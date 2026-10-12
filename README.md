@@ -6,6 +6,8 @@
 
 ## 开始开发
 
+仓库采用特性/发布模型：`master` 保存发布基线，`develop` 集成日常开发，特性在 `feature/<名称>` 分支实现。开发请检出 `develop`；分支创建、合并与发布流程见 [分支约定](docs/BRANCHING.md)。
+
 1. 在 DevEco Studio 打开本目录，使用本机 API 12 或兼容的 SDK。
 2. 配置工程的 Signing Configs / Automatically generate signature，选择登录的华为开发者账户及目标设备。仓库没有证书、私钥或签名密码。
 3. 选择 `entry`、`default`、`debug` 运行。首次启动输入 Jellyfin 完整地址（可包含 `/jellyfin` 反向代理路径）、用户名和密码。
