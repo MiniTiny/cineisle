@@ -1,17 +1,19 @@
 """Regressions against saved final native screenshots/layouts, not synthetic renders.
 
-Run with Python + Pillow after refreshing docs/audits/2026-10-10/emulator.
+Run with Python + Pillow after capturing into CINEISLE_UI_CAPTURE_DIR
+(default: .local/ui-captures).
 These checks cover the recorded API 26 emulator only. QA screenshots use an
 isolated Jellyfin-shaped fixture, not the user's authenticated server.
 """
 import json
+import os
 from pathlib import Path
 import re
 import unittest
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-CAPTURES = ROOT / 'docs/audits/2026-10-10/emulator'
+CAPTURES = Path(os.environ.get('CINEISLE_UI_CAPTURE_DIR', ROOT / '.local/ui-captures'))
 
 
 def layout(name):

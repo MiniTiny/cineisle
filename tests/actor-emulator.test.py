@@ -1,8 +1,8 @@
 """Read-only regression over captured native UI evidence, not live playback proof."""
-import json,re,unittest,pathlib
+import json,re,unittest,pathlib,os
 from PIL import Image
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-D=ROOT/'docs/audits/2026-10-10/emulator'
+D=pathlib.Path(os.environ.get('CINEISLE_UI_CAPTURE_DIR', ROOT/'.local/ui-captures'))
 def nodes(name):return json.loads((D/('actor-baseline-'+name+'.json')).read_text())['nodes']
 def texts(name):return [n.get('text','') for n in nodes(name)]
 class NativeEvidence(unittest.TestCase):

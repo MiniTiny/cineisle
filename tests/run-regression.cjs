@@ -1,6 +1,6 @@
 // Reproducible local gate. Each suite has its own process and explicit evidence boundary.
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), { spawnSync } = require('node:child_process');
-const root = path.resolve(__dirname, '..'), audit = path.join(root, 'docs/audits/2026-10-10');
+const root = path.resolve(__dirname, '..'), audit = path.resolve(root, process.env.CINEISLE_TEST_OUTPUT_DIR || '.local/test-results/regression');
 const suites = ['protocol', 'feature-regression', 'player-regression', 'system-playback', 'pip-subtitle', 'language-preferences', 'openapi-regression', 'media-presentation', 'detail-regression', 'branding', 'window-theme', 'library-grid', 'actor-baseline'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` }));
 suites.push(...['original-icons', 'brand-package'].map(name => ({ name, command: process.env.PYTHON || 'python3', file: `tests/${name}.test.py` })));
 const results = [];

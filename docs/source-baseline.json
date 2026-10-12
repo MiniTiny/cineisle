@@ -1,0 +1,2307 @@
+{
+  "branch": "codex/actor-experience",
+  "head": "225fba7cb5ad68865986a96e4b62d883c1d987a0",
+  "files": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "sha256": "c4af4117b399e07963158e1d71bd29257a883e999f35de9ed5f69ae150e333e2"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "sha256": "72a5f467b083c24507b1e848bbb958800f783fe1d313a8ca017f2a2673acad47"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "969d3e2bbedab5c19e66603f4e9e3a9a2d185101f089240a3c0fcf1115c184aa"
+    },
+    {
+      "path": "README.md",
+      "sha256": "5e81c58c721af1ff9588de57186907cb31be18c16abff43ee34a84f099f3244c"
+    },
+    {
+      "path": "UNIAPP_MIGRATION_PROPOSAL.md",
+      "sha256": "ed9dd7c6e0913282a9ce7d2945a423906df0a9cad0fa25b1525550265ad43768"
+    },
+    {
+      "path": "app/phone/build.gradle.kts",
+      "sha256": "387bf67a0b26679acb21afca4a93b40baec58450f104c25b6f306aebfff3d9bc"
+    },
+    {
+      "path": "app/phone/lint.xml",
+      "sha256": "f515d57e1b247b41076e547d72e4abee32d9056cc6387106b5652b727c5284a1"
+    },
+    {
+      "path": "app/phone/proguard-rules.pro",
+      "sha256": "2711c001161d050dfa30942c08a27761a69791898eaa3402a266ca67d6de977a"
+    },
+    {
+      "path": "app/phone/src/androidTest/java/dev/jdtech/jellyfin/ActorDetailRegressionTest.kt",
+      "sha256": "7b66476b45edc018627f564232cea9ff2c15a52d7b5235c96303c260713026be"
+    },
+    {
+      "path": "app/phone/src/androidTest/java/dev/jdtech/jellyfin/ConvenienceRegressionTest.kt",
+      "sha256": "0690eca84f3b615f25b319387493403471a368aaa7a26bb8a236477265ad1082"
+    },
+    {
+      "path": "app/phone/src/androidTest/java/dev/jdtech/jellyfin/HomeFavoritesRegressionTest.kt",
+      "sha256": "2b02b1c76e9b425c3d4d120f25d07418cbd91b97edf041929e6a4226c4a844df"
+    },
+    {
+      "path": "app/phone/src/androidTest/java/dev/jdtech/jellyfin/PlayerLockRegressionTest.kt",
+      "sha256": "2d154eb0be2a450d772a835fda586523f4c0af40d87777052b264b757174fe76"
+    },
+    {
+      "path": "app/phone/src/main/AndroidManifest.xml",
+      "sha256": "f7da26f5f568a397c6ad537e4927a472ee64b5bbef78a36f49978b2d857009ee"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/BaseApplication.kt",
+      "sha256": "8065016d7c3d54b16ba7a5e1bfaa291482ffb4c3aa13dae3d328c6a217c6a86b"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/BasePlayerActivity.kt",
+      "sha256": "67140012dc2643d9f56f7333be18a451b004434142fdc61912b58f3302839e47"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/BindingAdapters.kt",
+      "sha256": "4a8beec458839c84e12b6a8c34289204aa054cae28345f4e161db9aa16af93eb"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/MainActivity.kt",
+      "sha256": "c64815cb36f17e89e02288865ac4212e2bddcdaf5158715b74f8bd158e92e8ec"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/PlayerActivity.kt",
+      "sha256": "fb16b70b66afb8c6717c5b8dbaf44f411e5a195ee56eba1db7005a77ed3f9796"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ActorListAdapter.kt",
+      "sha256": "9374b6cd5d47e60b732000dde62d2985efe3b2353a9588f07461c9e6dfb62dc2"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/BannerAdapter.kt",
+      "sha256": "6591aa2b0101d12b1dc98a620ef847e2c9a89524d276a41d4254c71e14203dfa"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/CollectionListAdapter.kt",
+      "sha256": "7779ffe789a4caf45f7f0ab19faa3bbaef929db63ec62725f348d672f2880934"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/DiscoveredServerListAdapter.kt",
+      "sha256": "8060ad73b33368f427ab567d1e417d8a28c5243f6475cb7cfdfb3b07816e69ab"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/DownloadTaskListAdapter.kt",
+      "sha256": "fd830c9b758fa1d3dbf35cb32fe68f7494a563328dc886e7cb978601ca6ea911"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/EpisodeListAdapter.kt",
+      "sha256": "e67543b8490800056eebad6b716bd8a89f458be24f6fcf23d1317b06c03eb8f5"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/FavoritesListAdapter.kt",
+      "sha256": "2aba4c887d0872b6dbdc61665dde51be8061e2c5a4afbe4f71f57005764981b2"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/HomeEpisodeListAdapter.kt",
+      "sha256": "bd1171fd3fa24abcae23929ddd9c4f85ebc9980f07965e578d7e8a521865a371"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/PersonListAdapter.kt",
+      "sha256": "6734c46aef7c6a4c67356acf2e4fd0a629c368f33c157b4c92944c49d3782019"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ServerAddressAdapter.kt",
+      "sha256": "d2c671a7a3028f3dc7404a571feb04caa26be25b5575f3c72eb4e4c5719fe1a7"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ServerGridAdapter.kt",
+      "sha256": "abcd9b1fe2bf9aa793add3d06341a1a8f3d585258534e7303d6d3a16e27d47c5"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/UserListAdapter.kt",
+      "sha256": "409ce7fe578c5e41a2d03d0878fb31de3d7935d81688b7ea6a515321eb24cf40"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/UserLoginListAdapter.kt",
+      "sha256": "627dc2745510a49ec60a775547c04899e8241caa8b2a4adcce4f31dee29ee22e"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ViewItemListAdapter.kt",
+      "sha256": "2bae599d31e0d3ad9a6846cb827611ad9fc58489254de4259b6c73b4f09e1d63"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ViewItemPagingAdapter.kt",
+      "sha256": "054d9e6bd6c53089bfcb7aca088d984d2801b6c8a9920d315ea30af9cc64fcde"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/adapters/ViewListAdapter.kt",
+      "sha256": "a636aec03902759dfc9ee3e1a2714c0a55e2c2ab79126ea7ad9247aba90a9b1c"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/di/AppModule.kt",
+      "sha256": "46f018be066a1e62fc8487df0f5e262ac11af40b3ea6fefd7d9d4cbe678ca925"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/dialogs/StorageSelectionDialog.kt",
+      "sha256": "a392e3b20539436ab1a49b9e0b91c655c9ba812f973353bbc37ef3b7c71b70af"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/ActorsFragment.kt",
+      "sha256": "5002b919ad238910f203a19a0aaae850b56f197f4715a8dbb51ff8c7bc33b456"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/AddServerFragment.kt",
+      "sha256": "12d5d7223b8b89c5625fd55c6419f9b9dd6dcf334b6d57905f55798c38830643"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/CollectionFragment.kt",
+      "sha256": "8701f85d353a7c7b13911342c6452e900c1a6c2ce3d64ca4a5b0c3a6f9642b21"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/DownloadsFragment.kt",
+      "sha256": "22d9c8ea158c8439d6828ff7b5d247041e15e1fb0ba42946c264502f33c50d08"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/EpisodeBottomSheetFragment.kt",
+      "sha256": "9ec603e0020c0a7a002ccd55a00951cc7265a88570adbbda8fcdd117fc926c28"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/FavoriteFragment.kt",
+      "sha256": "5bc5bea4e577213f415a6aafa4b814103ed67d9d5f9f2084d660da98cbac4794"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/HomeFragment.kt",
+      "sha256": "3a79048105a11dedeaa86849a433f50ade2e5e2efd36c00c4d0639e03695e1ab"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/LibraryFragment.kt",
+      "sha256": "1a7dc9af96a2ba1b5d159ca99a1016c722707ffdb29a820665c821eb7d143e1e"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/LoginFragment.kt",
+      "sha256": "5d7c1ee0df068f54267e06917cdb394dcbb79a0867b26d9ec03fba7dcbf546c2"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/MediaFragment.kt",
+      "sha256": "3ea6b5b9b85b20c4ee038dfb310db30ae532153478acfa1c76c20b060ed14c7e"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/MoreFragment.kt",
+      "sha256": "43a5ca88322c9a0724017e412b479d343eb7b662876b67067d350984a6cbdb8f"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/MovieFragment.kt",
+      "sha256": "2eb0bfe94487b45ed6a56c19dadff0de765855df85f13c666a80c841a5c21dc2"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/PersonDetailFragment.kt",
+      "sha256": "892d9e212f4ca6aeb434b1dcb2c4134d094d7cc1ed1b634008f87803faf12c0f"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/RecommendFragment.kt",
+      "sha256": "a209412478ef0fd374bc496e20166ddddb8561bb51894ae0a01f53a3064da566"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SearchResultFragment.kt",
+      "sha256": "9c4e89031aa32ae40c05c3b4ccc638cb238763ad75c793ef950915f42ea7aa6c"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SeasonFragment.kt",
+      "sha256": "91b679f8dec597f7ba6ced107ffdd586b40c36798e2a83859f0b8e9043e1a7c2"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/ServerAddressesFragment.kt",
+      "sha256": "1032db7746023a04c91673d6c808dac6a0c4b6841a03ff71746a91a042fb4016"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/ServerSelectFragment.kt",
+      "sha256": "27a28c0d5d739af2f2a0ed9e3b09aa8e2f530505a4bca464d9cd55d468fe89f7"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsAppearanceFragment.kt",
+      "sha256": "8665162ec5dff3ebb8f8401887619ec51f62097139dc194ecca71240e3c537b0"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsCacheFragment.kt",
+      "sha256": "769da93d7d274902d947762e6ba0b85df17271a2ab20efa5eb385f71e8fdf897"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsDeviceFragment.kt",
+      "sha256": "9ddf4034a11b9d86b6b7c17d21b7a3030ff7367e62683cddc3771971db86951a"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsDownloadsFragment.kt",
+      "sha256": "c0b5734d518c1c873531c3d8922337bb13002dfa8c0fb0e7cb43b0469cf1b5c6"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsFragment.kt",
+      "sha256": "7bfb7b4e49229fe5fb20cf1a969b023c8ed0b9ed6c628744dc1b0c4c724674ae"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsLanguageFragment.kt",
+      "sha256": "91e15b3ffa1a929c2f3a5250344ee7b479d375444224bffc3e50276d2cd70674"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsNetworkFragment.kt",
+      "sha256": "245106c019f992c293f943ae7394cc6c591e9611c3588ee7d76f354379674f9a"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsPlayerFragment.kt",
+      "sha256": "811e0f265951de1806408175cde194fe3a9e6e683c6415bded181dc2875633cf"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsSecurityFragment.kt",
+      "sha256": "6ca641a30350ff51485574673ddb3c4aa695c59b76949ba4ad42ace9fe801798"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/SettingsSyncFragment.kt",
+      "sha256": "e48785a7acf182ebb91468d355074c117498ea0254685e4d69734f525fea8457"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/ShowFragment.kt",
+      "sha256": "b927b4f79f7966603d9776fae11ba845b929fa16a737385071d9f773631643a4"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/TwoPaneSettingsFragment.kt",
+      "sha256": "3f88167be93792781b863b08c75f6aba8a7d1c6c1739af307d60111ae224d616"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/fragments/UsersFragment.kt",
+      "sha256": "3c871228bb132b593715e145ccf359ffe19684ff3865d854c2f9f1d3ecc75b46"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/utils/ActorTagUi.kt",
+      "sha256": "4bdf4141424f8ca3a0a82c90cfcee20115018393c38dbadbee33600bc8be5867"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/utils/DownloadChoices.kt",
+      "sha256": "e287bbeb9389caca4930644db244bff00f38cb2658c6e278721cab40444b6d34"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/utils/Extensions.kt",
+      "sha256": "f66863179cb7e90273891f56eda31c6261ae537508d40edb3353eac155d10f3f"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/utils/PlayerGestureHelper.kt",
+      "sha256": "4fc2d640ff8b038d6025dc4a97201cd1c1c98f4e9a3be9dbe9994d064a1f85d4"
+    },
+    {
+      "path": "app/phone/src/main/java/dev/jdtech/jellyfin/utils/PreviewScrubListener.kt",
+      "sha256": "b65a92948c3294526e1a5accc9d3d68a04ac5c75ee0cd8a3dd2f4faafef9ef78"
+    },
+    {
+      "path": "app/phone/src/main/res/layout-w600dp/activity_main.xml",
+      "sha256": "6919d92af621db46bc85573848d26b85ab6a7c68c0dc06a6f6091b40406d3527"
+    },
+    {
+      "path": "app/phone/src/main/res/layout-w600dp/fragment_person_detail.xml",
+      "sha256": "6733bf523b2dcd9c70deec6ad08f83021c29dee7d8ace4484a19e37edfba9188"
+    },
+    {
+      "path": "app/phone/src/main/res/layout-w600dp/fragment_show.xml",
+      "sha256": "a86e53900e5a28ab5262acccc5abf459dd6b71446a2798571fa68ffc31f6678c"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/activity_main.xml",
+      "sha256": "61a85d4269adf567bd436d51eabda4b7271be119fbd77441b2d72262111dc4df"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/activity_player.xml",
+      "sha256": "ff9f596409ce05caf3d330bcba52928f5837f3bd46cd12da901407c7e80a7a18"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/actor_item.xml",
+      "sha256": "5747cd1c200ca95da62864785c0cf70e0ec248da5047873a2eda3daaaa16e764"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/base_item.xml",
+      "sha256": "6da9b3fd3a4cf096d2dd8418eb03b27d91984e406401705eea73a55af27a6d61"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/card_offline.xml",
+      "sha256": "1d1b5109aa0d070034512e03a26fb8725bbaab3bac16a9ff32f6666595837474"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/collection_item.xml",
+      "sha256": "1482d527f6257fc5b0567c37f6099c41b4cb3fd5d4799cafe79f54261d233c46"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/discovered_server_item.xml",
+      "sha256": "19482d2ca11ccdc3c2cf283156c07a28cac9b091b25c021b14c39b8bb59b5839"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/download_task_item.xml",
+      "sha256": "5b60e81316fc9d6f7e8d8f9f2d0504f5f49fe2bf38dcf7a3614482c6445a3c5d"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/episode_bottom_sheet.xml",
+      "sha256": "a380f86356c54d6f5b96760f9ea60ac91d224ecfa7f76ec8527b1cf2f375d983"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/episode_item.xml",
+      "sha256": "f02b0962f85b017fe9ea6083f781f238e590fe4223c4ef291112136c7ff395df"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/error_panel.xml",
+      "sha256": "81eb3e25a7f83de9573709c677fffdb6bfac18cbced58d51ea404e6374db3463"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/exo_locked_controls.xml",
+      "sha256": "ce16512c9db42db9bb2231a3bafe1c67a2059535d9b2f43e19d7b1135fdde723"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/exo_main_controls.xml",
+      "sha256": "2d8000fceb24fbfdd627553d020982e1819462ee13edee23014e36e5c41cfd1b"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/exo_player_control_view.xml",
+      "sha256": "4664c172a12e661d10e527151c7630110615edfa7dbc39e37e13e986fa15243a"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/exo_player_view.xml",
+      "sha256": "a5b22907c0f1e9f65ca47cfa84c839727ac9b206ec70e8d40a7ed38b951093d4"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/favorite_section.xml",
+      "sha256": "6b9b817df86275859e1441a2505ef1d5dc116069802b72ff49fcf73672453dca"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_actors.xml",
+      "sha256": "f7c9988a5e7b897832d82c4c2b019428d21d1c41a2bcb96aabe0c8f41e85f1fd"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_add_server.xml",
+      "sha256": "7ce614c0004fcccecb0d3eb15aba78892102b6439422cb736181792212a8ac7d"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_downloads.xml",
+      "sha256": "a49ee832263de6f20c795a0b9cdc1f6616dabef16d8f28e096f141c30c8f25d9"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_favorite.xml",
+      "sha256": "38f2c73e3cbc2ab088a6ae29b0c80c5d21950a064dcbf5b9df42e392a39c5b12"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_home.xml",
+      "sha256": "b8640895c7b7f55a73917e16f4b0ba4ca5a26e6788880807f9d04045ccfb6207"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_library.xml",
+      "sha256": "f01233ee24746a78cf87cfb4d6e130380faa39912db4aacd0ffe71d1fbce98b8"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_login.xml",
+      "sha256": "0c1edba2e97327f292380506af1fe4d91fee9ba27deebc73850c43028b3a9b76"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_media.xml",
+      "sha256": "3f76c01e4cddf9e88b2568bd218b2b16b4f6470172f4560d148fdef2ac5fad90"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_more.xml",
+      "sha256": "2758afae75ed2951095c3d4ac5a8a26da5f0275f6b94f12843cb7ba0b4c13862"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_movie.xml",
+      "sha256": "58b1c8c4897671d7288bb7b1c31794448469f95924d3922915b6d589cf1a3449"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_person_detail.xml",
+      "sha256": "2ed349b76ee0ad6cc7c3e7f761e8ba89c0a6849fcb059194bfb098823ce17a76"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_recommend.xml",
+      "sha256": "32cdae92a65019d188cb9934a0a015a46f23acc71a83d4b5acfec3b73d14729d"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_search_result.xml",
+      "sha256": "9c433cbee7e85589a262785d37c18b444771032d6514f283099cdba0a4e46633"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_season.xml",
+      "sha256": "1a2092ea5a8510e27d1aca1ecfb27670f9a64d96c61f4c76c74ece18fa03831c"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_server_addresses.xml",
+      "sha256": "e646a421dc6e2b70b565ce0a7a145a2f92b76b930dd96c0d3ad21847b8c27978"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_server_select.xml",
+      "sha256": "ba937199c8b81c45858f7837dcb78ca966ce5fe18d171820a126ec05a5880a16"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_show.xml",
+      "sha256": "a37234757d0f08c9c76b8dc7aa6a34db0d82c08401a18e6381587e7e5bc4edda"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/fragment_users.xml",
+      "sha256": "5caaace25da870527ca4f1e99fd55d752b60422fbd6635b361ef2e327d9f6588"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/home_episode_item.xml",
+      "sha256": "b22e2c7c0cd468fb3eb42703911170d9d84f975975242a663ac87139f656df02"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/item_actions.xml",
+      "sha256": "5fcd4c248adcdff78e690d8dad62af1e3377dbb93d4e292bf6c98a7e6177c9d8"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/item_banner.xml",
+      "sha256": "ddc0f7c54795093a2f4629b25a864438444f74e2348f50eda27cdfc6a0eca12c"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/item_info.xml",
+      "sha256": "747f3e44d1705325cc065b771fc16cc882832cc0000a3d6a0ec1a1c379103b2a"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/next_up_section.xml",
+      "sha256": "db302a5a20874b67881122c3356ce4e8607120806c7015819de86a5de6924c8e"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/person_item.xml",
+      "sha256": "e4cbad0915f892ea6dccc52be2471e0134f5e505f792a5ddf9699a18d3e40747"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/preparing_download_dialog.xml",
+      "sha256": "0008a1a088ac7f844e6af086f968f3c39ac378be189808c25d0840bca0388e53"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/season_header.xml",
+      "sha256": "72fc6c93577b5068d957a9aa86f1f4eece02bad54a9c9c733479400c814c2dea"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/server_address_list_item.xml",
+      "sha256": "a8d3ed62b86fee36aab9cbfe7a270ff1fee4cfe7624ea4f7f0af55b860ccfd0c"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/server_item.xml",
+      "sha256": "4e84ec18553390e12a98f6adf879d8c9ba82d4e98cea54d9536fc333ed511d08"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/user_item.xml",
+      "sha256": "13f9de63ff85442934bbc4de467abc6861b7ed71d109e72d0a31748f1f913a33"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/user_list_item.xml",
+      "sha256": "c00fd157c10231960a7fd25b2c80950a2ccb49f616b03f8245a872a619d25bf7"
+    },
+    {
+      "path": "app/phone/src/main/res/layout/view_item.xml",
+      "sha256": "8a8e05cc4bc50453bb78b5a6daede499117235cc1b9478d13432d9b6f08eabf4"
+    },
+    {
+      "path": "app/phone/src/main/res/menu/actors_menu.xml",
+      "sha256": "935911dbd67fd6ef1b22ab7056b4329470eac2942141f8ff685364b952688f38"
+    },
+    {
+      "path": "app/phone/src/main/res/navigation/app_navigation.xml",
+      "sha256": "21594b7e605dfc8f5aaf3b80094cdc1a7a789f846dbdc2a566d17debf4fb93cd"
+    },
+    {
+      "path": "app/phone/src/main/res/xml/backup_rules.xml",
+      "sha256": "c78a33d326ac893c67046a5acd1030095a7434f388e23c14857e926659007ea6"
+    },
+    {
+      "path": "app/phone/src/main/res/xml/data_extraction_rules.xml",
+      "sha256": "7ff71f7b2f9f97e83c3ae98a3b4766dc51187d094d10fdf28b2da3f77da2e64a"
+    },
+    {
+      "path": "app/tv/build.gradle.kts",
+      "sha256": "7578e64889b08ba6cb4da60c3fe70b23a455ecf919bda8fb930b6b86c9d3122c"
+    },
+    {
+      "path": "app/tv/proguard-rules.pro",
+      "sha256": "c0c547b3b34af8c32ef344a2303a1bfb5de793e2b6a80fac94b45391d8e1e5ed"
+    },
+    {
+      "path": "app/tv/src/androidTest/java/dev/jdtech/jellyfin/TvPlaybackRegressionTest.kt",
+      "sha256": "b324a42dd542258b850c61cb913c9c0b5079cb95fb6e6fde8f1b141d1ca5db64"
+    },
+    {
+      "path": "app/tv/src/main/AndroidManifest.xml",
+      "sha256": "86a3b1d1905671b9d79844d375eedd796608292cd5913f06c7a2130e7f8a2aba"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/BaseApplication.kt",
+      "sha256": "2c475e68ca6bbf8e10d77ba9d9fca032d80472338b2b89c34c37b81c4abcc822"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/MainActivity.kt",
+      "sha256": "e499604a8f1e37a8c7dbbfc01f79b557b9abc2b9b132e0b3d1100bd5241ea883"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/PlayerActivity.kt",
+      "sha256": "e2091bb3da36ea7100846ab12404f9c50ab87412efbe99b91efc341d124fbbb7"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/AddServerScreen.kt",
+      "sha256": "8aac1025477250912fad9c2665a019837a5339f7c62b5e7ca2ae5a700ceb314e"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/DownloadTaskButton.kt",
+      "sha256": "a024740895ba03eb8670fe79f3689dd3d1ac48a19b412eb1446e4a1cc8c5ee0a"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/HomeScreen.kt",
+      "sha256": "83c286e780659395bb3dfffc0683677510bc1d93715666089e96cf1e95f6a84f"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/LibrariesScreen.kt",
+      "sha256": "323827db7854c0dba5367798ca89f61397d97da095b4e464932be09a82c1956a"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/LibraryScreen.kt",
+      "sha256": "9d78a29e06c1851795a65687c64485bc109ede7e0320297f43bf9762d04e5e5e"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/LoginScreen.kt",
+      "sha256": "dd65707e48e1dc5cdfc170b2988a00682f6dede26100ed6109a0e6bd8e393a59"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/MainScreen.kt",
+      "sha256": "de5016c430851529a7ec2edf9312ba123d27e605a48de42629074e087fb99ca2"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/MovieScreen.kt",
+      "sha256": "b1abd98fc878e92652f28b1998737408ef52b81edb6279294abce33f16455644"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/PlayerScreen.kt",
+      "sha256": "4babc807855f2140e3196743530e8a2304c6e8b7568a6f9f5a72abcfbf6cb419"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/SearchScreen.kt",
+      "sha256": "c3ec8ade3d55dc5a663a3054bf2084f7c6dac0e22fd2f3c92dd597a05b7fd047"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/SeasonScreen.kt",
+      "sha256": "3296e6bc5a0384006a1014e6add6312dfb4b320a67f06bd24ef2a740df2a214c"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/ServerSelectScreen.kt",
+      "sha256": "4d6e93edcf6c2b68ab936340f13ff6c2435c6f271f674ebb3e4f7bfce9a7a844"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/SettingsScreen.kt",
+      "sha256": "ca4f7f0989aaa35d7bae944d31f075eb3cee3dfad72811d26162268919de8237"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/SettingsSubScreen.kt",
+      "sha256": "eb31f3e600bf623935d630d8613944981d348ac89bcf204d13de717d7f646c89"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/ShowScreen.kt",
+      "sha256": "5941c9c060d4b352f7bd4171ab9349e53e88c8b3fb97d2a7d94ae2ef10b912eb"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/UserSelectScreen.kt",
+      "sha256": "ea30cb6eb2d2e78b813dbeabe846fbd155d9d4f7003e5687b5419f7d37d7679a"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/EpisodeCard.kt",
+      "sha256": "7a1e4a0880361fa297cec0b444f33b704ddeee0d2d0bbc4ead25a535b8492949"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/ItemCard.kt",
+      "sha256": "eb05eb586a43bd124514213c1c85104f1cac5279b8ec16f7128c0fe66aa8858a"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/ItemPoster.kt",
+      "sha256": "80e220317f8eed204dbb1821550221eb12515b87cceb32799168f123f36843a8"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/LoadingIndicator.kt",
+      "sha256": "bbbb512bab7948083d55e44949a8a24502fabc63a5884598a8695ef329e7154e"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/PillBorderIndicator.kt",
+      "sha256": "8b208427570c86781ac2799bbbe290fd012e7fafba54ae14f490d4cacd8313e2"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/ProfileButton.kt",
+      "sha256": "f2636cc38dcddb7ec5156e4a13b271189a561bbe79da1fa922e7e50f64e1fa1a"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/ProgressBadge.kt",
+      "sha256": "0f4342f35781c2eb0919c2ef6ab5eb7c93ab027256f94d5a155ddcbd83c27d8f"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/SettingsCategoryCard.kt",
+      "sha256": "17e658c943c8f820880ebde627b8b022e018baaeb8aa218daf8223aeab8ec347"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/SettingsDetailsSelectCard.kt",
+      "sha256": "67fab8fbf94a2ce7f7ad457b0b438461fd44ea8fddb4a660f9f4c0edc4d4ad2b"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/SettingsSelectCard.kt",
+      "sha256": "37453fb94d66f0a39fba6dfd917841a7db0e549fedd6e82679eb5f6945025477"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/SettingsSwitchCard.kt",
+      "sha256": "6d0a0463bc3455d11d47f269eca1a8c1b1ac0ccd1e5fce9cfae90303684ce5e2"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerControls.kt",
+      "sha256": "d55f0453b8d6f4e8610b9b986ece65d81cf294a93466b29d1fadca816a833b97"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerMediaButton.kt",
+      "sha256": "ee76218949845900b125fe9376d737ff85ca667a0fade2bac06fdd81475df7b7"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerMediaTitle.kt",
+      "sha256": "2106db131b3b53e438615fa0314fa3e5f29e69602f8fe03a9bb3a0724d33297c"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerOverlay.kt",
+      "sha256": "15ca21927b24ff2cdccc7fc0fd24a015f21f91f7e7967d19c6cc939aa91756f0"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerSeekBar.kt",
+      "sha256": "eb1631a3144b261f062fc80a0c27faed63711474a30a0e1c33add74ccb1e845b"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerSeeker.kt",
+      "sha256": "e1fae787454d39dc97bc5e4622d905d9474b17d1125c1f9053166c0ffb59664e"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/components/player/VideoPlayerState.kt",
+      "sha256": "022a72519a241060b4d5fdb15b31c2a12066dcfc5d3bc3eef9cdee4437831fee"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dialogs/BaseDialogStyle.kt",
+      "sha256": "6b7209a229fb300e573175ddedeff340d0020568710bb57ddbadcd647446cfbb"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dialogs/VideoPlayerTrackSelectorDialog.kt",
+      "sha256": "4ebbc59f45b800cb154afc733ebb7fe9a7fa55bc29a1eb592984db32c1c32da1"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Collections.kt",
+      "sha256": "8ba33bbd2bb2b513c87c0963e528f0d4cf37f2d2ee994abe696f186f5ae8040e"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Episodes.kt",
+      "sha256": "75f8fd4ab417be7bb245642c4cbd2962424f4f4df08e0081f5cfe7a67cef1862"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/HomeItems.kt",
+      "sha256": "fc99a8fab3cb903693974572775820fcb0c762103b25752b3027360894bbf979"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Movies.kt",
+      "sha256": "8c7e0292b46188e59ffcf54c290918d1859bf2b88f94e3c9dbb18536a526fd5c"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Servers.kt",
+      "sha256": "d6ddd8bdf460ec8a1b8d2de33a48b7527a3152a0f4b7ed04c3e084d859012539"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Show.kt",
+      "sha256": "4cac1ae3eef135528382f2be47d6cfa7f5c1a5b2162202b7d2829abec08e65d1"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/dummy/Users.kt",
+      "sha256": "7305b1c673693ad01ac0581da357f28231e27b8b6b210413d33c10c33e4c7dff"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/theme/Color.kt",
+      "sha256": "56baf05bbbbc392e01304c028c032ee5086863fda89be736d8d31a1a71f1aa92"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/theme/Shape.kt",
+      "sha256": "1c96334609346b0c64958b02ed7b19dac1d6c6fd1fe7ce574409483c636990ae"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/theme/Spacing.kt",
+      "sha256": "d186591481abd266e9cff2306f42f958a7b9ed4e1d56e0ee3fb3a97ead554670"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/theme/Theme.kt",
+      "sha256": "38af6912f26f24ea2861121b7c214d2ede182f049f6e2c068593a13f47a4e5b3"
+    },
+    {
+      "path": "app/tv/src/main/java/dev/jdtech/jellyfin/ui/theme/Type.kt",
+      "sha256": "042d457ebf2b69022c741c490591b876b05a8f0242e829bc008c552e4acf5720"
+    },
+    {
+      "path": "app/tv/src/main/res/drawable/ic_banner.xml",
+      "sha256": "39c21af804eec4d2d1e8bea15759672d9242245dcc6af9c1e477cc64c18594f8"
+    },
+    {
+      "path": "app/tv/src/main/res/values/themes.xml",
+      "sha256": "3e4c3e44ca09a59984836074c7b8ae393d00ba94c7da1a8c8e34dfdc681973c5"
+    },
+    {
+      "path": "app/tv/src/main/res/xml/backup_rules.xml",
+      "sha256": "c78a33d326ac893c67046a5acd1030095a7434f388e23c14857e926659007ea6"
+    },
+    {
+      "path": "app/tv/src/main/res/xml/data_extraction_rules.xml",
+      "sha256": "7ff71f7b2f9f97e83c3ae98a3b4766dc51187d094d10fdf28b2da3f77da2e64a"
+    },
+    {
+      "path": "build.gradle.kts",
+      "sha256": "2ec6a2a1a0045382c50c9bbd1b01a7d588ce5c5d79059d00bdcba10ab98767a5"
+    },
+    {
+      "path": "buildSrc/build.gradle.kts",
+      "sha256": "eb23190c0ce3a9a4612fb5c5819b62822f8d002fc8c607597e81f51deee72542"
+    },
+    {
+      "path": "buildSrc/src/main/kotlin/Versions.kt",
+      "sha256": "8eeecda16c13881123268023542aec7fffd360f03e931265d7850ba32d2cf858"
+    },
+    {
+      "path": "core/build.gradle.kts",
+      "sha256": "bee9388fe88303fd77a7b7cb90b5364fbced33d838dee0c9b522a4ea19d1a126"
+    },
+    {
+      "path": "core/proguard-rules.pro",
+      "sha256": "790268d9fa590dc241bc2b3cf14980b79aa167d210bc2350dace9245dc92c395"
+    },
+    {
+      "path": "core/src/debug/res/values/colors.xml",
+      "sha256": "d3504319292d4d2b3fc7e6b788b6b4d511efc867c68666b63b3b196eee6e37f1"
+    },
+    {
+      "path": "core/src/debug/res/values/strings.xml",
+      "sha256": "755a4c018f558dfd6e2647421e4fc9aa73cbc0416c235739f97149e313c4cfbb"
+    },
+    {
+      "path": "core/src/huawei/res/drawable/ic_banner.xml",
+      "sha256": "6d60127c35381354a9fe08893363664cd9f49187e632a5d7b0d0e146e3af622a"
+    },
+    {
+      "path": "core/src/huawei/res/drawable/ic_banner_foreground.xml",
+      "sha256": "c7dc928659a7b44fb442d8ce0aaf8a95ad021e389ee7a9aefb85b33b9e28f4a6"
+    },
+    {
+      "path": "core/src/huawei/res/drawable/ic_launcher_foreground.xml",
+      "sha256": "8537b30d3f9c22b95300fa32676875f39212fbdcdb6447f968b6135996d46d9d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/ApiModule.kt",
+      "sha256": "2f4fa6decbc033e715fcda0e40d07d6e2a9a87e0fc29a384d6e5e7332753a1e6"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/AppPreferencesModule.kt",
+      "sha256": "37833af7ef8e1d6a58a1d8a25c9c57440bb600130c0f707d35e5f9a7f9e006eb"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/DatabaseModule.kt",
+      "sha256": "4fa0ba2353fd1de0f352594b2bb9cf32980e711f692904d27aa3c959e98f5f93"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/DownloaderModule.kt",
+      "sha256": "4435062dd72e0fed55881346c540742c3f4abeea229f0847831c62972314a335"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/RepositoryModule.kt",
+      "sha256": "58450e042540e7112991baacf90cb5d58f2f15f62fd3179a6beb99cba874e428"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/di/SharedPreferencesModule.kt",
+      "sha256": "e0915c7c53402286a6fad441dac4cea285e4192a0dd06a05081e331e3bc79c95"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/AddServerAddressDialog.kt",
+      "sha256": "22ef3ca8bc718baa3cdac603f2024620e9bc4f54937d7269ae1c1b58288c0479"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/AppLockDialog.kt",
+      "sha256": "f76d0b375b635d50503f07d98d95595f8c677468c527b5bb44e31b0c8a6ebc61"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/DeleteServerAddressDialog.kt",
+      "sha256": "e4b0a167337bf0d43d80e7f99a5d510826bd0937d911be1543997dcfa00d4040"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/DeleteServerDialogFragment.kt",
+      "sha256": "7a6f945b2aecb19011a8767ddb78688e147442c1c95f7dd4231adaff09fab1ec"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/DeleteUserDialogFragment.kt",
+      "sha256": "d78c793de6ae93021e27abf64c0a9a54271f08e8788476fc454202e3d73b8719"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/ErrorDialogFragment.kt",
+      "sha256": "3ac862452edc78d95c8453334cdf113840824700517250ba2e8f2944fdf212cd"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/SetPasswordDialog.kt",
+      "sha256": "af742c835e85dbace314560f92442cd87d8e8f6a5669b469916b902e1418c60e"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/dialogs/SortDialogFragment.kt",
+      "sha256": "d4a8eb1fab50756f57741f9955f4f707f947f29f0fc1ce3502cee6b247cbd374"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/DiscoveredServer.kt",
+      "sha256": "e16419829cab537423c0dd4909ad4582ad4fb73c3ff21ce05141bacf6d5cf39e"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/EpisodeItem.kt",
+      "sha256": "e896cc7adb381b0d32e5546197473e8b4496c9369447fbca7765f8706ba1b502"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/ExceptionUiText.kt",
+      "sha256": "a97e957e962bd24b5c9706d564826780fa05321e9b3cdc24b1b65c0f398a6468"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/FavoriteSection.kt",
+      "sha256": "4e75b38b3b016a596725253af40140ac44e94cf9c841ab955dab28cceb33989c"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/HomeItem.kt",
+      "sha256": "1c89a0fd6312dee2caa3097bc0df6f821c73166349b240de38064655b759714d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/HomeSection.kt",
+      "sha256": "d0dae0ef6b2efdd6a83e384a2d01cf551c19d28c8cfed61a0f44e9dc9b1ad9be"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/UiText.kt",
+      "sha256": "cd69c3dfad99891374f8c57cfba5dad552ec9eb5d4c33605bcbd95b4cd9c7077"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/models/View.kt",
+      "sha256": "83c0440736dc536d0aaf989cc767b7b0f12a4af123eea8adfe2699968a4e97f3"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/security/AppLockGate.kt",
+      "sha256": "7ee877d17caef128f66aa27b0264855ed0333fdef5a9f2b844ffdb5858ef198d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/security/AppLockSession.kt",
+      "sha256": "eaac5839a8b3dc75a2fc170efe6eb97f781bf10b39ac632c3279e7967689961f"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/security/AppLockStore.kt",
+      "sha256": "b92f0d65deb33a4b077739ec15dc7191e4e9fba1e7904cec8852b664faf25ef0"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/BatchDownloadDialog.kt",
+      "sha256": "0e059ff06bd664ad003938413e0ca6f010a925b8fffa7d0d58398d1f7dec24eb"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/ComposeUtils.kt",
+      "sha256": "9ebe7b55ac2bab5cd5a0f8b2a36d47c74dcdd08d2cbcadb4ec963ef6108e3d2f"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/CoreExtensions.kt",
+      "sha256": "90b8760609f15e0ec32c4c969e8203121f92169fec1fcce361674b588d4914b6"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/DownloadReceiver.kt",
+      "sha256": "4763852a316e78574c9e3def88da73323794fc475becd9e84c069038a6adc507"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/DownloadStatus.kt",
+      "sha256": "618934189848e774b9df29fdabcb61b027fcdb7ab2d8493299161134a7c04798"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/Downloader.kt",
+      "sha256": "baa132952b66eca18c540e1e39f2bf4afa170b843cb26b18f4ea6819634ba181"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/utils/DownloaderImpl.kt",
+      "sha256": "47b87a8e6ca6c3f2da08d9fd3ab9f500dc1a326bfde1d98548217e981b3fbcac"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/ActorsViewModel.kt",
+      "sha256": "b5ab4753d55da449cc7708bc99ea72b9a74ea99be880d98e872dd2d1b2b37474"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/AddServerViewModel.kt",
+      "sha256": "e25b03e72fc1a19a2f061ccf7f4913fc5fb10ec20133dcc828cb77311345f692"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/CollectionViewModel.kt",
+      "sha256": "58bac22c30d85819c88ab8fd98be7d6a7ae706be82bbd3fba2e86ce3612c61b4"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/DownloadsViewModel.kt",
+      "sha256": "dd445be5a9db014ce58f65ce165f60d393374237650fbfcc14567ba56d55643d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/EpisodeBottomSheetViewModel.kt",
+      "sha256": "06fe31cd527cb3c7bb393eff66b3c32d234bbe10eed21be0360774a50ed92b1e"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/FavoriteViewModel.kt",
+      "sha256": "630d23a2a8f31b5ba5ee69c8f817ee25f6cf531daaabcec602f89793926f9f39"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/HomeViewModel.kt",
+      "sha256": "d1b85f72070dccd88050e742484f3ffe6e7a7af2b9c489c9385fb6d013290069"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/LibraryViewModel.kt",
+      "sha256": "5a4ece935cb4328276235e5b6114b019c37f40e5dab8b62c70e712724b318a04"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/LoginViewModel.kt",
+      "sha256": "c805bb28dd90aff2796d51406f5b7e9955dc5cbd07859ce6eebdf9e6b595ea2a"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/MainViewModel.kt",
+      "sha256": "79caedd038a396a6721011794363e3c6796bcf284af6a15fd8b922a25b3354d9"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/MediaViewModel.kt",
+      "sha256": "a8b7631a18e95effa0c5ab6fbebc6bdb8ca0a89f0b41f563e923d2271c9d81b4"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/MovieViewModel.kt",
+      "sha256": "ecef808026e40b5030e36d025f1e8c306137bde33748a3b3f3c8c711c84eea80"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/PersonDetailLoader.kt",
+      "sha256": "69da6ff9ff6b667c42d5ffc16e9ccb804ad9abeaf3f25114d453207c5e3a283c"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/PersonDetailViewModel.kt",
+      "sha256": "1c89633c992f683b9cf2a166d72e885ecb078def51b5f90b57e36f823dc65776"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/ProgressiveSectionLoader.kt",
+      "sha256": "75218b9576e950764bad688bc244538e6c3cbb5c9b8a77e7b7fa918961c3587b"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/RecommendViewModel.kt",
+      "sha256": "4b7d7cb24c5d2425fe0ca301b9f55c0cd27d29d895240f4b0b76d3629ea401e8"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/SearchResultViewModel.kt",
+      "sha256": "f4fd4905369dfadeff7733241be05a51caa361fd03b363e3e44f8d24335b8d15"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/SeasonViewModel.kt",
+      "sha256": "730c9b6e105dc260f875cc5f9d4871b37cf9034d3503fa41d06b95471575509e"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/ServerAddressesViewModel.kt",
+      "sha256": "1dced5980e1bf574dbc0bc3b75afad65374e7173b45fdd2c0c39a4fecad500b6"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/ServerSelectViewModel.kt",
+      "sha256": "1785e31bf2afd7e239d02e0d625c27e7deb120dfc5bd3ac52676f479a75e3e85"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/SettingsDeviceViewModel.kt",
+      "sha256": "52d561a478bc577b98d086600ac36052783d78362a99965a7bf296789febd04d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/SettingsViewModel.kt",
+      "sha256": "5379bb2d1d9f553a1222e58f22940630f0b6a320344fe25346c7c6922effe705"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/ShowViewModel.kt",
+      "sha256": "5d2743152f2b0989f7ef40fa103e38e2dd3bd1c0b7c963aabf781a8247b8c70d"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/UserSelectViewModel.kt",
+      "sha256": "c20813ea6d949dde31b5f4b5a31369d43c97055a08d41a478849e63cde1b35de"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/viewmodels/UsersViewModel.kt",
+      "sha256": "3d073e595ea51f3366ebfb0bc78e5e9246ae7de21b4eb4b1e811a1f54755dcb6"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/work/BatchDownloadWorker.kt",
+      "sha256": "58d221494bd13fe790b8da4e7923f0f2db5b03de0755a4bda95d1a3ec02cbe08"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/work/LibrarySyncWorker.kt",
+      "sha256": "a02829e9f6ec096723027a33e6204cb9ea260bd8d5e51287ad1197ecfea38069"
+    },
+    {
+      "path": "core/src/main/java/dev/jdtech/jellyfin/work/SyncWorker.kt",
+      "sha256": "1349d7b031f1d246c6ce085783ae46aa67bf5ca9de13e03b500944cba6df31e4"
+    },
+    {
+      "path": "core/src/main/res/anim/button_ripple.xml",
+      "sha256": "d51ab99cdbc827df3e44baec82bc0690096d8a65280c9a550aeeb69ca03debbe"
+    },
+    {
+      "path": "core/src/main/res/anim/fragment_enter.xml",
+      "sha256": "df4c9ab82e3ccad517ccf55b8def986eab026c695b0c87ad25ea70f62b06dd09"
+    },
+    {
+      "path": "core/src/main/res/anim/fragment_exit.xml",
+      "sha256": "2d2cc88ee45524d41cd58e74b9c23d6e2bb1f0ab6d788f38f7c41936dfdf0ebe"
+    },
+    {
+      "path": "core/src/main/res/anim/neon_pulse.xml",
+      "sha256": "27e2e8ee00d33d41dc99c06cfc4f160a6ade4853b7d83ff1cffcea9f7d5fe922"
+    },
+    {
+      "path": "core/src/main/res/drawable/bg_rounded_rect_12dp.xml",
+      "sha256": "8d4ff7e56ea0a38b8c52cf1d5659367c07f4e56f1764b4e9f7f3015818c7098c"
+    },
+    {
+      "path": "core/src/main/res/drawable/button_accent_background.xml",
+      "sha256": "43d4c0d2126cb6b66aa405f47637e1a7922f3c6bcd9b2ad8c9b632f96243284b"
+    },
+    {
+      "path": "core/src/main/res/drawable/button_setup_background.xml",
+      "sha256": "6735ab25d8aa9694c36677b3f3250754f050581a76188baf235fb43ea1520e8e"
+    },
+    {
+      "path": "core/src/main/res/drawable/circle_background.xml",
+      "sha256": "653b43150762d714b1f8c378e84eac371a62d688b82a180b62be6b063374b37c"
+    },
+    {
+      "path": "core/src/main/res/drawable/header_gradient.xml",
+      "sha256": "d4de0aa956870dfd011ab3e0715bc94a7b86bc1bc29450582407bb3cb4c82eaf"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_alert_circle.xml",
+      "sha256": "fed388da51a0d34da5a235a63cfc0fb41b64330c594e607d58567403e8eec0a5"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_arrow_left.xml",
+      "sha256": "ce3b2fa862757e7b5f4f84c661334cc7b2a4f97ee8f4f91fa83fa596d7afcb11"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_arrow_right.xml",
+      "sha256": "9078edb2237fc7ab6ea61edb80789219727618e6637f5789a6f6920b168b18bd"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_banner.xml",
+      "sha256": "6d60127c35381354a9fe08893363664cd9f49187e632a5d7b0d0e146e3af622a"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_banner_foreground.xml",
+      "sha256": "03ec1e6199cd35f2f953a3b94a54ff075483b64f577943ab2f31ed6aec4b869d"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_check.xml",
+      "sha256": "565515bb67de8152d4264e45aa263c9594a1617a5863cd7647b0ae677342629f"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_closed_caption.xml",
+      "sha256": "0053c4695286fcdbc4301df3d7a5ba4d63321264472686e626993f9db0875c3d"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_database.xml",
+      "sha256": "68821e2872d94aac9cbc1679586d6dee47d129b70509b5e2c5754ec4992805d0"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_delete.xml",
+      "sha256": "b18c34d24a14dfbf28c93c87346b0a2d8874faf6fed1030be1069b5fabd4418a"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_dolby.xml",
+      "sha256": "821034d36b6b268ed466e321c33b8fc06b531f901725b2097489d34e8f8c10cb"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_download.xml",
+      "sha256": "b5379aeaa27ae962b746f2e3e72864f97965f8901c86d8f19aaec998c3fbabe4"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_exit_to_app.xml",
+      "sha256": "a684c1c83c9690612f0652cf94055dc82f53a0e8591fc361f9149bd502a27717"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_fast_forward.xml",
+      "sha256": "ef6d6f1114f8c0f387a0198f96efaea6e448989662a1f2da37b7da09716cc2cc"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_film.xml",
+      "sha256": "69f2e1b5f90b919cf85516bb5b087174067f9f7324ccdc05e320b4f388e9765b"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_gauge.xml",
+      "sha256": "0b6c4b970dad4accbdc29fe77693bf0b7967e8f1bff9f61cf682d3b8235a8e7c"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_globe.xml",
+      "sha256": "852f2b23c5846193123f3224c986f61287fe4130ce534bafbe89d252c84dd5fc"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_hard_drive.xml",
+      "sha256": "8e9e5b92c3beeada8cc5b5be3858ba6e611752b532cf9dc0d80c904825a78104"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_heart.xml",
+      "sha256": "40c00f47815669e2c3f1dfae558548db2afbf10b1f7e1a70111e6e198f181818"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_heart_filled.xml",
+      "sha256": "25819bf9b3ed318eea1f261864696cfdf6915c8e7005b6044e8b840406a89938"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_home.xml",
+      "sha256": "faa4859918cd78de5b5ae075718b9f2f343b8f91f1495f39ae82d87ab6c25544"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_home_normal.xml",
+      "sha256": "2eb8cdc927f661a5139881d79985bd57495817ff4e107df5ce568eb0e64c4290"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_home_selected.xml",
+      "sha256": "a9a45acbad5187d0a90fea67adff92b3059b27868bdb22dacbd79b500222aa77"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_info.xml",
+      "sha256": "a1d5ae1b0655dfa32f906b304871c2ab9fc021b225b1e3c4e922170f7bdb9d0a"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_languages.xml",
+      "sha256": "beb13a2be237fe23cb01c8460ffe5428fece6e4455c4e92a4fcc37ba0739fd1b"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_launcher_foreground.xml",
+      "sha256": "8537b30d3f9c22b95300fa32676875f39212fbdcdb6447f968b6135996d46d9d"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_library.xml",
+      "sha256": "cdbfb54a4629abd53a20ad318bf1a2f7206d536bbd825b7ced83b0a0eaeac84c"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_lock.xml",
+      "sha256": "a5ebc7bcb3abceff9214c48c76babebdece90979820c95e089953de6de1de369"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_logo.xml",
+      "sha256": "bec1468134d447d2194d4003dabc7d70a2fb8defc1d7b39a84825c5595e10948"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_minus_fat.xml",
+      "sha256": "7b81268ce9ee492b0d9981b5c10f9970225b6c36461738c4784205d844dfd09a"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_more.xml",
+      "sha256": "3730b9de73599b2df93cba48f6ce3a26db312b164f5367361223a250a364b364"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_network.xml",
+      "sha256": "13a71690b743960fc27f65e814f7777ce5a7c15193d7dbd578eb69dbac6e9dff"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_palette.xml",
+      "sha256": "7786f221f8202e25202e52d740fc916411c32551a1fb8819daf10bceef38094f"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_pause.xml",
+      "sha256": "af5e0fb8f2197d3fde9cba9b616628ac4c37add4e061217b1985e8352045251f"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_picture_in_picture.xml",
+      "sha256": "f3c44cf2f9a8edad80f724894bfb93786b7bcc8d4292601c52b18ed7d3b144a7"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_play.xml",
+      "sha256": "b1b3e816e21396e1ef14ff0fccdf4cacd7f2a519ddc028001868f7b24cad1114"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_plus.xml",
+      "sha256": "53c0e0d1c0c9f9066c64724f568e4853dc5d6473d18f34854ae762d8c6d70d72"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_remove.xml",
+      "sha256": "36a5c30bfe21375a4b7ef71f0da046862dfb6eee6299918fffe521ff3d31f638"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_rewind.xml",
+      "sha256": "b888f2c8af4c1841ce1a8e060af0334dcefb758f4b28345c130ae04678e21673"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_rotate_ccw.xml",
+      "sha256": "9029d6530813ef08c786d4db6b7d5779ee1112d8ec5d7909073c852793570d3f"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_search.xml",
+      "sha256": "daea581523290e9643ce9ab2cd5dfad3fae41431c202da48fa1625cf9e0b73f7"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_server.xml",
+      "sha256": "7ae0de966a41c60e81588ff7c421c26cbabf4553de12f1f214075f9d9653ca31"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_server_off.xml",
+      "sha256": "23bbf3a6ee5fa232000ebc8ea4e30993f6f0f66a7f5e04c06b719fae855c6ed3"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_settings.xml",
+      "sha256": "13f9d460d2aba992cf8c8b90e86d4d2008ee6e6202a2c78e8a92dbb28e4f46a0"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_skip_back.xml",
+      "sha256": "8adfeccbc4a0c02c64ecb6943e009c82c3aa26c7d44e1e48f358e145f67392c9"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_skip_forward.xml",
+      "sha256": "bbb7ea052412bad4c5f441ec0498d08e61f61899c89f4102099886d4d681d412"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_smartphone.xml",
+      "sha256": "0c83097228141ab917ad96984a10c4312faaeaba3d60ece3b5583303de7be45e"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sparkles.xml",
+      "sha256": "abd6e901e429e9d79feee13a0e72f68b05a03c5b8db9483dbcbeb849c11a35f2"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_speaker.xml",
+      "sha256": "f2cd79df14a6101f3588b29506d630c944dd2d4ee1ac31fc92bc43d61937ac0e"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_speed_forward.xml",
+      "sha256": "e00b6d5b6efb77885a071004d2f602738a5d03066e5dc8572111bff1bc02ecb4"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_star.xml",
+      "sha256": "1453686323448eddfc57dffe1b4e3d3dc7ea03517283c7e2b36e334f452251ab"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun.xml",
+      "sha256": "b257d734384c92c8d11211539483fecde4861f14b27b8500fc22446ebb15921d"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_0.xml",
+      "sha256": "024214828ed6d6fd034e2a795e69744922b5c723cacee70bdef6dc398af6fce0"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_12.xml",
+      "sha256": "6682a7aaef4844cc8bf46804f5e9e8e3b063a75011908d7103649fd3da28fd4d"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_25.xml",
+      "sha256": "6f52b6ed20bd0b78506b7c3b6d148bf9bd73aedc6aca373c4ec8bc3d54ee688c"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_37.xml",
+      "sha256": "b3d5dda2f2e0f0fb81d6b3e297cf960953d659e25865efa774ff58a5d5dabd77"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_50.xml",
+      "sha256": "27452a5f13764c33c0a54390a41eff6e9d7155ca6dbde895f8a6c4f6cbd8bb92"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_62.xml",
+      "sha256": "e124920d2b283f5cdb37ed4399202e79cfe9dcac2dc5e1983150567413782775"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_75.xml",
+      "sha256": "dcf35a750e95917f981e700e583de7b75706230c4bbb03de176293697841edcb"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_87.xml",
+      "sha256": "1062030af94e8093ca6fd8f225512d6237f92a27f926e4ef1713148e66f744d0"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sun_level.xml",
+      "sha256": "6a6524684e30d22a71f94f2bd6601aefea9cff5be4a6c883c4ce139c188fe5c2"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_sync.xml",
+      "sha256": "c263e17f0f3b6a86e08fa628d423e15ecd1aa4961d5ff3b1da7a6a4346c252e6"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_trash.xml",
+      "sha256": "b9104630122cd0ae5e6d760d7a94db8759bdb21b50d7cd2c7a5e651c0d8a41bb"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_tv.xml",
+      "sha256": "84f658e39cdb3c9d4d8778660ef1e3bce3459e438b230b980747eb8bc99cfcdf"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_unlock.xml",
+      "sha256": "ac1a4e5b34172cd7a34e63bd597a432327ffb4df8f51cc9ba70aed487e67296b"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_user.xml",
+      "sha256": "b385585ae93a56b5b13bd4a22e776c9cdc40b59012c6e6c297ff9484876ac20b"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_user_color_on_primary.xml",
+      "sha256": "b2cbd255bdfc89dd3eb6d90e5d58251e671002b6f1d8dbdd915a1224bd454b15"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_volume.xml",
+      "sha256": "0a120dad8e2cc19eeb77625c99c2614549dd79d0a248e11c4f4cb6056687d884"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_volume_0.xml",
+      "sha256": "9ada82a771cf526c78e30561aacc9e71504d794cffccfe9b848c16d8f833e507"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_volume_50.xml",
+      "sha256": "25fe330fddee4150dd3df124ccecc8dddaaf73a3667492cc9db654ecc42157b1"
+    },
+    {
+      "path": "core/src/main/res/drawable/ic_volume_level.xml",
+      "sha256": "667e77efd7618cb20bf0e57398a92f401f5a4e23b82545e2bd447f8b019b0a14"
+    },
+    {
+      "path": "core/src/main/res/drawable/overlay_background.xml",
+      "sha256": "df0ba5ad53fc3c3d3ddf332a626fd98d1738c86bf9c0307f2b17244005aed056"
+    },
+    {
+      "path": "core/src/main/res/drawable/person_placeholder.xml",
+      "sha256": "0ac5e3a4b8e0554bbaf43e10c226d431dff10c5cf79940f01792c03cff698497"
+    },
+    {
+      "path": "core/src/main/res/drawable/progress_scale_drawable.xml",
+      "sha256": "208941ea5aead16a567cfb14bf069efcdf625bb893c3cfbfb329de5fd79c381f"
+    },
+    {
+      "path": "core/src/main/res/drawable/ripple_background.xml",
+      "sha256": "40e34928c7651fa40b6e5c5b60391e899f41f29cf212636450997050ce6dc37e"
+    },
+    {
+      "path": "core/src/main/res/drawable/rounded_corner.xml",
+      "sha256": "366c6b07b2437857299eef6168d47e901e72a1e3752497f2f24f2ebb710a7233"
+    },
+    {
+      "path": "core/src/main/res/drawable/tech_button_background.xml",
+      "sha256": "f2edd4a6067e7a58048a7e2a6de6093c27c44f0132dfb7e39c277abc2b1a5a8e"
+    },
+    {
+      "path": "core/src/main/res/drawable/tech_card_background.xml",
+      "sha256": "01c57cf495020a941adf98c2321a95e1a753e017b71fdd11eee8ffce1736d604"
+    },
+    {
+      "path": "core/src/main/res/drawable/tech_card_glow.xml",
+      "sha256": "7099e393d31d916fed5dfe72ecd5818375fed234b1f18e2616a4355deb7e5373"
+    },
+    {
+      "path": "core/src/main/res/drawable/tech_gradient_bg.xml",
+      "sha256": "3679b42fc46b5ba6b28fb7ebdc4f3673975fef5e6c9a837825c8df5fddcc9184"
+    },
+    {
+      "path": "core/src/main/res/drawable/tech_ripple.xml",
+      "sha256": "0548f2d40e198be5d16bd4f5529b8650b01e8756c14025a927e6649b977a83ac"
+    },
+    {
+      "path": "core/src/main/res/drawable/transparent_circle.xml",
+      "sha256": "437c6657d4caa6351efa2b7b407c8c9e514293b84ad79a9b08972d1e2985dbf0"
+    },
+    {
+      "path": "core/src/main/res/drawable/transparent_circle_background.xml",
+      "sha256": "3ea8d12b2eda143b9b1c111c246fdf726ee720fef44dbd35a87f2d53589bbe26"
+    },
+    {
+      "path": "core/src/main/res/drawable/user_placeholder.xml",
+      "sha256": "6b1772adf03fdccd0674ae2fc6af10110d97e9b302d9d5c91b34a3f812904e40"
+    },
+    {
+      "path": "core/src/main/res/layout/dialog_app_lock.xml",
+      "sha256": "4bd8c1efabbf2ec4d8e424fb342657182eb60e5fc8660ffd622e63a5049a5907"
+    },
+    {
+      "path": "core/src/main/res/layout/dialog_dim_opacity.xml",
+      "sha256": "4257d8d5d7bbb88dd126f7843c43f205c15a71171722214f6111c447305ea542"
+    },
+    {
+      "path": "core/src/main/res/layout/dialog_set_password.xml",
+      "sha256": "e7f831f5d9b271df993b3a5615e61bcf305983577e2fa8567b85c111d913cbf2"
+    },
+    {
+      "path": "core/src/main/res/layout/preference_material3_switch.xml",
+      "sha256": "c654b62597963f1b31f0d7ced0326b8b17fa698871438aadfc8cd132f0a124f3"
+    },
+    {
+      "path": "core/src/main/res/menu/bottom_nav_menu.xml",
+      "sha256": "d616d6efe50af8b973586190fe6e7248241a5d7655d9e33aa22304e3658dda87"
+    },
+    {
+      "path": "core/src/main/res/menu/bottom_nav_menu_offline.xml",
+      "sha256": "fd5a883118eb225744b6745c332aab46e14bdc82068917307b6dae5aa88bc2bd"
+    },
+    {
+      "path": "core/src/main/res/menu/favorites_menu.xml",
+      "sha256": "2e6ae19c1108d401f325b9e18c0c1614480ef2bd37b89e7f4e06744232b57502"
+    },
+    {
+      "path": "core/src/main/res/menu/home_menu.xml",
+      "sha256": "d88446bc8cd4663d5217115469e49758ea41d521edcd6794fb5d756b082a48d7"
+    },
+    {
+      "path": "core/src/main/res/menu/library_menu.xml",
+      "sha256": "cad6a83f5c258e6476f09fce7c972050b97ebbaf74e854519ed43885c6f2fc60"
+    },
+    {
+      "path": "core/src/main/res/menu/media_menu.xml",
+      "sha256": "51478035abde5664bf6ceb7cc926b41ade000b810d2e05eee33b3c8b8879c050"
+    },
+    {
+      "path": "core/src/main/res/mipmap-anydpi/ic_banner.xml",
+      "sha256": "de83041cfccbfe95db5506179df398177f583d7302b52d2e13e12769b70c7ade"
+    },
+    {
+      "path": "core/src/main/res/mipmap-anydpi/ic_launcher.xml",
+      "sha256": "ebd23f6c5c90847c021fd019d86d1f2d9180703c7617b1465ff8496e284d7170"
+    },
+    {
+      "path": "core/src/main/res/values-ar/strings.xml",
+      "sha256": "20e851e09d7165c8ed7d3a2bc1ccb4abc8bc3d767e45e4214cf804a176c5329d"
+    },
+    {
+      "path": "core/src/main/res/values-b+es+419/strings.xml",
+      "sha256": "e64dcffcab77bf53031b7aec0b1c80eb7d93b2460b2dd0e323134047ddfc82ee"
+    },
+    {
+      "path": "core/src/main/res/values-bg/strings.xml",
+      "sha256": "26ed92670765f2beaf6f68f7a8cdd9190dc513f734b16c58e561a4154fa59767"
+    },
+    {
+      "path": "core/src/main/res/values-cs-rCZ/strings.xml",
+      "sha256": "c92951c5284223334f95e2919ec8dd3daca83ac7482728e5f43531b19d75cd8e"
+    },
+    {
+      "path": "core/src/main/res/values-de/strings.xml",
+      "sha256": "7d180b4090d2365ba286fde3c7aab7ccb6b51b21db45f1594e51a7c66b8316c0"
+    },
+    {
+      "path": "core/src/main/res/values-es-rMX/strings.xml",
+      "sha256": "9fa105a07c593b86fe9d67a2440072886919c7e2fb51ab20d070d35653726998"
+    },
+    {
+      "path": "core/src/main/res/values-es/strings.xml",
+      "sha256": "a56a582ddc3ffed0b6e9da1f1bb79a30d4289e6f0be414d22fa486be8a08cf8e"
+    },
+    {
+      "path": "core/src/main/res/values-fr/strings.xml",
+      "sha256": "4e80e370d2703858e812bb76f9783760af3e57b639cb917712e58e461634aada"
+    },
+    {
+      "path": "core/src/main/res/values-hu/strings.xml",
+      "sha256": "6bbc9ed4a05a41c553ca793ccb6f4ba8b002943cb5b4065fe10d4d00c1a84e69"
+    },
+    {
+      "path": "core/src/main/res/values-it/strings.xml",
+      "sha256": "d07a67770b584538a07647287c0b7443193a3d2253b1014768a96b02a56a1508"
+    },
+    {
+      "path": "core/src/main/res/values-iw/strings.xml",
+      "sha256": "193334ec8d58b8546174b74e778a225df22e5808e772cc2528e310c6025a65c0"
+    },
+    {
+      "path": "core/src/main/res/values-ko/strings.xml",
+      "sha256": "2df28cfaf3c74e46d50fbdb62e4bb5903c3a07a56e5136bc02cdc4b4c2523e96"
+    },
+    {
+      "path": "core/src/main/res/values-nl/strings.xml",
+      "sha256": "5ca6787b550ef1f7885ded95309366b1092ba28535b047a6a88f33d096ffc7ea"
+    },
+    {
+      "path": "core/src/main/res/values-pl/strings.xml",
+      "sha256": "6fcadd31ea04d6dabd910fe7ef9ea928b20bc5029684a22d796c3cb9f643024c"
+    },
+    {
+      "path": "core/src/main/res/values-pt-rBR/strings.xml",
+      "sha256": "2738015f130cd5a81df0abcb64eb1125dfd16aab452b697db3eb1d349a6af4d7"
+    },
+    {
+      "path": "core/src/main/res/values-pt/strings.xml",
+      "sha256": "1503848f79e79030349a81bd4521570350d17da1d8a0fc6305cd2e28a0ef141d"
+    },
+    {
+      "path": "core/src/main/res/values-ro/strings.xml",
+      "sha256": "0e63228b82279e5a63479e1b83532462e4956d578eb6cbca92637bc1bb84b824"
+    },
+    {
+      "path": "core/src/main/res/values-ru/strings.xml",
+      "sha256": "bcdbbf048789dbb5f0940418ced43c3a0fa567d9f4c44a848ffe2ad2f334ae6a"
+    },
+    {
+      "path": "core/src/main/res/values-sk/strings.xml",
+      "sha256": "7d60a0d823e01071c83403a649529826683c6d0db9b5a998aae9cb3e0b938e7c"
+    },
+    {
+      "path": "core/src/main/res/values-sl/strings.xml",
+      "sha256": "17f2ccf9000408cefb04295cf51e5c10efde83dba3bd923442e0bc8d41014281"
+    },
+    {
+      "path": "core/src/main/res/values-sv/strings.xml",
+      "sha256": "09d5cd517e1928b197c2db6e658e0d823497ff1c3c51f2d324992f535a687846"
+    },
+    {
+      "path": "core/src/main/res/values-sw600dp/dimens.xml",
+      "sha256": "58aad8db6ae0e193e7f0bf613483093769bc1f3b9b0111921e83a929a05912e5"
+    },
+    {
+      "path": "core/src/main/res/values-sw720dp/dimens.xml",
+      "sha256": "8c000e064598402bffb869edbb239e44d63e797168b3e5928eeb287dd3f78611"
+    },
+    {
+      "path": "core/src/main/res/values-uk/strings.xml",
+      "sha256": "6a179781ed40332164c6bef37142ffa483c315b9cde94315fb8e5b0a8d4fdba3"
+    },
+    {
+      "path": "core/src/main/res/values-vi/strings.xml",
+      "sha256": "22614276fef627d32bd97bb8f9a9d2bdc9d5433a404ba49de5bd31da572b13c1"
+    },
+    {
+      "path": "core/src/main/res/values-yue/strings.xml",
+      "sha256": "c0868945329ff474b339c701122c8e4f89bdbf090272a541e7dd26cb97c544cf"
+    },
+    {
+      "path": "core/src/main/res/values-zh-rCN/strings.xml",
+      "sha256": "99f70e5c9d203fac9701a9852c7c20cfd53d2ef7c21de24de986b0c31f6f49ff"
+    },
+    {
+      "path": "core/src/main/res/values-zh-rTW/strings.xml",
+      "sha256": "cefebafd8923b1fa6eebfbc6ed47c37495eb13b440698eabdbbceceac4dd8234"
+    },
+    {
+      "path": "core/src/main/res/values/about_libraries.xml",
+      "sha256": "b5f8203564b68f44f023b13203872d3b66ee436e6e042ad6ab352a2bf9ec4e1f"
+    },
+    {
+      "path": "core/src/main/res/values/colors.xml",
+      "sha256": "3c7c675aaf70ed65ec271d3e3b4f000bca8dd1414da612a1b501b189205d5d10"
+    },
+    {
+      "path": "core/src/main/res/values/dimens.xml",
+      "sha256": "aba2278d92cd0a4c816e8a921630b25e2abf7a3f1c04b0efd2258e38994f24b0"
+    },
+    {
+      "path": "core/src/main/res/values/drawables.xml",
+      "sha256": "94e365c798c89a8ba35a13a25d4ccd9c14cb5d718eb8be6f090fcf1af934326d"
+    },
+    {
+      "path": "core/src/main/res/values/ic_banner_background.xml",
+      "sha256": "5dbcab405fa141ade19a9a86bb243aad198c325e437118d980db18ab6d6f9bc6"
+    },
+    {
+      "path": "core/src/main/res/values/ic_launcher_background.xml",
+      "sha256": "e6133e3780902813d5d1f86460e05a278a72dd4f61690fdbf9e48a3062e49519"
+    },
+    {
+      "path": "core/src/main/res/values/languages.xml",
+      "sha256": "7813e25354e6872da3597fed2cfa592cb99498742f7bdc8d2747ea95714f8be1"
+    },
+    {
+      "path": "core/src/main/res/values/plurals.xml",
+      "sha256": "c7e9153218cf1e61aa75b9140bdd28bf6ee75b01de762911aef8c1dce816b530"
+    },
+    {
+      "path": "core/src/main/res/values/shape.xml",
+      "sha256": "015f131607603907fe2b15542aaba3eafe194351e622a27c074af2c701a48821"
+    },
+    {
+      "path": "core/src/main/res/values/string_arrays.xml",
+      "sha256": "c835eb6927df94bbbced6ee73a5418691ea3092a01b87d259781f3cb1166c9a5"
+    },
+    {
+      "path": "core/src/main/res/values/strings.xml",
+      "sha256": "86fc9a54d5e4d805e366119012d54f5a3b4899ba0a08f6aae1fb61bd5cbff9c9"
+    },
+    {
+      "path": "core/src/main/res/values/styles.xml",
+      "sha256": "2f880ac85ecedf8f8a4011990ba0eb7e9166a25314a554926432f17d5d1e657c"
+    },
+    {
+      "path": "core/src/main/res/values/themes.xml",
+      "sha256": "132ff1381ab6c9bcb7f30a7d31a9fae64dc9986b44b4d705b8062e03101fe266"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings.xml",
+      "sha256": "d00eb69fe3ff388b8fce9c0bedb95ef9a0e912242a65bdba3a77e88f2c8456bf"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_appearance.xml",
+      "sha256": "a292e759e1555538e4531231ee9ae4e81b275dc50bcfad408e6ff17dfe507190"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_cache.xml",
+      "sha256": "487fa4c0d2bf272bd992a429132927b8a24f4b9a5ddcce6599656f86ab5c4a89"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_device.xml",
+      "sha256": "cd918f97eeceb28c4feec6c396bbb0f7b72654ff08db89ef0af8943bf4c1c06a"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_downloads.xml",
+      "sha256": "a93fad3fc064fea43e85ac5614b81789d9c361e07acb2dc6a7c27ee4193feae1"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_language.xml",
+      "sha256": "309c1c288f1eadede1c4b4876aa53a53472c1d3d135caf4f6d587a91cd7581ea"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_network.xml",
+      "sha256": "acbd5a17e52b3bd9ae9110a03a019f44173c04c24973ddc41f341d3e011f13b4"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_player.xml",
+      "sha256": "16a6284faee0186ad253f5f1448dc2230d59d448c5155c6ed5fca44eb9282db8"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_security.xml",
+      "sha256": "7c9635d225b52bc0f0002f0b4060e357bdf019b7a7fec3e5f6e42129f08e03dc"
+    },
+    {
+      "path": "core/src/main/res/xml/fragment_settings_sync.xml",
+      "sha256": "f2817a22ad321a2f882a964a1fe1e2a6a6d25241dc80926bbe209c8215c17de8"
+    },
+    {
+      "path": "core/src/main/res/xml/locales_config.xml",
+      "sha256": "3461cefc87918b0e44b333777510b2ab4aa3db36885b48001369011e04b2c151"
+    },
+    {
+      "path": "core/src/main/res/xml/network_security_config.xml",
+      "sha256": "7247f934f2118999705dbd5d0ebfb2e508b648d64a239f613ea540e6f0e4fe68"
+    },
+    {
+      "path": "core/src/staging/res/values/colors.xml",
+      "sha256": "05de5a046a7d8fe9f7e28bec511ef3fc18a9449d17be316087fda0b107491419"
+    },
+    {
+      "path": "core/src/staging/res/values/strings.xml",
+      "sha256": "0415eeb593035e599165099fbaa7ae947a5e97847d58959c84713a42dd2100ff"
+    },
+    {
+      "path": "core/src/test/java/dev/jdtech/jellyfin/security/AppLockSessionTest.kt",
+      "sha256": "d4e599461c4b5964d85166e157fdc51c8aa5b0f40b68c06c4fdb24c92dbaa239"
+    },
+    {
+      "path": "core/src/test/java/dev/jdtech/jellyfin/viewmodels/PersonDetailLoaderTest.kt",
+      "sha256": "bbb2cea1cdade26eb900176f94a39c9c9f0f7b5ed6cd8eb7c10c2f94daacc38a"
+    },
+    {
+      "path": "core/src/test/java/dev/jdtech/jellyfin/viewmodels/ProgressiveSectionLoaderTest.kt",
+      "sha256": "39798eb1eb80de9e53f09ccae12548772533b488520e7680dbb283ce5ce5e672"
+    },
+    {
+      "path": "data/build.gradle.kts",
+      "sha256": "4e11115f22bbae28de84fd3812fc81a1289462ea8def6efb0e822a6a91e8f75f"
+    },
+    {
+      "path": "data/lint.xml",
+      "sha256": "f515d57e1b247b41076e547d72e4abee32d9056cc6387106b5652b727c5284a1"
+    },
+    {
+      "path": "data/proguard-rules.pro",
+      "sha256": "b5b0adb9b7c32ce4f46083bf505d01ea185c99473c6966cc929b734842721917"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/2.json",
+      "sha256": "975150d233ad75d8476c7dde173febd9223a47a83d6c48977033f61a9d3e6da0"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/3.json",
+      "sha256": "5848ab16bb6a86406038674ab20a009e7240d2f4807722596a541565fc5f06ea"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/4.json",
+      "sha256": "8c3a5b0537ef864170d93e0313ac05f4d6f62b02b9356c8f605946e2a0079429"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/5.json",
+      "sha256": "d3400812a63f470a274b5d875a93d083c28dafc1ee3a0a9ba7f1d8872090c297"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/6.json",
+      "sha256": "0e98b03682606c561aae6dfe5c7b56b9daa36f7e353489acdc1a6188fed34d6c"
+    },
+    {
+      "path": "data/schemas/dev.jdtech.jellyfin.database.ServerDatabase/7.json",
+      "sha256": "1a8231d072e8b6b8039806b1c1144bcf0a2429c51c60cebafb7942bb9e6990bd"
+    },
+    {
+      "path": "data/src/main/AndroidManifest.xml",
+      "sha256": "45d946413dc0d77c76a3af980fb822ed96cf1480ba8b95916e93f42cee3ae1a3"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/api/JellyfinApi.kt",
+      "sha256": "2743f3f98ccf3e5295dfa3a8be3702d5e43bc952c4839969de8934a73027b9b7"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/api/JellyfinExtApi.kt",
+      "sha256": "f10ba17a532c60c5cc9b0bf8d585623a86b89851febb3275f917f7bd2b56c55e"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/database/Converters.kt",
+      "sha256": "8abf55c5c452adb9dd2a168cc2a7ee4834ed91d0bce97e0593ba5a729520894a"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/database/RoomMigrations.kt",
+      "sha256": "4c96497a9045c0f8d2327d00c453a0576d6c43cc0740f66539432acc48210a78"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/database/ServerDatabase.kt",
+      "sha256": "022676421cc77a080a55bf02e952360f2796a55872ebce809a60ea34a33ab65d"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/database/ServerDatabaseDao.kt",
+      "sha256": "ca456593a63cf652eeb382a841ffacc226f13f3026afefa9a407c4067b70dcea"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ActorInsights.kt",
+      "sha256": "1a6b2427f5a752e536678f74929b1f68b742011a26210cb8f57102c50b6db13a"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/CachedCatalog.kt",
+      "sha256": "c8b3ba06a75e84010df491f8dfb4be26ccb6c1a488589e29d19cb57f2034f14c"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/CollectionType.kt",
+      "sha256": "bb420833e4a3de3183314aa70d8ad33c7060df5a04f8bcb42041258014e4fba2"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/DiscoveryRecommendation.kt",
+      "sha256": "3cfbc6b789400b20be14f716be172a5450f2c68983028f28567a043a9e1ed820"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FavoriteBatchEditor.kt",
+      "sha256": "30b9703497db5469b8134378b9100a3391e8941653f180972235bf8d6b76d80f"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FavoriteFilters.kt",
+      "sha256": "8b5ab78b5c6449bf52a97a9d15e47148beab282768f67744256b065a2eb87217"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidBoxSet.kt",
+      "sha256": "d8c5afb4a33d7e3921ac3e88f6bfb80d9508f3c55a02606df023b4fc89f63d0d"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidCollection.kt",
+      "sha256": "65f917c3cca4c761106eaf1e6c4f1f512257fe171da46ffbcce4bd835fa5aba0"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidEpisode.kt",
+      "sha256": "76b69c7727d75b1de16f591e96e43ed3373c4cda8d6ed398920653e2757c9227"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidEpisodeDto.kt",
+      "sha256": "78c56c3eff6d0eed8c94c15d79c237351c366d92a600c99858d8f9d9f915837b"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidImages.kt",
+      "sha256": "9efe951532d4676366f1e278a56292dcabdc04060426b11d64fb9d1743509323"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidItem.kt",
+      "sha256": "79c65c168a9e1821d3cdebcc444eeb0cec0c4ae375856d2a110fc674fc237f68"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidMediaStream.kt",
+      "sha256": "67bd6a900be88999c8de0e3b03ca19ffff542de3cd203f81935590a1ee505033"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidMediaStreamDto.kt",
+      "sha256": "3f5a30affda635bd1d332d477cd18fa9f484e1ce42047f2c7d2d4471e1c36c76"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidMovie.kt",
+      "sha256": "0a8723e43229be47bd9e34014ead72c20d0665550d1a8f2a0e500ac8704cbb06"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidMovieDto.kt",
+      "sha256": "9e97ac50401e0662b8e868f6f01b54e95160b858425a6563e9d7f81d9124bf73"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidPerson.kt",
+      "sha256": "b8f6e211b0be84fd0bb3f9c0dbe5669553a8d2552b38cd2324641e2cd1d57418"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidPersonDto.kt",
+      "sha256": "141bb5b5b79a7c05d5302447b180e61c93e2413cdb714e96ef44a6bc22ef8e5d"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidSeason.kt",
+      "sha256": "e54cb62f24a2e3e5d61d34e5b7452e00365980e38d1d4aa12964c28db342f917"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidSeasonDto.kt",
+      "sha256": "9e1fa5471880dbd91aac39b88c46668f2a0415487a99605eab6b6d0eea80bcef"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidShow.kt",
+      "sha256": "538395d01b93a5be7949ccb38b239ec0865fe98d5696c44ffe09fa7852af4ae7"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidShowDto.kt",
+      "sha256": "86e4186ddf6c184eadec260a09b3d8176ff9050f791ba32b130884a8d2a9ecfa"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidSource.kt",
+      "sha256": "49a335f6eac20c794a3ffe9747ac881ec20731c61b48c2e744b80c4d258a84e2"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidSourceDto.kt",
+      "sha256": "587d0971449dd3dc8305a44553f2be39279875cc275d0151a77a29100f1e8f90"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidSources.kt",
+      "sha256": "5d26f310519b6a2d0421b42c908a7c9c943a1f4c132a9d88351ef632b2041381"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/FindroidUserDataDto.kt",
+      "sha256": "d8beea1b926f8b899221286eb331d573fedcf1b527751896aa0ee452117b8107"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/Intro.kt",
+      "sha256": "6ecd8f11d0cdac5736fead5fc390a728e88bead9a35e1a0f548a4c34332941b7"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/IntroDto.kt",
+      "sha256": "ce91de70eb16bff81cc7257ef77267586063b63e47f77ff74de82a977bf8d78d"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/PersonItemDto.kt",
+      "sha256": "e7feac39edd7a6fee3a03c0baa6b09f72d7fe481c171f9d058e8044a4c89a764"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/Server.kt",
+      "sha256": "273e3cbfcc4bbfe52d91bc9546d0c12bf08f7658ace8f1f5a58c6c1cf241865e"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ServerAddress.kt",
+      "sha256": "25df443e9e6b952641e6f9c24b0384a528c7b8b8e3fe9293fc7d3c401ef4a2c5"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ServerWithAddressAndUser.kt",
+      "sha256": "f8646fde0bc267d8d6f21fb7e6065e83302490b40be586201c41244729849700"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ServerWithAddresses.kt",
+      "sha256": "20464530c28242851f80fe4a8728564483d75f26b47ee8c8d2b22d615ad34b5a"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ServerWithAddressesAndUsers.kt",
+      "sha256": "17d03cce302fbb83dd88f205060d1dae9445e84d0235fe2873d8a5edc58a9fb6"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/ServerWithUsers.kt",
+      "sha256": "1a12cd4eac25bc99574d2a9a44e2520065a4baabf319320b021d866807919ccc"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/SortBy.kt",
+      "sha256": "ebaea7c4782a0a1982f5df4f62ebbe71123d3993d31f111d77c0804b1c29d346"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/SyncStatusDto.kt",
+      "sha256": "a8ebe180299ad10fa2ef4701de3b30068d333bb0249bef4cb8591c78abd05078"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/TrickPlayManifest.kt",
+      "sha256": "28893638a12cfbe8378a6d1910fbedbc1553798ccd26507c33d771fd586aec1b"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/TrickPlayManifestDto.kt",
+      "sha256": "9f99bb6fc8abe5e714280503671dad9bc34f88e465d789cc27f8e04003d7ed2d"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/User.kt",
+      "sha256": "46f5744e20182fd0084f3e4842e69b4cb5f523014ec6c086a4630fd6bac2cb93"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/VideoMetadata.kt",
+      "sha256": "8c18b6a656c9b2513d6ad942068dc4aaf612acc7b1a4ffbd445ed5bbd21c9077"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/models/WorkProfileDto.kt",
+      "sha256": "b2e7cdc627a8202786195caf0edf84f3a70f8bb0dd002e777982408dc6084154"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/ActorProfiles.kt",
+      "sha256": "862c0ca78766589496950a06861ad9e83cbf0801bc23c35c8ac53bf0563b588f"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/AdaptiveJellyfinRepository.kt",
+      "sha256": "8531998b5645abefea3bb2cdd9532cf9e2f9b58c6391dc7741ec2e9bbb726687"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/CachedMediaBrowser.kt",
+      "sha256": "87363de0db175fdcb40249ddb707202e47880e612ef9411ac1841f9bf062e630"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/ConnectionFailures.kt",
+      "sha256": "30687b2c896bcc7394e091d2c100c1579774725a61fe474f728e48ab0b9932a6"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/DiscoveryProfiles.kt",
+      "sha256": "334d213d12b0bc68abd8a86bc98654036735e3562c92fd7386a102e9f8a11759"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/FavoritePages.kt",
+      "sha256": "c44056cbe7543801f8ea68a08370921d3d49a68c728e53a8878e9e7171dec0a3"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/ItemsPagingSource.kt",
+      "sha256": "e71ed8c8513d486ad61e7649c409f3bc141d2b380fa8b68c047c4d74ec5dc60b"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/JellyfinRepository.kt",
+      "sha256": "ce2cf82215cbbddb4c938b0fdf40f5d9ab84c23b5c3ebc8ef1264d2ab2e0ae4f"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/JellyfinRepositoryImpl.kt",
+      "sha256": "c64b06223a9935b7213c00e2657b79d2c022da5a14aad075390632208327f416"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/JellyfinRepositoryOfflineImpl.kt",
+      "sha256": "6715b5a4f42a3b10098f916b25ac73ad56e6f5132569359f942b69831a2e5793"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/repository/LibrarySynchronizer.kt",
+      "sha256": "be38bb1b6f9a66dfbfd1011eee7615acbada83553abe6cf377f66427c48cdb43"
+    },
+    {
+      "path": "data/src/main/java/dev/jdtech/jellyfin/security/PasswordHash.kt",
+      "sha256": "d7f85d8118710bf92763d8b4603e3621e5b1eed88b8db1cad3b24e46796c1a14"
+    },
+    {
+      "path": "data/src/main/res/values-zh-rCN/strings.xml",
+      "sha256": "aa2cd89b6f2fe0e28f68a1057761168b5f8338216ff47015a857cf719636845d"
+    },
+    {
+      "path": "data/src/main/res/values/strings.xml",
+      "sha256": "12a0144d8482f550ac68fd921c659c148f3ba91093fb6e11100c15aae4af9534"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/models/ActorInsightBuilderTest.kt",
+      "sha256": "2c513a54183aae5a4fa1db0c6a229372bede14004002250b0fc8a237ec369ef4"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/models/DiscoveryRankingTest.kt",
+      "sha256": "2af64084a918fbdf1c04e4c992984a026030783e049c8fd83c6d6cc5d934c58e"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/models/FavoriteBatchEditorTest.kt",
+      "sha256": "acee1fb824b31c9c1cb4e449e492097df397dfd1ebc48fd433b0ceec495f3ba3"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/models/FavoriteFiltersTest.kt",
+      "sha256": "1ba19a1bde6f972c4edd619947f58862558a1eea6a3c0fc8f30c694cfb1d7e2a"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/repository/ConnectionFailuresTest.kt",
+      "sha256": "3797cd086ce088d5a794f7af0e8042b5c9f64a76c713f986df421c9c26807a94"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/repository/FavoritePagesTest.kt",
+      "sha256": "8357b863b89356da436958b0d5c92caeba911c0d841db8aa2ca2038f9831c9e3"
+    },
+    {
+      "path": "data/src/test/java/dev/jdtech/jellyfin/security/PasswordHashTest.kt",
+      "sha256": "465118a30901fc7da8394a7ef9363830f49c9f285f23cb1e84a2abe0643096c8"
+    },
+    {
+      "path": "docs/optimization-plan.md",
+      "sha256": "74b640894161385bac732e08743e9d8a1e94925697a20f2dfebf5dfbde2b858e"
+    },
+    {
+      "path": "docs/validation-actor-detail.md",
+      "sha256": "9ff83fb26386483f02744aed61f9a6bda32548ba728a23e32add85afbc2fc77f"
+    },
+    {
+      "path": "docs/validation-convenience.md",
+      "sha256": "9bd31d24a68cbff2fd12ecbff81286dbcc492c3af3b750cec0d1131f9b363b04"
+    },
+    {
+      "path": "docs/validation-home-favorites.md",
+      "sha256": "1b7b2aa27d06ea0257f05113a2a3044aef0df572c481e83330bedfc0fd7e6e27"
+    },
+    {
+      "path": "docs/validation-phase2-hardening.md",
+      "sha256": "897e173b9bc96656d61f399cab0e760cdab46818e2ec085c4034c2e0d7752700"
+    },
+    {
+      "path": "docs/validation-phase2.md",
+      "sha256": "b2fb29ef01f427e3b9845e2159fd645d167ed10443a54bce93e072e7c836937f"
+    },
+    {
+      "path": "docs/validation.md",
+      "sha256": "753d1c820162df66fcd06f8a4b3651d275f5f0bd2a61f7068069c80c9f0695d2"
+    },
+    {
+      "path": "gradle.properties",
+      "sha256": "eae014041537ec28e3c2b2abf6c6ff84b771d45b0a03bc719615ff9d0f373afd"
+    },
+    {
+      "path": "gradle/libs.versions.toml",
+      "sha256": "1325a511e509991815de76b21d29c8d0453d812bbd391675d6c016bd1e184e88"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.properties",
+      "sha256": "7e1d39503dd81e9efcfdcb507c788d307c0f66fc49ffebb5ab8a0518f7398da8"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/design.md",
+      "sha256": "4dc2403d6fdf4a25b77601c7104d7b0db569841505f717bd8380a0fb309146eb"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/proposal.md",
+      "sha256": "3bccd4ce03bf5e2970026d7069face27916e6d3b0a2af0f1096fb01a5c0e80db"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/specs/layout-insets-adaptation/spec.md",
+      "sha256": "0e95e01964ae218849058cabc8944c019d2e3f8de30b964e39c07332058d05bd"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/specs/neon-animations/spec.md",
+      "sha256": "b17df1c8ee895c7228cf94b5400f88e7b6dd07538b75141da68115e782a83de3"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/specs/tech-theme-system/spec.md",
+      "sha256": "095225f0ea2b5a8eb703501c8d733589688a762e95c71cf102af4b1803eb941c"
+    },
+    {
+      "path": "openspec/changes/archive/2025-03-13-radical-tech-ui-makeover/tasks.md",
+      "sha256": "e22b9991510b40d58ca1a0dcc74dd6a0d4ba1a36ecb84ebd81259752875198d1"
+    },
+    {
+      "path": "openspec/changes/moodshot-camera-app/proposal.md",
+      "sha256": "e1be3ee1ff9327dbce769cfbeb6810a7f9de594a10e78888658b114c3b73a986"
+    },
+    {
+      "path": "player/core/build.gradle.kts",
+      "sha256": "55cef9472e17e4730e8bed2d4177623f28d38934d702190eebf4676106fbd33d"
+    },
+    {
+      "path": "player/core/lint.xml",
+      "sha256": "f515d57e1b247b41076e547d72e4abee32d9056cc6387106b5652b727c5284a1"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/models/ExternalSubtitle.kt",
+      "sha256": "29d558446231f97f164fe280c39d4ad47dfb42c896d1e67eee45cff23607e350"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/models/PlayerItem.kt",
+      "sha256": "0a373c5074bd81d054e045b3ed173130d07039d00e454e0101e00d10b9d01501"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/models/Track.kt",
+      "sha256": "9e70d51e3da0f49dadf4db8f4ac5531a6c32c9bfe69303a9bfaf13d3e02cb888"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/player/TemporaryPlaybackSpeed.kt",
+      "sha256": "031979d5b3bf917c4618a24accb3714b6729afbd103e22dcc67b9677ad19e2cf"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/utils/bif/BifData.kt",
+      "sha256": "090da46f515144a273242abf778ee5e708eb57a7f8d77cb7d6962146ee073207"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/utils/bif/BifIndexEntry.kt",
+      "sha256": "af8ff23ad9fc63485ff4432adae164a83a8b7caa5bb786286bf988c0e6b0b3de"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/utils/bif/BifUtil.kt",
+      "sha256": "b91a6a0a6af5545b20adbd1484e4c3e83a01639848d603a38f94186e11ff61c4"
+    },
+    {
+      "path": "player/core/src/main/java/dev/jdtech/jellyfin/utils/bif/Indexed8Array.kt",
+      "sha256": "3dbff1af4d9e3b9c2d0e4d9ddb3d50ff7f39a4b90c53367bf152bdfb9c95846b"
+    },
+    {
+      "path": "player/core/src/test/java/dev/jdtech/jellyfin/player/TemporaryPlaybackSpeedTest.kt",
+      "sha256": "4e6fc41d2058dae5290f8b7db9262dba6720e4a08ab2661069c8e4ac681353a9"
+    },
+    {
+      "path": "player/video/build.gradle.kts",
+      "sha256": "44a43f59bb77fba37ca73e78c3d9a3d4592c6a113b80c163eead8bf78eedbabf"
+    },
+    {
+      "path": "player/video/lint.xml",
+      "sha256": "f515d57e1b247b41076e547d72e4abee32d9056cc6387106b5652b727c5284a1"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/Extensions.kt",
+      "sha256": "49192370db587257b50d1fbbf194012cb053c74a55b8addeef794e5637d8c3f7"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/dialogs/SpeedSelectionDialogFragment.kt",
+      "sha256": "185dd0c265b65087dcf61e2256ae7cf4f017de5c7ace131050474f99f9906e34"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/dialogs/TrackSelectionDialogFragment.kt",
+      "sha256": "05118cc670538cc4f23d9bc3da14cd7503a5fdcae8552d2f5da8e1b07a99fa78"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/dialogs/VideoVersionDialogFragment.kt",
+      "sha256": "afe1f1fe4f002bd15cfd8e35dfd6ed61b1e721bf91bda7790816df54e2f8a872"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/mpv/MPVPlayer.kt",
+      "sha256": "372eaf05bdac2ca2e5c848e398afdfd82c9358b781a08cee331a2aefc5649987"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/mpv/TrackType.kt",
+      "sha256": "0310d8703e8e5fb0bb1833435b1392e87491618a888029d419503bb7ff659e0f"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/viewmodels/PlayerActivityViewModel.kt",
+      "sha256": "036737e66ba4c3cf50d36e7e084db33a253f22f248c0a783262bc6029e0fbe2c"
+    },
+    {
+      "path": "player/video/src/main/java/dev/jdtech/jellyfin/viewmodels/PlayerViewModel.kt",
+      "sha256": "763da0b2aeb57f9046cf99c0388e7ee5016d1607b7c288f5234231c212a9d16c"
+    },
+    {
+      "path": "player/video/src/main/res/values-b+es+419/strings.xml",
+      "sha256": "28ccc121373dd663516bf5e0dd169a22515ba8d8d19a5f72e689dde6fb7c912f"
+    },
+    {
+      "path": "player/video/src/main/res/values-bg/strings.xml",
+      "sha256": "ecd2145079367471f31f48ffeb82c27ad6e9b65f10ba80935c4f7669b6804d11"
+    },
+    {
+      "path": "player/video/src/main/res/values-cs-rCZ/strings.xml",
+      "sha256": "bcecd234d2b17a238c77261d9aafb2c016685fa2ce03080455aa83bb1065cc29"
+    },
+    {
+      "path": "player/video/src/main/res/values-de/strings.xml",
+      "sha256": "3432f9c10b638d8594297db95fab750e4c2a6dda9f5ef59cbfc282ec957852a4"
+    },
+    {
+      "path": "player/video/src/main/res/values-es-rMX/strings.xml",
+      "sha256": "dbc0c21aa7452670ca4e586fd976b279bd46fe18bb02ef0745d389579f9d514e"
+    },
+    {
+      "path": "player/video/src/main/res/values-es/strings.xml",
+      "sha256": "e268e559d2edf95dc251613576b787ffaa33e15f5ed334866a5002b5f19a6152"
+    },
+    {
+      "path": "player/video/src/main/res/values-fr/strings.xml",
+      "sha256": "f210394ba2f92f5762138727b4b525e1729dda292c5274660406723f4d8e4bbb"
+    },
+    {
+      "path": "player/video/src/main/res/values-hu/strings.xml",
+      "sha256": "0655ac1846b32d3dbe6d2627aa28979992d95275dfe124a4739637b8cb112cb0"
+    },
+    {
+      "path": "player/video/src/main/res/values-it/strings.xml",
+      "sha256": "f1734164f319011d3e9db46552205668b1d1d323688721257917ee0e1f75af9a"
+    },
+    {
+      "path": "player/video/src/main/res/values-iw/strings.xml",
+      "sha256": "6518ed0184c5d16b7cf50862bec675b0396de6d8c531883e7f3f96d413a1968e"
+    },
+    {
+      "path": "player/video/src/main/res/values-ko/strings.xml",
+      "sha256": "980a6a1c7bc0cf140653ee8c1321e714b3e867b77ff848ae35fdbc2831383843"
+    },
+    {
+      "path": "player/video/src/main/res/values-nl/strings.xml",
+      "sha256": "22afb9eceac40061dce4754a4a3042ea6e6525c0f067310630c445ad1c374268"
+    },
+    {
+      "path": "player/video/src/main/res/values-pl/strings.xml",
+      "sha256": "7c0950f672792e3fdf614d02886bc5d7a66cd87e92ecb892feeb890287699984"
+    },
+    {
+      "path": "player/video/src/main/res/values-pt-rBR/strings.xml",
+      "sha256": "7790ad88ec48744a6010a791ea28e407338c23a12fd060921169915c0d3eb28c"
+    },
+    {
+      "path": "player/video/src/main/res/values-pt/strings.xml",
+      "sha256": "5861167e3f2ad8051acea069f0c2c5f00cbf4eca34214e8f9c4199aa9ef8f746"
+    },
+    {
+      "path": "player/video/src/main/res/values-ru/strings.xml",
+      "sha256": "0295d425877ee9da25d30435fa0f993349d4d290167a66faacdd34858ce2ba58"
+    },
+    {
+      "path": "player/video/src/main/res/values-sk/strings.xml",
+      "sha256": "7e979ece9e9d0891f35093049ca3c53f91415ede42cb19294d720d60b540ee3e"
+    },
+    {
+      "path": "player/video/src/main/res/values-sl/strings.xml",
+      "sha256": "073328492fa7ce6a68b3b0578f13472d930b7847bfe4e34898f9e93bfcecc100"
+    },
+    {
+      "path": "player/video/src/main/res/values-sv/strings.xml",
+      "sha256": "403c2611b2ad13484bd3cac35d129c42b27bad50b9fba5aad95c50bf0e604f6b"
+    },
+    {
+      "path": "player/video/src/main/res/values-uk/strings.xml",
+      "sha256": "cdfdfb1f19c8ace19f79982839335c450cd0bc2a550d0bf6a470d29a43312451"
+    },
+    {
+      "path": "player/video/src/main/res/values-vi/strings.xml",
+      "sha256": "b36fc847cc87a9df840ae0f7eeb784dc56a72bdb0b4c202c773faa290604c221"
+    },
+    {
+      "path": "player/video/src/main/res/values-zh-rCN/strings.xml",
+      "sha256": "b09ba9789a992cad0ae11585a8fa02afbb30a45f9339dbc07148497224f32843"
+    },
+    {
+      "path": "player/video/src/main/res/values-zh-rTW/strings.xml",
+      "sha256": "b8e635e8af5044ef82fe3480943e98126e56fa58642e8c341d9a61c32a556552"
+    },
+    {
+      "path": "player/video/src/main/res/values/strings.xml",
+      "sha256": "26865a7fdb5dce43963e68e99799024ae25d3f2e913fb5c4a68e971bb67f6a71"
+    },
+    {
+      "path": "preferences/build.gradle.kts",
+      "sha256": "c8823cdc373a341f12c988ceb8dc212138871c4c3c0b7b1d858a1d90a6f7f9c3"
+    },
+    {
+      "path": "preferences/lint.xml",
+      "sha256": "f515d57e1b247b41076e547d72e4abee32d9056cc6387106b5652b727c5284a1"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/AppPreferences.kt",
+      "sha256": "f53799770ff1fe33cc7c39df6a09deb274ed8fc165d513062c6dc6e68dd5a680"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/Constants.kt",
+      "sha256": "bec924d967e56f0375fa3460e891b299f4082bda83a5162afb822a165326c028"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/models/Preference.kt",
+      "sha256": "61b1718735ee43f8b61ff1c08eac766bb7534369f23ee5dae378b78e306fae2c"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/models/PreferenceCategory.kt",
+      "sha256": "098bc36d2fca715b5713555eef7bc1221aaf532619cbef3e73e10b4b76fac11d"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/models/PreferenceSelect.kt",
+      "sha256": "adc3df3dab3231b6a0e54727fda2a74177e519a4c91e2c2cb185430223922d4e"
+    },
+    {
+      "path": "preferences/src/main/java/dev/jdtech/jellyfin/models/PreferenceSwitch.kt",
+      "sha256": "ef240cb113b1c2cffd4d0e9257a9da04fd6df5c0159db47693e32813c008e980"
+    },
+    {
+      "path": "renovate.json",
+      "sha256": "c1fff7eb78d7042ed025237c1b15186c4b4b5baadd719bc87c0f2a3bd6f0cc3c"
+    },
+    {
+      "path": "scripts/changed-kotlin.init.gradle",
+      "sha256": "ec49242cea41442a231e281fa4f88b7473503eb0d3ae3c25b023c6e88c834129"
+    },
+    {
+      "path": "scripts/mock_jellyfin.py",
+      "sha256": "9231daaebb465d00b7246048fb05ccbe8c6dbf1a4e9281254eb3134a5df63376"
+    },
+    {
+      "path": "scripts/seed_emulator_fixture.py",
+      "sha256": "dfcd267bb39aaa2b511a9d428e2411f5028437973d60e407993388101d253372"
+    },
+    {
+      "path": "scripts/verify_actor_detail.py",
+      "sha256": "705df7e68d0cab1971f54b7801279bb8dafb2706cb1a5eb925b3633e5eddbb66"
+    },
+    {
+      "path": "scripts/verify_actor_migrations.py",
+      "sha256": "0c4ea330b29caabd9db04d396065a1cc30c17b4d3d698abcaecd0e03c6fc3773"
+    },
+    {
+      "path": "scripts/verify_android_migrations.py",
+      "sha256": "85526093c54cb120dde459cd28f6d4d42acb6a24b16e8f71c518f9f6f04365b7"
+    },
+    {
+      "path": "scripts/verify_catalog.py",
+      "sha256": "be99349337a542024f1a0be830f328784ff49784b8136dc568a80bc5e1c481e1"
+    },
+    {
+      "path": "settings.gradle.kts",
+      "sha256": "5e578f08d3759b2e058e43987a7669ca45560952553ab72d707f7e86a515fc88"
+    }
+  ],
+  "basis": "Immutable Android commit; paths are relative to the source repository."
+}

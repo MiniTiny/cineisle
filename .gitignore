@@ -24,3 +24,10 @@ __pycache__/
 *.keystore
 .env
 .env.*
+
+# Machine-local evidence, diagnostics and history backups
+.local/
+docs/audits/
+docs/brand/
+docs/artifact.json
+docs/*.log

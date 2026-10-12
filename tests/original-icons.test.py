@@ -8,7 +8,6 @@ import subprocess
 import sys
 import unittest
 import xml.etree.ElementTree as ET
-import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MEDIA = ROOT / 'entry/src/main/resources/base/media'
@@ -17,6 +16,7 @@ spec = importlib.util.spec_from_file_location('cineisle_icons', ROOT / 'scripts/
 icons = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(icons)
 COLORS = {c['name']: c['value'] for c in json.loads((MEDIA.parent / 'element/color.json').read_text())['color']}
+PROVENANCE = json.loads((ROOT / 'tests/fixtures/icon-provenance.json').read_text())
 
 
 def geometry(svg):
@@ -118,14 +118,12 @@ class OriginalIconsTest(unittest.TestCase):
         self.assertEqual(ET.fromstring(local).find(NS+'g').attrib['stroke'], COLORS['brand_accent'])
 
     def test_previous_vector_paths_are_absent_from_all_replacements(self):
-        evidence = json.loads((ROOT / 'docs/audits/2026-10-10/evidence-brand.json').read_text())
-        previous = ROOT / evidence['artifact']['path']
-        self.assertEqual(hashlib.sha256(previous.read_bytes()).hexdigest(), evidence['artifact']['sha256'])
-        with zipfile.ZipFile(previous) as archive:
-            old = {shape for name in icons.outputs() for shape in geometry(archive.read('resources/base/media/' + name))}
+        old = set(PROVENANCE['previousGeometrySha256'])
+        self.assertTrue(old)
         for name in icons.outputs():
             with self.subTest(icon=name):
-                self.assertTrue(set(geometry((MEDIA / name).read_text())).isdisjoint(old), 'retained geometry: ' + name)
+                current = {hashlib.sha256(repr(shape).encode()).hexdigest() for shape in geometry((MEDIA / name).read_text())}
+                self.assertTrue(current.isdisjoint(old), 'retained geometry: ' + name)
 
     def test_all_page_and_component_media_references_resolve(self):
         available = {p.stem for directory in [MEDIA, ROOT / 'AppScope/resources/base/media'] for p in directory.glob('*')}
@@ -158,8 +156,7 @@ class OriginalIconsTest(unittest.TestCase):
         self.assertIn('Jellyfin OpenAPI', notices)
         self.assertIn('GPL-3.0-only', notices)
         self.assertEqual(json.loads((ROOT / 'oh-package.json5').read_text())['license'], 'GPL-3.0-only')
-        prior = json.loads((ROOT / 'docs/audits/2026-10-10/evidence-brand.json').read_text())
-        license_hash = next(x['sha256'] for x in prior['fingerprints'] if x['path'] == 'LICENSE')
+        license_hash = PROVENANCE['licenseSha256']
         self.assertEqual(hashlib.sha256((ROOT / 'LICENSE').read_bytes()).hexdigest(), license_hash)
 
 

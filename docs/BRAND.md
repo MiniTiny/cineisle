@@ -1,0 +1,58 @@
+# 映屿 · CineIsle 品牌规范
+
+启用日期：2026-10-10。产品定位：HarmonyOS NEXT 私人影视库客户端。
+
+“映”代表影像与放映，“屿”代表一座由个人收藏、观看记录与偏好构成的岛屿。CineIsle 由 cinema 与 isle 组成。名称表达拥有自己的影像空间，服务端协议仍使用 Jellyfin。
+
+![映屿图标](../AppScope/resources/base/media/app_icon.svg)
+
+## Logo
+
+本次为映屿重新绘制的原创 SVG：青绿岛屿承载收藏，斜向光束表示放映，暖色光点表示故事与发现，海面弧线使形状更稳定。没有沿用旧启动图标的路径、渐变或播放图形。
+
+唯一应用图标源为 `AppScope/resources/base/media/app_icon.svg`，108×108 viewBox；系统启动图标与启动窗口均引用 `$media:app_icon`。图形集中在中央区域，便于方形/圆形裁切。没有文本、字体、外部图片、脚本或滤镜依赖。本地渲染预览和设备截图不提交。
+
+| 用途 | 色值 |
+|---|---|
+| 深海底色 | `#0D1924` |
+| 岛屿浅色 | `#8DE8D2` |
+| 岛屿深色 | `#28BBA8` |
+| 暖色光点 | `#F4CF8B` |
+
+## 导航与详情图标
+
+图标源文件见 `entry/src/main/resources/base/media`，以应用实际 SVG 为准。
+
+全部图标重新绘制，统一24×24网格、1.75单位描边、圆头/圆角连接与至少1单位的外沿留白，适配现有22/24vp入口。14个导航/搜索/已看资源覆盖7种语义的active/muted状态；7个详情资源覆盖播放、预告片、下载、本机文件移除、服务器删除和收藏两态。几何定义位于 `scripts/generate-icons.py`，没有外部图标库、字体、图片或原vector导入。
+
+- 首页为岛屿与水面，推荐为四向星光，媒体库为叠放片架，演员为圆润人物，更多为四点菜单。
+- 搜索保留放大镜含义；已看为圈内勾选，收藏有空心/实心变化，状态可通过轮廓和界面选中底色辨认。
+- 本机移除为带减号的文件；服务器删除为珊瑚色垃圾桶，形状与颜色均区分。确认、权限和操作逻辑保持现有行为。
+- 导航选中态青绿 `#8DE8D2`、未选中 `#A6BDBB`、收藏暖金 `#F4CF8B`、服务器删除 `#FF9F9F`；底色与按钮同步使用深海/青绿资源。主操作背景 `#16776C` 配浅色文字。
+
+统一色值放在 `entry/src/main/resources/base/element/color.json`，SVG生成器读取同一资源；`build.sh` 在编译前检查生成漂移。图片占位与系统栏同步深海底色，播放器仍保留黑色视频区域及字幕对比度。
+
+图标回归通过固定几何指纹检查旧图形参数是否重新出现；指纹夹具位于 `tests/fixtures/icon-provenance.json`，无需历史 HAP 或审计归档。这项检查不等同于整个应用的许可审计。
+
+## 身份与设置
+
+| 入口 | 名称 / 标识 |
+|---|---|
+| 系统应用名、登录标题 | 映屿 · CineIsle（AppScope app_name 资源） |
+| 更多页版本 | 映屿 · CineIsle · 0.1.0 |
+| 应用包名 | `com.cineisle.app` |
+| vendor、Jellyfin Client、AVSession tag | `CineIsle` |
+| 工程包名称 | `cineisle` |
+| 安全会话别名 | `cineisle.current.session` |
+
+用户可见文案来自 string 资源；机器标识与版本来自 `ProductIdentity`。Jellyfin HTTP 头使用 ASCII 客户端名，鉴权格式、设备 ID、令牌、反向代理路径保持原协议行为。AVSession 的媒体标题仍取实际电影/单集名称，锁屏回到应用的 Want 使用运行时 abilityInfo。
+
+新包名安装为独立应用，登录、缓存、下载与语言偏好不会自动从旧沙箱迁入。用户需重新连接服务器并设置偏好。
+
+运行代码、打包资源和产品介绍已移除旧品牌名称。启动、导航和详情图标均为当前原创资源。现有项目许可证与 Jellyfin OpenAPI 信息见根目录 `LICENSE`、`THIRD_PARTY_NOTICES.md`；本次不改动其他许可。历史审计归档及真实工作区信息仅保留在本地。
+
+## 验证方法
+
+`tests/branding.test.cjs` 检查名称、资源连接、包版本、SVG 安全性与平台适配逻辑。`tests/original-icons.test.py` 检查 21 个资源、生成漂移、留白、状态几何、操作区分、引用、对比度及许可指纹。`tests/brand-package.test.py` 在构建后核验实际 HAP 的资源与身份。
+
+逻辑测试使用平台模拟，静态 SVG/HAP 检查不证明设备桌面、启动页、锁屏或实际布局效果。设备和真实 Jellyfin 验收需要独立执行；截图、日志与签名包保留在本地。

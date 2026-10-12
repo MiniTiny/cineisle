@@ -8,5 +8,6 @@
 - 运行 scripts/build.sh 做 ArkTS 与资源编译；运行 tests/protocol.test.cjs 做协议回归。
 - 构建 HAP、签名安装、设备 UI、真实 Jellyfin 联调、实际视频解码是不同的证据，不得互相替代。
 - 不提交访问令牌、测试账户、证书、私钥或签名密码。不要记录包含 api_key 的图片/播放地址。
+- `docs` 只保留可复用的开发文档和不含本地信息的基准清单。本地审计、日志、截图、服务探测、工作区快照及产物存入被忽略的 `.local` 目录；不得将本地历史资料重新加入 Git。
 - 当前待迁移功能不得以空实现按钮或固定成功提示伪装已实现；更新迁移清单并补相应验收。
 - 分支使用特性/发布模型：`master` 为发布基线，`develop` 为日常集成分支，特性从 `develop` 创建 `feature/<名称>`，验收后合入 `develop`，发布时再将 `develop` 合入 `master` 并打版本标签。日常工作使用 `develop` 或 `feature/*`，不使用 `main`。详见 `docs/BRANCHING.md`。
