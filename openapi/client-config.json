@@ -1,0 +1,50 @@
+{
+  "schema": "jellyfin-10.10.0.json",
+  "schemaSha256": "e48d88490e79d5dec94e0b14008aeca61782ed84619623ff9d150e8af119f9d5",
+  "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.11.0/openapi.json",
+  "schemaVersion": "10.10.0",
+  "output": "entry/src/main/ets/api/generated",
+  "operations": [
+    "GetPublicSystemInfo",
+    "AuthenticateUserByName",
+    "GetUserViews",
+    "GetItems",
+    "GetItem",
+    "GetResumeItems",
+    "GetLatestMedia",
+    "GetNextUp",
+    "GetMovieRecommendations",
+    "GetSeasons",
+    "GetEpisodes",
+    "MarkFavoriteItem",
+    "UnmarkFavoriteItem",
+    "MarkPlayedItem",
+    "MarkUnplayedItem",
+    "GetPlaybackInfo",
+    "GetSubtitle",
+    "GetVideoStream",
+    "GetItemImage",
+    "GetItemImageByIndex",
+    "ReportPlaybackStart",
+    "ReportPlaybackProgress",
+    "ReportPlaybackStopped",
+    "DeleteItem"
+  ],
+  "urlOnly": [
+    "GetVideoStream",
+    "GetItemImage",
+    "GetItemImageByIndex"
+  ],
+  "legacyQueryConverters": [
+    "GetItems"
+  ],
+  "compatibilitySchemas": [
+    {
+      "schema": "jellyfin-10.8.9.json",
+      "schemaSha256": "fbad603f55b6381c5f7c6552409497c050509ca28d32ec8d5015702f87e429bd",
+      "schemaVersion": "10.8.9",
+      "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.8.0/openapi.json",
+      "serverVersionPrefix": "10.8."
+    }
+  ]
+}

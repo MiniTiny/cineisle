@@ -1,0 +1,338 @@
+{
+  "schemaVersion": "10.10.0",
+  "schemaSha256": "e48d88490e79d5dec94e0b14008aeca61782ed84619623ff9d150e8af119f9d5",
+  "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.11.0/openapi.json",
+  "operations": [
+    {
+      "operationId": "GetPublicSystemInfo",
+      "method": "GET",
+      "path": "/System/Info/Public",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/System/Info/Public",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "AuthenticateUserByName",
+      "method": "POST",
+      "path": "/Users/AuthenticateByName",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/AuthenticateByName",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "GetUserViews",
+      "method": "GET",
+      "path": "/UserViews",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/Views",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetItems",
+      "method": "GET",
+      "path": "/Items",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Items",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetItem",
+      "method": "GET",
+      "path": "/Items/{itemId}",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/Items/{itemId}",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetResumeItems",
+      "method": "GET",
+      "path": "/UserItems/Resume",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/Items/Resume",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetLatestMedia",
+      "method": "GET",
+      "path": "/Items/Latest",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/Items/Latest",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetNextUp",
+      "method": "GET",
+      "path": "/Shows/NextUp",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Shows/NextUp",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetMovieRecommendations",
+      "method": "GET",
+      "path": "/Movies/Recommendations",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Movies/Recommendations",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetSeasons",
+      "method": "GET",
+      "path": "/Shows/{seriesId}/Seasons",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Shows/{seriesId}/Seasons",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetEpisodes",
+      "method": "GET",
+      "path": "/Shows/{seriesId}/Episodes",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Shows/{seriesId}/Episodes",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "MarkFavoriteItem",
+      "method": "POST",
+      "path": "/UserFavoriteItems/{itemId}",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/FavoriteItems/{itemId}",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "UnmarkFavoriteItem",
+      "method": "DELETE",
+      "path": "/UserFavoriteItems/{itemId}",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/FavoriteItems/{itemId}",
+          "method": "DELETE"
+        }
+      ]
+    },
+    {
+      "operationId": "MarkPlayedItem",
+      "method": "POST",
+      "path": "/UserPlayedItems/{itemId}",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/PlayedItems/{itemId}",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "MarkUnplayedItem",
+      "method": "DELETE",
+      "path": "/UserPlayedItems/{itemId}",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/{userId}/PlayedItems/{itemId}",
+          "method": "DELETE"
+        }
+      ]
+    },
+    {
+      "operationId": "GetPlaybackInfo",
+      "method": "GET",
+      "path": "/Items/{itemId}/PlaybackInfo",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Items/{itemId}/PlaybackInfo",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetSubtitle",
+      "method": "GET",
+      "path": "/Videos/{routeItemId}/{routeMediaSourceId}/Subtitles/{routeIndex}/Stream.{routeFormat}",
+      "response": "text",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Videos/{routeItemId}/{routeMediaSourceId}/Subtitles/{routeIndex}/Stream.{routeFormat}",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetVideoStream",
+      "method": "GET",
+      "path": "/Videos/{itemId}/stream",
+      "response": "external-binary-url",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Videos/{itemId}/stream",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetItemImage",
+      "method": "GET",
+      "path": "/Items/{itemId}/Images/{imageType}",
+      "response": "external-binary-url",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Items/{itemId}/Images/{imageType}",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetItemImageByIndex",
+      "method": "GET",
+      "path": "/Items/{itemId}/Images/{imageType}/{imageIndex}",
+      "response": "external-binary-url",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Items/{itemId}/Images/{imageType}/{imageIndex}",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "ReportPlaybackStart",
+      "method": "POST",
+      "path": "/Sessions/Playing",
+      "response": "void",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Sessions/Playing",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "ReportPlaybackProgress",
+      "method": "POST",
+      "path": "/Sessions/Playing/Progress",
+      "response": "void",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Sessions/Playing/Progress",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "ReportPlaybackStopped",
+      "method": "POST",
+      "path": "/Sessions/Playing/Stopped",
+      "response": "void",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Sessions/Playing/Stopped",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "DeleteItem",
+      "method": "DELETE",
+      "path": "/Items/{itemId}",
+      "response": "void",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Items/{itemId}",
+          "method": "DELETE"
+        }
+      ]
+    }
+  ],
+  "modelAndRequestDefinitions": 111,
+  "modelDefinitions": 88,
+  "limitations": [
+    "Selected application operations only; not a full Jellyfin SDK",
+    "Binary responses are URL builders consumed by Image/AVPlayer/system download",
+    "Subtitle text transport is used for SRT; no bitmap subtitle support",
+    "DTO types do not perform complete runtime schema validation; transport and domain mapping validate boundaries",
+    "int64 uses number; unsafe integers are rejected, no arbitrary precision support",
+    "Unsupported schema or serialization stops generation"
+  ],
+  "compatibilitySchemas": [
+    {
+      "schema": "jellyfin-10.8.9.json",
+      "schemaSha256": "fbad603f55b6381c5f7c6552409497c050509ca28d32ec8d5015702f87e429bd",
+      "schemaVersion": "10.8.9",
+      "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.8.0/openapi.json",
+      "serverVersionPrefix": "10.8."
+    }
+  ]
+}

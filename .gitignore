@@ -1,0 +1,26 @@
+oh_modules/
+node_modules/
+.hvigor/
+.idea/
+build/
+**/build/
+local.properties
+*.p12
+*.p7b
+*.cer
+.DS_Store
+.codebase-memory/
+__pycache__/
+*.py[cod]
+
+# Local packages and signing material
+*.hap
+*.app
+*.hsp
+*.pem
+*.key
+*.pfx
+*.jks
+*.keystore
+.env
+.env.*

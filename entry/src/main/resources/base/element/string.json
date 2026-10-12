@@ -1,0 +1,1064 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "映屿 · CineIsle 鸿蒙私人影视库"
+    },
+    {
+      "name": "login_intro",
+      "value": "连接你的 Jellyfin，随时沉浸于好故事"
+    },
+    {
+      "name": "server_placeholder",
+      "value": "服务地址，例如 https://media.example.com/jellyfin"
+    },
+    {
+      "name": "username",
+      "value": "用户名"
+    },
+    {
+      "name": "password",
+      "value": "密码"
+    },
+    {
+      "name": "https_hint",
+      "value": "公网连接建议使用 HTTPS；登录凭据保存到系统安全存储"
+    },
+    {
+      "name": "connecting",
+      "value": "正在连接…"
+    },
+    {
+      "name": "login",
+      "value": "连接并登录"
+    },
+    {
+      "name": "offline_cache",
+      "value": "正在展示上次同步的离线缓存"
+    },
+    {
+      "name": "actors_sync_hint",
+      "value": "同步媒体库后，按演员作品的总播放量浏览演员"
+    },
+    {
+      "name": "sync_library",
+      "value": "同步媒体库"
+    },
+    {
+      "name": "actor_stats",
+      "value": "%d 部作品 · %d 次播放"
+    },
+    {
+      "name": "download_complete",
+      "value": "已下载，可离线播放"
+    },
+    {
+      "name": "download_progress",
+      "value": "下载中 %d%%"
+    },
+    {
+      "name": "download_interrupted",
+      "value": "下载未完成，请移除后重新下载"
+    },
+    {
+      "name": "play",
+      "value": "播放"
+    },
+    {
+      "name": "remove_download",
+      "value": "移除下载"
+    },
+    {
+      "name": "remove_download_confirm",
+      "value": "将删除本机视频文件并取消正在进行的任务。"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "remove",
+      "value": "移除"
+    },
+    {
+      "name": "no_downloads",
+      "value": "暂无下载，可在电影或单集详情中下载"
+    },
+    {
+      "name": "favorites",
+      "value": "我的收藏"
+    },
+    {
+      "name": "downloads",
+      "value": "离线下载"
+    },
+    {
+      "name": "syncing",
+      "value": "同步中…"
+    },
+    {
+      "name": "last_sync",
+      "value": "最近同步：%s"
+    },
+    {
+      "name": "not_synced",
+      "value": "尚未同步媒体库"
+    },
+    {
+      "name": "change_account",
+      "value": "退出并切换账户或服务器"
+    },
+    {
+      "name": "logout_confirm",
+      "value": "退出后可登录其他账户，本机媒体保留并按服务器和用户隔离。"
+    },
+    {
+      "name": "logout",
+      "value": "退出登录"
+    },
+    {
+      "name": "version",
+      "value": "映屿 · CineIsle · 0.1.0"
+    },
+    {
+      "name": "refresh",
+      "value": "刷新"
+    },
+    {
+      "name": "search_hint",
+      "value": "搜索电影、剧集或单集"
+    },
+    {
+      "name": "back",
+      "value": "返回"
+    },
+    {
+      "name": "search_results",
+      "value": "搜索结果"
+    },
+    {
+      "name": "continue_watching",
+      "value": "继续观看"
+    },
+    {
+      "name": "recommend_hint",
+      "value": "重温已观看的好片"
+    },
+    {
+      "name": "latest",
+      "value": "最近添加"
+    },
+    {
+      "name": "no_items",
+      "value": "暂无媒体"
+    },
+    {
+      "name": "load_more",
+      "value": "加载更多"
+    },
+    {
+      "name": "tab_recommend",
+      "value": "推荐"
+    },
+    {
+      "name": "tab_home",
+      "value": "首页"
+    },
+    {
+      "name": "tab_library",
+      "value": "媒体库"
+    },
+    {
+      "name": "tab_actors",
+      "value": "演员"
+    },
+    {
+      "name": "tab_more",
+      "value": "更多"
+    },
+    {
+      "name": "download_wifi",
+      "value": "通过 Wi-Fi 下载"
+    },
+    {
+      "name": "download_confirm",
+      "value": "将下载原始视频文件，可能占用较多存储空间。仅使用非计费网络。"
+    },
+    {
+      "name": "download",
+      "value": "下载"
+    },
+    {
+      "name": "unfavorite",
+      "value": "取消收藏"
+    },
+    {
+      "name": "favorite",
+      "value": "收藏"
+    },
+    {
+      "name": "mark_unplayed",
+      "value": "标为未观看"
+    },
+    {
+      "name": "mark_played",
+      "value": "标为已观看"
+    },
+    {
+      "name": "cast",
+      "value": "演职人员"
+    },
+    {
+      "name": "progress_not_saved",
+      "value": "播放进度暂未保存到服务器，请检查网络"
+    },
+    {
+      "name": "play_error",
+      "value": "播放失败。请检查网络及设备对该视频编码的支持；当前版本只支持直接播放。"
+    },
+    {
+      "name": "offline_playback",
+      "value": "正在播放本机下载文件"
+    },
+    {
+      "name": "direct_play_hint",
+      "value": "直接播放 · 解码能力取决于设备"
+    },
+    {
+      "name": "invalid_server",
+      "value": "请输入完整的 http:// 或 https:// 服务地址，不要包含密码、查询参数或片段"
+    },
+    {
+      "name": "invalid_account",
+      "value": "服务端返回的账户标识无效"
+    },
+    {
+      "name": "invalid_item",
+      "value": "媒体标识无效"
+    },
+    {
+      "name": "session_read_failed",
+      "value": "无法读取安全登录凭据，请解锁设备后重试"
+    },
+    {
+      "name": "session_clear_failed",
+      "value": "无法清除安全登录凭据"
+    },
+    {
+      "name": "login_expired",
+      "value": "登录失效或用户名密码错误，请重新登录"
+    },
+    {
+      "name": "permission_denied",
+      "value": "当前用户没有执行此操作的权限"
+    },
+    {
+      "name": "http_failed",
+      "value": "服务请求失败（HTTP %d）"
+    },
+    {
+      "name": "html_response",
+      "value": "服务地址返回了网页，请检查 Jellyfin 地址和反向代理路径"
+    },
+    {
+      "name": "login_response_invalid",
+      "value": "服务端登录响应不完整"
+    },
+    {
+      "name": "tasks_active",
+      "value": "请等待同步或下载完成，或先取消下载"
+    },
+    {
+      "name": "login_required",
+      "value": "请先登录服务器"
+    },
+    {
+      "name": "sync_active",
+      "value": "媒体同步正在进行"
+    },
+    {
+      "name": "sync_progress",
+      "value": "已同步 %d / %d 项"
+    },
+    {
+      "name": "sync_complete",
+      "value": "同步完成：%d 项媒体，%d 位演员"
+    },
+    {
+      "name": "no_media_source",
+      "value": "服务器没有返回可播放的视频源"
+    },
+    {
+      "name": "download_exists",
+      "value": "已有下载记录，请先移除旧记录后重试"
+    },
+    {
+      "name": "no_download_source",
+      "value": "没有可下载的媒体源"
+    },
+    {
+      "name": "cancel_download_failed",
+      "value": "下载任务未能取消，请稍后重试"
+    },
+    {
+      "name": "cached_media",
+      "value": "离线媒体汇总（重新同步可恢复媒体库目录）"
+    },
+    {
+      "name": "cache_library_unavailable",
+      "value": "这份旧缓存没有媒体库归属，请返回查看离线媒体汇总，联网后重新同步"
+    },
+    {
+      "name": "cache_recovered",
+      "value": "本地缓存已重建，损坏的记录和已有视频文件均已保留。请重新同步媒体库"
+    },
+    {
+      "name": "cache_recovery_failed",
+      "value": "无法保留损坏的本地缓存，请检查存储空间和文件权限后重试"
+    },
+    {
+      "name": "sync_incomplete",
+      "value": "媒体库在同步期间发生变化或分页不完整，旧缓存已保留，请重新同步"
+    },
+    {
+      "name": "sync_library_progress",
+      "value": "%s：已同步 %d / %d 项"
+    },
+    {
+      "name": "pause",
+      "value": "暂停"
+    },
+    {
+      "name": "playback_options",
+      "value": "播放选项"
+    },
+    {
+      "name": "next_episode",
+      "value": "下一集"
+    },
+    {
+      "name": "media_source",
+      "value": "媒体源"
+    },
+    {
+      "name": "audio_track",
+      "value": "音轨"
+    },
+    {
+      "name": "subtitle_track",
+      "value": "字幕"
+    },
+    {
+      "name": "subtitles_off",
+      "value": "关闭字幕"
+    },
+    {
+      "name": "no_audio_tracks",
+      "value": "设备尚未识别可选择的音轨"
+    },
+    {
+      "name": "auto_next",
+      "value": "自动播放下一集"
+    },
+    {
+      "name": "playback_loading",
+      "value": "正在加载播放选项…"
+    },
+    {
+      "name": "audio_track_number",
+      "value": "音轨 %d"
+    },
+    {
+      "name": "subtitle_track_number",
+      "value": "字幕轨道 %d"
+    },
+    {
+      "name": "server_subtitle",
+      "value": "服务器文本字幕 · %s"
+    },
+    {
+      "name": "subtitle_format_hint",
+      "value": "设备轨道取决于解码支持。服务器文本字幕按 SRT 显示，不保留 ASS 样式；图片字幕暂不支持。离线仅可选文件内的设备轨道。"
+    },
+    {
+      "name": "track_switch_failed",
+      "value": "音轨切换失败，请检查设备对该音频编码的支持"
+    },
+    {
+      "name": "subtitle_failed",
+      "value": "字幕加载或切换失败，请检查网络和字幕格式，可重试或关闭字幕"
+    },
+    {
+      "name": "source_switch_failed",
+      "value": "媒体源切换失败，请检查网络后重试"
+    },
+    {
+      "name": "next_episode_failed",
+      "value": "下一集未能加载。请检查网络或下载文件，点击“下一集”重试"
+    },
+    {
+      "name": "queue_finished",
+      "value": "已到达可播放列表末尾"
+    },
+    {
+      "name": "episode_order_unknown",
+      "value": "单集顺序不完整，暂不能自动连播"
+    },
+    {
+      "name": "episode_queue_failed",
+      "value": "单集列表不完整，请重试"
+    },
+    {
+      "name": "next_not_downloaded",
+      "value": "下一集尚未下载，离线连播已停止"
+    },
+    {
+      "name": "speed_failed",
+      "value": "当前设备未能应用此播放速度"
+    },
+    {
+      "name": "player_release_failed",
+      "value": "播放器资源释放失败，请退出播放页后重试"
+    },
+    {
+      "name": "pip_enter",
+      "value": "画中画"
+    },
+    {
+      "name": "pip_exit",
+      "value": "退出画中画"
+    },
+    {
+      "name": "pip_unavailable",
+      "value": "当前设备不支持画中画"
+    },
+    {
+      "name": "pip_failed",
+      "value": "画中画操作失败，请重试"
+    },
+    {
+      "name": "background_playback",
+      "value": "后台播放"
+    },
+    {
+      "name": "background_playback_hint",
+      "value": "开启后可后台听音频并使用锁屏控制；在后台关闭画中画或退出播放页会停止播放。"
+    },
+    {
+      "name": "background_unavailable",
+      "value": "未能获得后台播放授权，播放将留在前台"
+    },
+    {
+      "name": "background_stop_failed",
+      "value": "后台播放任务未能结束，请退出应用后重试"
+    },
+    {
+      "name": "session_unavailable",
+      "value": "系统媒体会话不可用，暂不能使用锁屏、后台及画中画控制"
+    },
+    {
+      "name": "session_update_failed",
+      "value": "系统播放状态更新失败，请重试"
+    },
+    {
+      "name": "system_playback_cleanup_failed",
+      "value": "系统播放资源释放失败，请退出应用后重试"
+    },
+    {
+      "name": "pip_subtitle_failed",
+      "value": "画中画字幕更新失败，请退出画中画后重试"
+    },
+    {
+      "name": "playback_language_preferences",
+      "value": "音轨与字幕语言偏好"
+    },
+    {
+      "name": "preferred_audio_language",
+      "value": "优先音轨语言"
+    },
+    {
+      "name": "preferred_subtitle_language",
+      "value": "优先字幕语言"
+    },
+    {
+      "name": "playback_language_placeholder",
+      "value": "留空使用默认；如 zh、en、ja、zh-Hant"
+    },
+    {
+      "name": "preferred_subtitles_off",
+      "value": "默认始终关闭字幕"
+    },
+    {
+      "name": "save_playback_preferences",
+      "value": "保存并应用"
+    },
+    {
+      "name": "reset_playback_preferences",
+      "value": "恢复默认偏好"
+    },
+    {
+      "name": "playback_preferences_hint",
+      "value": "应用级设置，退出和重启后保留。支持两/三字母语言码及脚本/地区标签；无匹配保留默认轨道。手动选轨仅对本次播放有效，切源或下一集重新使用偏好。恢复默认不改回当前手动轨道。"
+    },
+    {
+      "name": "playback_preferences_saved",
+      "value": "语言偏好已保存，已尝试应用到当前播放"
+    },
+    {
+      "name": "playback_language_invalid",
+      "value": "请输入有效语言代码，如 zh、eng 或 zh-Hant；留空使用默认"
+    },
+    {
+      "name": "playback_preferences_invalid",
+      "value": "保存的语言偏好无效，暂用默认；请重新保存设置"
+    },
+    {
+      "name": "playback_preferences_load_failed",
+      "value": "语言偏好读取失败，暂用默认；保存时将重试"
+    },
+    {
+      "name": "playback_preferences_save_failed",
+      "value": "语言偏好保存失败，仍使用原设置，请重试"
+    },
+    {
+      "name": "playback_preferences_restore_failed",
+      "value": "语言偏好保存及恢复失败，未确认写入；请重新保存设置"
+    },
+    {
+      "name": "api_response_invalid",
+      "value": "Jellyfin 返回的数据不完整或格式无效"
+    },
+    {
+      "name": "api_parameter_invalid",
+      "value": "请求参数无效，请重试"
+    },
+    {
+      "name": "api_numeric_range",
+      "value": "媒体数据超出当前客户端支持的整数范围"
+    },
+    {
+      "name": "api_session_invalid",
+      "value": "登录会话无效，请重新登录"
+    },
+    {
+      "name": "next_up",
+      "value": "下一集"
+    },
+    {
+      "name": "latest_library",
+      "value": "最近添加 · %s"
+    },
+    {
+      "name": "view_all",
+      "value": "查看全部"
+    },
+    {
+      "name": "media_movie",
+      "value": "电影"
+    },
+    {
+      "name": "media_series",
+      "value": "剧集"
+    },
+    {
+      "name": "media_episode",
+      "value": "单集"
+    },
+    {
+      "name": "media_season",
+      "value": "季"
+    },
+    {
+      "name": "media_video",
+      "value": "视频"
+    },
+    {
+      "name": "episode_label",
+      "value": "第 %d 季 · 第 %d 集 · %s"
+    },
+    {
+      "name": "poster_unavailable",
+      "value": "暂无海报"
+    },
+    {
+      "name": "watched_indicator",
+      "value": "已观看"
+    },
+    {
+      "name": "present_year",
+      "value": "至今"
+    },
+    {
+      "name": "channel_count",
+      "value": "%d 声道"
+    },
+    {
+      "name": "subtitle_chip",
+      "value": "CC"
+    },
+    {
+      "name": "detail_size",
+      "value": "文件大小"
+    },
+    {
+      "name": "detail_video",
+      "value": "视频"
+    },
+    {
+      "name": "detail_audio",
+      "value": "音频"
+    },
+    {
+      "name": "detail_subtitles",
+      "value": "字幕"
+    },
+    {
+      "name": "detail_genres",
+      "value": "类型"
+    },
+    {
+      "name": "detail_directors",
+      "value": "导演"
+    },
+    {
+      "name": "detail_writers",
+      "value": "编剧"
+    },
+    {
+      "name": "bit_depth",
+      "value": "%d 位"
+    },
+    {
+      "name": "runtime_minutes",
+      "value": "%d 分钟"
+    },
+    {
+      "name": "community_score",
+      "value": "评分 %s"
+    },
+    {
+      "name": "play_not_allowed",
+      "value": "当前用户没有播放此媒体的权限"
+    },
+    {
+      "name": "download_not_allowed",
+      "value": "当前用户没有下载此媒体的权限"
+    },
+    {
+      "name": "delete_not_allowed",
+      "value": "当前用户没有删除此媒体的权限"
+    },
+    {
+      "name": "media_deleted_cache_failed",
+      "value": "服务器媒体已删除，但本机缓存保存失败。请返回重新同步媒体库，本机下载文件已保留"
+    },
+    {
+      "name": "no_playable_episode",
+      "value": "没有可播放的单集"
+    },
+    {
+      "name": "continue_play",
+      "value": "继续播放"
+    },
+    {
+      "name": "start_over",
+      "value": "从头播放"
+    },
+    {
+      "name": "play_next_episode",
+      "value": "播放下一集"
+    },
+    {
+      "name": "media_versions",
+      "value": "媒体版本（用于播放和下载）"
+    },
+    {
+      "name": "source_number",
+      "value": "版本 %d"
+    },
+    {
+      "name": "server_delete",
+      "value": "删除服务器媒体"
+    },
+    {
+      "name": "server_delete_confirm",
+      "value": "将永久删除 Jellyfin 服务器上的电影及其媒体文件，所有用户都会受影响。本机下载文件会保留。是否继续？"
+    },
+    {
+      "name": "trailer",
+      "value": "预告片"
+    },
+    {
+      "name": "trailer_failed",
+      "value": "无法打开预告片，请检查链接或安装支持此链接的应用"
+    },
+    {
+      "name": "seasons",
+      "value": "季度"
+    },
+    {
+      "name": "episodes",
+      "value": "单集"
+    },
+    {
+      "name": "actor_search",
+      "value": "搜索演员姓名"
+    },
+    {
+      "name": "actor_order_play",
+      "value": "播放次数"
+    },
+    {
+      "name": "actor_order_watched",
+      "value": "已看作品"
+    },
+    {
+      "name": "actor_order_unplayed",
+      "value": "未看作品"
+    },
+    {
+      "name": "actor_order_works",
+      "value": "作品数量"
+    },
+    {
+      "name": "actor_order_recent",
+      "value": "最近观看"
+    },
+    {
+      "name": "actor_order_name",
+      "value": "姓名"
+    },
+    {
+      "name": "actor_order_recommended",
+      "value": "推荐演员"
+    },
+    {
+      "name": "followed_only",
+      "value": "仅关注"
+    },
+    {
+      "name": "show_actor_tags",
+      "value": "显示风格标签"
+    },
+    {
+      "name": "clear_filters",
+      "value": "清除筛选"
+    },
+    {
+      "name": "actor_counts",
+      "value": "%d 部作品 · 已看 %d · 未看 %d"
+    },
+    {
+      "name": "actor_new_count",
+      "value": "已关注 · %d 部新作品"
+    },
+    {
+      "name": "no_filter_matches",
+      "value": "没有符合筛选的演员"
+    },
+    {
+      "name": "home_section_failed",
+      "value": "分栏加载失败"
+    },
+    {
+      "name": "retry",
+      "value": "重试"
+    },
+    {
+      "name": "settings",
+      "value": "设置"
+    },
+    {
+      "name": "cancel_sync",
+      "value": "取消同步"
+    },
+    {
+      "name": "sync_cancelled",
+      "value": "同步已取消，原目录和下载文件已保留"
+    },
+    {
+      "name": "pending_changes",
+      "value": "待回传修改：%d"
+    },
+    {
+      "name": "flush_changes",
+      "value": "回传离线修改"
+    },
+    {
+      "name": "network_failed",
+      "value": "网络连接失败，请稍后重试"
+    },
+    {
+      "name": "discover",
+      "value": "发现新片"
+    },
+    {
+      "name": "rewatch",
+      "value": "重温佳作"
+    },
+    {
+      "name": "discovery_hint",
+      "value": "结合关注演员与收藏类型推荐；长按查看推荐原因"
+    },
+    {
+      "name": "discovery_reason",
+      "value": "推荐原因"
+    },
+    {
+      "name": "discovery_recent",
+      "value": "最近加入的未看作品"
+    },
+    {
+      "name": "ok",
+      "value": "知道了"
+    },
+    {
+      "name": "all",
+      "value": "全部"
+    },
+    {
+      "name": "all_genres",
+      "value": "全部类型"
+    },
+    {
+      "name": "favorite_search",
+      "value": "搜索名称、原名或剧集名"
+    },
+    {
+      "name": "unwatched_only",
+      "value": "仅未看"
+    },
+    {
+      "name": "name_ascending",
+      "value": "名称升序"
+    },
+    {
+      "name": "name_descending",
+      "value": "名称降序"
+    },
+    {
+      "name": "continue_first",
+      "value": "继续观看优先"
+    },
+    {
+      "name": "favorites_loaded",
+      "value": "已加载：匹配 %d / %d"
+    },
+    {
+      "name": "favorites_count",
+      "value": "匹配 %d / 共 %d"
+    },
+    {
+      "name": "select_items",
+      "value": "多选"
+    },
+    {
+      "name": "select_all",
+      "value": "全选"
+    },
+    {
+      "name": "batch_unfavorite",
+      "value": "取消所选收藏"
+    },
+    {
+      "name": "batch_unfavorite_confirm",
+      "value": "取消这 %d 项收藏？"
+    },
+    {
+      "name": "confirm",
+      "value": "确认"
+    },
+    {
+      "name": "batch_result",
+      "value": "成功 %d 项，失败 %d 项"
+    },
+    {
+      "name": "undo",
+      "value": "撤销"
+    },
+    {
+      "name": "no_matches",
+      "value": "没有符合筛选的收藏"
+    },
+    {
+      "name": "no_favorites",
+      "value": "暂无收藏"
+    },
+    {
+      "name": "download_active",
+      "value": "进行中"
+    },
+    {
+      "name": "download_completed",
+      "value": "已完成"
+    },
+    {
+      "name": "download_failed",
+      "value": "需处理"
+    },
+    {
+      "name": "stop_download",
+      "value": "停止下载"
+    },
+    {
+      "name": "download_failure_reason",
+      "value": "系统下载失败（%d），可重试"
+    },
+    {
+      "name": "download_preferences",
+      "value": "下载偏好"
+    },
+    {
+      "name": "remember_source",
+      "value": "记住下载版本偏好"
+    },
+    {
+      "name": "source_default",
+      "value": "按媒体默认版本下载"
+    },
+    {
+      "name": "clear_source_preference",
+      "value": "清除版本偏好"
+    },
+    {
+      "name": "download_location_hint",
+      "value": "保存在当前账户的应用私有目录；仅 Wi-Fi 下载，卸载应用会清除文件"
+    },
+    {
+      "name": "follow",
+      "value": "关注"
+    },
+    {
+      "name": "unfollow",
+      "value": "取消关注"
+    },
+    {
+      "name": "biography_loading",
+      "value": "简介加载中，作品可先浏览"
+    },
+    {
+      "name": "all_tags",
+      "value": "全部风格"
+    },
+    {
+      "name": "tag_evidence",
+      "value": "以下 %d 部作品支持此标签"
+    },
+    {
+      "name": "actor_tag_boundary",
+      "value": "标签仅概括库内作品类型和题材；角色采用服务器提供的演职员信息"
+    },
+    {
+      "name": "credit_role",
+      "value": "饰演：%s"
+    },
+    {
+      "name": "theme_investigation",
+      "value": "探案"
+    },
+    {
+      "name": "theme_revenge",
+      "value": "复仇"
+    },
+    {
+      "name": "theme_time_travel",
+      "value": "时空穿越"
+    },
+    {
+      "name": "theme_growth",
+      "value": "成长"
+    },
+    {
+      "name": "change_queued",
+      "value": "修改已保存在本机，联网后回传"
+    },
+    {
+      "name": "batch_download",
+      "value": "批量下载本季"
+    },
+    {
+      "name": "batch_download_confirm",
+      "value": "在 Wi-Fi 下下载所选 %d 集？已存在的任务将跳过"
+    },
+    {
+      "name": "app_lock",
+      "value": "应用锁"
+    },
+    {
+      "name": "lock_unlock",
+      "value": "解锁映屿"
+    },
+    {
+      "name": "lock_pin",
+      "value": "输入 PIN"
+    },
+    {
+      "name": "lock_pin_wrong",
+      "value": "PIN 不正确或尝试过于频繁，请稍后重试"
+    },
+    {
+      "name": "lock_pin_format",
+      "value": "PIN 必须为 6–12 位数字"
+    },
+    {
+      "name": "lock_storage_failed",
+      "value": "安全存储不可用，保持锁定；请恢复系统安全存储后重启应用"
+    },
+    {
+      "name": "lock_pin_mismatch",
+      "value": "两次输入的 PIN 不一致"
+    },
+    {
+      "name": "lock_policy",
+      "value": "设置 6–12 位数字 PIN；冷启动及后台超过 15 分钟后锁定，锁定时暂停播放并隐藏内容"
+    },
+    {
+      "name": "lock_current_pin",
+      "value": "当前 PIN"
+    },
+    {
+      "name": "lock_new_pin",
+      "value": "新 PIN（6–12 位数字）"
+    },
+    {
+      "name": "lock_confirm_pin",
+      "value": "再次输入新 PIN"
+    },
+    {
+      "name": "lock_save",
+      "value": "保存 PIN"
+    },
+    {
+      "name": "lock_now",
+      "value": "立即锁定"
+    },
+    {
+      "name": "lock_disable",
+      "value": "关闭应用锁"
+    },
+    {
+      "name": "offline_mode",
+      "value": "离线模式（仅本账户缓存与已下载媒体）"
+    },
+    {
+      "name": "offline_mode_enabled",
+      "value": "请先关闭离线模式再同步"
+    },
+    {
+      "name": "download_create_failed",
+      "value": "创建系统下载任务失败，可重试"
+    },
+    {
+      "name": "controls_lock",
+      "value": "锁定控制"
+    },
+    {
+      "name": "controls_unlock",
+      "value": "解除控制锁定"
+    },
+    {
+      "name": "download_queued",
+      "value": "等待下载（最多四个同时任务）"
+    }
+  ]
+}

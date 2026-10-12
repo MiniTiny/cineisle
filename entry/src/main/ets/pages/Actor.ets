@@ -1,0 +1,125 @@
+import { PinGate } from '../components/PinGate';
+import router from '@ohos.router';
+import { MediaItem, Person } from '../model/Models';
+import { ActorProfile, ActorTag, ExperienceState, actorProfiles, applyPending, authorizationFailure } from '../utils/Experience';
+import { AppService } from '../service/AppService';
+import { JellyfinClient } from '../service/JellyfinClient';
+import { errorText, text } from '../utils/Strings';
+import { MediaCard } from '../components/MediaCard';
+
+interface ActorRoute { personId: string; personName: string }
+@Entry
+@Component
+struct Actor {
+  @StorageLink('cineIsleLocked') locked: boolean = true;
+  @State person: Person = { Id: '', Name: '' };
+  @State overview: string = '';
+  @State works: MediaItem[] = [];
+  @State followed: boolean = false;
+  @State profile: ActorProfile | undefined = undefined;
+  @State unwatched: boolean = false;
+  @State tag: string = '';
+  @State busy: boolean = false;
+  @State biographyLoading: boolean = false;
+  @State message: string = '';
+  private revision: number = 0;
+  private client: JellyfinClient | undefined = undefined;
+  aboutToAppear(): void {
+    const route = router.getParams() as ActorRoute; if (!route?.personId) { router.back(); return; }
+    this.person = { Id: route.personId, Name: route.personName ?? '' }; this.client = AppService.client; this.refresh();
+  }
+  onPageShow(): void { if (this.client && this.client !== AppService.client) { this.clear(); router.back(); return; } if (!this.busy) { this.works = applyPending(this.works.map((i: MediaItem) => AppService.snapshot.items.find((v: MediaItem) => v.Id === i.Id) ?? i), AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []); this.describe(); } }
+  onPageHide(): void { ++this.revision; this.busy = false; this.biographyLoading = false; }
+  private clear(): void { ++this.revision; this.works = []; this.profile = undefined; this.overview = ''; this.biographyLoading = false; this.busy = false; }
+  private current(revision: number): boolean { return revision === this.revision && this.client === AppService.client; }
+  private describe(): void { this.followed = AppService.experience?.snapshot().follows.some((f) => f.id === this.person.Id) ?? false; this.profile = actorProfiles(this.works, AppService.experience?.snapshot().follows ?? []).find((a: ActorProfile) => a.person.Id === this.person.Id); }
+  private async refresh(): Promise<void> {
+    const revision = ++this.revision; const client = AppService.requireClient(); this.busy = true; this.biographyLoading = true; this.message = '';
+    this.works = applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? [])
+      .filter((i: MediaItem) => ['Movie', 'Series'].includes(i.Type) && (i.People ?? []).some((p: Person) => p.Id === this.person.Id)); this.describe();
+    if (AppService.experience?.snapshot().offline) { this.busy = false; this.biographyLoading = false; return; }
+    const biography = async (): Promise<void> => {
+      try { const item = await client.detail(this.person.Id); if (this.current(revision)) { this.person = { Id: item.Id, Name: item.Name }; this.overview = item.Overview ?? ''; } }
+      catch (e) { if (this.current(revision)) { if (authorizationFailure(e as Error)) { this.clear(); } this.message = errorText(e as Error); } }
+      finally { if (this.current(revision)) { this.biographyLoading = false; } }
+    };
+    const credits = async (): Promise<void> => {
+      try {
+        if (!this.works.length) {
+          const works = await AppService.allItems([{ key: 'PersonIds', value: this.person.Id }, { key: 'IncludeItemTypes', value: 'Movie,Series' }]);
+          if (!this.current(revision)) { return; }
+          this.works = applyPending(works, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []); this.describe();
+        }
+        if (this.current(revision)) {
+          AppService.experience?.update((next: ExperienceState) => {
+            const follow = next.follows.find((f) => f.id === this.person.Id); if (follow) { follow.acknowledged = this.works.map((i: MediaItem) => i.Id); }
+          }); this.describe();
+        }
+      } catch (e) { if (this.current(revision)) { if (authorizationFailure(e as Error)) { this.clear(); } this.message = errorText(e as Error); } }
+      finally { if (this.current(revision)) { this.busy = false; } }
+    };
+    await Promise.all([biography(), credits()]);
+  }
+  private follow(): void {
+    try {
+      AppService.experience?.update((next: ExperienceState) => {
+        if (next.follows.some((f) => f.id === this.person.Id)) { next.follows = next.follows.filter((f) => f.id !== this.person.Id); }
+        else { next.follows.push({ id: this.person.Id, acknowledged: this.works.map((i: MediaItem) => i.Id) }); }
+      }); this.describe();
+    } catch (e) { this.message = errorText(e as Error); }
+  }
+  private shown(): MediaItem[] {
+    const ids = this.tag ? new Set(this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.map((i: MediaItem) => i.Id) ?? []) : undefined;
+    return this.works.filter((i: MediaItem) => (!this.unwatched || !i.UserData?.Played) && (!ids || ids.has(i.Id)))
+      .sort((a: MediaItem, b: MediaItem) => Number(!!a.UserData?.Played) - Number(!!b.UserData?.Played) || (b.UserData?.PlaybackPositionTicks ?? 0) - (a.UserData?.PlaybackPositionTicks ?? 0) || a.Id.localeCompare(b.Id));
+  }
+  private currentTagLabel(): string { const tag = this.profile?.tags.find((t: ActorTag) => t.key === this.tag); return tag ? this.tagName(tag) : text('all_tags'); }
+  private tagName(tag: ActorTag): string { return tag.theme ? text('theme_' + tag.title) : tag.title; }
+  private role(item: MediaItem): string {
+    const roles = (item.People ?? []).filter((p: Person) => p.Id === this.person.Id && p.Role).map((p: Person) => p.Role ?? '');
+    return Array.from(new Set(roles)).join('、');
+  }
+  @Builder
+  credits() {
+    List({ space: 14 }) {
+      ForEach(this.shown(), (item: MediaItem) => {
+        ListItem() {
+          Column({ space: 8 }) {
+            MediaCard({ item: item, wide: true, onSelect: (selected: MediaItem) => router.pushUrl({ url: 'pages/Detail', params: { item: selected } }) })
+            if (this.role(item)) { Text($r('app.string.credit_role', this.role(item))).fontColor($r('app.color.brand_muted')).fontSize(13) }
+          }
+        }
+      }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
+    }.layoutWeight(1).width('100%')
+  }
+  build() {
+    Column() {
+      if (this.locked) { PinGate() }
+      else {
+    Column({ space: 10 }) {
+      Row({ space: 8 }) {
+        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
+        Text(this.person.Name).fontColor('#F2F3FA').fontSize(22).layoutWeight(1)
+        Button(this.followed ? $r('app.string.unfollow') : $r('app.string.follow')).backgroundColor($r('app.color.brand_action')).onClick(() => this.follow())
+      }
+      if (this.biographyLoading) { Text($r('app.string.biography_loading')).fontColor($r('app.color.brand_muted')) }
+      if (this.overview) { Scroll() { Text(this.overview).fontColor('#F2F3FA').fontSize(14) }.height(100).width('100%') }
+      Row() {
+        Checkbox().select(this.unwatched).onChange((v: boolean) => { this.unwatched = v; })
+        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA')
+        Select([{ value: text('all_tags') }, ...(this.profile?.tags ?? []).map((t: ActorTag): SelectOption => ({ value: this.tagName(t) }))])
+          .value(this.currentTagLabel()).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface'))
+          .selected((this.profile?.tags ?? []).findIndex((t: ActorTag) => t.key === this.tag) + 1).onSelect((i: number) => { this.tag = i ? this.profile!.tags[i - 1].key : ''; })
+      }
+      if (this.tag) {
+        Text($r('app.string.tag_evidence', this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.length ?? 0)).fontColor($r('app.color.brand_muted')).fontSize(12)
+      }
+      Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
+      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      if (this.busy) { LoadingProgress().width(24).height(24) }
+      this.credits()
+    }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+      }
+    }.width('100%').height('100%')
+  }
+}

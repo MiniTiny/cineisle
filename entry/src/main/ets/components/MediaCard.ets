@@ -1,0 +1,78 @@
+import { MediaItem } from '../model/Models';
+import { AppService } from '../service/AppService';
+import { playbackPercent, posterTarget } from '../utils/MediaPresentation';
+
+@Component
+export struct MediaCard {
+  @Prop item: MediaItem;
+  @Prop wide: boolean = false;
+  onSelect: (item: MediaItem) => void = () => {};
+  onPlay: ((item: MediaItem) => void) | undefined = undefined;
+  onReason: ((item: MediaItem) => void) | undefined = undefined;
+
+  private imageUrl(): string {
+    const target = posterTarget(this.item, this.wide);
+    return AppService.client?.image(target.id, target.tag, target.backdrop) ?? '';
+  }
+
+  private typeLabel(): Resource {
+    switch (this.item.Type) {
+      case 'Movie': return $r('app.string.media_movie');
+      case 'Series': return $r('app.string.media_series');
+      case 'Episode': return $r('app.string.media_episode');
+      case 'Season': return $r('app.string.media_season');
+      default: return $r('app.string.media_video');
+    }
+  }
+
+  build() {
+    Column({ space: 4 }) {
+      Stack() {
+        Image(this.imageUrl()).alt($r('app.media.poster_placeholder'))
+          .width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3).objectFit(ImageFit.Cover)
+          .borderRadius(8).backgroundColor($r('app.color.brand_surface')).accessibilityText(this.item.Name)
+        if (this.item.UserData?.Played) {
+          Row() {
+            Blank()
+            Image($r('app.media.nav_check_active')).width(22).height(22).padding(3).backgroundColor($r('app.color.brand_selected')).borderRadius(11)
+              .accessibilityText($r('app.string.watched_indicator'))
+          }.width('100%').padding(8).position({ x: 0, y: 0 })
+        }
+        if (this.wide && playbackPercent(this.item) > 0) {
+          Column() {
+            Blank()
+            Progress({ value: playbackPercent(this.item), total: 100, type: ProgressType.Linear })
+              .color($r('app.color.brand_accent')).backgroundColor($r('app.color.brand_selected')).height(4).width('92%').margin({ bottom: 8 })
+          }.width('100%').height('100%').position({ x: 0, y: 0 }).hitTestBehavior(HitTestMode.None)
+        }
+        if (this.wide && this.onPlay) {
+          Column() {
+            Blank()
+            Row() {
+              Blank()
+              Button({ type: ButtonType.Circle }) {
+                Image($r('app.media.detail_play')).width(22).height(22)
+              }.width(40).height(40).padding(8).backgroundColor($r('app.color.brand_action'))
+                .accessibilityText($r('app.string.play')).onClick(() => this.onPlay?.(this.item))
+            }.width('100%').padding(12)
+          }.width('100%').height('100%').position({ x: 0, y: 0 })
+        }
+      }.width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3)
+      Text(this.wide ? this.item.SeriesName ?? this.item.Name : this.item.Name)
+        .fontSize(14).fontColor('#F2F3FA').maxLines(this.wide ? 1 : 2).height(this.wide ? 20 : 40)
+        .textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      if (this.wide && this.item.Type === 'Episode') {
+        Text(this.item.ParentIndexNumber !== undefined && this.item.IndexNumber !== undefined ?
+          $r('app.string.episode_label', this.item.ParentIndexNumber, this.item.IndexNumber, this.item.Name) : this.item.Name)
+          .fontSize(12).fontColor($r('app.color.brand_muted')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      } else if (!this.wide) {
+        Row() {
+          Text(this.item.ProductionYear?.toString() ?? this.typeLabel()).fontSize(12).fontColor($r('app.color.brand_muted'))
+          Blank()
+          if (this.item.CommunityRating) { Text(this.item.CommunityRating.toFixed(1)).fontSize(12).fontColor('#EFC86A') }
+        }.width('100%')
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).onClick(() => this.onSelect(this.item))
+      .gesture(LongPressGesture().onAction(() => this.onReason?.(this.item)))
+  }
+}
