@@ -1207,6 +1207,34 @@
     {
       "name": "menu_data",
       "value": "资料与同步"
+    },
+    {
+      "name": "server_address_label",
+      "value": "服务器地址"
+    },
+    {
+      "name": "credentials_group",
+      "value": "本机凭据"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "仅管理本机保存的登录凭据；缓存和下载文件保留。"
+    },
+    {
+      "name": "offline_group",
+      "value": "浏览与离线"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "收藏筛选"
+    },
+    {
+      "name": "download_status",
+      "value": "下载状态"
+    },
+    {
+      "name": "selected_count",
+      "value": "已选择 %d 项"
     }
   ]
 }

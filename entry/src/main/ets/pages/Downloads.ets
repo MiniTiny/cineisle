@@ -1,3 +1,6 @@
+import { BrandHeader } from '../components/BrandHeader';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandButton } from '../components/BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
@@ -49,24 +52,22 @@ struct Downloads {
   }
   @Builder
   private filtersPanel() {
-      Column({ space: 8 }) {
-      Flex({ wrap: FlexWrap.Wrap }) {
-        Button($r('app.string.download_active')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'active' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'active'; })
-        Button($r('app.string.download_completed')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'complete' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'complete'; })
-        Button($r('app.string.download_failed')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'failed' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'failed'; })
-      }
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
-      }.width('100%')
+      Column({ space: 12 }) {
+        BrandHeading({ label: $r('app.string.download_status'), icon: $r('app.media.detail_download') })
+        Flex({ wrap: FlexWrap.Wrap }) {
+          Column() { BrandButton({ label: $r('app.string.download_active'), icon: $r('app.media.detail_download'), compact: true, primary: this.category === 'active', onSelect: () => { this.category = 'active'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '31%').margin({ right: '2%', bottom: 8 })
+          Column() { BrandButton({ label: $r('app.string.download_completed'), icon: $r('app.media.nav_check_active'), compact: true, primary: this.category === 'complete', onSelect: () => { this.category = 'complete'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '31%').margin({ right: '2%', bottom: 8 })
+          Column() { BrandButton({ label: $r('app.string.download_failed'), icon: $r('app.media.menu_reset'), compact: true, primary: this.category === 'failed', onSelect: () => { this.category = 'failed'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '32%').margin({ bottom: 8 })
+        }.width('100%')
+        if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
+      }.padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).width('100%')
   }
   build() {
     Column() {
       if (this.locked) { PinGate() }
       else {
     Column({ space: 12 }) {
-      Row({ space: 8 }) {
-        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text($r('app.string.downloads')).fontSize(22).fontColor('#F2F3FA').layoutWeight(1)
-      }
+      BrandHeader({ label: $r('app.string.downloads'), onBack: () => router.back() })
       if (UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
         Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
@@ -80,22 +81,31 @@ struct Downloads {
               Text(record.state === 'queued' ? $r('app.string.download_queued') : record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
                 $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor($r('app.color.brand_muted')).width('100%')
               if (record.state === 'downloading') { Progress({ value: record.progress * 100, total: 100 }).color($r('app.color.brand_accent')).width('100%') }
-              Flex({ wrap: FlexWrap.Wrap }) {
-                if (record.state === 'complete') {
-                  Button($r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).onClick(async () => {
-                    try { await router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item, '', true) }); } catch (e) { this.message = errorText(e as Error); }
-                  })
-                } else if (!['downloading', 'queued'].includes(record.state)) {
-                  Button($r('app.string.retry')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.busy).backgroundColor($r('app.color.brand_action')).onClick(() => this.retry(record))
-                }
-                Button(['downloading', 'queued'].includes(record.state) ? $r('app.string.stop_download') : $r('app.string.remove_download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
-                  .backgroundColor($r('app.color.brand_surface')).onClick(() => this.remove(record))
-              }
-            }.padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(14).width('100%')
+                Column({ space: 8 }) {
+                  if (record.state === 'complete') {
+                    BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: !this.busy, onSelect: async () => {
+                      try { await router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item, '', true) }); } catch (e) { this.message = errorText(e as Error); }
+                    } })
+                  } else if (!['downloading', 'queued'].includes(record.state)) {
+                    BrandButton({ label: $r('app.string.retry'), icon: $r('app.media.menu_sync'), primary: true, available: !this.busy, onSelect: () => this.retry(record) })
+                  }
+                  if (['downloading', 'queued'].includes(record.state)) {
+                    BrandButton({ label: $r('app.string.stop_download'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => this.remove(record) })
+                  } else {
+                    BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.remove(record) })
+                  }
+                }.width('100%')
+            }.padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20).width('100%')
           }
         }, (r: DownloadRecord) => `${r.id}:${r.state}:${r.progress}:${r.failure}`)
+        if (!this.visibleRecords().length) { ListItem() {
+          Column({ space: 12 }) {
+            Image($r('app.media.menu_offline')).width(40).height(40).accessibilityLevel('no')
+            Text($r('app.string.no_downloads')).fontColor($r('app.color.brand_muted')).textAlign(TextAlign.Center).width('100%')
+          }.width('100%').padding(24).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+        } }
       }.layoutWeight(1).width('100%')
-      if (!this.visibleRecords().length) { Text($r('app.string.no_downloads')).fontColor($r('app.color.brand_muted')) }
+
     }.padding(16).backgroundColor($r('app.color.brand_background')).width('100%').height('100%')
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })

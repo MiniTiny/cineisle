@@ -1,3 +1,6 @@
+import { BrandHeader } from '../components/BrandHeader';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandButton } from '../components/BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import common from '@ohos.app.ability.common';
@@ -209,6 +212,14 @@ struct Index {
     this.load();
   }
 
+  onBackPress(): boolean {
+    if (!this.locked && this.signedIn && this.tab === 2) {
+      this.switchTab(this.mode ? 2 : 4);
+      return true;
+    }
+    return false;
+  }
+
   private open(item: MediaItem): void { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
 
   private async sync(): Promise<void> {
@@ -286,14 +297,27 @@ Column({ space: 8 }) {
     List({ space: 14 }) {
       ForEach(this.libraries, (library: MediaItem) => {
         ListItem() {
-          Row({ space: 16 }) {
-            Image(AppService.client?.image(library.Id) ?? '').width(64).height(64).borderRadius(10).backgroundColor($r('app.color.brand_surface'))
-            Text(library.Name).fontSize(18).fontColor('#F2F3FA').layoutWeight(1)
-            Text('›').fontSize(28).fontColor($r('app.color.brand_accent'))
-          }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(16)
-            .onClick(() => { this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
+          Button({ type: ButtonType.Normal }) {
+            Row({ space: 14 }) {
+              Row() {
+                Image(library.CollectionType === 'movies' ? $r('app.media.detail_film') : $r('app.media.nav_library_active')).width(28).height(28).accessibilityLevel('no')
+              }.width(52).height(52).flexShrink(0).borderRadius(16).justifyContent(FlexAlign.Center).backgroundColor($r('app.color.brand_selected'))
+              Column({ space: 4 }) {
+                Text(library.Name).fontSize(18).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').width('100%')
+                Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : $r('app.string.tab_library')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+              }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+              Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no')
+            }.width('100%').padding({ left: 16, right: 16, top: this.landscape && this.viewportHeight < 440 ? 8 : 16, bottom: this.landscape && this.viewportHeight < 440 ? 8 : 16 }).hitTestBehavior(HitTestMode.None)
+          }.padding(0).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+            .accessibilityText(library.Name).onClick(() => { this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
         }
-      }, (library: MediaItem) => library.Id)
+      }, (library: MediaItem) => `${library.Id}|${library.Name}|${library.CollectionType}`)
+      if (!this.libraries.length && !this.busy) { ListItem() {
+        Column({ space: 12 }) {
+          BrandHeading({ label: $r('app.string.tab_library'), icon: $r('app.media.nav_library_active') })
+          Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%')
+        }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+      } }
     }.layoutWeight(1).width('100%')
   }
 
@@ -537,6 +561,12 @@ Column({ space: 8 }) {
     Column() {
       if (!this.signedIn) { this.loginPanel() }
       else {
+        if (!this.mode) {
+          if (this.tab === 2) {
+            Column() {
+              BrandHeader({ label: $r('app.string.tab_library'), searchable: true, onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(4) })
+            }.width('100%').padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          } else {
         Row({ space: 8 }) {
           Text(this.tabTitle()).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).fontSize(22).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').layoutWeight(1)
           if (this.tab !== 4 && this.mode !== 'downloads') {
@@ -548,9 +578,11 @@ Column({ space: 8 }) {
           Button($r('app.string.refresh'), { type: ButtonType.Normal }).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(13).fontColor($r('app.color.brand_accent'))
             .backgroundColor(Color.Transparent).height(44).padding({ left: 8, right: 8 }).enabled(!this.busy).onClick(() => this.load())
         }.height(UiLayout.headerHeight(this.fontScale)).width('100%').padding({ left: 20, right: 12 })
+          }
+        }
         if (this.tab !== 4 && this.mode !== 'downloads' && this.searchExpanded) {
           TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor('#F2F3FA')
-            .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).height(44).margin({ left: 16, right: 16, bottom: 12 })
+            .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).margin({ left: 16, right: 16, bottom: 12 })
             .enterKeyType(EnterKeyType.Search).onChange((value: string) => { this.search = value; })
             .onSubmit(() => this.performSearch())
         }
@@ -560,12 +592,9 @@ Column({ space: 8 }) {
           }, (value: string) => value) } }.scrollable(ScrollDirection.Horizontal).width('100%').height(UiLayout.buttonHeight(this.fontScale))
         }
         if (this.mode) {
-          Row() {
-            Button($r('app.string.back'), { type: ButtonType.Normal }).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(13).fontColor($r('app.color.brand_accent'))
-              .backgroundColor(Color.Transparent).onClick(() => this.switchTab(this.tab))
-            Text(this.sectionTitle || (this.mode === 'favorites' ? $r('app.string.favorites') : this.mode === 'downloads' ? $r('app.string.downloads') : $r('app.string.search_results')))
-              .fontColor('#F2F3FA').fontSize(18).layoutWeight(1).maxLines(1)
-          }.width('100%').padding({ left: 8, right: 16 })
+          Column() {
+            BrandHeader({ label: this.sectionTitle || (this.mode === 'favorites' ? $r('app.string.favorites') : this.mode === 'downloads' ? $r('app.string.downloads') : $r('app.string.search_results')), searchable: this.mode !== 'downloads', onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(this.tab) })
+          }.width('100%').padding({ left: 16, right: 16, bottom: 8 })
         }
         if (this.busy) { LoadingProgress().width(26).height(26).color($r('app.color.brand_accent')) }
         if (this.message) { Text(this.message).fontSize(12).fontColor('#FF9F9F').width('100%').padding({ left: 16, right: 16, bottom: 8 }) }
@@ -584,7 +613,7 @@ Column({ space: 8 }) {
               if (this.items.length === 0 && !this.busy) { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).padding(24) }
               this.mediaGrid()
               if (this.mode && this.items.length < this.total) {
-                Button($r('app.string.load_more')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.busy).backgroundColor($r('app.color.brand_surface')).onClick(() => this.load(true))
+                BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) })
               }
             }
           }.width('100%').layoutWeight(1).padding({ left: 16, right: 16, top: 8, bottom: 8 })

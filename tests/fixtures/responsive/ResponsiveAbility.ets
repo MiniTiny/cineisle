@@ -1,7 +1,9 @@
 // QA-only native viewport harness. Copied into an isolated bundle, never the product HAP.
+import { DownloadRecord } from '../model/Models';
 import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
 import { UiLayout } from '../utils/UiLayout';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import Want from '@ohos.app.ability.Want';
@@ -28,6 +30,7 @@ export default class ResponsiveAbility extends UIAbility {
   private async apply(): Promise<void> {
     if (!this.stage) { return; }
     try {
+      this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
       this.context.getApplicationContext().setFontSizeScale(this.font / 100);
       AppStorage.setOrCreate('cineIsleFontScale', UiLayout.scale(this.font / 100));
       AppStorage.setOrCreate('cineIsleLandscape', this.landscape);
@@ -61,6 +64,18 @@ export default class ResponsiveAbility extends UIAbility {
         await router.pushUrl({ url: 'pages/Player', params: await AppService.detailPlayback(item) });
       } else if (this.target === 'Actor') {
         await router.pushUrl({ url: 'pages/Actor', params: { personId: '00000000000000000000000000000032', personName: '潮汐 · 演员测试' } });
+      } else if (this.target === 'DownloadStates' && AppService.client) {
+        // Synthetic in-memory rows for geometry only; never create tasks or play these files.
+        const item = await AppService.client.detail('00000000000000000000000000000001');
+        const records: DownloadRecord[] = [];
+        for (const state of ['queued', 'downloading', 'complete', 'failed']) {
+          const record = new DownloadRecord(); record.id = 'visual-' + state;
+          record.item = { Id: record.id, Name: '光影之岛 · 下载状态布局', Type: item.Type };
+          record.state = state; record.progress = state === 'complete' ? 1 : 0.4;
+          record.failure = state === 'failed' ? '隔离夹具：下载失败示例' : ''; records.push(record);
+        }
+        AppService.downloads = records;
+        await router.pushUrl({ url: 'pages/Downloads' });
       } else if (['Favorites', 'Settings', 'Accounts', 'Downloads'].includes(this.target)) {
         await router.pushUrl({ url: 'pages/' + this.target });
       } else if (this.target === 'Quick') {

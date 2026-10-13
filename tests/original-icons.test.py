@@ -47,7 +47,7 @@ def contrast(first, second):
 class OriginalIconsTest(unittest.TestCase):
     def test_complete_family_matches_current_resource_files(self):
         expected = set(icons.outputs())
-        self.assertEqual(len(expected), 28)
+        self.assertEqual(len(expected), 38)
         actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_'))}
         self.assertEqual(actual, expected)
 
@@ -155,7 +155,7 @@ class OriginalIconsTest(unittest.TestCase):
     def test_management_symbols_are_distinct_and_bound_to_product_actions(self):
         shapes = [geometry((MEDIA / f'menu_{name}.svg').read_text()) for name in icons.MENU]
         self.assertEqual(len(set(shapes)), len(icons.MENU))
-        source = (ROOT / 'entry/src/main/ets/pages/Index.ets').read_text()
+        source = '\n'.join(p.read_text() for p in (ROOT / 'entry/src/main/ets').rglob('*.ets'))
         for name in icons.MENU:
             self.assertIn(f"app.media.menu_{name}", source)
 

@@ -1,5 +1,8 @@
 import { UiLayout } from '../utils/UiLayout';
 import router from '@ohos.router';
+import { BrandButton } from '../components/BrandButton';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandHeader } from '../components/BrandHeader';
 import { PinGate } from '../components/PinGate';
 import { AppService } from '../service/AppService';
 import { SessionStore } from '../service/SessionStore';
@@ -113,77 +116,130 @@ struct Accounts {
     } } });
   }
   @Builder
-  loginForm() {
-    TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !this.quickCode).onChange((v: string) => { this.server = v; })
-    if (this.quickCode) {
-      Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor($r('app.color.brand_accent')).letterSpacing(6 / this.fontScale)
-      Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor($r('app.color.brand_muted'))
-      Button($r('app.string.quick_connect_check')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy).onClick(() => this.checkQuick())
-      Button($r('app.string.cancel')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.cancelQuick(); this.message = ''; this.top(); })
-    } else {
-      TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onChange((v: string) => { this.username = v; })
-      TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onChange((v: string) => { this.password = v; })
-      Button($r('app.string.login')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy && !!this.server.trim() && !!this.username.trim()).onClick(() => this.login())
-      Button($r('app.string.quick_connect_login')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !!this.server.trim()).onClick(() => this.startQuick())
-      Button($r('app.string.save_server_only')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !!this.server.trim()).onClick(() => this.saveServer())
-      Text($r('app.string.https_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
-    }
+  private fieldCaption(label: Resource) {
+    Text(label).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
   }
+
+  @Builder
+  loginForm() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.add_account_server'), icon: $r('app.media.menu_add') })
+      this.fieldCaption($r('app.string.server_address_label'))
+      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => { this.server = v; })
+      if (this.quickCode) {
+        BrandHeading({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick') })
+        Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor($r('app.color.brand_accent')).letterSpacing(6 / this.fontScale)
+        Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        BrandButton({ label: $r('app.string.quick_connect_check'), icon: $r('app.media.menu_sync'), primary: true, available: !this.busy, onSelect: () => this.checkQuick() })
+        BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.cancelQuick(); this.message = ''; this.top(); } })
+      } else {
+        this.fieldCaption($r('app.string.username'))
+        TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.username = v; })
+        this.fieldCaption($r('app.string.password'))
+        TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.password = v; })
+        BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
+        BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
+        BrandButton({ label: $r('app.string.save_server_only'), icon: $r('app.media.menu_server'), available: !this.busy && !!this.server.trim(), onSelect: () => this.saveServer() })
+        Text($r('app.string.https_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      }
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+  }
+
   @Builder
   serverForm() {
-    Text($r('app.string.server_addresses')).fontColor('#F2F3FA').fontSize(20)
-    TextInput({ text: this.serverName, placeholder: $r('app.string.server_display_name') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onChange((v: string) => { this.serverName = v; })
-    TextArea({ text: this.addressText, placeholder: $r('app.string.addresses_hint') }).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).height(160).enabled(!this.busy).onChange((v: string) => { this.addressText = v; })
-    Text($r('app.string.addresses_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
-    Button($r('app.string.save')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy).onClick(() => this.saveServer())
-    Button($r('app.string.remove_saved_server')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).fontColor($r('app.color.brand_danger')).enabled(!this.busy).onClick(() => this.removeServer())
-    Button($r('app.string.cancel')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.endEditing())
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.server_addresses'), icon: $r('app.media.menu_server') })
+      this.fieldCaption($r('app.string.server_display_name'))
+      TextInput({ text: this.serverName, placeholder: $r('app.string.server_display_name') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.serverName = v; })
+      this.fieldCaption($r('app.string.server_address_label'))
+      TextArea({ text: this.addressText, placeholder: $r('app.string.addresses_hint') }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).height(Math.min(160 * this.fontScale, Math.max(80, this.viewportHeight * 0.4))).enabled(!this.busy).onChange((v: string) => { this.addressText = v; })
+      Text($r('app.string.addresses_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      BrandButton({ label: $r('app.string.save'), icon: $r('app.media.menu_save'), primary: true, available: !this.busy, onSelect: () => this.saveServer() })
+      BrandButton({ label: $r('app.string.remove_saved_server'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.removeServer() })
+      BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => this.endEditing() })
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
   }
+
+  @Builder
+  private accountCards() {
+    BrandHeading({ label: $r('app.string.saved_accounts'), icon: $r('app.media.nav_user_active') })
+    if (!this.accounts.length) { Text($r('app.string.no_saved_accounts')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20) }
+    ForEach(this.accounts, (account: AccountSummary) => {
+      Column({ space: 12 }) {
+        Row({ space: 12 }) {
+          Row() { Image($r('app.media.nav_user_active')).width(22).height(22).accessibilityLevel('no') }
+            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor($r('app.color.brand_selected')).borderRadius(12)
+          Column({ space: 4 }) {
+            Text(account.userName || $r('app.string.account_unnamed')).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium).width('100%')
+            Text(account.serverName || account.address).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+          }.layoutWeight(1)
+        }.width('100%')
+        if (account.active) {
+          Row({ space: 6 }) { Image($r('app.media.nav_check_active')).width(16).height(16).accessibilityLevel('no'); Text($r('app.string.active_account')).fontColor($r('app.color.brand_accent')).fontSize(12) }.width('100%')
+        }
+        Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+          Column() { BrandButton({ label: $r('app.string.switch_account'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy && !account.active, onSelect: () => this.select(account) }) }
+            .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+          Column() { BrandButton({ label: $r('app.string.remove_saved_account'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.remove(account) }) }
+            .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+        }.width('100%')
+      }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+    }, (account: AccountSummary) => JSON.stringify(account))
+  }
+
+  @Builder
+  private serverCards() {
+    BrandHeading({ label: $r('app.string.saved_servers'), icon: $r('app.media.menu_server') })
+    ForEach(this.servers, (server: ServerProfile) => {
+      Column({ space: 12 }) {
+        Row({ space: 12 }) {
+          Row() { Image($r('app.media.menu_server')).width(22).height(22).accessibilityLevel('no') }
+            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor($r('app.color.brand_selected')).borderRadius(12)
+          Text(server.name || server.preferred).fontColor('#F2F3FA').fontSize(16).fontWeight(FontWeight.Medium).layoutWeight(1)
+        }.width('100%')
+        Text(server.addresses.join('\n')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+          Column() { BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy, onSelect: () => { this.server = server.preferred; this.username = ''; this.adding = true; this.top(); } }) }
+            .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+          Column() { BrandButton({ label: $r('app.string.manage_addresses'), icon: $r('app.media.menu_settings'), available: !this.busy, onSelect: () => this.editServer(server) }) }
+            .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+        }.width('100%')
+      }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+    }, (server: ServerProfile) => JSON.stringify(server))
+  }
+
   build() {
     Column() {
       if (this.locked) { PinGate() }
       else {
         Column({ space: 14 }) {
-          Row({ space: 10 }) {
-            Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-            Text($r('app.string.accounts_servers')).fontColor('#F2F3FA').fontSize(22).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
-          }.width('100%')
-          if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
+          BrandHeader({ label: $r('app.string.accounts_servers'), onBack: () => router.back() })
+          if (this.message) {
+            Scroll() { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%').padding(12) }
+              .width('100%').height(Math.min(64 * this.fontScale, this.viewportHeight * 0.2))
+              .backgroundColor($r('app.color.brand_surface_raised')).borderRadius(12).align(Alignment.TopStart)
+          }
           Scroll(this.scroller) {
-            Column({ space: 14 }) {
+            Column({ space: 18 }) {
               if (this.editingId) { this.serverForm() }
               else {
-                if (this.adding) { this.loginForm() }
-                Button(this.adding ? $r('app.string.saved_accounts') : $r('app.string.add_account_server')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.toggleAdding())
-                if (!this.adding) {
-                  Text($r('app.string.saved_accounts')).fontColor('#F2F3FA').fontSize(18).width('100%')
-                  if (!this.accounts.length) { Text($r('app.string.no_saved_accounts')).fontColor($r('app.color.brand_muted')) }
-                  ForEach(this.accounts, (account: AccountSummary) => {
-                    Column({ space: 8 }) {
-                      Text(account.userName || $r('app.string.account_unnamed')).fontColor('#F2F3FA').fontSize(18).width('100%')
-                      Text(account.serverName || account.address).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-                      if (account.active) { Text($r('app.string.active_account')).fontColor($r('app.color.brand_accent')).fontSize(12) }
-                      Flex({ wrap: FlexWrap.Wrap }) {
-                        Button($r('app.string.switch_account')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy && !account.active).onClick(() => this.select(account))
-                        Button($r('app.string.remove_saved_account')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.remove(account))
-                      }
-                    }.width('100%').padding(14).backgroundColor($r('app.color.brand_surface')).borderRadius(12)
-                  }, (account: AccountSummary) => JSON.stringify(account))
-                  Text($r('app.string.saved_servers')).fontColor('#F2F3FA').fontSize(18).width('100%')
-                  ForEach(this.servers, (server: ServerProfile) => {
-                    Column({ space: 8 }) {
-                      Text(server.name || server.preferred).fontColor('#F2F3FA').fontSize(16).width('100%')
-                      Text(server.addresses.join('\n')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-                      Flex({ wrap: FlexWrap.Wrap }) {
-                        Button($r('app.string.login')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy).onClick(() => { this.server = server.preferred; this.username = ''; this.adding = true; this.top(); })
-                        Button($r('app.string.manage_addresses')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.editServer(server))
-                      }
-                    }.padding(14).width('100%').backgroundColor($r('app.color.brand_surface')).borderRadius(12)
-                  }, (server: ServerProfile) => JSON.stringify(server))
+                if (this.adding) {
+                  this.loginForm()
+                  BrandButton({ label: $r('app.string.saved_accounts'), icon: $r('app.media.menu_accounts'), available: !this.busy, onSelect: () => this.toggleAdding() })
+                } else {
+                  BrandButton({ label: $r('app.string.add_account_server'), icon: $r('app.media.menu_add'), primary: true, available: !this.busy, onSelect: () => this.toggleAdding() })
+                  this.accountCards()
+                  this.serverCards()
                 }
               }
-              if (!this.quickCode) { Button($r('app.string.reset_saved_accounts')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).fontColor($r('app.color.brand_danger')).enabled(!this.busy).onClick(() => this.resetAccounts()) }
-            }.width('100%').alignItems(HorizontalAlign.Start)
+              if (!this.quickCode) {
+                Column({ space: 12 }) {
+                  BrandHeading({ label: $r('app.string.credentials_group'), icon: $r('app.media.menu_lock') })
+                  Text($r('app.string.credentials_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+                  BrandButton({ label: $r('app.string.reset_saved_accounts'), icon: $r('app.media.menu_reset'), destructive: true, available: !this.busy, onSelect: () => this.resetAccounts() })
+                }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+              }
+            }.width('100%').alignItems(HorizontalAlign.Start).padding({ bottom: 12 })
           }.width('100%').layoutWeight(1).align(Alignment.TopStart)
         }.padding(20).height('100%').width('100%').backgroundColor($r('app.color.brand_background'))
       }
