@@ -1,0 +1,43 @@
+// Actual ArkUI compiler + construction tree: verifies icon/label share the hit target.
+// Native geometry is separately checked over captured layouts, not inferred here.
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const root=path.resolve(__dirname,'..'),loader='/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/ets/build-tools/ets-loader';
+const ts=require(loader+'/node_modules/typescript'),ui=require(loader+'/lib/process_ui_syntax'),main=require(loader+'/main'),utils=require(loader+'/lib/utils'),validation=require(loader+'/lib/validate_ui_syntax'),pre=require(loader+'/lib/pre_define');
+const options={...JSON.parse(fs.readFileSync(loader+'/tsconfig.json')).compilerOptions,target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.CommonJS};
+const file=path.join(root,'entry/src/main/ets/pages/Index.ets'),src=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.ETS,options);
+const page=src.statements.find(n=>ts.isStructDeclaration(n)&&n.name.text==='Index'),method=page.members.find(n=>n.name?.getText(src)==='morePanel').getText(src);
+function compile(builder,detail=false){
+ process.env.compiler=pre.BUILD_ON;main.projectConfig.projectPath=root;main.projectConfig.compileMode='jsbundle';main.partialUpdateConfig.partialUpdateMode=true;
+ for(const type of ['string','color'])main.resources.app[type]=Object.fromEntries(JSON.parse(fs.readFileSync(`entry/src/main/resources/base/element/${type}.json`))[type].map((v,i)=>[v.name,i+1]));
+ main.resources.app.media={nav_library_active:100,nav_library_muted:101};utils.storedFileInfo.setCurrentArkTsFile();validation.resetValidateUiSyntax();ui.resetLog();
+ const code=`@Component struct LayoutProbe { @State fontScale: number = 1; @State viewportWidth: number = 360; @State viewportHeight: number = 800; @State tab: number = 4; @State syncing: boolean = false; @State pendingCount: number = 0; @State lastSyncedAt: number = 0; @State speed: number = 1; @State syncMessage: string = ''; ${builder}\n build(){this.morePanel()} }`;
+ const actualCode=detail ? fs.readFileSync('entry/src/main/ets/components/DetailAction.ets','utf8').replace('export struct DetailAction','struct DetailAction') : code;
+ const input=ts.createSourceFile(root+'/LayoutProbe.ets',actualCode,ts.ScriptTarget.Latest,true,ts.ScriptKind.ETS,options);assert.equal(input.parseDiagnostics.length,0);
+ const output=ts.transform(input,[ui.processUISyntax(null,true)],options);assert.deepEqual(ui.transformLog.errors.filter(e=>e.type==='ERROR'),[]);
+ const printed=ts.createPrinter().printFile(output.transformed[0]);output.dispose();return ts.transpileModule(printed,{compilerOptions:options}).outputText;
+}
+function render(builder,detail=false,scale=1){
+ const roots=[],stack=[],last={};
+ const component=name=>new Proxy({}, {get:(_,action)=>(...args)=>{
+  if(['create','createWithLabel','createWithChild'].includes(action)){const normalized=args.map(a=>a&&typeof a==='object'&&'id' in a ? 'app.string.'+Object.keys(main.resources.app.string).find(k=>main.resources.app.string[k]===a.id) : a);const n={type:name,args:normalized,attrs:{},children:[]};(stack.at(-1)?.children||roots).push(n);last[name]=n;if(!['Image','Blank'].includes(name))stack.push(n);}
+  else if(action==='pop'){if(stack.at(-1)?.type===name)stack.pop();}
+  else if(last[name])last[name].attrs[action]=args.map(a=>a&&typeof a==='object'&&'id' in a ? 'app.string.'+Object.keys(main.resources.app.string).find(k=>main.resources.app.string[k]===a.id) : a);
+ }});
+ class View{constructor(){}createStorageLink(){return new Observed(1)}finalizeConstruction(){}observeComponentCreation2(fn){fn(1,true)}ifElseBranchUpdateFunction(_,fn){fn()}forEachUpdateFunction(_,items,fn){items.forEach(fn)}updateDirtyElements(){}}
+ class Observed{constructor(v){this.v=v}get(){return this.v}set(v){this.v=v}purgeDependencyOnElmtId(){}aboutToBeDeleted(){}}
+ const c={exports:{}, require:id=>{assert.equal(id,'../utils/UiLayout');return require('./ui-layout-fixture.cjs')}, UiLayout:require('./ui-layout-fixture.cjs').UiLayout, ObservedObject:{GetRawObject:v=>v},ViewPU:View,ObservedPropertySimplePU:Observed,ObservedPropertyObjectPU:Observed,SynchedPropertyObjectOneWayPU:Observed,SynchedPropertySimpleOneWayPU:Observed,ViewStackProcessor:component('ViewStackProcessor'),...Object.fromEntries(['Scroll','Column','Row','Stack','Button','Text','Image','Blank','If','Flex','ForEach'].map(n=>[n,component(n)])),$r:id=>id,AppService:{client:{session:{userName:'fixture',server:''}}},ButtonType:{Capsule:1},Alignment:{Center:1,TopStart:2},TextAlign:{Center:1},HitTestMode:{None:1},FontWeight:{Medium:500},TextOverflow:{Ellipsis:1,Clip:2},FlexWrap:{Wrap:1}};
+ vm.createContext(c);vm.runInContext(compile(builder,detail)+'\nthis.Probe='+ (detail?'DetailAction':'LayoutProbe')+';',c);const view=new c.Probe(undefined,detail?{label:'app.string.server_delete',icon:'fixture-icon'}:{});view.fontScale=scale;view.initialRender();return roots;
+}
+function flat(nodes){return nodes.flatMap(n=>[n,...flat(n.children)])}
+function libraryButton(tree){return flat(tree).find(n=>n.type==='Button'&&(n.args.includes('app.string.tab_library')||flat(n.children).some(v=>v.type==='Text'&&v.args.includes('app.string.tab_library'))))}
+const tests=[],test=(n,f)=>tests.push([n,f]);
+test('library icon and label are descendants of the same full-width click target',()=>{const b=libraryButton(render(method));assert.ok(b);assert.equal(b.attrs.width[0],'100%');assert.equal(flat(b.children).filter(n=>n.type==='Image').length,1);assert.equal(flat(b.children).filter(n=>n.type==='Text').length,1);assert.ok(b.attrs.onClick);});
+test('decorative icon does not intercept button clicks or become a separate accessibility target',()=>{const b=libraryButton(render(method)),children=flat(b.children);assert.equal(children.find(n=>n.type==='Image').attrs.accessibilityLevel[0],'no');assert.equal(children.find(n=>n.type==='Row').attrs.hitTestBehavior[0],1);assert.equal(b.attrs.accessibilityText[0],'app.string.tab_library');});
+test('menu captions keep a common horizontal center with an optional leading icon',()=>{const b=libraryButton(render(method)),t=flat(b.children).find(n=>n.type==='Text');assert.equal(t.attrs.width[0],'100%');assert.equal(t.attrs.textAlign[0],1);assert.equal(t.attrs.padding[0].left,t.attrs.padding[0].right);});
+test('custom menu caption matches native button medium weight and 16fp size',()=>{const t=flat(libraryButton(render(method)).children).find(n=>n.type==='Text');assert.equal(t.attrs.fontWeight[0],500);assert.equal(t.attrs.fontSize[0],16)});
+test('wrapped detail action labels use the full button content width and remain centered',()=>{const nodes=flat(render('',true)),b=nodes.find(n=>n.type==='Button'),t=nodes.find(n=>n.type==='Text');assert.equal(t.attrs.width[0],'100%');assert.equal(t.attrs.textAlign[0],1);assert.equal(t.attrs.maxLines[0],2);assert.equal(t.attrs.height[0],28);assert.equal(flat(b.children).filter(n=>n.type==='Image').length,1)});
+test('all seven speed controls are retained in a full-width wrapping container',()=>{const source=fs.readFileSync('entry/src/main/ets/pages/Player.ets','utf8'),block=source.match(/Flex\(\{ wrap: FlexWrap.Wrap \}\) \{\s*ForEach\(\[0\.5,[\s\S]*?\n            \}\.width\('100%'\)/)?.[0];assert.ok(block);const nodes=flat(render('@Builder morePanel(){'+block+'}'));const f=nodes.find(n=>n.type==='Flex');assert.equal(f.attrs.width[0],'100%');assert.equal(f.args[0].wrap,1);assert.deepEqual(nodes.filter(n=>n.type==='Button').map(n=>n.args[0]),['0.5×','0.75×','1×','1.25×','1.5×','1.75×','2×'])});
+test('short menu scroll content remains anchored below its header',()=>{const s=flat(render(method)).find(n=>n.type==='Scroll');assert.equal(s.attrs.align[0],2)});
+test('negative control detects the previous orphan icon and narrowed button',()=>{const old="Row({ space:10 }) { Image($r('app.media.nav_library_muted')).width(24).height(24); Button($r('app.string.tab_library')).layoutWeight(1) }.width('100%')";const bad=method.replace(/Button\(\{ type: ButtonType.Capsule \}\)[\s\S]*?(?=\n      Button\(\$r\('app.string.settings'\))/,old);assert.notEqual(bad,method);const b=libraryButton(render(bad));assert.equal(flat(b.children).filter(n=>n.type==='Image').length,0);assert.equal(b.attrs.width,undefined);});
+module.exports={render,flat,libraryButton,method};
+if(require.main===module){for(const [name,fn]of tests){fn();console.log('PASS '+name)}console.log(`${tests.length} button layout regressions passed. SDK tree construction is not native geometry.`);}

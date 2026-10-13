@@ -38,7 +38,7 @@ function compile(method, call, home = false, detail = false) {
   validation.componentCollection.customComponents.add('MediaCard');
   validation.componentCollection.customComponents.add('HomeShelf');
   const state = detail ? "@State children: MediaItem[] = [];\n@State item: MediaItem = { Id: 'show', Type: 'Series' };" : home ? '@State homeSections: HomeSection[] = []; @State homeFailures: Object[] = []; @State usingCache: boolean = false;\n@State busy: boolean = false;' : '@State items: MediaItem[] = [];';
-  const text = `interface HomeSection { id: string; items: MediaItem[] }\ninterface MediaItem { Id: string; Type?: string; Name?: string; UserData?: Object }\n@Component\nstruct GridProbe {\n${state}\n${method}\nprivate open(item: MediaItem): void {}\nprivate openChild(item: MediaItem): void {}\nprivate openLibrary(section: HomeSection): void {}\nbuild() { ${call} }\n}`;
+  const text = `interface HomeSection { id: string; items: MediaItem[] }\ninterface MediaItem { Id: string; Type?: string; Name?: string; UserData?: Object }\n@Component\nstruct GridProbe {\n@State fontScale: number = 1; @State viewportWidth: number = 360; @State viewportHeight: number = 800;\n@State tab: number = 1; @State mode: string = ''; @State landscape: boolean = false; @State discover: boolean = true;\n${state}\n${method}\n${page.members.find(n=>n.name?.getText(source)==='recommendFilters').getText(source)}\nprivate open(item: MediaItem): void {}\nprivate openChild(item: MediaItem): void {}\nprivate openLibrary(section: HomeSection): void {}\nbuild() { ${call} }\n}`;
   const input = ts.createSourceFile(path.join(root, 'GridProbe.ets'), text, ts.ScriptTarget.Latest, true, ts.ScriptKind.ETS, options);
   assert.equal(input.parseDiagnostics.length, 0);
   const transformed = ts.transform(input, [ui.processUISyntax(null, true)], options);
@@ -55,7 +55,8 @@ const control = compile(builder.getText(source).replace('mediaGrid()', 'mediaGri
 const home = compile(page.members.find(node => node.name?.getText(source) === 'homePanel').getText(source), 'this.homePanel()', true);
 function fixture(code) {
   let active;
-  const created = [];
+  const created = [], spans = [];
+  const gridItem = new Proxy({}, {get:(_,name)=>(...args)=>{if(name==='create')spans.push({});else if(spans.length)spans.at(-1)[name]=args[0]}});
   class View {
     constructor() { this.callbacks = new Map(); this.dirty = new Set(); this.lists = new Map(); this.nextId = 1; this.branches = new Map(); }
     finalizeConstruction() {}
@@ -90,13 +91,13 @@ function fixture(code) {
   const listItem = new Proxy({}, { get: (target, name) => name === 'create' ? (render) => {
     if (typeof render === 'function' && !renderingListItem) { renderingListItem = true; try { render(active.id, true); } finally { renderingListItem = false; } }
   } : () => {} });
-  const context = { ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Row: component, Button: component, Checkbox: component, Grid: component, GridItem: component, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
-    Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
+  const context = { UiLayout: require('./ui-layout-fixture.cjs').UiLayout, ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Column:component, Row: component, Flex:component, Button: component, Checkbox: component, Grid: component, GridItem: gridItem, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
+    FlexWrap: { Wrap:1 }, TextOverflow:{Clip:2}, Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
     MediaCard: class { constructor(parent, params) { this.item = params.item; } },
     HomeShelf: class { constructor(parent, params) { this.section = params.section; } } };
   vm.createContext(context); vm.runInContext(code + '\nthis.Probe = GridProbe;', context);
   const view = new context.Probe(undefined, {}); view.initialRender();
-  return { view, created, visible: () => [...view.lists.values()].flat().map(key => key.split('|')[0]), update(items) { if ('children' in view) view.children = items; else if ('homeSections' in view) view.homeSections = items; else view.items = items; view.rerender(); } };
+  return { view, created, spans, visible: () => [...view.lists.values()].flat().map(key => key.split('|')[0]), update(items) { if ('children' in view) view.children = items; else if ('homeSections' in view) view.homeSections = items; else view.items = items; view.rerender(); } };
 }
 const movies = (count, prefix = 'movie') => Array.from({ length: count }, (_, n) => ({ Id: `${prefix}-${n}`, Name: `Movie ${n}`, Type: 'Movie' }));
 const tests = [
@@ -125,6 +126,12 @@ const tests = [
     assert.equal(f.created.length, 0); assert.equal(f.view.items.length, 23);
   }]
 ];
+tests.push(['short landscape recommendation controls occupy one complete grid row', () => {
+ const f=fixture(current);f.view.tab=0;f.view.landscape=true;f.view.viewportHeight=280;f.view.viewportWidth=760;f.view.fontScale=2;f.view.rerender();assert.ok(f.spans.some(s=>s.columnStart===0&&s.columnEnd===2));f.update(movies(2));assert.equal(f.created.length,2);
+}]);
+tests.push(['keyboard-like portrait height changes retain the separate filter mode', () => {
+ const f=fixture(current);f.view.tab=0;f.view.viewportHeight=280;f.view.landscape=false;f.view.rerender();assert.equal(f.spans.filter(s=>s.columnStart===0).length,0);
+}]);
 module.exports = { createGrid: () => fixture(current), createHome: () => fixture(home), createDetail: () => fixture(detail) };
 tests.push(['same movie identity republishes changed watched/metadata into a new card', () => { const f = fixture(current); const first = movies(1); f.update(first); f.update([{ ...first[0], Name: 'Changed', UserData: { Played: true } }]); assert.deepEqual(f.visible(), ['movie-0']); assert.equal(f.created.length, 2); }]);
 const sections = ids => ids.map(id => ({ id, kind: 'latest', name: id, libraryId: id, items: movies(1, id) }));

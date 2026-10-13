@@ -131,7 +131,9 @@ class OriginalIconsTest(unittest.TestCase):
         for file in (ROOT / 'entry/src/main/ets').rglob('*.ets'):
             referenced.update(re.findall(r"\$r\('app\.media\.([^']+)'\)", file.read_text()))
         self.assertTrue(referenced <= available, str(referenced - available))
-        for name in ['home', 'star', 'library', 'user', 'more']:
+        # Four bottom destinations; library is an unselected action inside More.
+        self.assertIn('nav_library_muted', referenced)
+        for name in ['home', 'star', 'user', 'more']:
             self.assertIn('nav_' + name + '_active', referenced)
             self.assertIn('nav_' + name + '_muted', referenced)
         self.assertTrue({Path(s).stem for s in icons.outputs() if s.startswith('detail_')} <= referenced)

@@ -10,9 +10,10 @@
 
 1. 在 DevEco Studio 打开本目录，使用本机 API 12 或兼容的 SDK。
 2. 配置工程的 Signing Configs / Automatically generate signature，选择登录的华为开发者账户及目标设备。仓库没有证书、私钥或签名密码。
-3. 选择 `entry`、`default`、`debug` 运行。首次启动输入 Jellyfin 完整地址（可包含 `/jellyfin` 反向代理路径）、用户名和密码。
+3. 选择 `entry`、`default`、`debug` 运行。首次启动输入 Jellyfin 完整地址（可包含 `/jellyfin` 反向代理路径），使用账户密码或 Quick Connect 登录。在已登录的 Jellyfin 客户端输入临时代码完成授权。
 4. 首页固定提供收藏与离线下载入口，四个底部入口为首页、推荐、演员、更多，媒体库在更多中进入。首页为继续观看、下一集及各媒体库最近添加横向分区，查看全部进入相应库；搜索通过工具栏图标展开。可浏览媒体库、推荐；在“更多 → 同步媒体库”建立媒体与演员缓存，再查看演员排行。
-5. 电影/剧集详情显示原名、年份范围、分级/评分、类型、导演/编剧和演员；电影还显示文件大小与音视频规格。详情支持媒体版本、继续/从头播放、预告片、收藏/已看、按权限下载与管理；剧集/季支持一键播放、下一集及横向季度入口。电影的服务器删除需服务端权限与页面确认，本机下载单独管理。“更多 → 离线下载”管理本机文件。播放页“播放选项”提供媒体源、设备音轨和文本字幕选择；单集支持自动连播及手动下一集。“播放选项”还可进入画中画、开启后台听音频；系统媒体会话提供锁屏控制，画中画会同步显示当前文本字幕。在“播放选项 → 音轨与字幕语言偏好”填写语言码（如 zh、en、zh-Hant），可保存并应用、默认关闭字幕或恢复默认；设置在重启/退出登录后保留。具体设备能力及显示效果需验收。
+5. 登录页或“更多 → 账户与服务器”可添加服务器/账户、切换已保存账户、编辑共享的多个地址，以及移除本机凭据。故障切换先验证同一服务器，未知写入不会自动重放；退出/移除保留缓存和下载文件。
+6. 电影/剧集详情显示原名、年份范围、分级/评分、类型、导演/编剧和演员；电影还显示文件大小与音视频规格。详情支持媒体版本、继续/从头播放、预告片、收藏/已看、按权限下载与管理；剧集/季支持一键播放、下一集及横向季度入口。电影的服务器删除需服务端权限与页面确认，本机下载单独管理。“更多 → 离线下载”管理本机文件。播放页“播放选项”提供媒体源、设备音轨和文本字幕选择；单集支持自动连播及手动下一集。“播放选项”还可进入画中画、开启后台听音频；系统媒体会话提供锁屏控制，画中画会同步显示当前文本字幕。在“播放选项 → 音轨与字幕语言偏好”填写语言码（如 zh、en、zh-Hant），可保存并应用、默认关闭字幕或恢复默认；设置在重启/退出登录后保留。具体设备能力及显示效果需验收。
 
 命令行构建：
 
@@ -28,6 +29,7 @@
 
 ```bash
 /Applications/DevEco-Studio.app/Contents/tools/node/bin/node tests/branding.test.cjs
+/Applications/DevEco-Studio.app/Contents/tools/node/bin/node tests/accounts-regression.test.cjs
 /Applications/DevEco-Studio.app/Contents/tools/node/bin/node tests/openapi-regression.test.cjs
 /Applications/DevEco-Studio.app/Contents/tools/node/bin/node tests/protocol.test.cjs
 /Applications/DevEco-Studio.app/Contents/tools/node/bin/node tests/feature-regression.test.cjs
@@ -50,7 +52,7 @@ python3 tests/brand-package.test.py
 
 仓库只维护可复用的开发文档。本地审计报告、日志、设备截图、探测结果和构建产物不提交；回归测试输出默认写入被忽略的 `.local/test-results/regression`。
 
-本轮补齐演员标签/关注与完整人物页、收藏全量分页/组合筛选/批量撤销、离线修改与进度队列、下载分类/重试/批量队列、PIN 应用锁及播放控制锁。当前固定功能基准为 `codex/actor-experience@225fba7c`，状态与验收差异见功能清单。
+当前支持多服务器/多账户持久化、地址故障切换和 Quick Connect 登录；同时已补齐演员标签/关注与完整人物页、收藏全量分页/组合筛选/批量撤销、离线修改与进度队列、下载分类/重试/批量队列、PIN 应用锁及播放控制锁。当前固定功能基准为 `codex/actor-experience@225fba7c`，状态与验收差异见功能清单。
 
 ## 代码结构
 
@@ -61,7 +63,9 @@ python3 tests/brand-package.test.py
 - `api/DomainMapping.ets`：协议 DTO 到页面/缓存模型的转换和边界校验。
 - `model`：页面/缓存媒体、账户、下载和同步快照领域模型。
 - `service/JellyfinClient.ets`：业务入口，媒体查询、字幕和上报委托给生成客户端。
-- `service/SessionStore.ets`：系统 Asset 安全存储登录会话，密码不持久化。
+- `service/SessionStore.ets`：分块系统 Asset 存储服务器、账户与令牌，旧会话迁移和提交保护；密码不持久化。
+- `service/QuickConnectLogin.ets`：配对代码、授权检查、超时与取消，Secret不进入页面状态或磁盘。
+- `utils/Accounts.ts`：服务器地址、账户身份、集合校验及无凭据列表。
 - `service/LocalStore.ets`：按服务器 ID / 用户 ID 隔离的原子 JSON 快照和下载元数据。
 - `service/AppService.ets`：同步、下载、媒体源与下一集选择。
 - `service/PlaybackController.ets`：AVPlayer 生命周期、轨道、字幕和串行播放上报。

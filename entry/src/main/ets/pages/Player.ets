@@ -1,3 +1,4 @@
+import { UiLayout } from '../utils/UiLayout';
 import { AppLock } from '../service/AppLock';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
@@ -13,6 +14,9 @@ import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 @Entry
 @Component
 struct Player {
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State route: PlaybackRoute = new PlaybackRoute();
   @State message: string = '';
@@ -179,8 +183,8 @@ struct Player {
       else {
     Column({ space: 10 }) {
       Row() {
-        Button($r('app.string.back')).enabled(!this.controlsLocked).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).maxLines(2).layoutWeight(1).margin({ left: 12 })
+        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.controlsLocked).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
+        Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1).margin({ left: 12 })
       }.padding(12).width('100%')
       Stack({ alignContent: Alignment.Bottom }) {
         XComponent({ id: 'playbackSurface', type: XComponentType.SURFACE, controller: this.surface })
@@ -191,6 +195,8 @@ struct Player {
             .backgroundColor('#99000000').padding(8).margin({ bottom: 16 }).width('94%')
         }
       }.width('100%').layoutWeight(1)
+      Scroll() {
+      Column({ space: 10 }) {
       if (!this.controlsLocked) {
       Row({ space: 8 }) {
         Text(this.clock(this.playbackPosition)).fontColor('#FFFFFF').fontSize(12)
@@ -199,25 +205,24 @@ struct Player {
           .onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.controller?.seek(value); } })
         Text(this.clock(this.duration)).fontColor('#FFFFFF').fontSize(12)
       }.padding({ left: 12, right: 12 })
-      Row({ space: 8 }) {
-        Button(this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play')).enabled(!this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state))
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Button(this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state))
           .onClick(() => { this.toggle(); })
-        Button($r('app.string.playback_options')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.options = !this.options; })
-        if (this.route.item.Type === 'Episode') { Button($r('app.string.next_episode')).enabled(!this.busy && this.state !== 'released').onClick(() => { this.system?.next(); }) }
+        Button($r('app.string.playback_options')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.options = !this.options; })
+        if (this.route.item.Type === 'Episode') { Button($r('app.string.next_episode')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.busy && this.state !== 'released').onClick(() => { this.system?.next(); }) }
       }
-        Button($r('app.string.controls_lock')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.controlsLocked = true; this.options = false; })
+        Button($r('app.string.controls_lock')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.controlsLocked = true; this.options = false; })
       } else {
-        Button($r('app.string.controls_unlock')).backgroundColor($r('app.color.brand_action')).onClick(() => { this.controlsLocked = false; })
+        Button($r('app.string.controls_unlock')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).onClick(() => { this.controlsLocked = false; })
       }
       if (this.options && !this.controlsLocked) {
-        Scroll() {
           Column({ space: 10 }) {
-            Button(this.pipActive ? $r('app.string.pip_exit') : $r('app.string.pip_enter'))
+            Button(this.pipActive ? $r('app.string.pip_exit') : $r('app.string.pip_enter')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
               .enabled(this.systemReady && this.pipSupported && !this.busy && ['prepared', 'playing', 'paused'].includes(this.state))
               .onClick(() => { if (this.pipActive) { this.system?.stopPiP(); } else { this.system?.startPiP(); } })
             if (!this.pipSupported) { Text($r('app.string.pip_unavailable')).fontColor($r('app.color.brand_muted')).fontSize(12) }
             Row({ space: 12 }) {
-              Text($r('app.string.background_playback')).fontColor('#FFFFFF')
+              Text($r('app.string.background_playback')).fontColor('#FFFFFF').layoutWeight(1)
               Toggle({ type: ToggleType.Switch, isOn: this.backgroundEnabled }).enabled(this.systemReady)
                 .onChange((value: boolean) => { this.system?.setBackground(value); })
             }
@@ -241,43 +246,45 @@ struct Player {
             Text($r('app.string.subtitle_format_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
             Text($r('app.string.playback_language_preferences')).fontColor('#FFFFFF')
             Text($r('app.string.preferred_audio_language')).fontColor($r('app.color.brand_muted'))
-            TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') }).maxLength(63)
+            TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(63)
               .enabled(!this.settingsBusy).onChange((value: string) => { this.audioLanguage = value; })
             Text($r('app.string.preferred_subtitle_language')).fontColor($r('app.color.brand_muted'))
-            TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') }).maxLength(63)
+            TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(63)
               .enabled(!this.settingsBusy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
             Row({ space: 12 }) {
-              Text($r('app.string.preferred_subtitles_off')).fontColor('#FFFFFF')
+              Text($r('app.string.preferred_subtitles_off')).fontColor('#FFFFFF').layoutWeight(1)
               Toggle({ type: ToggleType.Switch, isOn: this.subtitlesOff }).enabled(!this.settingsBusy)
                 .onChange((value: boolean) => { this.subtitlesOff = value; })
             }
-            Row({ space: 8 }) {
-              Button($r('app.string.save_playback_preferences')).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(); })
-              Button($r('app.string.reset_playback_preferences')).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(true); })
+            Flex({ wrap: FlexWrap.Wrap }) {
+              Button($r('app.string.save_playback_preferences')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(); })
+              Button($r('app.string.reset_playback_preferences')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(true); })
             }
             Text($r('app.string.playback_preferences_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
             if (this.settingsMessage) { Text(this.settingsMessage).fontColor('#FFCF8F').fontSize(12) }
-            Row({ space: 8 }) {
+            Flex({ wrap: FlexWrap.Wrap }) {
               ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
-                Button(`${speed}×`).backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+                Button(`${speed}×`).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+                  .margin({ right: 8, bottom: 8 })
                   .onClick(() => { this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); })
               })
-            }
+            }.width('100%')
             if (this.route.item.Type === 'Episode') {
               Row({ space: 12 }) {
-                Text($r('app.string.auto_next')).fontColor('#FFFFFF')
+                Text($r('app.string.auto_next')).fontColor('#FFFFFF').layoutWeight(1)
                 Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).onChange((value: boolean) => { this.autoNext = value; })
               }
             }
           }.padding(12).width('100%')
-        }.height(250).width('100%')
       }
       if (this.busy) { Text($r('app.string.playback_loading')).fontColor($r('app.color.brand_muted')) }
       if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(12).padding(8) }
       if (this.reportMessage) { Text(this.reportMessage).fontColor('#FF9F9F').fontSize(12) }
       Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).padding(8)
+      }.width('100%')
+      }.width('100%').height(UiLayout.playerControls(this.viewportHeight, this.fontScale, this.options && !this.controlsLocked)).align(Alignment.TopStart)
     }.width('100%').height('100%').backgroundColor('#000000')
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

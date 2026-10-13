@@ -4,17 +4,25 @@ import { ApiQuery, ApiTransport } from './generated/JellyfinApi';
 import { Session } from '../model/Models';
 import { queryString } from '../utils/Protocol';
 import { text } from '../utils/Strings';
+import { PublicSystemInfo } from './generated/Models';
+import { addresses } from '../utils/Accounts';
 import { ProductIdentity } from '../utils/ProductIdentity';
 
+class HttpFailure extends Error {
+  status: number;
+  constructor(status: number) { super(text('http_failed', status)); this.status = status; }
+}
 // The generated client owns wire routes/types; this adapter owns native HTTP and credentials.
 export class NativeHttpTransport implements ApiTransport {
   private session: Session;
+  private recovery: Promise<string> | undefined = undefined;
+  endpointChanged: ((address: string) => void) | undefined = undefined;
   constructor(session: Session) { this.session = session; }
 
-  private authorization(): string {
+  private authorization(includeToken: boolean = true): string {
     if ([this.session.deviceId, this.session.token].some((value: string) => /["\r\n]/.test(value))) { throw new Error('api_session_invalid'); }
     const base = `MediaBrowser Client="${ProductIdentity.CLIENT_NAME}", Device="HarmonyOS Phone", DeviceId="${this.session.deviceId}", Version="${ProductIdentity.VERSION}"`;
-    return this.session.token ? `${base}, Token="${this.session.token}"` : base;
+    return includeToken && this.session.token ? `${base}, Token="${this.session.token}"` : base;
   }
 
   private method(value: string): http.RequestMethod {
@@ -44,8 +52,42 @@ export class NativeHttpTransport implements ApiTransport {
   }
 
   private async read(path: string, method: string, params: ApiQuery[], body: string, accept: string): Promise<string> {
+    return this.readAttempt(path, method, params, body, accept, []);
+  }
+  private async readAttempt(path: string, method: string, params: ApiQuery[], body: string, accept: string, tried: string[]): Promise<string> {
+    const address = this.session.server;
+    try { return await this.at(address, path, method, params, body, accept); }
+    catch (e) {
+      const message = (e as Error).message;
+      if (!this.session.serverId || (!this.session.token && path !== '/System/Info/Public') || !(message === 'network_failed' || [408, 502, 503, 504].includes((e as HttpFailure).status))) { throw e as Error; }
+      const attempted = [...tried, address]; const candidates = addresses(this.session.addresses ?? [address]).filter((v: string) => !attempted.includes(v)); if (!candidates.length) { throw e as Error; }
+      if (!this.recovery) {
+        this.recovery = this.recover(address, candidates);
+        this.recovery.finally(() => { this.recovery = undefined; }).catch(() => {});
+      }
+      let replacement: string;
+      try { replacement = await this.recovery; } catch (ignored) { throw e as Error; }
+      // An unknown write outcome is never replayed automatically.
+      if (method !== 'GET') { throw e as Error; }
+      if (attempted.includes(replacement)) { throw e as Error; }
+      return this.readAttempt(path, method, params, body, accept, attempted);
+    }
+  }
+  private async recover(failed: string, candidates: string[]): Promise<string> {
+    if (this.session.server !== failed) { return this.session.server; }
+    for (const candidate of candidates.filter((v: string) => v !== failed)) {
+      const anonymous = new Session(); anonymous.server = candidate; anonymous.deviceId = this.session.deviceId;
+      try {
+        const info = await new NativeHttpTransport(anonymous).request<PublicSystemInfo>('/System/Info/Public', 'GET', [], '');
+        if (info?.Id !== this.session.serverId) { continue; }
+        this.session.server = candidate; this.endpointChanged?.(candidate); return candidate;
+      } catch (e) { /* No credentials reach an unverified backup address. */ }
+    }
+    throw new Error('server_unavailable');
+  }
+  private async at(address: string, path: string, method: string, params: ApiQuery[], body: string, accept: string): Promise<string> {
     const nativeMethod = this.method(method);
-    const authorization = this.authorization();
+    const authorization = this.authorization(path !== '/System/Info/Public');
     if (body) { parseJson(body); }
     const query = queryString(params);
     const connection = http.createHttp();
@@ -59,10 +101,10 @@ export class NativeHttpTransport implements ApiTransport {
       };
       // Native HTTP rejects an explicitly empty body on some POST/DELETE requests.
       if (body) { options.extraData = body; }
-      const response = await connection.request(`${this.session.server}${path}${query ? '?' + query : ''}`, options);
+      const response = await connection.request(`${address}${path}${query ? '?' + query : ''}`, options);
       if (response.responseCode === 401) { throw new Error('login_expired'); }
       if (response.responseCode === 403) { throw new Error('permission_denied'); }
-      if (response.responseCode < 200 || response.responseCode >= 300) { throw new Error(text('http_failed', response.responseCode)); }
+      if (response.responseCode < 200 || response.responseCode >= 300) { throw new HttpFailure(response.responseCode); }
       if (response.responseCode === 204) { return ''; }
       if (typeof response.result !== 'string') { throw new Error('api_response_invalid'); }
       if (response.result.trim().startsWith('<')) { throw new Error('html_response'); }

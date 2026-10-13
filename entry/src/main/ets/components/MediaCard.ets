@@ -1,9 +1,11 @@
+import { UiLayout } from '../utils/UiLayout';
 import { MediaItem } from '../model/Models';
 import { AppService } from '../service/AppService';
 import { playbackPercent, posterTarget } from '../utils/MediaPresentation';
 
 @Component
 export struct MediaCard {
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @Prop item: MediaItem;
   @Prop wide: boolean = false;
   onSelect: (item: MediaItem) => void = () => {};
@@ -52,19 +54,19 @@ export struct MediaCard {
               Blank()
               Button({ type: ButtonType.Circle }) {
                 Image($r('app.media.detail_play')).width(22).height(22)
-              }.width(40).height(40).padding(8).backgroundColor($r('app.color.brand_action'))
+              }.width(40).height(UiLayout.buttonHeight(this.fontScale)).padding(8).backgroundColor($r('app.color.brand_action'))
                 .accessibilityText($r('app.string.play')).onClick(() => this.onPlay?.(this.item))
             }.width('100%').padding(12)
           }.width('100%').height('100%').position({ x: 0, y: 0 })
         }
       }.width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3)
       Text(this.wide ? this.item.SeriesName ?? this.item.Name : this.item.Name)
-        .fontSize(14).fontColor('#F2F3FA').maxLines(this.wide ? 1 : 2).height(this.wide ? 20 : 40)
+        .fontSize(14).fontColor('#F2F3FA').maxLines(2).height(40 * this.fontScale)
         .textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
       if (this.wide && this.item.Type === 'Episode') {
         Text(this.item.ParentIndexNumber !== undefined && this.item.IndexNumber !== undefined ?
           $r('app.string.episode_label', this.item.ParentIndexNumber, this.item.IndexNumber, this.item.Name) : this.item.Name)
-          .fontSize(12).fontColor($r('app.color.brand_muted')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+          .fontSize(12).fontColor($r('app.color.brand_muted')).height(32 * this.fontScale).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
       } else if (!this.wide) {
         Row() {
           Text(this.item.ProductionYear?.toString() ?? this.typeLabel()).fontSize(12).fontColor($r('app.color.brand_muted'))

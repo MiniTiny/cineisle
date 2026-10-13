@@ -1,3 +1,4 @@
+import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { MediaItem } from '../model/Models';
@@ -10,6 +11,10 @@ import { MediaCard } from '../components/MediaCard';
 @Entry
 @Component
 struct Favorites {
+  @StorageLink('cineIsleLandscape') landscape: boolean = false;
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State all: MediaItem[] = [];
   @State visibleItems: MediaItem[] = [];
@@ -109,8 +114,43 @@ struct Favorites {
     this.selected = []; this.selection = false; this.message = text('batch_result', success.length, failed) + (failure ? ` · ${failure}` : ''); this.busy = false; this.filter(false);
   }
   @Builder
+  private filtersPanel() {
+      Column({ space: 10 }) {
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Select([{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }])
+          .selected(['', 'Movie', 'Series', 'Episode'].indexOf(this.category)).value(text(['all', 'media_movie', 'media_series', 'media_episode'][['', 'Movie', 'Series', 'Episode'].indexOf(this.category)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); })
+        Select([{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))]).enabled(this.genres.length > 0)
+          .selected(this.genres.indexOf(this.genre) + 1).value(this.genre || text('all_genres')).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); })
+      }.width('100%')
+      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).onChange((v: string) => { this.query = v; this.filter(); })
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Row() { Checkbox().select(this.unwatched).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
+        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA') }.margin({ right: 8, bottom: 8 })
+        Select([{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }])
+          .selected(['name', 'nameDesc', 'continue'].indexOf(this.order)).value(text(['name_ascending', 'name_descending', 'continue_first'][['name', 'nameDesc', 'continue'].indexOf(this.order)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); })
+      }
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).width('100%')
+        Button($r('app.string.clear_filters')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); })
+        Button(this.selection ? $r('app.string.cancel') : $r('app.string.select_items')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => { this.selection = !this.selection; this.selected = []; })
+      }
+      if (this.selection) {
+        Flex({ wrap: FlexWrap.Wrap }) {
+          Button($r('app.string.select_all')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selected = this.visibleItems.map((i: MediaItem) => i.Id); })
+          Button($r('app.string.batch_unfavorite')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(this.selected.length > 0 && !this.busy).onClick(() => this.remove())
+        }
+      }
+      if (this.undoItems.length) { Button($r('app.string.undo')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.batch(this.undoItems, true)) }
+      if (this.busy) { LoadingProgress().width(24).height(24) }
+      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      if (!this.visibleItems.length && !this.busy) { Text(this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites')).fontColor($r('app.color.brand_muted')) }
+      }.width('100%').alignItems(HorizontalAlign.Start)
+  }
+  @Builder
   grid() {
     Grid(this.scroller) {
+      if (!UiLayout.separateFilters(this.viewportHeight, this.landscape)) { GridItem() { this.filtersPanel() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1) }
+
       ForEach(this.visibleItems, (item: MediaItem) => {
         GridItem() {
           Column() {
@@ -119,7 +159,7 @@ struct Favorites {
           }.gesture(LongPressGesture().onAction(() => { if (!this.busy) { this.selection = true; this.selected = [item.Id]; } }))
         }
       }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}:${this.selection}`)
-    }.columnsTemplate('1fr 1fr 1fr').columnsGap(12).rowsGap(16).layoutWeight(1).width('100%')
+    }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(16).layoutWeight(1).width('100%')
   }
   build() {
     Column() {
@@ -127,41 +167,16 @@ struct Favorites {
       else {
     Column({ space: 10 }) {
       Row({ space: 8 }) {
-        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text($r('app.string.favorites')).fontColor('#F2F3FA').fontSize(22).layoutWeight(1)
-        Button($r('app.string.refresh')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.refresh())
+        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
+        Text($r('app.string.favorites')).fontColor('#F2F3FA').fontSize(22).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+        Button($r('app.string.refresh')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.refresh())
       }
-      Row() {
-        Select([{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }])
-          .selected(['', 'Movie', 'Series', 'Episode'].indexOf(this.category)).value(text(['all', 'media_movie', 'media_series', 'media_episode'][['', 'Movie', 'Series', 'Episode'].indexOf(this.category)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); })
-        Select([{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))]).enabled(this.genres.length > 0)
-          .selected(this.genres.indexOf(this.genre) + 1).value(this.genre || text('all_genres')).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); })
-      }.width('100%')
-      TextInput({ text: this.query, placeholder: text('favorite_search') }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).onChange((v: string) => { this.query = v; this.filter(); })
-      Row({ space: 8 }) {
-        Checkbox().select(this.unwatched).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
-        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA')
-        Select([{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }])
-          .selected(['name', 'nameDesc', 'continue'].indexOf(this.order)).value(text(['name_ascending', 'name_descending', 'continue_first'][['name', 'nameDesc', 'continue'].indexOf(this.order)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); })
+      if (UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
+        Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
-      Row({ space: 8 }) {
-        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).layoutWeight(1)
-        Button($r('app.string.clear_filters')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); })
-        Button(this.selection ? $r('app.string.cancel') : $r('app.string.select_items')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => { this.selection = !this.selection; this.selected = []; })
-      }
-      if (this.selection) {
-        Row({ space: 8 }) {
-          Button($r('app.string.select_all')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selected = this.visibleItems.map((i: MediaItem) => i.Id); })
-          Button($r('app.string.batch_unfavorite')).backgroundColor($r('app.color.brand_action')).enabled(this.selected.length > 0 && !this.busy).onClick(() => this.remove())
-        }
-      }
-      if (this.undoItems.length) { Button($r('app.string.undo')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.batch(this.undoItems, true)) }
-      if (this.busy) { LoadingProgress().width(24).height(24) }
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
-      if (!this.visibleItems.length && !this.busy) { Text(this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites')).fontColor($r('app.color.brand_muted')) }
       this.grid()
     }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

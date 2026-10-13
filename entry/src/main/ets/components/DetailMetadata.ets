@@ -1,8 +1,10 @@
+import { UiLayout } from '../utils/UiLayout';
 import { MediaItem, Person } from '../model/Models';
 import { detailMetadata, DetailRow } from '../utils/DetailPresentation';
 import { AppService } from '../service/AppService';
 @Component
 export struct DetailMetadataPanel {
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @Prop item: MediaItem;
   @Prop sourceId: string = '';
   onPerson: (person: Person) => void = () => {};
@@ -21,7 +23,7 @@ export struct DetailMetadataPanel {
       }
       ForEach(detailMetadata(this.item, this.sourceId).rows, (row: DetailRow) => {
         Row({ space: 14 }) {
-          Text(row.label).fontSize(13).fontColor($r('app.color.brand_muted')).width(56).align(Alignment.Top)
+          Text(row.label).fontSize(13).fontColor($r('app.color.brand_muted')).width(56 * this.fontScale).align(Alignment.Top)
           Text(row.value).fontSize(14).fontColor('#F2F3FA').lineHeight(22).layoutWeight(1)
         }.width('100%').alignItems(VerticalAlign.Top)
       }, (row: DetailRow) => row.key + ':' + row.value)
@@ -33,12 +35,12 @@ export struct DetailMetadataPanel {
               Column({ space: 6 }) {
                 Image(AppService.client?.image(person.Id, person.PrimaryImageTag) ?? '').alt($r('app.media.nav_user_muted'))
                   .width(80).height(80).objectFit(ImageFit.Cover).borderRadius(40).backgroundColor($r('app.color.brand_surface'))
-                Text(person.Name).fontColor('#F2F3FA').fontSize(12).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width(88)
-                if (person.Role) { Text(person.Role).fontColor($r('app.color.brand_muted')).fontSize(11).maxLines(1).width(88) }
+                Text(person.Name).fontColor('#F2F3FA').fontSize(12).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width(88 * this.fontScale)
+                if (person.Role) { Text(person.Role).fontColor($r('app.color.brand_muted')).fontSize(11).maxLines(1).width(88 * this.fontScale) }
               }.onClick(() => this.onPerson(person))
             }
           }, (person: Person) => person.Id + ':' + person.Name + ':' + (person.Role ?? '') + ':' + (person.PrimaryImageTag ?? ''))
-        }.listDirection(Axis.Horizontal).height(126).width('100%').scrollBar(BarState.Off)
+        }.listDirection(Axis.Horizontal).height(80 + 46 * this.fontScale).width('100%').scrollBar(BarState.Off)
       }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }

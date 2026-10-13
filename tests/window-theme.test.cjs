@@ -43,6 +43,17 @@ test('unsupported system bar capability preserves the already-painted window bac
   const s = stage({ failBars: true }); s.ability.onWindowStageCreate(s.value); s.complete({ code: 0 }); await h.settle();
   assert.equal(s.calls[3][1], color('brand_surface_raised'));
 });
+test('cold start and configuration changes publish the scale for all existing routes', () => {
+  const s=stage(); s.ability.context.config={fontSizeScale:2}; s.ability.onWindowStageCreate(s.value);
+  assert.equal(AppStorage.values.get('cineIsleFontScale'),2);
+  s.ability.onConfigurationUpdated({fontSizeScale:1.3}); assert.equal(AppStorage.values.get('cineIsleFontScale'),1.3);
+  s.ability.onConfigurationUpdated({fontSizeScale:NaN}); assert.equal(AppStorage.values.get('cineIsleFontScale'),1);
+});
+test('rotation is independent of keyboard area and font-only callbacks preserve orientation', () => {
+ const s=stage();s.ability.onConfigurationUpdated({fontSizeScale:2,direction:1});assert.equal(AppStorage.values.get('cineIsleLandscape'),true);
+ s.ability.onConfigurationUpdated({fontSizeScale:1.3});assert.equal(AppStorage.values.get('cineIsleLandscape'),true);
+ s.ability.onConfigurationUpdated({direction:0});assert.equal(AppStorage.values.get('cineIsleLandscape'),false);assert.equal(AppStorage.values.get('cineIsleFontScale'),1.3);
+});
 (async () => { for (const [name, fn] of tests) { await fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} window theme regression tests passed. SDK fixtures do not prove device pixels.`);
 })().catch(e => { console.error(e); process.exitCode = 1; });

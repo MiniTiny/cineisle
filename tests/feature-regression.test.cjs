@@ -11,6 +11,7 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-regression-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
 const modules = new Map(), platform = new Map(), queue = [], requests = [];
+const assets = new Map();
 let assetValue, routeParams = {}, replacedRoute;
 const fileApi = { accessSync: fs.existsSync, mkdirSync: fs.mkdirSync, readTextSync: p => fs.readFileSync(p, 'utf8'),
   openSync: (p, flags) => ({ fd: fs.openSync(p, flags) }), writeSync: fs.writeSync, fsyncSync: fs.fsyncSync,
@@ -25,20 +26,20 @@ platform.set('@ohos.request', {});
 platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 platform.set('@ohos.resourceManager', {});
 require('./preferences-platform.cjs').install(platform, directory);
-platform.set('@ohos.util', { generateRandomUUID: () => 'mock-device',
+platform.set('@ohos.util', { generateRandomUUID: () => require('node:crypto').randomUUID(),
   TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } },
   TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 platform.set('@ohos.security.asset', { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return', ACCESSIBILITY: 'access', CONFLICT_RESOLUTION: 'conflict' },
   ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
-  query: async attrs => new TextDecoder().decode(attrs.get('alias')) === 'cineisle.app.lock.v1' ? [] : assetValue ? [new Map([['secret', assetValue]])] : [],
-  add: async attrs => { assetValue = attrs.get('secret'); }, remove: async () => { assetValue = undefined; } });
+  query: async attrs => { const value = assets.get(new TextDecoder().decode(attrs.get('alias'))); return value ? [new Map([['secret', value]])] : []; },
+  add: async attrs => { const bytes = attrs.get('secret'); assert.ok(bytes.length <= 1024); assets.set(new TextDecoder().decode(attrs.get('alias')), bytes); }, remove: async attrs => { assets.delete(new TextDecoder().decode(attrs.get('alias'))); } });
 platform.set('@ohos.net.http', { RequestMethod: { GET: 'GET', POST: 'POST', DELETE: 'DELETE' }, HttpDataType: { STRING: 'STRING' },
   createHttp: () => ({ async request(url, options) {
     requests.push({ url, options }); const value = queue.shift();
     if (value instanceof Error) throw value;
     assert.ok(value, 'Each platform request must have an explicit fixture'); return value;
   }, destroy() {} }) });
-platform.set('@ohos.router', { getParams: () => routeParams, back() {}, pushUrl() {}, replaceUrl(value) { replacedRoute = value; } });
+platform.set('@ohos.router', { getParams: () => routeParams, back() {}, pushUrl() {}, clear() {}, replaceUrl(value) { replacedRoute = value; } });
 
 function load(relative) {
   const file = path.resolve(root, relative);
@@ -98,7 +99,7 @@ function reset() {
   AppService.client = undefined; AppService.local = undefined; AppService.snapshot = new LibrarySnapshot();
   AppService.downloads = []; AppService.tasks.clear(); AppService.pumping = false; AppService.polling = false; AppService.syncing = false;
   AppService.cacheRecovered = false; AppService.initialized = false; AppService.context = context;
-  queue.length = 0; requests.length = 0; assetValue = undefined; routeParams = {};
+  queue.length = 0; requests.length = 0; assetValue = undefined; assets.clear(); AppService.accountBusy = false; AppService.accountListener = undefined; AppService.closePlayback = undefined; routeParams = {};
 }
 const tests = [];
 function test(name, fn) { tests.push([name, fn]); }
@@ -417,7 +418,7 @@ test('a failed shelf retains successful home sections and reports independent fa
   const p = page(); await p.load(); assert.ok(p.homeFailures.some(f => f.message === 'latest-failed')); assert.ok(p.homeSections.some(s => s.id === 'resume')); assert.ok(p.homeSections.some(s => s.id === 'nextup')); assert.equal(p.busy, false);
 });
 
-module.exports = { load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
+module.exports = { assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
 if (require.main === module) (async () => {
   try {
     for (const [name, fn] of tests) { reset(); await fn(); console.log('PASS ' + name); }

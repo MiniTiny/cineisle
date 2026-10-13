@@ -28,7 +28,12 @@
     "ReportPlaybackStart",
     "ReportPlaybackProgress",
     "ReportPlaybackStopped",
-    "DeleteItem"
+    "DeleteItem",
+    "GetQuickConnectEnabled",
+    "InitiateQuickConnect",
+    "GetQuickConnectState",
+    "AuthenticateWithQuickConnect",
+    "GetCurrentUser"
   ],
   "urlOnly": [
     "GetVideoStream",
@@ -44,7 +49,15 @@
       "schemaSha256": "fbad603f55b6381c5f7c6552409497c050509ca28d32ec8d5015702f87e429bd",
       "schemaVersion": "10.8.9",
       "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.8.0/openapi.json",
-      "serverVersionPrefix": "10.8."
+      "serverVersionPrefix": "10.8.",
+      "operationIdAliases": {
+        "GetQuickConnectEnabled": "GetEnabled",
+        "InitiateQuickConnect": "Initiate",
+        "GetQuickConnectState": "Connect"
+      },
+      "methodOverrides": {
+        "InitiateQuickConnect": "GET"
+      }
     }
   ]
 }

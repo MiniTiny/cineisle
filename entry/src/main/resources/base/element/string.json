@@ -106,11 +106,11 @@
     },
     {
       "name": "change_account",
-      "value": "退出并切换账户或服务器"
+      "value": "退出当前账户"
     },
     {
       "name": "logout_confirm",
-      "value": "退出后可登录其他账户，本机媒体保留并按服务器和用户隔离。"
+      "value": "将移除当前账户的本机登录凭据，其他已保存账户仍保留。缓存和下载文件不会删除。"
     },
     {
       "name": "logout",
@@ -1059,6 +1059,142 @@
     {
       "name": "download_queued",
       "value": "等待下载（最多四个同时任务）"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "账户与服务器"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "已保存账户"
+    },
+    {
+      "name": "saved_servers",
+      "value": "已保存服务器"
+    },
+    {
+      "name": "add_account_server",
+      "value": "添加账户或服务器"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "还没有已保存账户"
+    },
+    {
+      "name": "active_account",
+      "value": "当前账户"
+    },
+    {
+      "name": "switch_account",
+      "value": "切换"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "移除账户"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "仅移除本机登录凭据；该账户的缓存、离线修改和下载文件保留，不删除服务器内容。"
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "移除服务器"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "将移除此服务器及其全部本机登录凭据；缓存与下载文件保留，不删除服务器内容。"
+    },
+    {
+      "name": "save_server_only",
+      "value": "仅保存服务器"
+    },
+    {
+      "name": "server_display_name",
+      "value": "服务器显示名称"
+    },
+    {
+      "name": "server_addresses",
+      "value": "服务器名称与地址"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "管理地址"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "每行一个完整地址，最多8个，保留 /jellyfin 等路径。发生连接故障时按顺序验证同一服务器后切换。"
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Quick Connect 登录"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "在已登录的 Jellyfin 客户端中打开“设置 → Quick Connect”，输入此代码授权。每5秒检查；5分钟未完成请重新获取代码。"
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "我已授权，检查登录"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "服务器未启用 Quick Connect，请使用账户密码登录"
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "Quick Connect 代码已失效，请重新获取"
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "已取消 Quick Connect"
+    },
+    {
+      "name": "account_switching",
+      "value": "账户切换正在进行，请稍候"
+    },
+    {
+      "name": "account_not_found",
+      "value": "此账户已被移除，请重新登录"
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "地址指向其他服务器，未发送账户令牌"
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "此地址已属于另一个已保存服务器"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "已保存地址均不可用，请检查网络或管理服务器地址"
+    },
+    {
+      "name": "account_store_full",
+      "value": "账户存储已满，请先移除不再使用的账户"
+    },
+    {
+      "name": "session_save_failed",
+      "value": "无法保存账户凭据，原账户仍保留"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "已取消登录，请重新连接"
+    },
+    {
+      "name": "account_unnamed",
+      "value": "未命名账户"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "重置账户存储"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "将移除本设备所有已保存服务器和登录凭据，可用于修复损坏的账户存储。缓存、离线修改、下载文件和 PIN 保留；不会删除服务器内容。"
     }
   ]
 }

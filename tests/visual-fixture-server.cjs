@@ -42,6 +42,8 @@ const server = http.createServer((req, res) => {
   routes.push({ method: req.method, path: p }); // No headers, query strings, login body or credentials.
   let result;
   if (p === '/System/Info/Public') result = { Id: id(20), ServerName: 'CineIsle Visual Fixture', Version: '10.10.0' };
+  else if (p === '/QuickConnect/Enabled') result = true;
+  else if (p === '/QuickConnect/Initiate' || p === '/QuickConnect/Connect') result = { Code: '246810', Secret: 'local-layout-quick-secret', Authenticated: false };
   else if (p === '/Users/AuthenticateByName') result = { User: { Id: userId, Name: 'UI 测试', Policy: { EnableContentDeletion: true } }, AccessToken: 'local-fixture-token' };
   else if (p.endsWith('/Views') || p === '/UserViews') result = page(libraries);
   else if (p === '/Shows/NextUp') result = page([episode]);

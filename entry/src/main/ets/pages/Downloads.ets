@@ -1,3 +1,4 @@
+import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { DownloadRecord } from '../model/Models';
@@ -8,6 +9,10 @@ import { errorText } from '../utils/Strings';
 @Entry
 @Component
 struct Downloads {
+  @StorageLink('cineIsleLandscape') landscape: boolean = false;
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State records: DownloadRecord[] = [];
   @State category: string = 'active';
@@ -42,22 +47,32 @@ struct Downloads {
         try { await AppService.removeDownload(record); this.changed(); } catch (e) { this.message = errorText(e as Error); }
       } } });
   }
+  @Builder
+  private filtersPanel() {
+      Column({ space: 8 }) {
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Button($r('app.string.download_active')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'active' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'active'; })
+        Button($r('app.string.download_completed')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'complete' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'complete'; })
+        Button($r('app.string.download_failed')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.category === 'failed' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'failed'; })
+      }
+      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
+      }.width('100%')
+  }
   build() {
     Column() {
       if (this.locked) { PinGate() }
       else {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
-        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
+        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
         Text($r('app.string.downloads')).fontSize(22).fontColor('#F2F3FA').layoutWeight(1)
       }
-      Row({ space: 8 }) {
-        Button($r('app.string.download_active')).backgroundColor(this.category === 'active' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'active'; })
-        Button($r('app.string.download_completed')).backgroundColor(this.category === 'complete' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'complete'; })
-        Button($r('app.string.download_failed')).backgroundColor(this.category === 'failed' ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.category = 'failed'; })
+      if (UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
+        Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
       List({ space: 12 }) {
+      if (!UiLayout.separateFilters(this.viewportHeight, this.landscape)) { ListItem() { this.filtersPanel() } }
+
         ForEach(this.visibleRecords(), (record: DownloadRecord) => {
           ListItem() {
             Column({ space: 10 }) {
@@ -65,15 +80,15 @@ struct Downloads {
               Text(record.state === 'queued' ? $r('app.string.download_queued') : record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
                 $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor($r('app.color.brand_muted')).width('100%')
               if (record.state === 'downloading') { Progress({ value: record.progress * 100, total: 100 }).color($r('app.color.brand_accent')).width('100%') }
-              Row({ space: 8 }) {
+              Flex({ wrap: FlexWrap.Wrap }) {
                 if (record.state === 'complete') {
-                  Button($r('app.string.play')).backgroundColor($r('app.color.brand_action')).onClick(async () => {
+                  Button($r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).onClick(async () => {
                     try { await router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item, '', true) }); } catch (e) { this.message = errorText(e as Error); }
                   })
                 } else if (!['downloading', 'queued'].includes(record.state)) {
-                  Button($r('app.string.retry')).enabled(!this.busy).backgroundColor($r('app.color.brand_action')).onClick(() => this.retry(record))
+                  Button($r('app.string.retry')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(!this.busy).backgroundColor($r('app.color.brand_action')).onClick(() => this.retry(record))
                 }
-                Button(['downloading', 'queued'].includes(record.state) ? $r('app.string.stop_download') : $r('app.string.remove_download'))
+                Button(['downloading', 'queued'].includes(record.state) ? $r('app.string.stop_download') : $r('app.string.remove_download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
                   .backgroundColor($r('app.color.brand_surface')).onClick(() => this.remove(record))
               }
             }.padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(14).width('100%')
@@ -83,6 +98,6 @@ struct Downloads {
       if (!this.visibleRecords().length) { Text($r('app.string.no_downloads')).fontColor($r('app.color.brand_muted')) }
     }.padding(16).backgroundColor($r('app.color.brand_background')).width('100%').height('100%')
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

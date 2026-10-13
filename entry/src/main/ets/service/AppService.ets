@@ -4,7 +4,7 @@ import common from '@ohos.app.ability.common';
 import request from '@ohos.request';
 import fs from '@ohos.file.fs';
 import fileUri from '@ohos.file.fileuri';
-import { DownloadRecord, ItemsResult, LibraryMembership, LibrarySnapshot, MediaItem, MediaSource, PlaybackRoute, QueryParam } from '../model/Models';
+import { Session, DownloadRecord, ItemsResult, LibraryMembership, LibrarySnapshot, MediaItem, MediaSource, PlaybackRoute, QueryParam } from '../model/Models';
 import { rankActors, safeItemId, uniqueItems } from '../utils/Protocol';
 import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
@@ -17,10 +17,28 @@ import { followingEpisode } from '../utils/Playback';
 import { firstEpisode } from '../utils/DetailPresentation';
 
 import { PlaybackPreferenceStore } from './PlaybackPreferenceStore';
+import { ServerProfile, sessionKey, addresses } from '../utils/Accounts';
 import { ExperienceStore } from './ExperienceStore';
 import { ExperienceState, PendingEdit, PendingPosition, applyPending, connectionFailure, uniqueWorks } from '../utils/Experience';
 
+interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
+  private static accountBusy: boolean = false;
+  private static accountListener: (() => void) | undefined = undefined;
+  private static notifyAccount(): void {
+    const listener = AppService.accountListener;
+    try { listener?.(); } catch (e) { if (AppService.accountListener === listener) { AppService.accountListener = undefined; } }
+  }
+  static subscribeAccount(listener: () => void): void { AppService.accountListener = listener; }
+  static unsubscribeAccount(listener: () => void): void { if (AppService.accountListener === listener) { AppService.accountListener = undefined; } }
+  static closePlayback: (() => Promise<void>) | undefined = undefined;
+  private static async accountOperation(operation: () => Promise<void>): Promise<void> {
+    if (AppService.accountBusy) { throw new Error('account_switching'); }
+    if (AppService.syncing || AppService.tasks.size || AppService.mutations.size || AppService.downloads.some((r: DownloadRecord) => ['downloading', 'queued'].includes(r.state))) { throw new Error('tasks_active'); }
+    if (!AppLock.permit()) { throw new Error('lock_pin_wrong'); }
+    AppService.accountBusy = true; try { await operation(); } finally { AppService.accountBusy = false; }
+  }
+
   static experience: ExperienceStore | undefined = undefined;
   private static syncRevision: number = 0;
   private static editRevision: number = 0;
@@ -55,7 +73,7 @@ export class AppService {
     AppService.initialized = true;
   }
 
-  private static useClient(client: JellyfinClient): void {
+  private static prepareClient(client: JellyfinClient): PreparedAccount {
     const local = new LocalStore(AppService.context, client.session);
     const snapshot = local.snapshot();
     const records = local.downloads();
@@ -65,32 +83,77 @@ export class AppService {
       if (record.state === 'complete' && !fs.accessSync(record.path)) { record.state = 'missing'; }
     });
     local.saveDownloads(records);
-    AppService.local = local; AppService.snapshot = snapshot; AppService.downloads = records; AppService.client = client;
-    AppService.experience = new ExperienceStore(local);
-    const edits = AppService.experience.snapshot().pending;
-    const extra = [...edits.map((p: PendingEdit) => p.item), ...AppService.experience.snapshot().positions.map((p: PendingPosition) => p.item)].filter((i: MediaItem | undefined) => !!i && validMediaItem(i) && !snapshot.items.some((v: MediaItem) => v.Id === i.Id)) as MediaItem[];
-    AppService.snapshot.items = applyPending(uniqueWorks([...snapshot.items, ...extra]), edits);
-    const positions = AppService.experience.snapshot().positions;
-    AppService.snapshot.items.forEach((i: MediaItem) => { const position = positions.find((p: PendingPosition) => p.id === i.Id); if (position) { i.UserData = i.UserData ?? {}; i.UserData.PlaybackPositionTicks = position.ticks; } });
-    AppService.cacheRecovered = local.recovered;
+    const experience = new ExperienceStore(local);
+    const edits = experience.snapshot().pending;
+    const extra = [...edits.map((p: PendingEdit) => p.item), ...experience.snapshot().positions.map((p: PendingPosition) => p.item)].filter((i: MediaItem | undefined) => !!i && validMediaItem(i) && !snapshot.items.some((v: MediaItem) => v.Id === i.Id)) as MediaItem[];
+    snapshot.items = applyPending(uniqueWorks([...snapshot.items, ...extra]), edits);
+    const positions = experience.snapshot().positions;
+    snapshot.items.forEach((i: MediaItem) => { const position = positions.find((p: PendingPosition) => p.id === i.Id); if (position) { i.UserData = i.UserData ?? {}; i.UserData.PlaybackPositionTicks = position.ticks; } });
+    return { local: local, snapshot: snapshot, records: records, experience: experience };
   }
 
-  static async login(server: string, name: string, password: string): Promise<void> {
-    const client = await JellyfinClient.login(server, name, password);
-    await SessionStore.save(client.session);
-    AppService.useClient(client); await AppService.restoreDownloads(); await AppService.pumpDownloads();
+  private static useClient(client: JellyfinClient, prepared?: PreparedAccount): void {
+    const data = prepared ?? AppService.prepareClient(client);
+    AppService.local = data.local; AppService.snapshot = data.snapshot; AppService.downloads = data.records; AppService.experience = data.experience;
+    AppService.client = client; AppService.cacheRecovered = data.local.recovered;
+    client.onEndpointChange((address: string) => { if (AppService.client === client) { SessionStore.rememberAddress(client.session.serverId, address).catch(() => {}); } });
+    AppService.notifyAccount();
   }
-
-  static async logout(): Promise<void> {
-    if (AppService.syncing || AppService.tasks.size > 0 || AppService.downloads.some((r: DownloadRecord) => ['downloading', 'queued'].includes(r.state))) { throw new Error('tasks_active'); }
-    await SessionStore.clear();
-    AppService.client = undefined; AppService.local = undefined;
-    AppService.experience = undefined;
-    AppService.snapshot = new LibrarySnapshot(); AppService.downloads = [];
-    AppService.cacheRecovered = false;
+  private static clearClient(): void {
+    AppService.client = undefined; AppService.local = undefined; AppService.experience = undefined; AppService.snapshot = new LibrarySnapshot();
+    AppService.downloads = []; AppService.cacheRecovered = false; AppService.notifyAccount();
   }
-
+  private static async acceptClient(client: JellyfinClient, allowed: () => boolean = () => true): Promise<void> {
+    if (!allowed() || !AppLock.permit()) { throw new Error('login_cancelled'); }
+    const server = (await SessionStore.servers()).find((s: ServerProfile) => s.id === client.session.serverId);
+    if (server) { client.session.addresses = addresses(Array.from(new Set([...server.addresses, client.session.server]))); client.session.serverName = server.name; }
+    const data = AppService.prepareClient(client); await AppService.closePlayback?.();
+    if (!allowed() || !AppLock.permit()) { throw new Error('login_cancelled'); }
+    await SessionStore.save(client.session); AppService.useClient(client, data);
+  }
+  static async login(server: string, name: string, password: string, allowed: () => boolean = () => true): Promise<void> {
+    await AppService.accountOperation(async () => {
+      const target = (await SessionStore.servers()).find((s: ServerProfile) => s.addresses.includes(server.trim().replace(/\/+$/, '')));
+      await AppService.acceptClient(await JellyfinClient.login(server, name, password, target?.id ?? '', target?.addresses ?? []), allowed);
+    });
+    await AppService.restoreDownloads(); await AppService.pumpDownloads();
+  }
+  static async loginQuick(client: JellyfinClient): Promise<void> {
+    await AppService.accountOperation(async () => AppService.acceptClient(client)); await AppService.restoreDownloads(); await AppService.pumpDownloads();
+  }
+  static async switchAccount(key: string): Promise<void> {
+    await AppService.accountOperation(async () => {
+      const session = await SessionStore.get(key); const client = new JellyfinClient(session); const data = AppService.prepareClient(client);
+      if (!data.experience.snapshot().offline) { try { await client.validateAccount(); } catch (e) { if (!connectionFailure(e as Error)) { throw e as Error; } } }
+      await AppService.closePlayback?.(); await SessionStore.save(client.session); AppService.useClient(client, data);
+    });
+    await AppService.restoreDownloads(); await AppService.pumpDownloads();
+  }
+  static async logout(): Promise<void> { await AppService.accountOperation(async () => { await AppService.closePlayback?.(); await SessionStore.clear(); AppService.clearClient(); }); }
+  static async resetAccounts(): Promise<void> { await AppService.accountOperation(async () => { await AppService.closePlayback?.(); await SessionStore.reset(); AppService.clearClient(); }); }
+  static async removeAccount(key: string): Promise<void> {
+    await AppService.accountOperation(async () => { const active = AppService.client && sessionKey(AppService.client.session) === key; if (active) { await AppService.closePlayback?.(); } await SessionStore.remove(key); if (active) { AppService.clearClient(); } });
+  }
+  static async removeServer(id: string): Promise<void> {
+    await AppService.accountOperation(async () => { const active = AppService.client?.session.serverId === id; if (active) { await AppService.closePlayback?.(); } await SessionStore.removeServer(id); if (active) { AppService.clearClient(); } });
+  }
+  static async saveServer(id: string, name: string, inputs: string[]): Promise<void> {
+    await AppService.accountOperation(async () => {
+      const list = addresses(inputs); const client = AppService.client;
+      let replacement: JellyfinClient | undefined = undefined; let prepared: PreparedAccount | undefined = undefined;
+      if (client?.session.serverId === id && !list.includes(client.session.server)) {
+        const info = await JellyfinClient.inspectServer(list[0]); if (info.Id !== id) { throw new Error('server_identity_mismatch'); }
+        const session = JSON.parse(JSON.stringify(client.session)) as Session; session.server = list[0]; session.addresses = list; session.serverName = name;
+        replacement = new JellyfinClient(session, info.Version ?? ''); prepared = AppService.prepareClient(replacement);
+      }
+      const profile: ServerProfile = { id: id, name: name, addresses: list, preferred: client?.session.serverId === id && list.includes(client.session.server) ? client.session.server : list[0] };
+      await SessionStore.updateServer(profile);
+      if (replacement && prepared) { AppService.useClient(replacement, prepared); }
+      else if (client?.session.serverId === id) { client.session.addresses = list; client.session.serverName = name; }
+    });
+  }
   static requireClient(): JellyfinClient {
+    if (AppService.accountBusy) { throw new Error('account_switching'); }
     if (!AppService.client) { throw new Error('login_required'); }
     return AppService.client;
   }
@@ -347,7 +410,7 @@ export class AppService {
     return failed;
   }
   private static async pumpDownloads(): Promise<void> {
-    if (AppService.pumping || !AppService.client) { return; } AppService.pumping = true;
+    if (AppService.accountBusy || AppService.pumping || !AppService.client) { return; } AppService.pumping = true;
     const client = AppService.client; const local = AppService.local;
     try {
       while (client === AppService.client && AppService.downloads.filter((r: DownloadRecord) => r.state === 'downloading').length < 4) {

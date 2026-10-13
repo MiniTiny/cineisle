@@ -1,3 +1,4 @@
+import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import common from '@ohos.app.ability.common';
@@ -16,6 +17,9 @@ interface DetailRoute { item: MediaItem }
 @Entry
 @Component
 struct Detail {
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State item: MediaItem = { Id: '', Name: '', Type: '' };
   @State children: MediaItem[] = [];
@@ -181,16 +185,16 @@ struct Detail {
       if (this.item.Type === 'Series') {
         List({ space: 12 }) {
           ForEach(this.children, (child: MediaItem) => {
-            ListItem() { MediaCard({ item: child, onSelect: (item: MediaItem) => this.openChild(item) }).width(120) }
+            ListItem() { MediaCard({ item: child, onSelect: (item: MediaItem) => this.openChild(item) }).width(UiLayout.shelfWidth(this.viewportWidth, false, this.fontScale)) }
           }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
-        }.listDirection(Axis.Horizontal).height(242).width('100%')
+        }.listDirection(Axis.Horizontal).height(UiLayout.shelfHeight(this.viewportWidth, this.fontScale, false)).width('100%')
       } else {
         if (!this.usingCache) {
-          Row({ space: 8 }) {
-            Button(this.selectingEpisodes ? $r('app.string.cancel') : $r('app.string.batch_download')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectingEpisodes = !this.selectingEpisodes; this.selectedEpisodes = []; })
+          Flex({ wrap: FlexWrap.Wrap }) {
+            Button(this.selectingEpisodes ? $r('app.string.cancel') : $r('app.string.batch_download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectingEpisodes = !this.selectingEpisodes; this.selectedEpisodes = []; })
             if (this.selectingEpisodes) {
-              Button($r('app.string.select_all')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectedEpisodes = this.children.filter((i: MediaItem) => i.CanDownload).map((i: MediaItem) => i.Id); })
-              Button($r('app.string.download')).backgroundColor($r('app.color.brand_action')).enabled(!this.busy && this.selectedEpisodes.length > 0).onClick(() => this.batchEpisodes())
+              Button($r('app.string.select_all')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectedEpisodes = this.children.filter((i: MediaItem) => i.CanDownload).map((i: MediaItem) => i.Id); })
+              Button($r('app.string.download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy && this.selectedEpisodes.length > 0).onClick(() => this.batchEpisodes())
             }
           }.width('100%')
         }
@@ -207,9 +211,9 @@ struct Detail {
       else {
     Column() {
       Row({ space: 12 }) {
-        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
+        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
         Text(this.item.Name).fontSize(18).fontColor('#F2F3FA').layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-        Button($r('app.string.refresh')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !this.deleted).onClick(() => this.refresh())
+        Button($r('app.string.refresh')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !this.deleted).onClick(() => this.refresh())
       }.width('100%').padding(16)
       Scroll() {
         Column({ space: 18 }) {
@@ -230,7 +234,7 @@ struct Detail {
           if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(13).width('100%') }
           if (this.busy) { LoadingProgress().width(28).height(28).color($r('app.color.brand_accent')) }
           Button(this.nextUp && this.item.Type === 'Series' ? $r('app.string.play_next_episode') :
-            (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0 ? $r('app.string.continue_play') : $r('app.string.play'))
+            (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0 ? $r('app.string.continue_play') : $r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
             .width('100%').backgroundColor($r('app.color.brand_action')).enabled(this.canPlay()).onClick(() => this.play())
           Flex({ wrap: FlexWrap.Wrap }) {
             if ((this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0) {
@@ -259,7 +263,7 @@ struct Detail {
             Text($r('app.string.media_versions')).fontSize(18).fontColor('#F2F3FA').width('100%')
             Flex({ wrap: FlexWrap.Wrap }) {
               ForEach(this.item.MediaSources ?? [], (source: MediaSource, index: number) => {
-                Button(source.Name || $r('app.string.source_number', index + 1))
+                Button(source.Name || $r('app.string.source_number', index + 1)).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
                   .fontSize(12).margin({ right: 8, bottom: 8 }).enabled(!this.busy && !this.deleted)
                   .backgroundColor((this.sourceId || this.item.MediaSources?.[0]?.Id) === source.Id ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
                   .onClick(() => { this.sourceId = source.Id; })
@@ -274,9 +278,9 @@ struct Detail {
           }
           this.childrenPanel()
         }.padding(16).width('100%')
-      }.layoutWeight(1).width('100%')
+      }.layoutWeight(1).width('100%').align(Alignment.TopStart)
     }.width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

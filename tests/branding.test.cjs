@@ -17,7 +17,7 @@ const { NativeHttpTransport } = h.load('api/NativeHttpTransport.ets');
 const { SessionStore } = h.load('service/SessionStore.ets');
 const { SystemPlayback } = h.load('service/SystemPlayback.ets');
 const tests = [], test = (name, fn) => tests.push([name, fn]);
-const fixture = { server: 'https://example.invalid/jellyfin', userId: 'fixture-user', deviceId: 'fixture-device', token: 'fixture-token' };
+const fixture = { server: 'https://example.invalid/jellyfin', serverId: 'fixture-server', userId: 'fixture-user', userName: 'fixture-user', deviceId: 'fixture-device', token: 'fixture-token' };
 const requests = [];
 let created = 0, destroyed = 0;
 const http = h.platform.get('@ohos.net.http');
@@ -128,12 +128,12 @@ test('native media session uses new identity and lock-screen launch targets the 
   } finally { await system.dispose(); }
 });
 test('session save/load/clear share the CineIsle alias and preserve secret access settings', async () => {
-  await SessionStore.save(fixture); assert.deepEqual(await SessionStore.load(), fixture);
+  await SessionStore.save(fixture); assert.deepEqual(await SessionStore.load(), { ...fixture, addresses: [fixture.server], serverName: '' });
   await SessionStore.clear(); assert.equal(await SessionStore.load(), undefined);
-  assert.ok(aliases.length >= 4); assert.deepEqual([...new Set(aliases)], ['cineisle.current.session']);
+  assert.ok(aliases.length >= 4); assert.ok(aliases.includes('cineisle.current.session')); assert.ok(aliases.every(v => v === 'cineisle.current.session' || v.startsWith('cineisle.sessions.')));
 });
 test('repeated sign-out treats a missing CineIsle asset as already cleared', async () => {
-  await SessionStore.clear(); await SessionStore.clear(); assert.equal(secrets.size, 0);
+  await SessionStore.clear(); await SessionStore.clear(); assert.equal((await SessionStore.list()).length, 0); assert.equal(await SessionStore.load(), undefined);
 });
 (async () => { for (const [name, fn] of tests) { await fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} branding regression tests passed. Native HTTP/Asset/AVSession fixtures do not prove device UI or server identification.`);
