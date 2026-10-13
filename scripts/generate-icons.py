@@ -26,6 +26,17 @@ DETAIL = {
     'heart_filled': HEART,
 }
 
+# Original management symbols extend the same rounded, 24-unit CineIsle family.
+MENU = {
+    'settings': '<path d="M4.2 6.3H6M10 6.3H19.8M4.2 12H14M18 12H19.8M4.2 17.7H8M12 17.7H19.8"/><circle cx="8" cy="6.3" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="17.7" r="2"/>',
+    'sync': '<path d="M5.1 9C6.3 5.9 9 4.3 12.2 4.3C15.5 4.3 18.2 6 19.4 8.9M19.4 8.9V4.7M19.4 8.9H15.2M18.9 15C17.7 18.1 15 19.7 11.8 19.7C8.5 19.7 5.8 18 4.6 15.1M4.6 15.1V19.3M4.6 15.1H8.8"/>',
+    'upload': '<path d="M12 15V4.5M8.4 8.1L12 4.5L15.6 8.1M4.4 15.8V18C4.4 19.2 5.2 20 6.4 20H17.6C18.8 20 19.6 19.2 19.6 18V15.8"/>',
+    'accounts': '<circle cx="8.7" cy="7.4" r="2.8"/><path d="M3.8 18.9C4.1 14.6 6 12.7 9 12.7C10.4 12.7 11.6 13.1 12.5 14"/><rect x="14.4" y="10.8" width="5.8" height="9.3" rx="1.5"/><path d="M16.6 14H18M16.6 17H18"/>',
+    'logout': '<path d="M10.1 4.3H6.4C5.1 4.3 4.3 5.1 4.3 6.4V17.6C4.3 18.9 5.1 19.7 6.4 19.7H10.1M10 12H20M16.3 8.3L20 12L16.3 15.7"/>',
+    'cancel': '<circle cx="12" cy="12" r="8.3"/><path d="M8.7 8.7L15.3 15.3M15.3 8.7L8.7 15.3"/>',
+    'chevron': '<path d="M9.4 5.7L15.7 12L9.4 18.3"/>',
+}
+
 
 def svg(geometry, color, filled=False):
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">\n'
@@ -42,6 +53,9 @@ def outputs():
     for name, geometry in DETAIL.items():
         color = colors['brand_danger'] if name == 'remove' else colors['brand_warm'] if name == 'heart_filled' else colors['brand_accent']
         result[f'detail_{name}.svg'] = svg(geometry, color, name == 'heart_filled')
+    for name, geometry in MENU.items():
+        color = colors['brand_warm'] if name == 'logout' else colors['brand_muted'] if name == 'chevron' else colors['brand_accent']
+        result[f'menu_{name}.svg'] = svg(geometry, color)
     return result
 
 

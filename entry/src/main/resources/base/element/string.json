@@ -1195,6 +1195,18 @@
     {
       "name": "reset_accounts_confirm",
       "value": "将移除本设备所有已保存服务器和登录凭据，可用于修复损坏的账户存储。缓存、离线修改、下载文件和 PIN 保留；不会删除服务器内容。"
+    },
+    {
+      "name": "menu_collection",
+      "value": "我的影库"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "账户与偏好"
+    },
+    {
+      "name": "menu_data",
+      "value": "资料与同步"
     }
   ]
 }

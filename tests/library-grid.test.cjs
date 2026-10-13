@@ -30,6 +30,7 @@ function compile(method, call, home = false, detail = false) {
   process.env.compiler = pre.BUILD_ON;
   main.projectConfig.projectPath = root;
   main.resources.app.string = Object.fromEntries(JSON.parse(fs.readFileSync(path.join(root, 'entry/src/main/resources/base/element/string.json'))).string.map((value, index) => [value.name, index + 1]));
+  main.resources.app.media = Object.fromEntries(fs.readdirSync(path.join(root,'entry/src/main/resources/base/media')).filter(n=>n.endsWith('.svg')).map((n,i)=>[n.slice(0,-4),10000+i]));
   main.resources.app.color = Object.fromEntries(JSON.parse(fs.readFileSync(path.join(root, 'entry/src/main/resources/base/element/color.json'))).color.map((value, index) => [value.name, index + 1000]));
   main.projectConfig.compileMode = 'jsbundle';
   main.partialUpdateConfig.partialUpdateMode = true;
@@ -38,7 +39,7 @@ function compile(method, call, home = false, detail = false) {
   validation.componentCollection.customComponents.add('MediaCard');
   validation.componentCollection.customComponents.add('HomeShelf');
   const state = detail ? "@State children: MediaItem[] = [];\n@State item: MediaItem = { Id: 'show', Type: 'Series' };" : home ? '@State homeSections: HomeSection[] = []; @State homeFailures: Object[] = []; @State usingCache: boolean = false;\n@State busy: boolean = false;' : '@State items: MediaItem[] = [];';
-  const text = `interface HomeSection { id: string; items: MediaItem[] }\ninterface MediaItem { Id: string; Type?: string; Name?: string; UserData?: Object }\n@Component\nstruct GridProbe {\n@State fontScale: number = 1; @State viewportWidth: number = 360; @State viewportHeight: number = 800;\n@State tab: number = 1; @State mode: string = ''; @State landscape: boolean = false; @State discover: boolean = true;\n${state}\n${method}\n${page.members.find(n=>n.name?.getText(source)==='recommendFilters').getText(source)}\nprivate open(item: MediaItem): void {}\nprivate openChild(item: MediaItem): void {}\nprivate openLibrary(section: HomeSection): void {}\nbuild() { ${call} }\n}`;
+  const text = `interface HomeSection { id: string; items: MediaItem[] }\ninterface MediaItem { Id: string; Type?: string; Name?: string; UserData?: Object }\n@Component\nstruct GridProbe {\n@State fontScale: number = 1; @State viewportWidth: number = 360; @State viewportHeight: number = 800;\n@State tab: number = 1; @State mode: string = ''; @State landscape: boolean = false; @State discover: boolean = true;\n${state}\n${page.members.filter(n=>['menuAction','menuHeading'].includes(n.name?.getText(source))).map(n=>n.getText(source)).join('\n')}\n${method}\n${page.members.find(n=>n.name?.getText(source)==='recommendFilters').getText(source)}\nprivate open(item: MediaItem): void {}\nprivate openChild(item: MediaItem): void {}\nprivate openLibrary(section: HomeSection): void {}\nbuild() { ${call} }\n}`;
   const input = ts.createSourceFile(path.join(root, 'GridProbe.ets'), text, ts.ScriptTarget.Latest, true, ts.ScriptKind.ETS, options);
   assert.equal(input.parseDiagnostics.length, 0);
   const transformed = ts.transform(input, [ui.processUISyntax(null, true)], options);
@@ -92,7 +93,7 @@ function fixture(code) {
     if (typeof render === 'function' && !renderingListItem) { renderingListItem = true; try { render(active.id, true); } finally { renderingListItem = false; } }
   } : () => {} });
   const context = { UiLayout: require('./ui-layout-fixture.cjs').UiLayout, ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Column:component, Row: component, Flex:component, Button: component, Checkbox: component, Grid: component, GridItem: gridItem, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
-    FlexWrap: { Wrap:1 }, TextOverflow:{Clip:2}, Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
+    FlexWrap: { Wrap:1 }, TextOverflow:{Clip:2,Ellipsis:1},ButtonType:{Normal:1},FontWeight:{Medium:500},FlexAlign:{Center:1,SpaceBetween:2},TextAlign:{Start:1},HitTestMode:{None:1},Image:component, Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
     MediaCard: class { constructor(parent, params) { this.item = params.item; } },
     HomeShelf: class { constructor(parent, params) { this.section = params.section; } } };
   vm.createContext(context); vm.runInContext(code + '\nthis.Probe = GridProbe;', context);

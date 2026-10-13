@@ -47,8 +47,8 @@ def contrast(first, second):
 class OriginalIconsTest(unittest.TestCase):
     def test_complete_family_matches_current_resource_files(self):
         expected = set(icons.outputs())
-        self.assertEqual(len(expected), 21)
-        actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_'))}
+        self.assertEqual(len(expected), 28)
+        actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_'))}
         self.assertEqual(actual, expected)
 
     def test_generator_drift_gate_passes(self):
@@ -132,7 +132,7 @@ class OriginalIconsTest(unittest.TestCase):
             referenced.update(re.findall(r"\$r\('app\.media\.([^']+)'\)", file.read_text()))
         self.assertTrue(referenced <= available, str(referenced - available))
         # Four bottom destinations; library is an unselected action inside More.
-        self.assertIn('nav_library_muted', referenced)
+        self.assertIn('nav_library_active', referenced)
         for name in ['home', 'star', 'user', 'more']:
             self.assertIn('nav_' + name + '_active', referenced)
             self.assertIn('nav_' + name + '_muted', referenced)
@@ -151,6 +151,17 @@ class OriginalIconsTest(unittest.TestCase):
                 self.assertIn(name, COLORS)
             self.assertNotRegex(source, r'#(?:D5CCFF|443C63|292541|7C67ED|8E7DFF|BBAAFF)', str(file))
         self.assertEqual(COLORS['start_window_background'], COLORS['brand_background'])
+
+    def test_management_symbols_are_distinct_and_bound_to_product_actions(self):
+        shapes = [geometry((MEDIA / f'menu_{name}.svg').read_text()) for name in icons.MENU]
+        self.assertEqual(len(set(shapes)), len(icons.MENU))
+        source = (ROOT / 'entry/src/main/ets/pages/Index.ets').read_text()
+        for name in icons.MENU:
+            self.assertIn(f"app.media.menu_{name}", source)
+
+    def test_departure_and_chevron_use_the_existing_brand_palette(self):
+        for name, color in [('logout', 'brand_warm'), ('chevron', 'brand_muted')]:
+            self.assertEqual(ET.fromstring((MEDIA / f'menu_{name}.svg').read_text()).find(NS+'g').attrib['stroke'], COLORS[color])
 
     def test_current_notices_describe_original_assets_and_keep_other_licenses(self):
         notices = (ROOT / 'THIRD_PARTY_NOTICES.md').read_text()

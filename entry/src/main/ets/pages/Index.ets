@@ -413,47 +413,75 @@ Column({ space: 8 }) {
   }
 
   @Builder
+  private menuAction(label: Resource, icon: Resource, activate: () => void, enabled: boolean = true, departure: boolean = false, compact: boolean = false) {
+    Button({ type: ButtonType.Normal }) {
+      Row({ space: 10 }) {
+        Row() {
+          Image(icon).width(22).height(22).accessibilityLevel('no')
+        }.width(compact ? 32 : 36).height(compact ? 32 : 36).justifyContent(FlexAlign.Center).borderRadius(12)
+          .backgroundColor($r('app.color.brand_selected')).flexShrink(0)
+        Text(label).fontSize(16).fontWeight(FontWeight.Medium)
+          .fontColor(departure ? $r('app.color.brand_warm') : '#F2F3FA')
+          .layoutWeight(1).textAlign(TextAlign.Start).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+        if (!compact) { Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no') }
+      }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) })
+        .padding({ left: compact ? 12 : 16, right: compact ? 12 : 16, top: 8, bottom: 8 }).hitTestBehavior(HitTestMode.None)
+    }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 }).padding(0).borderRadius(18)
+      .backgroundColor($r('app.color.brand_surface')).enabled(enabled && (!departure || !this.syncing)).accessibilityText(label).onClick(activate)
+  }
+
+  @Builder
+  private menuHeading(label: Resource) {
+    Text(label).fontSize(12).fontWeight(FontWeight.Medium).fontColor($r('app.color.brand_muted'))
+      .width('100%').padding({ left: 4, top: 4, bottom: 2 })
+  }
+
+  @Builder
   morePanel() {
     Scroll() {
-    Column({ space: 16 }) {
-      Text(AppService.client?.session.userName ?? '').fontSize(24).fontColor('#F2F3FA')
-      Text(AppService.client?.session.server ?? '').fontSize(12).fontColor($r('app.color.brand_muted'))
-      Button($r('app.string.favorites')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface'))
-        .onClick(() => router.pushUrl({ url: 'pages/Favorites' }))
-      Button($r('app.string.downloads')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface'))
-        .onClick(() => router.pushUrl({ url: 'pages/Downloads' }))
-      Button({ type: ButtonType.Capsule }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Text($r('app.string.tab_library')).fontSize(16).fontWeight(FontWeight.Medium).fontColor('#F2F3FA')
-            .width('100%').textAlign(TextAlign.Center).padding({ left: 32, right: 32 })
-          Row() {
-            Image($r('app.media.nav_library_muted')).width(22).height(22).accessibilityLevel('no')
-            Blank()
-          }.width('100%').hitTestBehavior(HitTestMode.None)
+      Column({ space: 18 }) {
+        Row({ space: 14 }) {
+          Image($r('app.media.app_icon')).width(48).height(48).borderRadius(14).flexShrink(0).accessibilityLevel('no')
+          Column({ space: 4 }) {
+            Text(AppService.client?.session.userName ?? '').fontSize(22).fontWeight(FontWeight.Medium)
+              .fontColor('#F2F3FA').width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+            Text(AppService.client?.session.server ?? '').fontSize(12).fontColor($r('app.color.brand_muted'))
+              .width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+        Column({ space: 8 }) {
+          this.menuHeading($r('app.string.menu_collection'))
+          this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }))
+          this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: 'pages/Downloads' }))
+          this.menuAction($r('app.string.tab_library'), $r('app.media.nav_library_active'), () => { this.tab = 2; this.mode = ''; this.load(); })
         }.width('100%')
-      }.width('100%').height(UiLayout.buttonHeight(this.fontScale)).padding({ left: 16, right: 16 }).backgroundColor($r('app.color.brand_surface'))
-        .accessibilityText($r('app.string.tab_library')).onClick(() => { this.tab = 2; this.mode = ''; this.load(); })
-      Button($r('app.string.settings')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).onClick(() => router.pushUrl({ url: 'pages/Settings' }))
-      Button(this.syncing ? $r('app.string.syncing') : $r('app.string.sync_library')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface'))
-        .enabled(!this.syncing).onClick(() => this.sync())
-      if (this.syncing) { Button($r('app.string.cancel_sync')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => AppService.cancelSync()) }
-      Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor($r('app.color.brand_muted'))
-      Button($r('app.string.flush_changes')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).onClick(async () => { try { await AppService.flushPending(); this.pendingCount = (AppService.experience?.snapshot().pending.length ?? 0) + (AppService.experience?.snapshot().positions.length ?? 0); this.syncMessage = getContext(this).resourceManager.getStringSync($r('app.string.pending_changes').id, (AppService.experience?.snapshot().pending.length ?? 0) + (AppService.experience?.snapshot().positions.length ?? 0)); } catch (e) { this.syncMessage = errorText(e as Error); } })
-      Text(this.lastSyncedAt ? $r('app.string.last_sync', new Date(this.lastSyncedAt).toLocaleString()) : $r('app.string.not_synced'))
-        .fontSize(12).fontColor($r('app.color.brand_muted'))
-      if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor($r('app.color.brand_muted')) }
-      Button($r('app.string.accounts_servers')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).onClick(() => router.pushUrl({ url: 'pages/Accounts' }))
-      Button($r('app.string.change_account')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).enabled(!this.syncing)
-        .onClick(() => {
+        Column({ space: 8 }) {
+          this.menuHeading($r('app.string.menu_preferences'))
+          this.menuAction($r('app.string.accounts_servers'), $r('app.media.menu_accounts'), () => router.pushUrl({ url: 'pages/Accounts' }))
+          this.menuAction($r('app.string.settings'), $r('app.media.menu_settings'), () => router.pushUrl({ url: 'pages/Settings' }))
+        }.width('100%')
+        Column({ space: 8 }) {
+          this.menuHeading($r('app.string.menu_data'))
+          if (this.syncing) {
+            this.menuAction($r('app.string.syncing'), $r('app.media.menu_sync'), () => {}, false)
+          } else {
+            this.menuAction($r('app.string.sync_library'), $r('app.media.menu_sync'), () => this.sync())
+          }
+          if (this.syncing) { this.menuAction($r('app.string.cancel_sync'), $r('app.media.menu_cancel'), () => AppService.cancelSync()) }
+          this.menuAction($r('app.string.flush_changes'), $r('app.media.menu_upload'), async () => { try { await AppService.flushPending(); this.pendingCount = (AppService.experience?.snapshot().pending.length ?? 0) + (AppService.experience?.snapshot().positions.length ?? 0); this.syncMessage = getContext(this).resourceManager.getStringSync($r('app.string.pending_changes').id, this.pendingCount); } catch (e) { this.syncMessage = errorText(e as Error); } })
+          Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
+          Text(this.lastSyncedAt ? $r('app.string.last_sync', new Date(this.lastSyncedAt).toLocaleString()) : $r('app.string.not_synced'))
+            .fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
+          if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }
+        }.width('100%')
+        this.menuAction($r('app.string.change_account'), $r('app.media.menu_logout'), () => {
           AlertDialog.show({ title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
             primaryButton: { value: $r('app.string.cancel'), action: () => {} },
-            secondaryButton: { value: $r('app.string.logout'), action: async () => {
-              await this.logout();
-            } }
+            secondaryButton: { value: $r('app.string.logout'), action: async () => { await this.logout(); } }
           });
-        })
-      Text($r('app.string.version')).fontSize(12).fontColor($r('app.color.brand_muted'))
-    }.width('100%').padding({ top: 18, bottom: 18 })
+        }, true, true)
+        Text($r('app.string.version')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').textAlign(TextAlign.Center)
+      }.width('100%').padding({ top: 8, bottom: 18 })
     }.width('100%').layoutWeight(1).align(Alignment.TopStart)
   }
 
@@ -461,10 +489,12 @@ Column({ space: 8 }) {
   homePanel() {
     List({ space: 24 }) {
       ListItem() { Column({ space: 8 }) {
-    Row({ space: 12 }) {
-      Button($r('app.string.favorites')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).layoutWeight(1).backgroundColor($r('app.color.brand_surface')).onClick(() => router.pushUrl({ url: 'pages/Favorites' }))
-      Button($r('app.string.downloads')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).layoutWeight(1).backgroundColor($r('app.color.brand_surface')).onClick(() => router.pushUrl({ url: 'pages/Downloads' }))
-    }.width('100%').padding({ left: 20, right: 20, bottom: 8 })
+    Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+      Column() { this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }), true, false, true) }
+        .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+      Column() { this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: 'pages/Downloads' }), true, false, true) }
+        .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+    }.width('100%').padding({ left: 20, right: 20 })
     if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor($r('app.color.brand_muted')) }
     ForEach(this.homeFailures, (failure: HomeFailure) => {
       Row() {
