@@ -1235,6 +1235,30 @@
     {
       "name": "selected_count",
       "value": "已选择 %d 项"
+    },
+    {
+      "name": "player_seek",
+      "value": "播放进度"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "控制已锁定，点按右上角解锁"
+    },
+    {
+      "name": "player_system_group",
+      "value": "系统播放"
+    },
+    {
+      "name": "player_media_group",
+      "value": "媒体与字幕"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "倍速与连播"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "未选择"
     }
   ]
 }

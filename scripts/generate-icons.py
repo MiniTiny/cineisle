@@ -49,6 +49,19 @@ MENU = {
 }
 
 
+# Original playback symbols share the existing round strokes and optical margins.
+PLAYER = {
+    'pause': '<rect x="6" y="4.4" width="3.6" height="15.2" rx="1.2"/><rect x="14.4" y="4.4" width="3.6" height="15.2" rx="1.2"/>',
+    'next': '<path d="M5.1 4.9L15.2 12L5.1 19.1Z"/><path d="M18.8 5V19"/>',
+    'pip': '<rect x="3.4" y="4.8" width="17.2" height="14.4" rx="2.6"/><rect x="11.4" y="11.4" width="6.2" height="4.8" rx="1"/>',
+    'pip_exit': '<path d="M9.1 4.8H17.9C19.5 4.8 20.6 5.9 20.6 7.5V16.5C20.6 18.1 19.5 19.2 17.9 19.2H6.1C4.5 19.2 3.4 18.1 3.4 16.5V12.7M3.4 4.8L10.1 11.5M3.4 4.8V9.5M3.4 4.8H8.1"/>',
+    'audio': '<path d="M4.3 9H8L12.1 5.3V18.7L8 15H4.3ZM15.8 8C18.2 10 18.2 14 15.8 16M18.9 5.6C22 9 22 15 18.9 18.4"/>',
+    'subtitle': '<rect x="3.7" y="5" width="16.6" height="14" rx="3"/><path d="M7.4 10.1H10.6M7.4 13.9H10.6M13.4 10.1H16.6M13.4 13.9H16.6"/>',
+    'speed': '<path d="M4.1 17.8C2.7 12.2 5.6 5.2 12 4.2C18.4 5.2 21.3 12.2 19.9 17.8M5.1 17.8H18.9M12 13.9L16.5 8.4M7.4 8.6L8.5 9.7M12 6.9V8.2"/>',
+    'background': '<rect x="3.4" y="4.2" width="10.6" height="15.6" rx="2.8"/><path d="M7 16.7H10.4M17.2 8.2C19.8 10.1 19.8 13.9 17.2 15.8M19.8 5.9C22 9.1 22 14.9 19.8 18.1"/>',
+}
+
+
 def svg(geometry, color, filled=False):
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">\n'
             f'  <g fill="{color if filled else "none"}" stroke="{color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">\n'
@@ -67,6 +80,8 @@ def outputs():
     for name, geometry in MENU.items():
         color = colors['brand_warm'] if name == 'logout' else colors['brand_muted'] if name == 'chevron' else colors['brand_accent']
         result[f'menu_{name}.svg'] = svg(geometry, color)
+    for name, geometry in PLAYER.items():
+        result[f'player_{name}.svg'] = svg(geometry, colors['brand_accent'])
     return result
 
 

@@ -47,8 +47,8 @@ def contrast(first, second):
 class OriginalIconsTest(unittest.TestCase):
     def test_complete_family_matches_current_resource_files(self):
         expected = set(icons.outputs())
-        self.assertEqual(len(expected), 38)
-        actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_'))}
+        self.assertEqual(len(expected), 46)
+        actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_', 'player_'))}
         self.assertEqual(actual, expected)
 
     def test_generator_drift_gate_passes(self):
@@ -158,6 +158,13 @@ class OriginalIconsTest(unittest.TestCase):
         source = '\n'.join(p.read_text() for p in (ROOT / 'entry/src/main/ets').rglob('*.ets'))
         for name in icons.MENU:
             self.assertIn(f"app.media.menu_{name}", source)
+
+    def test_playback_symbols_are_distinct_and_bound_to_native_controls(self):
+        shapes = [geometry((MEDIA / f'player_{name}.svg').read_text()) for name in icons.PLAYER]
+        self.assertEqual(len(set(shapes)), len(icons.PLAYER))
+        source = (ROOT / 'entry/src/main/ets/pages/Player.ets').read_text()
+        for name in icons.PLAYER:
+            self.assertIn(f'app.media.player_{name}', source)
 
     def test_departure_and_chevron_use_the_existing_brand_palette(self):
         for name, color in [('logout', 'brand_warm'), ('chevron', 'brand_muted')]:

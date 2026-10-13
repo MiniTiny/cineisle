@@ -121,3 +121,15 @@ CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/responsive-emulator.tes
 | 真实 Jellyfin 与视频 | 已执行的服务操作与解码场景 | 其他版本、编码、转码及播放生命周期 |
 
 源码实现、构建、安装、设备 UI、真实服务和实际视频解码是不同证据。迁移差异见 [功能清单](MIGRATION.md)；发布前按实际功能补充各层验收。仓库中不保留个人设备或服务器的历史验收材料。
+
+## 播放器品牌与原生布局
+
+`node tests/brand-player.test.cjs` 使用本机ArkUI编译器执行实际播放器及共享图文按钮/分组/选择组件。覆盖播放暂停、锁定与返回、进度提交、四组选项、画中画可用性、后台开关、媒体源/音轨/字幕当前值与回调、偏好保存/恢复及忙碌禁用、七档倍速、单集连播和API 12视频比例布局；已加入全套回归。
+
+原生矩阵覆盖320×640vp和360×740vp的普通/两倍字号，以及760×280vp短横屏的普通/两倍字号。逐项滚动到完整操作并采集布局与PNG，检查图标/标题共享点击区、顶部图标中心点击、锁定后系统返回、选择当前值、分组和倍速选中态；横屏确认左右分栏和实际面板宽度，不能用全窗口宽度决定面板内按钮列数。复用隔离QA Ability，正式页面与资源逐文件相同；所有本地截图/日志/HAP/报告保留在忽略的`.local`目录。
+
+```bash
+CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-player-emulator.test.py
+```
+
+视频夹具可由ffmpeg生成640×360 H.264、双AAC音轨的有效MP4，通过`CINEISLE_VISUAL_VIDEO`传给`tests/visual-fixture-server.cjs`。启用该选项时服务支持字节范围读取和外部SRT字幕；默认无此选项时保持原有不可解码的布局夹具。测试视频只能证明对应模拟器/编码的显示、暂停及比例，不替代真实Jellyfin、其他编码、真机、画中画和后台/锁屏的完整生命周期验收。正式包覆盖安装和系统安全区单独验证。

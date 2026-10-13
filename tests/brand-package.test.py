@@ -43,8 +43,8 @@ class BrandPackageTest(unittest.TestCase):
                          (ROOT / 'AppScope/resources/base/media/app_icon.svg').read_bytes())
 
     def test_all_original_navigation_and_detail_icons_are_packaged_exactly(self):
-        files = [p for p in (ROOT / 'entry/src/main/resources/base/media').glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_'))]
-        self.assertEqual(len(files), 38)
+        files = [p for p in (ROOT / 'entry/src/main/resources/base/media').glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_', 'player_'))]
+        self.assertEqual(len(files), 46)
         for file in files:
             with self.subTest(icon=file.name):
                 self.assertEqual(self.archive.read('resources/base/media/' + file.name), file.read_bytes())

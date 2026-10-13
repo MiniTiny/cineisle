@@ -9,8 +9,12 @@ const userId = id(9), sourceId = id(10);
 const stream = [{ Type: 'Video', Index: 0, Codec: 'h264', Width: 1920, Height: 1080, BitDepth: 8 },
   { Type: 'Audio', Index: 1, Codec: 'aac', Language: 'zho', DisplayTitle: '中文 · AAC · Stereo', Channels: 2 },
   { Type: 'Subtitle', Index: 2, Codec: 'srt', Language: 'eng', DisplayTitle: 'English · SRT', IsExternal: true }];
+const videoFile=process.env.CINEISLE_VISUAL_VIDEO;
+const videoSize=videoFile?fs.statSync(videoFile).size:0;
+if(videoFile)stream.splice(2,0,{Type:'Audio',Index:2,Codec:'aac',Language:'eng',DisplayTitle:'English · AAC · Mono'});
 const source = { Id: sourceId, Name: '原始版本 · 1080p', Container: 'mp4', Size: 1024 * 1024 * 700,
   RunTimeTicks: 54000000000, MediaStreams: stream, SupportsDirectPlay: true, SupportsDirectStream: true };
+if(videoFile){source.Name='映屿布局测试 · H.264 / AAC';source.Size=videoSize;source.RunTimeTicks=6000000000;stream[0].Width=640;stream[0].Height=360;stream[1].Channels=1;stream[1].DisplayTitle='中文 · AAC · Mono';stream.at(-1).Index=3;}
 const item = (Id, Name, Type, extra = {}) => ({ Id, Name, Type, Overview: '这是隔离的界面回归测试数据，用于检查映屿图标、配色、元数据与操作入口。',
   Genres: ['剧情', '冒险'], ProductionYear: 2024, CommunityRating: 8.6, OfficialRating: 'PG-13',
   PremiereDate: '2024-01-01T00:00:00Z', Studios: [{ Name: '映屿测试工作室' }], People: [],
@@ -53,7 +57,7 @@ const server = http.createServer((req, res) => {
   else if (p.endsWith('/Items/Latest')) result = q.get('parentid') === showsId ? [show] : q.get('parentid') === moviesId ? [movie] : [movie, show];
   else if (p === '/Movies/Recommendations') result = [{ Items: [movie] }];
   else if (p === '/Persons') result = page([]);
-  else if (p.endsWith('/PlaybackInfo')) result = { MediaSources: [source], PlaySessionId: id(21) };
+  else if (p.endsWith('/PlaybackInfo')) result = { MediaSources: videoFile?[source,{...source,Id:id(11),Name:'备用媒体源 · 同一测试视频'}]:[source], PlaySessionId: id(21) };
   else if (/\/(?:User)?(FavoriteItems|PlayedItems)\//.test(p) || /\/Sessions\/Playing/.test(p)) { res.writeHead(204); res.end(); return; }
   else if (p === '/Items' || p === `/Users/${userId}/Items`) {
     let items = q.get('parentid') === showsId ? [show, season, episode] : q.get('parentid') === moviesId ? [movie, extraMovie] : catalog;
@@ -63,7 +67,15 @@ const server = http.createServer((req, res) => {
     if (q.get('includeitemtypes')) items = items.filter(x => q.get('includeitemtypes').split(',').includes(x.Type));
     const start = Number(q.get('startindex') || 0), limit = Number(q.get('limit') || items.length); result = { Items: items.slice(start, start + limit), TotalRecordCount: items.length, StartIndex: start };
   } else if (/\/Images\//.test(p)) { res.writeHead(404); res.end(); return; }
+  else if (/\/Subtitles\/\d+\/Stream\.srt$/.test(p) && videoFile) {
+    res.writeHead(200,{'Content-Type':'text/plain'});res.end('1\n00:00:00,000 --> 00:10:00,000\n映屿 · 字幕布局验证\n');return;
+  }
   else if (p.endsWith('/Download') || /\/Videos\/[^/]+\/stream$/.test(p)) {
+    if(videoFile){
+      const range=req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);let start=range?Number(range[1]):0,end=range&&range[2]?Math.min(Number(range[2]),videoSize-1):videoSize-1;
+      if(start>=videoSize||end<start){res.writeHead(416,{'Content-Range':`bytes */${videoSize}`});res.end();return;}
+      res.writeHead(range?206:200,{'Content-Type':'video/mp4','Accept-Ranges':'bytes','Content-Length':end-start+1,...(range?{'Content-Range':`bytes ${start}-${end}/${videoSize}`}:{})});fs.createReadStream(videoFile,{start,end}).pipe(res);return;
+    }
     res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': '4096' }); res.end(Buffer.alloc(4096)); return;
   }
   else {
