@@ -6,6 +6,8 @@ export class Session {
   userName: string = '';
   token: string = '';
   deviceId: string = '';
+  addresses?: string[];
+  serverName?: string;
 }
 
 export interface UserData {

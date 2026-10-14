@@ -1,3 +1,10 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandChoice } from '../components/BrandChoice';
+import { BrandState } from '../components/BrandState';
+import { BrandHeader } from '../components/BrandHeader';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandButton } from '../components/BrandButton';
+import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { MediaItem } from '../model/Models';
@@ -10,6 +17,10 @@ import { MediaCard } from '../components/MediaCard';
 @Entry
 @Component
 struct Favorites {
+  @StorageLink('cineIsleLandscape') landscape: boolean = false;
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State all: MediaItem[] = [];
   @State visibleItems: MediaItem[] = [];
@@ -87,10 +98,10 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    AlertDialog.show({ title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
-      primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('confirm'), action: () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
-      } } });
+      } }] }, this.viewportWidth, this.viewportHeight);
   }
   private async batch(items: MediaItem[], restore: boolean): Promise<void> {
     const revision = this.revision; this.busy = true; this.message = ''; const success: MediaItem[] = []; let failed = 0; let failure = '';
@@ -109,59 +120,75 @@ struct Favorites {
     this.selected = []; this.selection = false; this.message = text('batch_result', success.length, failed) + (failure ? ` · ${failure}` : ''); this.busy = false; this.filter(false);
   }
   @Builder
+  private filtersPanel() {
+      Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.favorite_filters'), icon: $r('app.media.menu_settings') })
+      BrandChoice({ label: $r('app.string.favorite_type'), icon: $r('app.media.detail_film'),
+        choices: [{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
+        selected: ['', 'Movie', 'Series', 'Episode'].indexOf(this.category),
+        onSelect: (i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); } })
+      BrandChoice({ label: $r('app.string.favorite_genre'), icon: $r('app.media.nav_star_active'),
+        choices: [{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))],
+        selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
+        onSelect: (i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); } })
+      Text($r('app.string.favorite_search')).fontSize(12).fontColor($r('app.color.brand_muted'))
+      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Row({ space: 12 }) {
+          Text($r('app.string.unwatched_only')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+          Checkbox().select(this.unwatched).selectedColor($r('app.color.brand_action')).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
+        }.width('100%').margin({ bottom: 8 })
+        BrandChoice({ label: $r('app.string.favorite_order'), icon: $r('app.media.menu_settings'),
+          choices: [{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }],
+          selected: ['name', 'nameDesc', 'continue'].indexOf(this.order),
+          onSelect: (i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); } })
+      }
+      Flex({ wrap: FlexWrap.Wrap }) {
+        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).width('100%')
+        Column() { BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_reset'), onSelect: () => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
+        Column() {
+          if (this.selection) { BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => { this.selection = false; this.selected = []; } }) }
+          else { BrandButton({ label: $r('app.string.select_items'), icon: $r('app.media.nav_check_active'), available: !this.busy, onSelect: () => { this.selection = true; this.selected = []; } }) }
+        }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+      }.width('100%')
+      if (this.selection) {
+        BrandButton({ label: $r('app.string.select_all'), icon: $r('app.media.nav_check_active'), available: !this.busy, onSelect: () => { this.selected = this.visibleItems.map((i: MediaItem) => i.Id); } })
+        Text($r('app.string.selected_count', this.selected.length)).fontSize(12).fontColor($r('app.color.brand_muted'))
+        BrandButton({ label: $r('app.string.batch_unfavorite'), icon: $r('app.media.detail_remove'), available: this.selected.length > 0 && !this.busy, destructive: true, onSelect: () => this.remove() })
+      }
+      if (this.undoItems.length) { BrandButton({ label: $r('app.string.undo'), icon: $r('app.media.menu_back'), available: !this.busy, onSelect: () => this.batch(this.undoItems, true) }) }
+      if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      if (!this.visibleItems.length && !this.busy) { BrandState({ label: this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites'), icon: $r('app.media.detail_heart') }) }
+      }.padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).width('100%').alignItems(HorizontalAlign.Start)
+  }
+  @Builder
   grid() {
     Grid(this.scroller) {
+      if (!UiLayout.separateFilters(this.viewportHeight, this.landscape)) { GridItem() { this.filtersPanel() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1) }
+
       ForEach(this.visibleItems, (item: MediaItem) => {
         GridItem() {
           Column() {
-            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
+            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).selectedColor($r('app.color.brand_action')).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
             MediaCard({ item: item, onSelect: (selected: MediaItem) => this.choose(selected) })
           }.gesture(LongPressGesture().onAction(() => { if (!this.busy) { this.selection = true; this.selected = [item.Id]; } }))
         }
       }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}:${this.selection}`)
-    }.columnsTemplate('1fr 1fr 1fr').columnsGap(12).rowsGap(16).layoutWeight(1).width('100%')
+    }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(16).layoutWeight(1).width('100%')
   }
   build() {
     Column() {
       if (this.locked) { PinGate() }
       else {
     Column({ space: 10 }) {
-      Row({ space: 8 }) {
-        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text($r('app.string.favorites')).fontColor('#F2F3FA').fontSize(22).layoutWeight(1)
-        Button($r('app.string.refresh')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.refresh())
+      BrandHeader({ label: $r('app.string.favorites'), refreshable: true, available: !this.busy, onBack: () => router.back(), onRefresh: () => this.refresh() })
+      if (UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
+        Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
-      Row() {
-        Select([{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }])
-          .selected(['', 'Movie', 'Series', 'Episode'].indexOf(this.category)).value(text(['all', 'media_movie', 'media_series', 'media_episode'][['', 'Movie', 'Series', 'Episode'].indexOf(this.category)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); })
-        Select([{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))]).enabled(this.genres.length > 0)
-          .selected(this.genres.indexOf(this.genre) + 1).value(this.genre || text('all_genres')).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); })
-      }.width('100%')
-      TextInput({ text: this.query, placeholder: text('favorite_search') }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).onChange((v: string) => { this.query = v; this.filter(); })
-      Row({ space: 8 }) {
-        Checkbox().select(this.unwatched).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
-        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA')
-        Select([{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }])
-          .selected(['name', 'nameDesc', 'continue'].indexOf(this.order)).value(text(['name_ascending', 'name_descending', 'continue_first'][['name', 'nameDesc', 'continue'].indexOf(this.order)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); })
-      }
-      Row({ space: 8 }) {
-        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).layoutWeight(1)
-        Button($r('app.string.clear_filters')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); })
-        Button(this.selection ? $r('app.string.cancel') : $r('app.string.select_items')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => { this.selection = !this.selection; this.selected = []; })
-      }
-      if (this.selection) {
-        Row({ space: 8 }) {
-          Button($r('app.string.select_all')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selected = this.visibleItems.map((i: MediaItem) => i.Id); })
-          Button($r('app.string.batch_unfavorite')).backgroundColor($r('app.color.brand_action')).enabled(this.selected.length > 0 && !this.busy).onClick(() => this.remove())
-        }
-      }
-      if (this.undoItems.length) { Button($r('app.string.undo')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).onClick(() => this.batch(this.undoItems, true)) }
-      if (this.busy) { LoadingProgress().width(24).height(24) }
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
-      if (!this.visibleItems.length && !this.busy) { Text(this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites')).fontColor($r('app.color.brand_muted')) }
       this.grid()
     }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

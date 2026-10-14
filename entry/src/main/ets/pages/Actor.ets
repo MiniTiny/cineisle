@@ -1,3 +1,9 @@
+import { BrandState } from '../components/BrandState';
+import { BrandHeader } from '../components/BrandHeader';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandButton } from '../components/BrandButton';
+import { BrandChoice } from '../components/BrandChoice';
+import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { MediaItem, Person } from '../model/Models';
@@ -11,6 +17,10 @@ interface ActorRoute { personId: string; personName: string }
 @Entry
 @Component
 struct Actor {
+  @StorageLink('cineIsleLandscape') landscape: boolean = false;
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State person: Person = { Id: '', Name: '' };
   @State overview: string = '';
@@ -80,8 +90,35 @@ struct Actor {
     return Array.from(new Set(roles)).join('、');
   }
   @Builder
+  private filtersPanel() {
+      Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.actor_profile'), icon: $r('app.media.nav_user_active') })
+      BrandButton({ label: this.followed ? $r('app.string.unfollow') : $r('app.string.follow'), icon: this.followed ? $r('app.media.detail_heart_filled') : $r('app.media.detail_heart'), primary: this.followed, onSelect: () => this.follow() })
+      if (this.biographyLoading) { BrandState({ label: $r('app.string.biography_loading'), loading: true }) }
+      if (this.overview) { Text(this.overview).fontColor('#F2F3FA').fontSize(14).width('100%') }
+      BrandHeading({ label: $r('app.string.actor_credits'), icon: $r('app.media.nav_library_active') })
+      Row({ space: 8 }) {
+        Checkbox().select(this.unwatched).selectedColor($r('app.color.brand_action')).onChange((v: boolean) => { this.unwatched = v; })
+        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA').layoutWeight(1)
+      }.width('100%')
+      BrandChoice({ label: $r('app.string.actor_tags'), icon: $r('app.media.nav_star_active'),
+        choices: [{ value: text('all_tags') }, ...(this.profile?.tags ?? []).map((t: ActorTag): SelectOption => ({ value: this.tagName(t) }))],
+        selected: (this.profile?.tags ?? []).findIndex((t: ActorTag) => t.key === this.tag) + 1,
+        onSelect: (i: number) => { this.tag = i ? this.profile!.tags[i - 1].key : ''; } })
+      if (this.tag) {
+        Text($r('app.string.tag_evidence', this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.length ?? 0)).fontColor($r('app.color.brand_muted')).fontSize(12)
+      }
+      Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
+      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      if (this.busy && !this.biographyLoading) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+  }
+  @Builder
   credits() {
     List({ space: 14 }) {
+      ListItem() { this.filtersPanel() }
+
+      if (!this.busy && !this.shown().length) { ListItem() { BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_library_active') }) } }
       ForEach(this.shown(), (item: MediaItem) => {
         ListItem() {
           Column({ space: 8 }) {
@@ -97,29 +134,10 @@ struct Actor {
       if (this.locked) { PinGate() }
       else {
     Column({ space: 10 }) {
-      Row({ space: 8 }) {
-        Button($r('app.string.back')).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text(this.person.Name).fontColor('#F2F3FA').fontSize(22).layoutWeight(1)
-        Button(this.followed ? $r('app.string.unfollow') : $r('app.string.follow')).backgroundColor($r('app.color.brand_action')).onClick(() => this.follow())
-      }
-      if (this.biographyLoading) { Text($r('app.string.biography_loading')).fontColor($r('app.color.brand_muted')) }
-      if (this.overview) { Scroll() { Text(this.overview).fontColor('#F2F3FA').fontSize(14) }.height(100).width('100%') }
-      Row() {
-        Checkbox().select(this.unwatched).onChange((v: boolean) => { this.unwatched = v; })
-        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA')
-        Select([{ value: text('all_tags') }, ...(this.profile?.tags ?? []).map((t: ActorTag): SelectOption => ({ value: this.tagName(t) }))])
-          .value(this.currentTagLabel()).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface'))
-          .selected((this.profile?.tags ?? []).findIndex((t: ActorTag) => t.key === this.tag) + 1).onSelect((i: number) => { this.tag = i ? this.profile!.tags[i - 1].key : ''; })
-      }
-      if (this.tag) {
-        Text($r('app.string.tag_evidence', this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.length ?? 0)).fontColor($r('app.color.brand_muted')).fontSize(12)
-      }
-      Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
-      if (this.busy) { LoadingProgress().width(24).height(24) }
+      BrandHeader({ label: this.person.Name, onBack: () => router.back() })
       this.credits()
     }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
-    }.width('100%').height('100%')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
 }

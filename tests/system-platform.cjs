@@ -55,7 +55,7 @@ state.install = platform => {
     PiPState: { STARTED: 2, STOPPED: 4, ABOUT_TO_RESTORE: 5, ERROR: 6 },
     async create(config) { if (state.createPiPWait) await state.createPiPWait; const window = new Window(config); state.windows.push(window); return window; } });
   platform.set('@ohos.app.ability.UIAbility', class {});
-  platform.set('@ohos.app.ability.ConfigurationConstant', { ColorMode: { COLOR_MODE_DARK: 0 } });
+  platform.set('@ohos.app.ability.ConfigurationConstant', { ColorMode: { COLOR_MODE_DARK: 0 }, Direction: { DIRECTION_VERTICAL:0,DIRECTION_HORIZONTAL:1,DIRECTION_NOT_SET:-1 } });
   platform.set('@ohos.window', {});
 };
 state.reset = () => {

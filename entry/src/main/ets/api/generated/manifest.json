@@ -314,10 +314,75 @@
           "method": "DELETE"
         }
       ]
+    },
+    {
+      "operationId": "GetQuickConnectEnabled",
+      "method": "GET",
+      "path": "/QuickConnect/Enabled",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/QuickConnect/Enabled",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "InitiateQuickConnect",
+      "method": "POST",
+      "path": "/QuickConnect/Initiate",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/QuickConnect/Initiate",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "GetQuickConnectState",
+      "method": "GET",
+      "path": "/QuickConnect/Connect",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/QuickConnect/Connect",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "AuthenticateWithQuickConnect",
+      "method": "POST",
+      "path": "/Users/AuthenticateWithQuickConnect",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/AuthenticateWithQuickConnect",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "operationId": "GetCurrentUser",
+      "method": "GET",
+      "path": "/Users/Me",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/Me",
+          "method": "GET"
+        }
+      ]
     }
   ],
-  "modelAndRequestDefinitions": 111,
-  "modelDefinitions": 88,
+  "modelAndRequestDefinitions": 115,
+  "modelDefinitions": 90,
   "limitations": [
     "Selected application operations only; not a full Jellyfin SDK",
     "Binary responses are URL builders consumed by Image/AVPlayer/system download",
@@ -332,7 +397,15 @@
       "schemaSha256": "fbad603f55b6381c5f7c6552409497c050509ca28d32ec8d5015702f87e429bd",
       "schemaVersion": "10.8.9",
       "source": "https://media.githubusercontent.com/media/jellyfin/jellyfin-sdk-typescript/v0.8.0/openapi.json",
-      "serverVersionPrefix": "10.8."
+      "serverVersionPrefix": "10.8.",
+      "operationIdAliases": {
+        "GetQuickConnectEnabled": "GetEnabled",
+        "InitiateQuickConnect": "Initiate",
+        "GetQuickConnectState": "Connect"
+      },
+      "methodOverrides": {
+        "InitiateQuickConnect": "GET"
+      }
     }
   ]
 }

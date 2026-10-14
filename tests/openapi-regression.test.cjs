@@ -305,6 +305,17 @@ test('generated optional queries keep false/zero and omit null/undefined', async
   assert.equal(param('includeExternalContent'), 'false'); assert.equal(param('includeHidden'), null); assert.equal(param('userId'), null);
   assert.deepEqual(url().searchParams.getAll('presetViews'), ['movies', 'tvshows']);
 });
+test('Quick Connect and saved-account validation use all new generated operations', async () => {
+  const api = new JellyfinApi(new NativeHttpTransport(session()));
+  queue.push(response(true)); assert.equal(await api.getQuickConnectEnabled(), true); route('GetQuickConnectEnabled', '/QuickConnect/Enabled');
+  queue.push(response({ Code: '123456', Secret: 'fixture-secret', Authenticated: false })); await api.initiateQuickConnect(); route('InitiateQuickConnect', '/QuickConnect/Initiate', 'POST'); assert.equal(Object.hasOwn(last().options, 'extraData'), false);
+  queue.push(response({ Authenticated: true })); await api.getQuickConnectState({ secret: 'fixture secret&' }); route('GetQuickConnectState', '/QuickConnect/Connect'); assert.equal(param('secret'), 'fixture secret&');
+  queue.push(response({ User: { Id: 'account-a' }, AccessToken: 'fixture-token' })); await api.authenticateWithQuickConnect({ body: { Secret: 'fixture-secret' } }); route('AuthenticateWithQuickConnect', '/Users/AuthenticateWithQuickConnect', 'POST'); assert.deepEqual(JSON.parse(last().options.extraData), { Secret: 'fixture-secret' });
+  queue.push(response({ Id: 'account-a' })); await api.getCurrentUser(); route('GetCurrentUser', '/Users/Me');
+});
+test('10.8 Quick Connect initiation uses pinned GET method and operation aliases', async () => {
+  const api = new JellyfinApi(new NativeHttpTransport(session())); api.setServerVersion('10.8.13'); queue.push(response({ Code: '123456' })); await api.initiateQuickConnect(); assert.equal(last().options.method, 'GET'); assert.equal(url().pathname, '/jellyfin/QuickConnect/Initiate');
+});
 test('selected operation routes/methods and schema hash match the vendored official specification', () => {
   assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'openapi', config.schema))).digest('hex'), config.schemaSha256);
   assert.equal(spec.info.version, '10.10.0');
@@ -377,7 +388,7 @@ test('restored session shares version discovery across concurrent home requests 
 test('failed discovery sends no action and can be retried without duplicate writes', async () => {
   const client = new JellyfinClient(session()); queue.push(new Error('offline'));
   await assert.rejects(client.favorite('movie', true), /offline/); assert.equal(requests.length, 1);
-  queue.push(response({ Version: '10.8.13' }), response({}, 204)); await client.favorite('movie', true);
+  queue.push(response({ Id: 'server-a', Version: '10.8.13' }), response({}, 204)); await client.favorite('movie', true);
   assert.deepEqual(requests.map(r => r.options.method), ['GET', 'GET', 'POST']);
   assert.equal(url().pathname, '/jellyfin/Users/account-a/FavoriteItems/movie');
 });
@@ -396,9 +407,9 @@ test('malformed server versions fail before sending login credentials or media r
     await assert.rejects(JellyfinClient.login(session().server, 'user', 'fixture-password'), /api_response_invalid/);
     assert.equal(requests.length, before + 1); assert.equal(last().options.method, 'GET');
   }
-  const client = new JellyfinClient(session()); queue.push(response({ Version: 'invalid' }));
+  const client = new JellyfinClient(session()); queue.push(response({ Id: 'server-a', Version: 'invalid' }));
   await assert.rejects(client.latest(), /api_response_invalid/);
-  queue.push(response({ Version: '10.10.0' }), response([film])); await client.latest();
+  queue.push(response({ Id: 'server-a', Version: '10.10.0' }), response([film])); await client.latest();
   assert.equal(url().pathname, '/jellyfin/Items/Latest');
 });
 test('version selection uses a complete minor prefix and remains local to each API instance', async () => {
@@ -435,7 +446,7 @@ test('compatibility manifest matches historical OpenAPI and its fingerprint', ()
     const old = JSON.parse(bytes);
     for (const operation of manifest.operations) {
       const route = operation.compatibility.find(r => r.serverVersionPrefix === profile.serverVersionPrefix);
-      assert.equal(old.paths[route.path][route.method.toLowerCase()].operationId, operation.operationId);
+      assert.equal(old.paths[route.path][route.method.toLowerCase()].operationId, profile.operationIdAliases?.[operation.operationId] || operation.operationId);
     }
     assert.equal(manifest.operations.filter(o => o.compatibility[0].path !== o.path).length, 8);
   }

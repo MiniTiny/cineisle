@@ -1,3 +1,8 @@
+import { BrandState } from '../components/BrandState';
+import { BrandButton } from '../components/BrandButton';
+import { BrandHeading } from '../components/BrandHeading';
+import { PlayerChoice } from '../components/PlayerChoice';
+import { UiLayout } from '../utils/UiLayout';
 import { AppLock } from '../service/AppLock';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
@@ -13,6 +18,13 @@ import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 @Entry
 @Component
 struct Player {
+  @StorageLink('cineIsleFontScale') fontScale: number = 1;
+  @State viewportWidth: number = 360;
+  @State viewportHeight: number = 800;
+  @State controlWidth: number = 360;
+  @State surfaceWidth: number = 360;
+  @State surfaceHeight: number = 200;
+  @State videoAspect: number = 16 / 9;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @State route: PlaybackRoute = new PlaybackRoute();
   @State message: string = '';
@@ -57,7 +69,7 @@ struct Player {
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
     this.controller = new PlaybackController(AppService.client, {
       state: (state: string) => { if (this.alive) { this.state = state; this.system?.sync(true); } },
-      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; this.speed = this.controller?.snapshot().speed ?? 1; this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
+      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
@@ -177,107 +189,199 @@ struct Player {
     Column() {
       if (this.locked) { PinGate() }
       else {
-    Column({ space: 10 }) {
-      Row() {
-        Button($r('app.string.back')).enabled(!this.controlsLocked).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).maxLines(2).layoutWeight(1).margin({ left: 12 })
-      }.padding(12).width('100%')
-      Stack({ alignContent: Alignment.Bottom }) {
-        XComponent({ id: 'playbackSurface', type: XComponentType.SURFACE, controller: this.surface })
-          .width('100%').height('100%')
-          .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); this.controller?.open(this.route, this.surfaceId); })
-        if (this.subtitle) {
-          Text(this.subtitle).fontSize(20).fontColor('#FFFFFF').textAlign(TextAlign.Center)
-            .backgroundColor('#99000000').padding(8).margin({ bottom: 16 }).width('94%')
-        }
-      }.width('100%').layoutWeight(1)
-      if (!this.controlsLocked) {
-      Row({ space: 8 }) {
-        Text(this.clock(this.playbackPosition)).fontColor('#FFFFFF').fontSize(12)
-        Slider({ value: this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 }).layoutWeight(1)
-          .enabled(!this.busy && this.duration > 0)
-          .onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.controller?.seek(value); } })
-        Text(this.clock(this.duration)).fontColor('#FFFFFF').fontSize(12)
-      }.padding({ left: 12, right: 12 })
-      Row({ space: 8 }) {
-        Button(this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play')).enabled(!this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state))
-          .onClick(() => { this.toggle(); })
-        Button($r('app.string.playback_options')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.options = !this.options; })
-        if (this.route.item.Type === 'Episode') { Button($r('app.string.next_episode')).enabled(!this.busy && this.state !== 'released').onClick(() => { this.system?.next(); }) }
-      }
-        Button($r('app.string.controls_lock')).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.controlsLocked = true; this.options = false; })
-      } else {
-        Button($r('app.string.controls_unlock')).backgroundColor($r('app.color.brand_action')).onClick(() => { this.controlsLocked = false; })
-      }
-      if (this.options && !this.controlsLocked) {
-        Scroll() {
-          Column({ space: 10 }) {
-            Button(this.pipActive ? $r('app.string.pip_exit') : $r('app.string.pip_enter'))
-              .enabled(this.systemReady && this.pipSupported && !this.busy && ['prepared', 'playing', 'paused'].includes(this.state))
-              .onClick(() => { if (this.pipActive) { this.system?.stopPiP(); } else { this.system?.startPiP(); } })
-            if (!this.pipSupported) { Text($r('app.string.pip_unavailable')).fontColor($r('app.color.brand_muted')).fontSize(12) }
-            Row({ space: 12 }) {
-              Text($r('app.string.background_playback')).fontColor('#FFFFFF')
-              Toggle({ type: ToggleType.Switch, isOn: this.backgroundEnabled }).enabled(this.systemReady)
-                .onChange((value: boolean) => { this.system?.setBackground(value); })
-            }
-            Text($r('app.string.background_playback_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
-            if (!this.route.offline && this.route.sources.length > 0) {
-              Text($r('app.string.media_source')).fontColor($r('app.color.brand_muted'))
-              Select(this.route.sources.map((source: MediaSource, index: number)  : SelectOption => ({ value: source.Name || `${source.Container || text('media_source')} ${index + 1}` })))
-                .selected(this.route.sources.findIndex((source: MediaSource) => source.Id === this.route.mediaSourceId)).enabled(!this.busy)
-                .onSelect((index: number) => { this.source(index); })
-            }
-            Text($r('app.string.audio_track')).fontColor($r('app.color.brand_muted'))
-            if (this.audio.length) {
-              Select(this.audio.map((track: TrackChoice)  : SelectOption => ({ value: track.label })))
-                .selected(this.audio.findIndex((track: TrackChoice) => track.key === this.audioKey)).enabled(!this.busy)
-                .onSelect((index: number) => { this.track(this.audio[index].key, true); })
-            } else { Text($r('app.string.no_audio_tracks')).fontColor($r('app.color.brand_muted')).fontSize(12) }
-            Text($r('app.string.subtitle_track')).fontColor($r('app.color.brand_muted'))
-            Select([{ value: text('subtitles_off') }, ...this.subtitles.map((track: TrackChoice)  : SelectOption => ({ value: track.label }))])
-              .selected(this.subtitles.findIndex((track: TrackChoice) => track.key === this.subtitleKey) + 1).enabled(!this.busy)
-              .onSelect((index: number) => { this.track(index === 0 ? '' : this.subtitles[index - 1].key, false); })
-            Text($r('app.string.subtitle_format_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
-            Text($r('app.string.playback_language_preferences')).fontColor('#FFFFFF')
-            Text($r('app.string.preferred_audio_language')).fontColor($r('app.color.brand_muted'))
-            TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') }).maxLength(63)
-              .enabled(!this.settingsBusy).onChange((value: string) => { this.audioLanguage = value; })
-            Text($r('app.string.preferred_subtitle_language')).fontColor($r('app.color.brand_muted'))
-            TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') }).maxLength(63)
-              .enabled(!this.settingsBusy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
-            Row({ space: 12 }) {
-              Text($r('app.string.preferred_subtitles_off')).fontColor('#FFFFFF')
-              Toggle({ type: ToggleType.Switch, isOn: this.subtitlesOff }).enabled(!this.settingsBusy)
-                .onChange((value: boolean) => { this.subtitlesOff = value; })
-            }
-            Row({ space: 8 }) {
-              Button($r('app.string.save_playback_preferences')).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(); })
-              Button($r('app.string.reset_playback_preferences')).enabled(!this.settingsBusy && !this.busy).onClick(() => { this.savePreferences(true); })
-            }
-            Text($r('app.string.playback_preferences_hint')).fontColor($r('app.color.brand_muted')).fontSize(12)
-            if (this.settingsMessage) { Text(this.settingsMessage).fontColor('#FFCF8F').fontSize(12) }
-            Row({ space: 8 }) {
-              ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
-                Button(`${speed}×`).backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
-                  .onClick(() => { this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); })
-              })
-            }
-            if (this.route.item.Type === 'Episode') {
-              Row({ space: 12 }) {
-                Text($r('app.string.auto_next')).fontColor('#FFFFFF')
-                Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).onChange((value: boolean) => { this.autoNext = value; })
-              }
-            }
+        Column({ space: 8 }) {
+          Row({ space: 12 }) {
+            Button({ type: ButtonType.Normal }) {
+              Image($r('app.media.menu_back')).width(24).height(24).accessibilityLevel('no')
+            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface'))
+              .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => router.back())
+            Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
+              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+            Button({ type: ButtonType.Normal }) {
+              Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock'))
+                .width(24).height(24).accessibilityLevel('no')
+            }.width(44).height(44).padding(0).borderRadius(14)
+              .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+              .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
+              .onClick(() => { this.controlsLocked = !this.controlsLocked; if (this.controlsLocked) { this.options = false; } })
           }.padding(12).width('100%')
-        }.height(250).width('100%')
+          Flex({ direction: this.viewportWidth > this.viewportHeight ? FlexDirection.Row : FlexDirection.Column,
+            alignItems: ItemAlign.Stretch }) {
+          Stack({ alignContent: Alignment.Center }) {
+            XComponent({ id: 'playbackSurface', type: XComponentType.SURFACE, controller: this.surface })
+              .width(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect).width)
+              .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect).height)
+              .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); this.controller?.open(this.route, this.surfaceId); })
+            if (this.subtitle) {
+              Column() {
+                Text(this.subtitle).fontSize(20).fontColor('#FFFFFF').textAlign(TextAlign.Center)
+                  .backgroundColor('#99000000').padding(8).width('94%')
+              }.width('100%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Center)
+                .padding({ bottom: 16 }).hitTestBehavior(HitTestMode.None)
+            }
+          }.layoutWeight(1).backgroundColor('#000000')
+            .margin({ right: this.viewportWidth > this.viewportHeight ? 12 : 0, bottom: this.viewportWidth > this.viewportHeight ? 0 : 8 })
+            .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
+          Scroll() {
+            Column({ space: 12 }) {
+              if (!this.controlsLocked) {
+                Column({ space: 12 }) {
+                  Row({ space: 8 }) {
+                    Text(this.clock(this.playbackPosition)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
+                    Slider({ value: this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
+                      .layoutWeight(1).selectedColor($r('app.color.brand_accent')).trackColor($r('app.color.brand_surface'))
+                      .blockColor($r('app.color.brand_accent')).enabled(!this.busy && this.duration > 0)
+                      .accessibilityText($r('app.string.player_seek'))
+                      .onChange((value: number, mode: SliderChangeMode) => {
+                        if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.controller?.seek(value); }
+                      })
+                    Text(this.clock(this.duration)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
+                  }.width('100%')
+                  Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+                    Column() {
+                      BrandButton({ label: this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play'),
+                        icon: this.state === 'playing' ? $r('app.media.player_pause') : $r('app.media.detail_play'), primary: true,
+                        available: !this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state),
+                        onSelect: () => { this.toggle(); } })
+                    }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+                    Column() {
+                      BrandButton({ label: $r('app.string.playback_options'), icon: $r('app.media.menu_settings'), primary: this.options,
+                        onSelect: () => { this.options = !this.options; } })
+                    }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+                  }.width('100%')
+                }.width('100%').padding(12).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+                if (this.options) {
+                  this.systemOptions()
+                  this.mediaOptions()
+                  this.languageOptions()
+                  this.queueOptions()
+                }
+              } else {
+                Text($r('app.string.player_locked_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+              }
+              if (this.busy) { BrandState({ label: $r('app.string.playback_loading'), loading: true }) }
+              if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
+              if (this.reportMessage) { Text(this.reportMessage).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
+              Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint'))
+                .fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+            }.padding({ left: 12, right: 12, bottom: 12 }).width('100%').alignItems(HorizontalAlign.Start)
+          }.width(this.viewportWidth > this.viewportHeight ? Math.min(320, this.viewportWidth * 0.45) : '100%')
+            .height(this.viewportWidth > this.viewportHeight ? '100%' : UiLayout.playerControls(this.viewportHeight, this.fontScale, this.options && !this.controlsLocked))
+            .align(Alignment.TopStart).onAreaChange((_old: Area, area: Area) => { this.controlWidth = Number.parseFloat(String(area.width)); })
+          }.width('100%').layoutWeight(1)
+        }.width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
-      if (this.busy) { Text($r('app.string.playback_loading')).fontColor($r('app.color.brand_muted')) }
-      if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(12).padding(8) }
-      if (this.reportMessage) { Text(this.reportMessage).fontColor('#FF9F9F').fontSize(12) }
-      Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).padding(8)
-    }.width('100%').height('100%').backgroundColor('#000000')
+    }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
+      this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
+    })
+  }
+
+  @Builder
+  systemOptions() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.player_system_group'), icon: $r('app.media.player_background') })
+      BrandButton({ label: this.pipActive ? $r('app.string.pip_exit') : $r('app.string.pip_enter'),
+        icon: this.pipActive ? $r('app.media.player_pip_exit') : $r('app.media.player_pip'), primary: this.pipActive,
+        available: this.systemReady && this.pipSupported && !this.busy && ['prepared', 'playing', 'paused'].includes(this.state),
+        onSelect: () => { if (this.pipActive) { this.system?.stopPiP(); } else { this.system?.startPiP(); } } })
+      if (!this.pipSupported) { Text($r('app.string.pip_unavailable')).fontColor($r('app.color.brand_muted')).fontSize(12) }
+      Row({ space: 12 }) {
+        Text($r('app.string.background_playback')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Toggle({ type: ToggleType.Switch, isOn: this.backgroundEnabled }).enabled(this.systemReady)
+          .selectedColor($r('app.color.brand_action')).switchPointColor($r('app.color.brand_accent'))
+          .accessibilityText($r('app.string.background_playback')).onChange((value: boolean) => { this.system?.setBackground(value); })
+      }.width('100%')
+      Text($r('app.string.background_playback_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  mediaOptions() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.player_media_group'), icon: $r('app.media.nav_library_active') })
+      if (!this.route.offline && this.route.sources.length > 0) {
+        PlayerChoice({ label: $r('app.string.media_source'), icon: $r('app.media.nav_library_active'),
+          choices: this.route.sources.map((source: MediaSource, index: number): SelectOption => ({ value: source.Name || `${source.Container || text('media_source')} ${index + 1}` })),
+          selected: this.route.sources.findIndex((source: MediaSource) => source.Id === this.route.mediaSourceId),
+          available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.source(index); } })
       }
-    }.width('100%').height('100%')
+      if (this.audio.length) {
+        PlayerChoice({ label: $r('app.string.audio_track'), icon: $r('app.media.player_audio'),
+          choices: this.audio.map((track: TrackChoice): SelectOption => ({ value: track.label })),
+          selected: this.audio.findIndex((track: TrackChoice) => track.key === this.audioKey),
+          available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(this.audio[index].key, true); } })
+      } else {
+        BrandHeading({ label: $r('app.string.audio_track'), icon: $r('app.media.player_audio') })
+        BrandState({ label: $r('app.string.no_audio_tracks'), icon: $r('app.media.player_audio') })
+      }
+      PlayerChoice({ label: $r('app.string.subtitle_track'), icon: $r('app.media.player_subtitle'),
+        choices: [{ value: text('subtitles_off') }, ...this.subtitles.map((track: TrackChoice): SelectOption => ({ value: track.label }))],
+        selected: this.subtitles.findIndex((track: TrackChoice) => track.key === this.subtitleKey) + 1,
+        available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(index === 0 ? '' : this.subtitles[index - 1].key, false); } })
+      Text($r('app.string.subtitle_format_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  languageOptions() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.playback_language_preferences'), icon: $r('app.media.menu_settings') })
+      Text($r('app.string.preferred_audio_language')).fontColor($r('app.color.brand_muted')).fontSize(14)
+      TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
+        .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface'))
+        .enabled(!this.settingsBusy && !this.busy).onChange((value: string) => { this.audioLanguage = value; })
+      Text($r('app.string.preferred_subtitle_language')).fontColor($r('app.color.brand_muted')).fontSize(14)
+      TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
+        .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface'))
+        .enabled(!this.settingsBusy && !this.busy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
+      Row({ space: 12 }) {
+        Text($r('app.string.preferred_subtitles_off')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Toggle({ type: ToggleType.Switch, isOn: this.subtitlesOff }).enabled(!this.settingsBusy && !this.busy)
+          .selectedColor($r('app.color.brand_action')).switchPointColor($r('app.color.brand_accent'))
+          .accessibilityText($r('app.string.preferred_subtitles_off')).onChange((value: boolean) => { this.subtitlesOff = value; })
+      }.width('100%')
+      Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+        Column() {
+          BrandButton({ label: $r('app.string.save_playback_preferences'), icon: $r('app.media.menu_save'), primary: true,
+            available: !this.settingsBusy && !this.busy, onSelect: () => { this.savePreferences(); } })
+        }.width(this.controlWidth >= 480 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+        Column() {
+          BrandButton({ label: $r('app.string.reset_playback_preferences'), icon: $r('app.media.menu_reset'),
+            available: !this.settingsBusy && !this.busy, onSelect: () => { this.savePreferences(true); } })
+        }.width(this.controlWidth >= 480 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+      }.width('100%')
+      Text($r('app.string.playback_preferences_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      if (this.settingsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.settingsMessage) { Text(this.settingsMessage).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
+    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  queueOptions() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.player_queue_group'), icon: $r('app.media.player_speed') })
+      Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+        ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
+          Column() {
+            Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
+              .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)
+              .backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+              .accessibilityText(`${speed}×`).onClick(() => { this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); })
+          }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '31%' : '48%').margin({ bottom: 8 })
+        })
+      }.width('100%')
+      if (this.route.item.Type === 'Episode') {
+        Row({ space: 12 }) {
+          Text($r('app.string.auto_next')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+          Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).selectedColor($r('app.color.brand_action'))
+            .switchPointColor($r('app.color.brand_accent')).accessibilityText($r('app.string.auto_next'))
+            .onChange((value: boolean) => { this.autoNext = value; })
+        }.width('100%')
+        BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
+          available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
+      }
+    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
   }
 }

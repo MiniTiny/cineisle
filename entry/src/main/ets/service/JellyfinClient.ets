@@ -1,9 +1,10 @@
 import util from '@ohos.util';
 import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../model/Models';
+import { addresses } from '../utils/Accounts';
 import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { JellyfinApi, getItemsFromQuery } from '../api/generated/JellyfinApi';
-import { BaseItemKind, ImageType, ItemFields, MediaType, PlayMethod, RecommendationDto } from '../api/generated/Models';
+import { BaseItemKind, ImageType, ItemFields, MediaType, PlayMethod, RecommendationDto, AuthenticationResult, PublicSystemInfo, QuickConnectResult } from '../api/generated/Models';
 import { itemPage, listItems, mediaItem, mediaItems, playbackInfo } from '../api/DomainMapping';
 
 // Stable business facade. All application wire operations come from pinned OpenAPI.
@@ -25,8 +26,16 @@ export class JellyfinClient {
     this.versionResolved = true;
   }
 
+  onEndpointChange(listener: (address: string) => void): void { this.transport.endpointChanged = listener; }
+  static async inspectServer(server: string): Promise<PublicSystemInfo> {
+    const session = new Session(); session.server = normalizeServer(server); session.deviceId = util.generateRandomUUID();
+    const info = await new JellyfinClient(session).api.getPublicSystemInfo();
+    if (typeof info?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(info.Id) || typeof info.Version !== 'string' || (info.ServerName != null && typeof info.ServerName !== 'string')) { throw new Error('login_response_invalid'); }
+    return info;
+  }
   private async discoverVersion(): Promise<void> {
     const info = await this.api.getPublicSystemInfo();
+    if (info?.Id !== this.session.serverId) { throw new Error('server_identity_mismatch'); }
     this.useServerVersion(info?.Version ?? '');
   }
 
@@ -44,19 +53,43 @@ export class JellyfinClient {
     return this.transport.request<T>(path, method, params, body);
   }
 
-  static async login(server: string, name: string, password: string): Promise<JellyfinClient> {
+  static async login(server: string, name: string, password: string, expectedServerId: string = '', candidates: string[] = []): Promise<JellyfinClient> {
     const session = new Session();
-    session.server = normalizeServer(server);
+    session.server = normalizeServer(server); session.serverId = expectedServerId; session.addresses = addresses(Array.from(new Set([session.server, ...candidates])));
     session.deviceId = util.generateRandomUUID();
     const client = new JellyfinClient(session);
     const info = await client.api.getPublicSystemInfo();
     client.useServerVersion(info?.Version ?? '');
+    if (expectedServerId && info?.Id !== expectedServerId) { throw new Error('server_identity_mismatch'); }
     const result = await client.api.authenticateUserByName({ body: { Username: name.trim(), Pw: password } });
-    if (typeof info?.Id !== 'string' || !info.Id || typeof result?.User?.Id !== 'string' || !result.User.Id ||
-      typeof result.AccessToken !== 'string' || !result.AccessToken || /["\r\n]/.test(result.AccessToken) ||
-      (result.User.Name != undefined && typeof result.User.Name !== 'string')) { throw new Error('login_response_invalid'); }
-    session.serverId = info.Id; session.userId = result.User.Id; session.userName = result.User.Name ?? ''; session.token = result.AccessToken;
+    client.acceptAuthentication(info, result);
     return client;
+  }
+
+  acceptAuthentication(info: PublicSystemInfo, result: AuthenticationResult): void {
+    if (typeof info?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(info.Id) || typeof result?.User?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(result.User.Id) ||
+      typeof result.AccessToken !== 'string' || !result.AccessToken || /["\r\n]/.test(result.AccessToken) || (result.ServerId != null && result.ServerId !== info.Id) ||
+      (result.User.Name != null && typeof result.User.Name !== 'string')) { throw new Error('login_response_invalid'); }
+    this.session.serverId = info.Id; this.session.userId = result.User.Id; this.session.userName = result.User.Name ?? '';
+    this.session.token = result.AccessToken; this.session.serverName = info.ServerName ?? ''; this.session.addresses = [this.session.server];
+  }
+  static async quickClient(server: string, expectedServerId: string = '', candidates: string[] = []): Promise<JellyfinClient> {
+    const session = new Session(); session.server = normalizeServer(server); session.serverId = expectedServerId; session.addresses = addresses(Array.from(new Set([session.server, ...candidates]))); session.deviceId = util.generateRandomUUID(); const client = new JellyfinClient(session);
+    const info = await client.api.getPublicSystemInfo();
+    if (typeof info?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(info.Id)) { throw new Error('login_response_invalid'); }
+    if (expectedServerId && info.Id !== expectedServerId) { throw new Error('server_identity_mismatch'); }
+    client.useServerVersion(info.Version ?? ''); client.session.serverId = info.Id; client.session.serverName = info.ServerName ?? ''; return client;
+  }
+  async quickEnabled(): Promise<boolean> { const enabled = await this.api.getQuickConnectEnabled(); if (typeof enabled !== 'boolean') { throw new Error('api_response_invalid'); } return enabled; }
+  async quickInitiate(): Promise<QuickConnectResult> { return this.api.initiateQuickConnect(); }
+  async quickState(secret: string): Promise<QuickConnectResult> { return this.api.getQuickConnectState({ secret: secret }); }
+  async quickAuthenticate(secret: string): Promise<void> {
+    const result = await this.api.authenticateWithQuickConnect({ body: { Secret: secret } });
+    this.acceptAuthentication({ Id: this.session.serverId, ServerName: this.session.serverName }, result);
+  }
+  async validateAccount(): Promise<void> {
+    await this.ready(); const user = await this.api.getCurrentUser(); if (user?.Id !== this.session.userId || (user.Name != null && typeof user.Name !== 'string')) { throw new Error('login_response_invalid'); }
+    this.session.userName = user.Name ?? this.session.userName;
   }
 
   async libraries(): Promise<MediaItem[]> {

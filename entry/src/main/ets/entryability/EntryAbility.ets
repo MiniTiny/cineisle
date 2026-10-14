@@ -1,11 +1,20 @@
+import { Configuration } from '@ohos.app.ability.Configuration';
+import { UiLayout } from '../utils/UiLayout';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import window from '@ohos.window';
+import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
 import { SystemPlayback } from '../service/SystemPlayback';
 export default class EntryAbility extends UIAbility {
   private main: window.Window | undefined = undefined;
+  onConfigurationUpdated(configuration: Configuration): void {
+    if (!configuration || configuration.fontSizeScale !== undefined) { AppStorage.setOrCreate('cineIsleFontScale', UiLayout.scale(configuration?.fontSizeScale)); }
+    if (configuration?.direction !== undefined) { AppStorage.setOrCreate('cineIsleLandscape', configuration.direction === ConfigurationConstant.Direction.DIRECTION_HORIZONTAL); }
+  }
   onWindowStageCreate(stage: window.WindowStage): void {
+    this.onConfigurationUpdated(this.context.config);
+    AppService.closePlayback = async () => { await SystemPlayback.current?.dispose(); };
     stage.loadContent('pages/Index', (error) => {
       if (error.code) { console.warn('CineIsle window content unavailable'); return; }
       this.configureWindow(stage);

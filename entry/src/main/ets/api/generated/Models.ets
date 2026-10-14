@@ -25,6 +25,10 @@ export interface AuthenticateUserByNameRequest {
   body: AuthenticateUserByName;
 }
 
+export interface AuthenticateWithQuickConnectRequest {
+  body: QuickConnectDto;
+}
+
 export interface AuthenticationResult {
   User?: UserDto;
   SessionInfo?: SessionInfoDto;
@@ -658,6 +662,10 @@ export interface GetNextUpRequest {
 export interface GetPlaybackInfoRequest {
   itemId: string;
   userId?: string;
+}
+
+export interface GetQuickConnectStateRequest {
+  secret: string;
 }
 
 export interface GetResumeItemsRequest {
@@ -1334,6 +1342,21 @@ export interface PublicSystemInfo {
 export interface QueueItem {
   Id?: string;
   PlaylistItemId?: string | null;
+}
+
+export interface QuickConnectDto {
+  Secret: string;
+}
+
+export interface QuickConnectResult {
+  Authenticated?: boolean;
+  Secret?: string;
+  Code?: string;
+  DeviceId?: string;
+  DeviceName?: string;
+  AppName?: string;
+  AppVersion?: string;
+  DateAdded?: string;
 }
 
 export interface RecommendationDto {

@@ -6,6 +6,7 @@
     "pages/Favorites",
     "pages/Downloads",
     "pages/Actor",
-    "pages/Settings"
+    "pages/Settings",
+    "pages/Accounts"
   ]
 }

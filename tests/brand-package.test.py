@@ -25,6 +25,7 @@ class BrandPackageTest(unittest.TestCase):
         self.assertEqual(app['bundleName'], 'com.cineisle.app')
         self.assertEqual(app['vendor'], 'CineIsle')
         self.assertEqual(app['versionName'], self.source['versionName'])
+        self.assertEqual(app['versionCode'], self.source['versionCode'])
         self.assertEqual(app['minAPIVersion'], 50000012)
         self.assertEqual(app['targetAPIVersion'], 50000012)
 
@@ -43,8 +44,8 @@ class BrandPackageTest(unittest.TestCase):
                          (ROOT / 'AppScope/resources/base/media/app_icon.svg').read_bytes())
 
     def test_all_original_navigation_and_detail_icons_are_packaged_exactly(self):
-        files = [p for p in (ROOT / 'entry/src/main/resources/base/media').glob('*.svg') if p.name.startswith(('nav_', 'detail_'))]
-        self.assertEqual(len(files), 21)
+        files = [p for p in (ROOT / 'entry/src/main/resources/base/media').glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_', 'player_'))]
+        self.assertEqual(len(files), 46)
         for file in files:
             with self.subTest(icon=file.name):
                 self.assertEqual(self.archive.read('resources/base/media/' + file.name), file.read_bytes())
@@ -56,7 +57,7 @@ class BrandPackageTest(unittest.TestCase):
 
     def test_resource_index_contains_new_names_without_legacy_brand(self):
         data = self.archive.read('resources.index')
-        for value in ['映屿 · CineIsle', '映屿 · CineIsle · 0.1.0', '映屿 · CineIsle 鸿蒙私人影视库']:
+        for value in ['映屿 · CineIsle', '映屿 · CineIsle · ' + self.source['versionName'], '映屿 · CineIsle 鸿蒙私人影视库']:
             self.assertIn(value.encode(), data)
         self.assertNotIn(b'findroid', data.lower())
 

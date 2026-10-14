@@ -106,11 +106,11 @@
     },
     {
       "name": "change_account",
-      "value": "退出并切换账户或服务器"
+      "value": "退出当前账户"
     },
     {
       "name": "logout_confirm",
-      "value": "退出后可登录其他账户，本机媒体保留并按服务器和用户隔离。"
+      "value": "将移除当前账户的本机登录凭据，其他已保存账户仍保留。缓存和下载文件不会删除。"
     },
     {
       "name": "logout",
@@ -118,7 +118,7 @@
     },
     {
       "name": "version",
-      "value": "映屿 · CineIsle · 0.1.0"
+      "value": "映屿 · CineIsle · 0.2.0"
     },
     {
       "name": "refresh",
@@ -1059,6 +1059,306 @@
     {
       "name": "download_queued",
       "value": "等待下载（最多四个同时任务）"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "账户与服务器"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "已保存账户"
+    },
+    {
+      "name": "saved_servers",
+      "value": "已保存服务器"
+    },
+    {
+      "name": "add_account_server",
+      "value": "添加账户或服务器"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "还没有已保存账户"
+    },
+    {
+      "name": "active_account",
+      "value": "当前账户"
+    },
+    {
+      "name": "switch_account",
+      "value": "切换"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "移除账户"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "仅移除本机登录凭据；该账户的缓存、离线修改和下载文件保留，不删除服务器内容。"
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "移除服务器"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "将移除此服务器及其全部本机登录凭据；缓存与下载文件保留，不删除服务器内容。"
+    },
+    {
+      "name": "save_server_only",
+      "value": "仅保存服务器"
+    },
+    {
+      "name": "server_display_name",
+      "value": "服务器显示名称"
+    },
+    {
+      "name": "server_addresses",
+      "value": "服务器名称与地址"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "管理地址"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "每行一个完整地址，最多8个，保留 /jellyfin 等路径。发生连接故障时按顺序验证同一服务器后切换。"
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Quick Connect 登录"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "在已登录的 Jellyfin 客户端中打开“设置 → Quick Connect”，输入此代码授权。每5秒检查；5分钟未完成请重新获取代码。"
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "我已授权，检查登录"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "服务器未启用 Quick Connect，请使用账户密码登录"
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "Quick Connect 代码已失效，请重新获取"
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "已取消 Quick Connect"
+    },
+    {
+      "name": "account_switching",
+      "value": "账户切换正在进行，请稍候"
+    },
+    {
+      "name": "account_not_found",
+      "value": "此账户已被移除，请重新登录"
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "地址指向其他服务器，未发送账户令牌"
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "此地址已属于另一个已保存服务器"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "已保存地址均不可用，请检查网络或管理服务器地址"
+    },
+    {
+      "name": "account_store_full",
+      "value": "账户存储已满，请先移除不再使用的账户"
+    },
+    {
+      "name": "session_save_failed",
+      "value": "无法保存账户凭据，原账户仍保留"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "已取消登录，请重新连接"
+    },
+    {
+      "name": "account_unnamed",
+      "value": "未命名账户"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "重置账户存储"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "将移除本设备所有已保存服务器和登录凭据，可用于修复损坏的账户存储。缓存、离线修改、下载文件和 PIN 保留；不会删除服务器内容。"
+    },
+    {
+      "name": "menu_collection",
+      "value": "我的影库"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "账户与偏好"
+    },
+    {
+      "name": "menu_data",
+      "value": "资料与同步"
+    },
+    {
+      "name": "server_address_label",
+      "value": "服务器地址"
+    },
+    {
+      "name": "credentials_group",
+      "value": "本机凭据"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "仅管理本机保存的登录凭据；缓存和下载文件保留。"
+    },
+    {
+      "name": "offline_group",
+      "value": "浏览与离线"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "收藏筛选"
+    },
+    {
+      "name": "download_status",
+      "value": "下载状态"
+    },
+    {
+      "name": "selected_count",
+      "value": "已选择 %d 项"
+    },
+    {
+      "name": "player_seek",
+      "value": "播放进度"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "控制已锁定，点按右上角解锁"
+    },
+    {
+      "name": "player_system_group",
+      "value": "系统播放"
+    },
+    {
+      "name": "player_media_group",
+      "value": "媒体与字幕"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "倍速与连播"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "未选择"
+    },
+    {
+      "name": "recommend_group",
+      "value": "光影发现"
+    },
+    {
+      "name": "actor_filters",
+      "value": "演员筛选"
+    },
+    {
+      "name": "actor_sort",
+      "value": "排序方式"
+    },
+    {
+      "name": "actor_profile",
+      "value": "人物与关注"
+    },
+    {
+      "name": "actor_credits",
+      "value": "作品与标签"
+    },
+    {
+      "name": "actor_tags",
+      "value": "作品标签"
+    },
+    {
+      "name": "media_detail",
+      "value": "影像详情"
+    },
+    {
+      "name": "detail_actions",
+      "value": "播放与管理"
+    },
+    {
+      "name": "detail_story",
+      "value": "故事与资料"
+    },
+    {
+      "name": "detail_technical",
+      "value": "版本与规格"
+    },
+    {
+      "name": "login_credentials",
+      "value": "连接影库"
+    },
+    {
+      "name": "login_connections",
+      "value": "更多连接方式"
+    },
+    {
+      "name": "search_group",
+      "value": "搜索影库"
+    },
+    {
+      "name": "search_action",
+      "value": "搜索"
+    },
+    {
+      "name": "close_search",
+      "value": "关闭搜索"
+    },
+    {
+      "name": "search_history",
+      "value": "最近搜索"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "填写服务器地址，获取配对代码后，在已登录的 Jellyfin 客户端中授权。"
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "配对登录"
+    },
+    {
+      "name": "loading",
+      "value": "正在加载…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "媒体类型"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "题材"
+    },
+    {
+      "name": "favorite_order",
+      "value": "排序"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "尚未保存服务器"
+    },
+    {
+      "name": "no_seasons",
+      "value": "尚无季度"
+    },
+    {
+      "name": "no_episodes",
+      "value": "尚无单集"
     }
   ]
 }

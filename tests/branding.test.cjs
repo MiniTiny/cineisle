@@ -17,7 +17,7 @@ const { NativeHttpTransport } = h.load('api/NativeHttpTransport.ets');
 const { SessionStore } = h.load('service/SessionStore.ets');
 const { SystemPlayback } = h.load('service/SystemPlayback.ets');
 const tests = [], test = (name, fn) => tests.push([name, fn]);
-const fixture = { server: 'https://example.invalid/jellyfin', userId: 'fixture-user', deviceId: 'fixture-device', token: 'fixture-token' };
+const fixture = { server: 'https://example.invalid/jellyfin', serverId: 'fixture-server', userId: 'fixture-user', userName: 'fixture-user', deviceId: 'fixture-device', token: 'fixture-token' };
 const requests = [];
 let created = 0, destroyed = 0;
 const http = h.platform.get('@ohos.net.http');
@@ -64,6 +64,9 @@ test('machine identity and package version agree with the application manifest',
   assert.equal(json('oh-package.json5').name, 'cineisle');
   assert.equal(ProductIdentity.CLIENT_NAME, 'CineIsle');
   assert.equal(ProductIdentity.VERSION, app.versionName); assert.equal(json('oh-package.json5').version, app.versionName);
+  assert.equal(json('entry/oh-package.json5').version, app.versionName);
+  assert.equal(strings.get('version'), `映屿 · CineIsle · ${app.versionName}`);
+  assert.ok(Number.isInteger(app.versionCode) && app.versionCode > 10000);
 });
 test('shipping source/config/resources contain no legacy brand strings', () => {
   const files = ['AppScope/app.json5', 'oh-package.json5'];
@@ -95,7 +98,7 @@ test('authenticated native HTTP request advertises CineIsle while preserving aut
   const result = await new NativeHttpTransport(fixture).request('/Items', 'GET', [{ key: 'userId', value: fixture.userId }], '');
   assert.equal(result.ok, true); assert.equal(requests.at(-1).url, 'https://example.invalid/jellyfin/Items?userId=fixture-user');
   const header = requests.at(-1).options.header.Authorization;
-  assert.equal(header, 'MediaBrowser Client="CineIsle", Device="HarmonyOS Phone", DeviceId="fixture-device", Version="0.1.0", Token="fixture-token"');
+  assert.equal(header, 'MediaBrowser Client="CineIsle", Device="HarmonyOS Phone", DeviceId="fixture-device", Version="' + app.versionName + '", Token="fixture-token"');
   assert.equal(destroyed, created); assert.match(header, /^[\x20-\x7e]+$/);
 });
 test('unauthenticated login requests identify the new client and omit the token', async () => {
@@ -128,12 +131,12 @@ test('native media session uses new identity and lock-screen launch targets the 
   } finally { await system.dispose(); }
 });
 test('session save/load/clear share the CineIsle alias and preserve secret access settings', async () => {
-  await SessionStore.save(fixture); assert.deepEqual(await SessionStore.load(), fixture);
+  await SessionStore.save(fixture); assert.deepEqual(await SessionStore.load(), { ...fixture, addresses: [fixture.server], serverName: '' });
   await SessionStore.clear(); assert.equal(await SessionStore.load(), undefined);
-  assert.ok(aliases.length >= 4); assert.deepEqual([...new Set(aliases)], ['cineisle.current.session']);
+  assert.ok(aliases.length >= 4); assert.ok(aliases.includes('cineisle.current.session')); assert.ok(aliases.every(v => v === 'cineisle.current.session' || v.startsWith('cineisle.sessions.')));
 });
 test('repeated sign-out treats a missing CineIsle asset as already cleared', async () => {
-  await SessionStore.clear(); await SessionStore.clear(); assert.equal(secrets.size, 0);
+  await SessionStore.clear(); await SessionStore.clear(); assert.equal((await SessionStore.list()).length, 0); assert.equal(await SessionStore.load(), undefined);
 });
 (async () => { for (const [name, fn] of tests) { await fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} branding regression tests passed. Native HTTP/Asset/AVSession fixtures do not prove device UI or server identification.`);

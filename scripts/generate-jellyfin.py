@@ -37,8 +37,11 @@ for profile in config.get('compatibilitySchemas', []):
     compatibility_documents[profile['schema']] = old
     assert old['openapi'] == '3.0.1' and old['info']['version'] == profile['schemaVersion']
     assert re.fullmatch(r'\d+\.\d+\.', profile['serverVersionPrefix']), 'Invalid version prefix'
-    old_ops = {op['operationId']: (path, method.upper(), op) for path, entry in old['paths'].items()
-               for method, op in entry.items() if isinstance(op, dict) and op.get('operationId') in wanted}
+    aliases = profile.get('operationIdAliases', {})
+    reverse = {aliases.get(name, name): name for name in wanted}
+    assert len(reverse) == len(wanted), 'Duplicate compatible operation alias'
+    old_ops = {reverse[op['operationId']]: (path, method.upper(), op) for path, entry in old['paths'].items()
+               for method, op in entry.items() if isinstance(op, dict) and op.get('operationId') in reverse}
     assert set(old_ops) == set(wanted), 'Missing compatible operation'
     compatibility.append((profile, old_ops))
 definitions, processing, enum_parsers = {}, set(), {}
@@ -146,7 +149,7 @@ for name in wanted:
     variants = []
     for index, (profile, old_ops) in enumerate(compatibility):
         old_path, old_method, old_op = old_ops[name]
-        assert old_method == method, ('Compatible method changed', name)
+        assert old_method == profile.get('methodOverrides', {}).get(name, method), ('Compatible method changed', name)
         old_params = {p['name']: p for p in old_op.get('parameters', [])}
         new_params = {p['name']: p for p in params}
         assert not any(p.get('required') for field, p in old_params.items() if field not in new_params), ('Required legacy parameter unsupported', name)
@@ -215,7 +218,7 @@ for name in wanted:
         lines.append(f'    if ({condition}) {{ {action} }}')
     payload = "options.body === undefined ? '' : JSON.stringify(options.body)" if body else "''"
     for index, old_path, old_params in variants:
-        if old_path == operations[name][0]:
+        if old_path == operations[name][0] and compatibility[index][1][name][1] == method:
             continue
         lines.append(f'    if (profile{index}) {{')
         for field, p in old_params.items():
@@ -226,7 +229,7 @@ for name in wanted:
                 lines.append(f'      if (!{value}) {{ throw new Error("api_parameter_invalid"); }}')
             old_path = old_path.replace('{' + field + '}', '${encodeURIComponent(' + scalar_query(value, p['schema']) + ')}')
         assert not re.search(r'(?<!\$)\{[A-Za-z]', old_path), ('Unresolved compatible path', name)
-        lines.append(f'      return {call}(`{old_path}`, ' + ('query);' if is_url else f'{json.dumps(method)}, query, {payload});'))
+        lines.append(f'      return {call}(`{old_path}`, ' + ('query);' if is_url else f'{json.dumps(compatibility[index][1][name][1])}, query, {payload});'))
         lines.append('    }')
     if is_url:
         lines.append(f'    return {call}(`{path}`, query);')
