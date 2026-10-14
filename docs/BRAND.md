@@ -91,7 +91,7 @@ Quick Connect入口使用原创配对图标和“配对登录”独立标题栏�
 | 入口 | 名称 / 标识 |
 |---|---|
 | 系统应用名、登录标题 | 映屿 · CineIsle（AppScope app_name 资源） |
-| 更多页版本 | 映屿 · CineIsle · 0.1.0 |
+| 更多页版本 | 映屿 · CineIsle · 0.2.0 |
 | 应用包名 | `com.cineisle.app` |
 | vendor、Jellyfin Client、AVSession tag | `CineIsle` |
 | 工程包名称 | `cineisle` |

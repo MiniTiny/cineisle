@@ -64,6 +64,9 @@ test('machine identity and package version agree with the application manifest',
   assert.equal(json('oh-package.json5').name, 'cineisle');
   assert.equal(ProductIdentity.CLIENT_NAME, 'CineIsle');
   assert.equal(ProductIdentity.VERSION, app.versionName); assert.equal(json('oh-package.json5').version, app.versionName);
+  assert.equal(json('entry/oh-package.json5').version, app.versionName);
+  assert.equal(strings.get('version'), `映屿 · CineIsle · ${app.versionName}`);
+  assert.ok(Number.isInteger(app.versionCode) && app.versionCode > 10000);
 });
 test('shipping source/config/resources contain no legacy brand strings', () => {
   const files = ['AppScope/app.json5', 'oh-package.json5'];
@@ -95,7 +98,7 @@ test('authenticated native HTTP request advertises CineIsle while preserving aut
   const result = await new NativeHttpTransport(fixture).request('/Items', 'GET', [{ key: 'userId', value: fixture.userId }], '');
   assert.equal(result.ok, true); assert.equal(requests.at(-1).url, 'https://example.invalid/jellyfin/Items?userId=fixture-user');
   const header = requests.at(-1).options.header.Authorization;
-  assert.equal(header, 'MediaBrowser Client="CineIsle", Device="HarmonyOS Phone", DeviceId="fixture-device", Version="0.1.0", Token="fixture-token"');
+  assert.equal(header, 'MediaBrowser Client="CineIsle", Device="HarmonyOS Phone", DeviceId="fixture-device", Version="' + app.versionName + '", Token="fixture-token"');
   assert.equal(destroyed, created); assert.match(header, /^[\x20-\x7e]+$/);
 });
 test('unauthenticated login requests identify the new client and omit the token', async () => {
