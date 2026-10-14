@@ -1299,6 +1299,38 @@
     {
       "name": "detail_technical",
       "value": "版本与规格"
+    },
+    {
+      "name": "login_credentials",
+      "value": "连接影库"
+    },
+    {
+      "name": "login_connections",
+      "value": "更多连接方式"
+    },
+    {
+      "name": "search_group",
+      "value": "搜索影库"
+    },
+    {
+      "name": "search_action",
+      "value": "搜索"
+    },
+    {
+      "name": "close_search",
+      "value": "关闭搜索"
+    },
+    {
+      "name": "search_history",
+      "value": "最近搜索"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "填写服务器地址，获取配对代码后，在已登录的 Jellyfin 客户端中授权。"
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "配对登录"
     }
   ]
 }

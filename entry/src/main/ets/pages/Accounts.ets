@@ -22,6 +22,7 @@ struct Accounts {
   @State accounts: AccountSummary[] = [];
   @State servers: ServerProfile[] = [];
   @State adding: boolean = false;
+  @State quickEntry: boolean = false;
   @State server: string = '';
   @State username: string = '';
   @State password: string = '';
@@ -33,7 +34,7 @@ struct Accounts {
   @State addressText: string = '';
   private scroller: Scroller = new Scroller();
   private top(): void { if (this.visible) { this.scroller.scrollTo({ xOffset: 0, yOffset: 0 }); } }
-  private toggleAdding(): void { this.cancelQuick(); this.adding = !this.adding; this.password = ''; this.top(); }
+  private toggleAdding(): void { this.cancelQuick(); this.adding = !this.adding; this.quickEntry = false; this.password = ''; this.top(); }
   private endEditing(): void { this.editingId = ''; this.top(); }
   private quick: QuickConnectLogin = new QuickConnectLogin();
   private timer: number = -1;
@@ -41,7 +42,7 @@ struct Accounts {
   private visible: boolean = false;
   aboutToAppear(): void {
     const route = router.getParams() as AccountsRoute;
-    this.server = route?.server ?? ''; this.adding = !!route?.quick; this.reload();
+    this.server = route?.server ?? ''; this.adding = !!route?.quick; this.quickEntry = !!route?.quick; this.reload();
   }
   onPageShow(): void { this.visible = true; this.reload(); }
   onPageHide(): void { this.visible = false; this.cancelQuick(); this.password = ''; ++this.revision; }
@@ -123,15 +124,18 @@ struct Accounts {
   @Builder
   loginForm() {
     Column({ space: 12 }) {
-      BrandHeading({ label: $r('app.string.add_account_server'), icon: $r('app.media.menu_add') })
+      BrandHeading({ label: this.quickEntry || !!this.quickCode ? $r('app.string.quick_connect_login') : $r('app.string.add_account_server'), icon: this.quickEntry || !!this.quickCode ? $r('app.media.menu_quick') : $r('app.media.menu_add') })
       this.fieldCaption($r('app.string.server_address_label'))
       TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => { this.server = v; })
       if (this.quickCode) {
-        BrandHeading({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick') })
         Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor($r('app.color.brand_accent')).letterSpacing(6 / this.fontScale)
         Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
         BrandButton({ label: $r('app.string.quick_connect_check'), icon: $r('app.media.menu_sync'), primary: true, available: !this.busy, onSelect: () => this.checkQuick() })
         BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.cancelQuick(); this.message = ''; this.top(); } })
+      } else if (this.quickEntry) {
+        Text($r('app.string.quick_connect_start_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), primary: true, available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
+        BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), available: !this.busy, onSelect: () => { this.quickEntry = false; this.message = ''; this.top(); } })
       } else {
         this.fieldCaption($r('app.string.username'))
         TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.username = v; })
@@ -213,7 +217,7 @@ struct Accounts {
       if (this.locked) { PinGate() }
       else {
         Column({ space: 14 }) {
-          BrandHeader({ label: $r('app.string.accounts_servers'), onBack: () => router.back() })
+          BrandHeader({ label: this.quickEntry ? $r('app.string.quick_connect_title') : $r('app.string.accounts_servers'), onBack: () => router.back() })
           if (this.message) {
             Scroll() { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%').padding(12) }
               .width('100%').height(Math.min(64 * this.fontScale, this.viewportHeight * 0.2))
@@ -232,7 +236,7 @@ struct Accounts {
                   this.serverCards()
                 }
               }
-              if (!this.quickCode) {
+              if (!this.quickCode && !this.quickEntry) {
                 Column({ space: 12 }) {
                   BrandHeading({ label: $r('app.string.credentials_group'), icon: $r('app.media.menu_lock') })
                   Text($r('app.string.credentials_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')

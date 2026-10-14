@@ -45,6 +45,7 @@ struct Index {
   @State resume: MediaItem[] = [];
   @State homeSections: HomeSection[] = [];
   @State searchExpanded: boolean = false;
+  @State searchFocused: boolean = false;
   @State libraries: MediaItem[] = [];
   @State actors: ActorSummary[] = [];
   @State offline: boolean = false;
@@ -113,7 +114,7 @@ struct Index {
     this.generation++; this.sessionClient = AppService.client; this.signedIn = this.sessionClient !== undefined;
     const state = AppService.experience?.snapshot();
     this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
-    this.mode = ''; this.search = ''; this.searchExpanded = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
+    this.mode = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
     this.message = ''; this.syncMessage = ''; this.syncing = false; this.busy = false; this.usingCache = false;
     this.cacheMessage = AppService.cacheRecovered ? getContext(this).resourceManager.getStringSync($r('app.string.cache_recovered').id) : '';
@@ -207,13 +208,22 @@ struct Index {
 
   private switchTab(index: number): void {
     try { AppService.experience?.update((state: ExperienceState) => { state.tab = index === 2 ? 4 : index; }); } catch (e) { this.message = errorText(e as Error); }
-    this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchExpanded = false;
+    this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false;
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = [];
     this.sectionTitle = ''; this.total = 0; this.usingCache = false;
     this.load();
   }
 
   onBackPress(): boolean {
+    if (!this.locked && this.signedIn && this.searchFocused && (this.searchExpanded || this.mode === 'search')) {
+      this.getUIContext().getFocusController().clearFocus();
+      this.searchFocused = false;
+      return true;
+    }
+    if (!this.locked && this.signedIn && (this.searchExpanded || this.mode === 'search')) {
+      this.switchTab(this.tab);
+      return true;
+    }
     if (!this.locked && this.signedIn && this.tab === 2) {
       this.switchTab(this.mode ? 2 : 4);
       return true;
@@ -233,7 +243,7 @@ struct Index {
 
   private openLibrary(section: HomeSection): void {
     this.tab = 2; this.mode = 'library'; this.parentId = section.libraryId; this.personId = '';
-    this.sectionTitle = section.name; this.search = ''; this.searchExpanded = false; this.load();
+    this.sectionTitle = section.name; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.load();
   }
 
   private tabTitle(): Resource {
@@ -249,24 +259,87 @@ struct Index {
   @Builder
   loginPanel() {
     Scroll() {
-    Column({ space: 20 }) {
-      Image($r('app.media.app_icon')).width(76).height(76).borderRadius(20)
-      Text($r('app.string.app_name')).fontSize(34).fontWeight(FontWeight.Bold).fontColor('#F2F3FA')
-      Text($r('app.string.login_intro')).fontSize(14).fontColor($r('app.color.brand_muted'))
-      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).onChange((value: string) => { this.server = value; })
-        .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy)
-      TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).onChange((value: string) => { this.username = value; })
-        .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy)
-      TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password)
-        .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy)
-      Text($r('app.string.https_hint')).fontSize(12).fontColor($r('app.color.brand_muted'))
-      Button(this.busy ? $r('app.string.connecting') : $r('app.string.login')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_action'))
-        .enabled(this.ready && !this.busy && this.server.trim().length > 0 && this.username.trim().length > 0).onClick(() => this.login())
-      Button($r('app.string.quick_connect_login')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).enabled(this.ready && !this.busy).onClick(() => router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true } }))
-      Button($r('app.string.accounts_servers')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).width('100%').backgroundColor($r('app.color.brand_surface')).enabled(this.ready && !this.busy).onClick(() => router.pushUrl({ url: 'pages/Accounts' }))
-      if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(13) }
-    }.padding(28).width('100%')
+      Column({ space: 18 }) {
+        Column({ space: 12 }) {
+          Image($r('app.media.app_icon')).width(76).height(76).borderRadius(20).accessibilityLevel('no')
+          Text($r('app.string.app_name')).fontSize(28).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+          Text($r('app.string.login_intro')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        }.width('100%').alignItems(HorizontalAlign.Start)
+        Column({ space: 12 }) {
+          BrandHeading({ label: $r('app.string.login_credentials'), icon: $r('app.media.menu_login') })
+          Text($r('app.string.server_address_label')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.server = value; })
+            .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
+          Text($r('app.string.username')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.username = value; })
+            .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
+          Text($r('app.string.password')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).type(InputType.Password)
+            .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
+          Text($r('app.string.https_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
+          BrandButton({ label: this.busy ? $r('app.string.connecting') : $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true,
+            available: this.ready && !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
+        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+        Column({ space: 12 }) {
+          BrandHeading({ label: $r('app.string.login_connections'), icon: $r('app.media.menu_accounts') })
+          BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: this.ready && !this.busy,
+            onSelect: () => router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true } }) })
+          BrandButton({ label: $r('app.string.accounts_servers'), icon: $r('app.media.menu_accounts'), available: this.ready && !this.busy,
+            onSelect: () => router.pushUrl({ url: 'pages/Accounts' }) })
+        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+      }.padding(20).width('100%').alignItems(HorizontalAlign.Start)
     }.width('100%').height('100%').align(Alignment.TopStart)
+  }
+
+  @Builder
+  private searchPanel() {
+    Grid() {
+      GridItem() {
+        Column({ space: 12 }) {
+          BrandHeading({ label: $r('app.string.search_group'), icon: $r('app.media.nav_search_active') })
+          Text($r('app.string.search_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor('#F2F3FA')
+            .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12)
+            .enterKeyType(EnterKeyType.Search).onFocus(() => { this.searchFocused = true; }).onBlur(() => { this.searchFocused = false; })
+            .onChange((value: string) => { this.search = value; }).onSubmit(() => this.performSearch())
+          BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
+          BrandButton({ label: $r('app.string.close_search'), icon: $r('app.media.menu_cancel'), onSelect: () => this.switchTab(this.tab) })
+          if (this.busy) { LoadingProgress().width(26).height(26).color($r('app.color.brand_accent')) }
+          if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_danger')).width('100%') }
+          if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+      }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+      if (this.recentSearches.length > 0) {
+        GridItem() {
+          Column({ space: 12 }) {
+            BrandHeading({ label: $r('app.string.search_history'), icon: $r('app.media.menu_sync') })
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+              ForEach(this.recentSearches, (value: string) => {
+                Column() { BrandButton({ label: value, icon: $r('app.media.nav_search_muted'), compact: true, available: !this.busy, onSelect: () => { this.search = value; this.performSearch(); } }) }
+                  .width(this.viewportWidth < 400 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+              }, (value: string) => value)
+            }.width('100%')
+          }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+        }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+      }
+      if (this.mode === 'search') {
+        GridItem() { BrandHeading({ label: $r('app.string.search_results'), icon: $r('app.media.detail_film') }) }
+          .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+        if (this.items.length === 0 && !this.busy) {
+          GridItem() { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%').padding(16) }
+            .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+        }
+        ForEach(this.items, (item: MediaItem) => {
+          GridItem() { MediaCard({ item: item, onSelect: (selected: MediaItem) => this.open(selected) }) }
+        }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
+        if (this.items.length < this.total) {
+          GridItem() { BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) }) }
+            .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+        }
+      }
+    }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(16).width('100%').layoutWeight(1)
+      .padding({ left: 16, right: 16, top: 8, bottom: 16 })
   }
 
   @Builder
@@ -343,10 +416,11 @@ struct Index {
     catch (e) { this.message = errorText(e as Error); }
   }
   private performSearch(): void {
-    if (!this.search.trim()) { return; }
+    if (this.busy || !this.search.trim()) { return; }
+    this.getUIContext().getFocusController().clearFocus(); this.searchFocused = false;
     try { AppService.experience?.search(this.search); this.recentSearches = AppService.experience?.snapshot().searches ?? []; }
     catch (e) { this.message = errorText(e as Error); }
-    this.mode = 'search'; this.parentId = ''; this.personId = ''; this.load();
+    this.mode = 'search'; this.sectionTitle = ''; this.parentId = ''; this.personId = ''; this.searchExpanded = true; this.load();
   }
   private reason(item: MediaItem): void {
     const value = this.discoveries.find((d: Discovery) => d.item.Id === item.Id);
@@ -586,7 +660,7 @@ struct Index {
           Text(this.tabTitle()).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).fontSize(22).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').layoutWeight(1)
           if (this.tab !== 4 && this.mode !== 'downloads') {
             Button({ type: ButtonType.Normal }) {
-              Image($r('app.media.nav_search_muted')).width(24).height(24)
+              Image(this.searchExpanded ? $r('app.media.nav_search_active') : $r('app.media.nav_search_muted')).width(24).height(24).accessibilityLevel('no')
             }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface')).accessibilityText($r('app.string.search_hint'))
               .onClick(() => { this.searchExpanded = !this.searchExpanded; })
           }
@@ -595,22 +669,13 @@ struct Index {
         }.height(UiLayout.primaryHeaderHeight(this.viewportHeight, this.fontScale, this.landscape)).width('100%').padding({ left: 20, right: 12 })
           }
         }
-        if (this.tab !== 4 && this.mode !== 'downloads' && this.searchExpanded) {
-          TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor('#F2F3FA')
-            .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).margin({ left: 16, right: 16, bottom: 12 })
-            .enterKeyType(EnterKeyType.Search).onChange((value: string) => { this.search = value; })
-            .onSubmit(() => this.performSearch())
-        }
-        if (this.searchExpanded && !this.mode) {
-          Scroll() { Row({ space: 8 }) { ForEach(this.recentSearches, (value: string) => {
-            Column() { BrandButton({ label: value, icon: $r('app.media.nav_search_muted'), compact: true, onSelect: () => { this.search = value; this.performSearch(); } }) }.width(180 * this.fontScale)
-          }, (value: string) => value) } }.scrollable(ScrollDirection.Horizontal).width('100%').height(Math.max(36, 32 * this.fontScale) + 16)
-        }
         if (this.mode) {
           Column() {
-            BrandHeader({ label: this.sectionTitle || (this.mode === 'favorites' ? $r('app.string.favorites') : this.mode === 'downloads' ? $r('app.string.downloads') : $r('app.string.search_results')), searchable: this.mode !== 'downloads', onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(this.tab) })
+            BrandHeader({ label: this.sectionTitle || (this.mode === 'favorites' ? $r('app.string.favorites') : this.mode === 'downloads' ? $r('app.string.downloads') : $r('app.string.search_results')), searchable: this.mode !== 'downloads' && this.mode !== 'search', onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(this.tab) })
           }.width('100%').padding({ left: 16, right: 16, bottom: 8 })
         }
+        if (this.searchExpanded || this.mode === 'search') { this.searchPanel() }
+        else {
         if (this.busy) { LoadingProgress().width(26).height(26).color($r('app.color.brand_accent')) }
         if (this.message) { Text(this.message).fontSize(12).fontColor('#FF9F9F').width('100%').padding({ left: 16, right: 16, bottom: 8 }) }
         if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor('#EFC86A').width('100%').padding({ left: 16, right: 16, bottom: 8 }) }
@@ -628,6 +693,7 @@ struct Index {
               }
             }
           }.width('100%').layoutWeight(1).padding({ left: 16, right: 16, top: 8, bottom: 8 })
+        }
         }
         Row() {
           this.navItem(1, $r('app.string.tab_home'), $r('app.media.nav_home_active'), $r('app.media.nav_home_muted'))
