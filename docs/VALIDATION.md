@@ -143,3 +143,17 @@ CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-player-emulator.t
 ```bash
 CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-discovery-emulator.test.py
 ```
+
+## 电影与剧集详情品牌布局
+
+`node tests/brand-media-detail.test.cjs` 使用实际ArkUI编译器运行电影/剧集/季/单集详情和元数据组件。覆盖四组尺寸/字号构建树、完整片名、原创操作与状态、选定源/元数据、继续/重播、收藏/已看独立写入、离线与忙碌门禁、下载/删除确认、人物导航、下一集/季入口、批量选择/全选/取消和空元数据；已加入全套回归。
+
+原生矩阵检查320×640vp、360×740vp及760×280vp短横屏，各含普通/两倍字号。逐项滚动采集完整操作、版本、故事、技术规格、人物与季度/单集入口；核对实际字号和窗口尺寸、图文同一点击区、青绿/危险配色、标签和值的包含关系、人物/返回和版本切换、批量选择与确认取消。需要Pillow：
+
+```bash
+CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-media-detail-emulator.test.py
+```
+
+隔离QA包使用相同产品源码与资源，仅加入诊断窗口与合成媒体夹具。正式签名包覆盖安装、系统安全区和可用真实媒体详情单独检查。夹具的图片占位、元数据和写入回调不证明真实媒体资源完整性、服务端删除、下载文件传输、视频解码或真机验收。报告、截图、日志和签名材料保留在忽略的`.local`目录。
+
+布局与确认弹窗分阶段修复时，分别保留对应HAP和源码指纹。仅修改弹窗按钮颜色时，逐字核对布局/业务源码未变并复验弹窗配色和取消行为；报告应明确截图对应阶段，不把旧包截图标为最终包截图。

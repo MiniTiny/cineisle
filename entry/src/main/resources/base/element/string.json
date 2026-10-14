@@ -1283,6 +1283,22 @@
     {
       "name": "actor_tags",
       "value": "作品标签"
+    },
+    {
+      "name": "media_detail",
+      "value": "影像详情"
+    },
+    {
+      "name": "detail_actions",
+      "value": "播放与管理"
+    },
+    {
+      "name": "detail_story",
+      "value": "故事与资料"
+    },
+    {
+      "name": "detail_technical",
+      "value": "版本与规格"
     }
   ]
 }

@@ -1,3 +1,6 @@
+import { BrandHeader } from '../components/BrandHeader';
+import { BrandHeading } from '../components/BrandHeading';
+import { BrandButton } from '../components/BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
@@ -131,8 +134,8 @@ struct Detail {
     const record = this.record(); const sourceId = this.sourceId;
     AlertDialog.show({ title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
       message: record ? $r('app.string.remove_download_confirm') : $r('app.string.download_confirm'),
-      primaryButton: { value: $r('app.string.cancel'), action: () => {} },
-      secondaryButton: { value: record ? $r('app.string.remove') : $r('app.string.download'), action: async () => {
+      primaryButton: { value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
+      secondaryButton: { value: record ? $r('app.string.remove') : $r('app.string.download'), fontColor: record ? $r('app.color.brand_danger') : $r('app.color.brand_accent'), action: async () => {
         if (!this.current(token, client) || this.busy || this.record() !== record) { return; }
         this.busy = true; this.message = '';
         try { if (record) { await AppService.removeDownload(record); } else { await AppService.download(item, sourceId); } }
@@ -145,8 +148,8 @@ struct Detail {
     if (!this.loaded || this.busy || this.usingCache || this.deleted || this.item.Type !== 'Movie' || this.item.CanDelete !== true) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
     AlertDialog.show({ title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
-      primaryButton: { value: $r('app.string.cancel'), action: () => {} },
-      secondaryButton: { value: $r('app.string.server_delete'), action: async () => {
+      primaryButton: { value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
+      secondaryButton: { value: $r('app.string.server_delete'), fontColor: $r('app.color.brand_danger'), action: async () => {
         if (!this.current(token, client) || this.busy || this.deleted) { return; }
         this.busy = true; this.message = '';
         try { await AppService.deleteMedia(item); if (this.current(token, client)) { this.deleted = true; router.back(); } }
@@ -170,7 +173,7 @@ struct Detail {
     const chosen = this.children.filter((item: MediaItem) => this.selectedEpisodes.includes(item.Id));
     const client = this.pageClient; const token = this.generation;
     AlertDialog.show({ title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
-      primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('download'), action: async () => {
+      primaryButton: { value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, secondaryButton: { value: text('download'), fontColor: $r('app.color.brand_accent'), action: async () => {
         if (!client || !this.current(token, client) || this.busy) { return; }
         this.busy = true;
         try { const failures = await AppService.batchDownload(chosen); if (this.current(token, client)) { this.message = text('batch_result', chosen.length - failures.length, failures.length); this.selectedEpisodes = failures; } }
@@ -178,31 +181,41 @@ struct Detail {
         finally { if (this.current(token, client)) { this.busy = false; } }
       } } });
   }
+  private actionWidth(): string { return this.viewportWidth < 400 || this.fontScale > 1.2 ? '100%' : '48%'; }
   @Builder
   private childrenPanel() {
     if (this.children.length > 0) {
-      Text(this.item.Type === 'Series' ? $r('app.string.seasons') : $r('app.string.episodes')).fontSize(20).fontColor('#F2F3FA').width('100%')
-      if (this.item.Type === 'Series') {
-        List({ space: 12 }) {
+      Column({ space: 14 }) {
+        BrandHeading({ label: this.item.Type === 'Series' ? $r('app.string.seasons') : $r('app.string.episodes'), icon: $r('app.media.nav_library_active') })
+        if (this.item.Type === 'Series') {
+          List({ space: 12 }) {
+            ForEach(this.children, (child: MediaItem) => {
+              ListItem() { MediaCard({ item: child, onSelect: (item: MediaItem) => this.openChild(item) }).width(UiLayout.shelfWidth(this.viewportWidth - 32, false, this.fontScale)) }
+            }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
+          }.listDirection(Axis.Horizontal).height(UiLayout.shelfHeight(this.viewportWidth - 32, this.fontScale, false)).width('100%')
+        } else {
+          if (!this.usingCache) {
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+              DetailAction({ label: this.selectingEpisodes ? $r('app.string.cancel') : $r('app.string.batch_download'), icon: this.selectingEpisodes ? $r('app.media.menu_cancel') : $r('app.media.detail_download'), available: !this.busy && !this.deleted, onSelect: () => { this.selectingEpisodes = !this.selectingEpisodes; this.selectedEpisodes = []; } }).width(this.actionWidth()).margin({ bottom: 8 })
+              if (this.selectingEpisodes) {
+                DetailAction({ label: $r('app.string.select_all'), icon: $r('app.media.nav_check_active'), available: !this.busy && !this.deleted, onSelect: () => { this.selectedEpisodes = this.children.filter((i: MediaItem) => i.CanDownload === true).map((i: MediaItem) => i.Id); } }).width(this.actionWidth()).margin({ bottom: 8 })
+                DetailAction({ label: $r('app.string.download'), icon: $r('app.media.detail_download'), primary: true, available: !this.busy && !this.deleted && this.selectedEpisodes.length > 0, onSelect: () => this.batchEpisodes() }).width(this.actionWidth()).margin({ bottom: 8 })
+              }
+            }.width('100%')
+          }
           ForEach(this.children, (child: MediaItem) => {
-            ListItem() { MediaCard({ item: child, onSelect: (item: MediaItem) => this.openChild(item) }).width(UiLayout.shelfWidth(this.viewportWidth, false, this.fontScale)) }
+            Column({ space: 8 }) {
+              if (this.selectingEpisodes) {
+                Row({ space: 8 }) {
+                  Checkbox().select(this.selectedEpisodes.includes(child.Id)).selectedColor($r('app.color.brand_action')).enabled(!this.busy && !this.deleted && child.CanDownload === true).onChange((value: boolean) => { if (value && !this.selectedEpisodes.includes(child.Id)) { this.selectedEpisodes = [...this.selectedEpisodes, child.Id]; } else if (!value) { this.selectedEpisodes = this.selectedEpisodes.filter((id: string) => id !== child.Id); } })
+                  Text(child.Name).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+                }.width('100%')
+              }
+              MediaCard({ item: child, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
+            }.width('100%')
           }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
-        }.listDirection(Axis.Horizontal).height(UiLayout.shelfHeight(this.viewportWidth, this.fontScale, false)).width('100%')
-      } else {
-        if (!this.usingCache) {
-          Flex({ wrap: FlexWrap.Wrap }) {
-            Button(this.selectingEpisodes ? $r('app.string.cancel') : $r('app.string.batch_download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectingEpisodes = !this.selectingEpisodes; this.selectedEpisodes = []; })
-            if (this.selectingEpisodes) {
-              Button($r('app.string.select_all')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.selectedEpisodes = this.children.filter((i: MediaItem) => i.CanDownload).map((i: MediaItem) => i.Id); })
-              Button($r('app.string.download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.busy && this.selectedEpisodes.length > 0).onClick(() => this.batchEpisodes())
-            }
-          }.width('100%')
         }
-        ForEach(this.children, (child: MediaItem) => {
-          if (this.selectingEpisodes) { Checkbox().select(this.selectedEpisodes.includes(child.Id)).enabled(child.CanDownload === true).onChange((value: boolean) => { if (value && !this.selectedEpisodes.includes(child.Id)) { this.selectedEpisodes = [...this.selectedEpisodes, child.Id]; } else if (!value) { this.selectedEpisodes = this.selectedEpisodes.filter((id: string) => id !== child.Id); } }) }
-          MediaCard({ item: child, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
-        }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
-      }
+      }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
     }
   }
   build() {
@@ -210,71 +223,70 @@ struct Detail {
       if (this.locked) { PinGate() }
       else {
     Column() {
-      Row({ space: 12 }) {
-        Button($r('app.string.back')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => router.back())
-        Text(this.item.Name).fontSize(18).fontColor('#F2F3FA').layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-        Button($r('app.string.refresh')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy && !this.deleted).onClick(() => this.refresh())
-      }.width('100%').padding(16)
+      BrandHeader({ label: $r('app.string.media_detail'), refreshable: true, available: !this.busy && !this.deleted, onRefresh: () => this.refresh(), onBack: () => router.back() }).padding({ left: 16, right: 16, top: 8, bottom: 8 })
       Scroll() {
         Column({ space: 18 }) {
-          Stack({ alignContent: Alignment.BottomStart }) {
+          Column({ space: 12 }) {
             Image(AppService.client?.image(this.item.Id, this.item.BackdropImageTags?.[0], true) ?? '').alt($r('app.media.poster_placeholder'))
-              .width('100%').height(200).objectFit(ImageFit.Cover).borderRadius(12).backgroundColor($r('app.color.brand_surface'))
-            Column({ space: 4 }) {
-              Text(this.item.Name).fontSize(28).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-              if (detailMetadata(this.item, this.sourceId).original) {
-                Text(detailMetadata(this.item, this.sourceId).original).fontSize(15).fontColor('#BDC5D6').width('100%')
-              }
-            }.width('100%').padding(12).backgroundColor('#B30D1924')
-          }.width('100%')
-          if (detailMetadata(this.item, this.sourceId).summary) {
-            Text(detailMetadata(this.item, this.sourceId).summary).fontColor($r('app.color.brand_muted')).fontSize(14).width('100%')
-          }
+              .width('100%').height(Math.min(260, Math.max(140, (this.viewportWidth - 32) * 9 / 16))).objectFit(ImageFit.Cover).borderRadius(16).backgroundColor($r('app.color.brand_surface'))
+            Text(this.item.Name).fontSize(26).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+            if (detailMetadata(this.item, this.sourceId).original) {
+              Text(detailMetadata(this.item, this.sourceId).original).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+            }
+            if (detailMetadata(this.item, this.sourceId).summary) {
+              Text(detailMetadata(this.item, this.sourceId).summary).fontColor($r('app.color.brand_muted')).fontSize(14).width('100%')
+            }
+          }.width('100%').alignItems(HorizontalAlign.Start)
           if (this.usingCache) { Text($r('app.string.offline_cache')).fontColor('#EFC86A').fontSize(13).width('100%') }
           if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(13).width('100%') }
           if (this.busy) { LoadingProgress().width(28).height(28).color($r('app.color.brand_accent')) }
-          Button(this.nextUp && this.item.Type === 'Series' ? $r('app.string.play_next_episode') :
-            (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0 ? $r('app.string.continue_play') : $r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
-            .width('100%').backgroundColor($r('app.color.brand_action')).enabled(this.canPlay()).onClick(() => this.play())
-          Flex({ wrap: FlexWrap.Wrap }) {
-            if ((this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0) {
-              DetailAction({ label: $r('app.string.start_over'), icon: $r('app.media.detail_play'), available: this.canPlay(), onSelect: () => this.play(true) })
-            }
-            if (trailerUrl(this.item)) {
-              DetailAction({ label: $r('app.string.trailer'), icon: $r('app.media.detail_film'), available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.trailer() })
-            }
-            DetailAction({ label: this.item.UserData?.Played ? $r('app.string.mark_unplayed') : $r('app.string.mark_played'),
-              icon: this.item.UserData?.Played ? $r('app.media.nav_check_active') : $r('app.media.nav_check_muted'),
-              available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.setFlag(false) })
-            DetailAction({ label: this.item.UserData?.IsFavorite ? $r('app.string.unfavorite') : $r('app.string.favorite'),
-              icon: this.item.UserData?.IsFavorite ? $r('app.media.detail_heart_filled') : $r('app.media.detail_heart'),
-              available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.setFlag(true) })
-            if (this.canDownload()) {
-              DetailAction({ label: this.record() ? $r('app.string.remove_download') : $r('app.string.download'),
-                icon: this.record() ? $r('app.media.detail_trash') : $r('app.media.detail_download'), available: !this.busy && !this.deleted, onSelect: () => this.download() })
-            }
-            if (this.loaded && !this.usingCache && this.item.Type === 'Movie' && this.item.CanDelete === true) {
-              DetailAction({ label: $r('app.string.server_delete'), icon: $r('app.media.detail_remove'), destructive: true,
-                available: !this.busy && !this.deleted, onSelect: () => this.deleteMedia() })
-            }
-          }.width('100%')
+          Column({ space: 12 }) {
+            BrandHeading({ label: $r('app.string.detail_actions'), icon: $r('app.media.detail_play') })
+            BrandButton({ label: this.nextUp && this.item.Type === 'Series' ? $r('app.string.play_next_episode') :
+              (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0 ? $r('app.string.continue_play') : $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: this.canPlay(), onSelect: () => this.play() })
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+              if ((this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.UserData?.PlaybackPositionTicks ?? 0) > 0) {
+                DetailAction({ label: $r('app.string.start_over'), icon: $r('app.media.menu_sync'), available: this.canPlay(), onSelect: () => this.play(true) }).width(this.actionWidth()).margin({ bottom: 8 })
+              }
+              if (trailerUrl(this.item)) {
+                DetailAction({ label: $r('app.string.trailer'), icon: $r('app.media.detail_film'), available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.trailer() }).width(this.actionWidth()).margin({ bottom: 8 })
+              }
+              DetailAction({ label: this.item.UserData?.Played ? $r('app.string.mark_unplayed') : $r('app.string.mark_played'),
+                icon: this.item.UserData?.Played ? $r('app.media.nav_check_active') : $r('app.media.nav_check_muted'), primary: this.item.UserData?.Played ?? false,
+                available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.setFlag(false) }).width(this.actionWidth()).margin({ bottom: 8 })
+              DetailAction({ label: this.item.UserData?.IsFavorite ? $r('app.string.unfavorite') : $r('app.string.favorite'),
+                icon: this.item.UserData?.IsFavorite ? $r('app.media.detail_heart_filled') : $r('app.media.detail_heart'), primary: this.item.UserData?.IsFavorite ?? false,
+                available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.setFlag(true) }).width(this.actionWidth()).margin({ bottom: 8 })
+              if (this.canDownload()) {
+                DetailAction({ label: this.record() ? $r('app.string.remove_download') : $r('app.string.download'),
+                  icon: this.record() ? $r('app.media.detail_trash') : $r('app.media.detail_download'), destructive: !!this.record(), available: !this.busy && !this.deleted, onSelect: () => this.download() }).width(this.actionWidth()).margin({ bottom: 8 })
+              }
+              if (this.loaded && !this.usingCache && this.item.Type === 'Movie' && this.item.CanDelete === true) {
+                DetailAction({ label: $r('app.string.server_delete'), icon: $r('app.media.detail_remove'), destructive: true,
+                  available: !this.busy && !this.deleted, onSelect: () => this.deleteMedia() }).width(this.actionWidth()).margin({ bottom: 8 })
+              }
+            }.width('100%')
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
           if (this.downloadState) { Text(this.downloadState).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }
           if (!this.usingCache && (this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.MediaSources?.length ?? 0) > 1) {
-            Text($r('app.string.media_versions')).fontSize(18).fontColor('#F2F3FA').width('100%')
-            Flex({ wrap: FlexWrap.Wrap }) {
-              ForEach(this.item.MediaSources ?? [], (source: MediaSource, index: number) => {
-                Button(source.Name || $r('app.string.source_number', index + 1)).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' })
-                  .fontSize(12).margin({ right: 8, bottom: 8 }).enabled(!this.busy && !this.deleted)
-                  .backgroundColor((this.sourceId || this.item.MediaSources?.[0]?.Id) === source.Id ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
-                  .onClick(() => { this.sourceId = source.Id; })
-              }, (source: MediaSource) => `${source.Id}:${source.Name}`)
-            }.width('100%')
+            Column({ space: 12 }) {
+              BrandHeading({ label: $r('app.string.media_versions'), icon: $r('app.media.nav_library_active') })
+              Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+                ForEach(this.item.MediaSources ?? [], (source: MediaSource, index: number) => {
+                  BrandButton({ label: source.Name || $r('app.string.source_number', index + 1), icon: $r('app.media.nav_library_active'),
+                    primary: (this.sourceId || this.item.MediaSources?.[0]?.Id) === source.Id, available: !this.busy && !this.deleted,
+                    onSelect: () => { this.sourceId = source.Id; } }).width(this.actionWidth()).margin({ bottom: 8 })
+                }, (source: MediaSource) => `${source.Id}:${source.Name}`)
+              }.width('100%')
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
           }
-          DetailMetadataPanel({ item: this.item, sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId,
+          DetailMetadataPanel({ item: this.item, sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId, stacked: this.viewportWidth < 400 || this.fontScale > 1.2,
             onPerson: (person: Person) => this.openPerson(person) })
           if (this.nextUp) {
-            Text($r('app.string.next_up')).fontSize(20).fontColor('#F2F3FA').width('100%')
-            MediaCard({ item: this.nextUp, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
+            Column({ space: 12 }) {
+              BrandHeading({ label: $r('app.string.next_up'), icon: $r('app.media.player_next') })
+              MediaCard({ item: this.nextUp, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
+            }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
           }
           this.childrenPanel()
         }.padding(16).width('100%')
