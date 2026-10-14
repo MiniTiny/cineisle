@@ -1,3 +1,5 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -132,24 +134,22 @@ struct Detail {
     if (this.busy || !this.canDownload() || this.deleted) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
     const record = this.record(); const sourceId = this.sourceId;
-    AlertDialog.show({ title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
       message: record ? $r('app.string.remove_download_confirm') : $r('app.string.download_confirm'),
-      primaryButton: { value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
-      secondaryButton: { value: record ? $r('app.string.remove') : $r('app.string.download'), fontColor: record ? $r('app.color.brand_danger') : $r('app.color.brand_accent'), action: async () => {
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: record ? $r('app.string.remove') : $r('app.string.download'), fontColor: record ? $r('app.color.brand_danger') : $r('app.color.brand_accent'), action: async () => {
         if (!this.current(token, client) || this.busy || this.record() !== record) { return; }
         this.busy = true; this.message = '';
         try { if (record) { await AppService.removeDownload(record); } else { await AppService.download(item, sourceId); } }
         catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
         finally { if (this.current(token, client)) { this.busy = false; this.updateDownload(); } }
-      } }
-    });
+      } }]
+    }, this.viewportWidth, this.viewportHeight);
   }
   private deleteMedia(): void {
     if (!this.loaded || this.busy || this.usingCache || this.deleted || this.item.Type !== 'Movie' || this.item.CanDelete !== true) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
-    AlertDialog.show({ title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
-      primaryButton: { value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
-      secondaryButton: { value: $r('app.string.server_delete'), fontColor: $r('app.color.brand_danger'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.server_delete'), fontColor: $r('app.color.brand_danger'), action: async () => {
         if (!this.current(token, client) || this.busy || this.deleted) { return; }
         this.busy = true; this.message = '';
         try { await AppService.deleteMedia(item); if (this.current(token, client)) { this.deleted = true; router.back(); } }
@@ -159,8 +159,8 @@ struct Detail {
             this.message = errorText(e as Error);
           }
         } finally { if (this.current(token, client)) { this.busy = false; } }
-      } }
-    });
+      } }]
+    }, this.viewportWidth, this.viewportHeight);
   }
   private openChild(item: MediaItem): void {
     if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
@@ -172,14 +172,14 @@ struct Detail {
   private batchEpisodes(): void {
     const chosen = this.children.filter((item: MediaItem) => this.selectedEpisodes.includes(item.Id));
     const client = this.pageClient; const token = this.generation;
-    AlertDialog.show({ title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
-      primaryButton: { value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, secondaryButton: { value: text('download'), fontColor: $r('app.color.brand_accent'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('download'), fontColor: $r('app.color.brand_accent'), action: async () => {
         if (!client || !this.current(token, client) || this.busy) { return; }
         this.busy = true;
         try { const failures = await AppService.batchDownload(chosen); if (this.current(token, client)) { this.message = text('batch_result', chosen.length - failures.length, failures.length); this.selectedEpisodes = failures; } }
         catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
         finally { if (this.current(token, client)) { this.busy = false; } }
-      } } });
+      } }] }, this.viewportWidth, this.viewportHeight);
   }
   private actionWidth(): string { return this.viewportWidth < 400 || this.fontScale > 1.2 ? '100%' : '48%'; }
   @Builder
@@ -216,6 +216,8 @@ struct Detail {
           }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
         }
       }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    } else if (this.loaded && !this.busy && ['Series', 'Season'].includes(this.item.Type)) {
+      BrandState({ label: this.item.Type === 'Series' ? $r('app.string.no_seasons') : $r('app.string.no_episodes'), icon: $r('app.media.nav_library_active') })
     }
   }
   build() {
@@ -237,9 +239,9 @@ struct Detail {
               Text(detailMetadata(this.item, this.sourceId).summary).fontColor($r('app.color.brand_muted')).fontSize(14).width('100%')
             }
           }.width('100%').alignItems(HorizontalAlign.Start)
-          if (this.usingCache) { Text($r('app.string.offline_cache')).fontColor('#EFC86A').fontSize(13).width('100%') }
-          if (this.message) { Text(this.message).fontColor('#FF9F9F').fontSize(13).width('100%') }
-          if (this.busy) { LoadingProgress().width(28).height(28).color($r('app.color.brand_accent')) }
+          if (this.usingCache) { Text($r('app.string.offline_cache')).fontColor($r('app.color.brand_warm')).fontSize(13).width('100%') }
+          if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
+          if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           Column({ space: 12 }) {
             BrandHeading({ label: $r('app.string.detail_actions'), icon: $r('app.media.detail_play') })
             BrandButton({ label: this.nextUp && this.item.Type === 'Series' ? $r('app.string.play_next_episode') :
@@ -259,10 +261,10 @@ struct Detail {
                 available: this.loaded && !this.busy && !this.deleted, onSelect: () => this.setFlag(true) }).width(this.actionWidth()).margin({ bottom: 8 })
               if (this.canDownload()) {
                 DetailAction({ label: this.record() ? $r('app.string.remove_download') : $r('app.string.download'),
-                  icon: this.record() ? $r('app.media.detail_trash') : $r('app.media.detail_download'), destructive: !!this.record(), available: !this.busy && !this.deleted, onSelect: () => this.download() }).width(this.actionWidth()).margin({ bottom: 8 })
+                  icon: this.record() ? $r('app.media.detail_remove') : $r('app.media.detail_download'), destructive: !!this.record(), available: !this.busy && !this.deleted, onSelect: () => this.download() }).width(this.actionWidth()).margin({ bottom: 8 })
               }
               if (this.loaded && !this.usingCache && this.item.Type === 'Movie' && this.item.CanDelete === true) {
-                DetailAction({ label: $r('app.string.server_delete'), icon: $r('app.media.detail_remove'), destructive: true,
+                DetailAction({ label: $r('app.string.server_delete'), icon: $r('app.media.detail_trash'), destructive: true,
                   available: !this.busy && !this.deleted, onSelect: () => this.deleteMedia() }).width(this.actionWidth()).margin({ bottom: 8 })
               }
             }.width('100%')

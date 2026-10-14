@@ -5,6 +5,7 @@ export struct BrandChoice {
   @Prop icon: Resource;
   @Prop choices: SelectOption[] = [];
   @Prop selected: number = 0;
+  @Prop available: boolean = true;
   onSelect: (index: number) => void = () => {};
   build() {
     Column({ space: 8 }) {
@@ -17,8 +18,8 @@ export struct BrandChoice {
         .fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).borderRadius(14)
         .optionBgColor($r('app.color.brand_surface')).optionFontColor('#F2F3FA')
         .selectedOptionBgColor($r('app.color.brand_selected')).selectedOptionFontColor($r('app.color.brand_accent'))
-        .accessibilityText(this.label).onSelect((index: number) => {
-          if (Number.isInteger(index) && index >= 0 && index < this.choices.length) { this.onSelect(index); }
+        .enabled(this.available).accessibilityText(this.label).onSelect((index: number) => {
+          if (this.available && Number.isInteger(index) && index >= 0 && index < this.choices.length) { this.onSelect(index); }
         })
     }.width('100%').alignItems(HorizontalAlign.Start)
   }

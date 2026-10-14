@@ -1,3 +1,5 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -44,11 +46,11 @@ struct Downloads {
     finally { this.busy = false; this.changed(); }
   }
   private remove(record: DownloadRecord): void {
-    AlertDialog.show({ title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-      primaryButton: { value: $r('app.string.cancel'), action: () => {} }, secondaryButton: { value: $r('app.string.remove'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.remove'), fontColor: $r('app.color.brand_danger'), action: async () => {
         if (this.client !== AppService.client) { return; }
         try { await AppService.removeDownload(record); this.changed(); } catch (e) { this.message = errorText(e as Error); }
-      } } });
+      } }] }, this.viewportWidth, this.viewportHeight);
   }
   @Builder
   private filtersPanel() {
@@ -59,6 +61,7 @@ struct Downloads {
           Column() { BrandButton({ label: $r('app.string.download_completed'), icon: $r('app.media.nav_check_active'), compact: true, primary: this.category === 'complete', onSelect: () => { this.category = 'complete'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '31%').margin({ right: '2%', bottom: 8 })
           Column() { BrandButton({ label: $r('app.string.download_failed'), icon: $r('app.media.menu_reset'), compact: true, primary: this.category === 'failed', onSelect: () => { this.category = 'failed'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '32%').margin({ bottom: 8 })
         }.width('100%')
+        if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
         if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
       }.padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).width('100%')
   }
@@ -99,10 +102,7 @@ struct Downloads {
           }
         }, (r: DownloadRecord) => `${r.id}:${r.state}:${r.progress}:${r.failure}`)
         if (!this.visibleRecords().length) { ListItem() {
-          Column({ space: 12 }) {
-            Image($r('app.media.menu_offline')).width(40).height(40).accessibilityLevel('no')
-            Text($r('app.string.no_downloads')).fontColor($r('app.color.brand_muted')).textAlign(TextAlign.Center).width('100%')
-          }.width('100%').padding(24).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+          BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') })
         } }
       }.layoutWeight(1).width('100%')
 

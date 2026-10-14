@@ -1331,6 +1331,34 @@
     {
       "name": "quick_connect_title",
       "value": "配对登录"
+    },
+    {
+      "name": "loading",
+      "value": "正在加载…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "媒体类型"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "题材"
+    },
+    {
+      "name": "favorite_order",
+      "value": "排序"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "尚未保存服务器"
+    },
+    {
+      "name": "no_seasons",
+      "value": "尚无季度"
+    },
+    {
+      "name": "no_episodes",
+      "value": "尚无单集"
     }
   ]
 }

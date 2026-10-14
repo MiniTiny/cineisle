@@ -1,3 +1,4 @@
+import { BrandState } from '../components/BrandState';
 import { UiLayout } from '../utils/UiLayout';
 import { BrandButton } from '../components/BrandButton';
 import { BrandHeading } from '../components/BrandHeading';
@@ -87,6 +88,7 @@ struct Settings {
                   BrandButton({ label: $r('app.string.lock_now'), icon: $r('app.media.menu_lock'), onSelect: () => AppLock.lock() })
                   BrandButton({ label: $r('app.string.lock_disable'), icon: $r('app.media.menu_unlock'), available: !this.busy, onSelect: () => this.changeLock(true) })
                 }
+                if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
                 if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
               }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
             }.width('100%').padding({ bottom: 12 })

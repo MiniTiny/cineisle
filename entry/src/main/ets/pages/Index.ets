@@ -1,3 +1,5 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandState } from '../components/BrandState';
 import { BrandChoice } from '../components/BrandChoice';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
@@ -278,6 +280,7 @@ struct Index {
             .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.https_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
           if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
+          if (this.busy || !this.ready) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           BrandButton({ label: this.busy ? $r('app.string.connecting') : $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true,
             available: this.ready && !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
         }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
@@ -293,6 +296,15 @@ struct Index {
   }
 
   @Builder
+  private statusPanel() {
+    Column({ space: 8 }) {
+      if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.message) { Text(this.message).fontSize(13).fontColor($r('app.color.brand_danger')).width('100%') }
+      if (this.cacheMessage) { Text(this.cacheMessage).fontSize(13).fontColor($r('app.color.brand_warm')).width('100%') }
+    }.width('100%')
+  }
+
+  @Builder
   private searchPanel() {
     Grid() {
       GridItem() {
@@ -305,7 +317,7 @@ struct Index {
             .onChange((value: string) => { this.search = value; }).onSubmit(() => this.performSearch())
           BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
           BrandButton({ label: $r('app.string.close_search'), icon: $r('app.media.menu_cancel'), onSelect: () => this.switchTab(this.tab) })
-          if (this.busy) { LoadingProgress().width(26).height(26).color($r('app.color.brand_accent')) }
+          if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_danger')).width('100%') }
           if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
         }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
@@ -327,7 +339,7 @@ struct Index {
         GridItem() { BrandHeading({ label: $r('app.string.search_results'), icon: $r('app.media.detail_film') }) }
           .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
         if (this.items.length === 0 && !this.busy) {
-          GridItem() { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%').padding(16) }
+          GridItem() { BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_search_active') }) }
             .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
         }
         ForEach(this.items, (item: MediaItem) => {
@@ -359,24 +371,30 @@ struct Index {
   @Builder
     mediaGrid() {
     Grid() {
+      if (this.busy || this.message || this.cacheMessage) { GridItem() { this.statusPanel() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1) }
       if (!this.mode && this.tab === 0) {
         GridItem() { this.recommendFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
 
       if (this.items.length === 0 && !this.busy) {
-        GridItem() { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%').padding(24) }
+        GridItem() { BrandState({ label: $r('app.string.no_items'), icon: this.tab === 0 ? $r('app.media.nav_star_active') : $r('app.media.nav_library_active') }) }
           .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
 
         ForEach(this.items, (item: MediaItem) => {
         GridItem() { MediaCard({ item: item, onReason: this.tab === 0 && this.discover ? (selected: MediaItem) => this.reason(selected) : undefined, onSelect: (selected: MediaItem) => this.open(selected) }) }
       }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
+      if (this.mode && this.items.length < this.total) {
+        GridItem() { BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) }) }
+          .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+      }
     }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(20).width('100%').layoutWeight(1)
   }
 
   @Builder
   libraryPanel() {
     List({ space: 14 }) {
+      if (this.busy || this.message || this.cacheMessage) { ListItem() { this.statusPanel() } }
       ForEach(this.libraries, (library: MediaItem) => {
         ListItem() {
           Button({ type: ButtonType.Normal }) {
@@ -395,10 +413,7 @@ struct Index {
         }
       }, (library: MediaItem) => `${library.Id}|${library.Name}|${library.CollectionType}`)
       if (!this.libraries.length && !this.busy) { ListItem() {
-        Column({ space: 12 }) {
-          BrandHeading({ label: $r('app.string.tab_library'), icon: $r('app.media.nav_library_active') })
-          Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%')
-        }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+        BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_library_active') })
       } }
     }.layoutWeight(1).width('100%')
   }
@@ -425,7 +440,7 @@ struct Index {
   private reason(item: MediaItem): void {
     const value = this.discoveries.find((d: Discovery) => d.item.Id === item.Id);
     if (!value) { return; }
-    AlertDialog.show({ title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), action: () => {} } });
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: $r('app.color.brand_accent'), action: () => {} } }, this.viewportWidth, this.viewportHeight);
   }
 
   @Builder
@@ -460,6 +475,7 @@ struct Index {
   @Builder
   actorPanel() {
     List({ space: 12 }) {
+      if (this.busy || this.message || this.cacheMessage) { ListItem() { this.statusPanel() } }
       ListItem() { this.actorFilters() }
 
       ForEach(this.profiles, (actor: ActorProfile) => {
@@ -487,7 +503,7 @@ struct Index {
           }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
         }
       }, (actor: ActorProfile) => `${actor.person.Id}|${actor.watched}:${actor.unplayed}:${actor.playCount}:${actor.followed}:${actor.newCount}:${JSON.stringify(actor.tags)}`)
-      if (this.profiles.length === 0 && AppService.snapshot.syncedAt) { ListItem() { Text($r('app.string.no_filter_matches')).fontColor($r('app.color.brand_muted')).width('100%') } }
+      if (this.profiles.length === 0 && !this.busy && AppService.snapshot.syncedAt) { ListItem() { BrandState({ label: $r('app.string.no_filter_matches'), icon: $r('app.media.nav_user_active') }) } }
     }.layoutWeight(1).width('100%')
 
   }
@@ -495,6 +511,7 @@ struct Index {
   @Builder
   downloadsPanel() {
     List({ space: 12 }) {
+      if (this.busy || this.message || this.cacheMessage) { ListItem() { this.statusPanel() } }
       ForEach(this.downloads, (record: DownloadRecord) => {
         ListItem() {
           Column({ space: 10 }) {
@@ -503,26 +520,22 @@ struct Index {
               $r('app.string.download_progress', Math.floor(record.progress * 100)) : $r('app.string.download_interrupted'))
               .fontSize(12).fontColor($r('app.color.brand_muted'))
             Flex({ wrap: FlexWrap.Wrap }) {
-              Button($r('app.string.play')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).enabled(record.state === 'complete').backgroundColor($r('app.color.brand_action'))
-                .onClick(async () => {
-                  try { router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item) }); }
-                  catch (e) { this.message = errorText(e as Error); }
-                })
-              Button($r('app.string.remove_download')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => {
-                AlertDialog.show({ title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-                  primaryButton: { value: $r('app.string.cancel'), action: () => {} },
-                  secondaryButton: { value: $r('app.string.remove'), action: async () => {
-                    try { await AppService.removeDownload(record); this.downloads = [...AppService.downloads]; }
-                    catch (e) { this.message = errorText(e as Error); }
-                  } }
-                });
-              })
+              Column() { BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: record.state === 'complete' && !this.busy, onSelect: async () => {
+                try { router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item) }); } catch (e) { this.message = errorText(e as Error); }
+              } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
+              Column() { BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => {
+                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+                  buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.remove'), fontColor: $r('app.color.brand_danger'), action: async () => {
+                    try { await AppService.removeDownload(record); this.downloads = [...AppService.downloads]; } catch (e) { this.message = errorText(e as Error); }
+                  } }]
+                }, this.viewportWidth, this.viewportHeight);
+              } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
             }
           }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(14)
         }
       }, (record: DownloadRecord) => record.id)
+      if (this.downloads.length === 0) { ListItem() { BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') }) } }
     }.layoutWeight(1).width('100%')
-    if (this.downloads.length === 0) { Text($r('app.string.no_downloads')).fontColor($r('app.color.brand_muted')).padding(20) }
   }
 
   @Builder
@@ -553,6 +566,7 @@ struct Index {
   morePanel() {
     Scroll() {
       Column({ space: 18 }) {
+        if (this.busy || this.message || this.cacheMessage) { this.statusPanel() }
         Row({ space: 14 }) {
           Image($r('app.media.app_icon')).width(48).height(48).borderRadius(14).flexShrink(0).accessibilityLevel('no')
           Column({ space: 4 }) {
@@ -588,10 +602,9 @@ struct Index {
           if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }
         }.width('100%')
         this.menuAction($r('app.string.change_account'), $r('app.media.menu_logout'), () => {
-          AlertDialog.show({ title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
-            primaryButton: { value: $r('app.string.cancel'), action: () => {} },
-            secondaryButton: { value: $r('app.string.logout'), action: async () => { await this.logout(); } }
-          });
+          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
+            buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.logout'), fontColor: $r('app.color.brand_danger'), action: async () => { await this.logout(); } }]
+          }, this.viewportWidth, this.viewportHeight);
         }, true, true)
         Text($r('app.string.version')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').textAlign(TextAlign.Center)
       }.width('100%').padding({ top: 8, bottom: 18 })
@@ -601,6 +614,7 @@ struct Index {
   @Builder
   homePanel() {
     List({ space: 24 }) {
+      if (this.busy || this.message || this.cacheMessage) { ListItem() { this.statusPanel() } }
       ListItem() { Column({ space: 8 }) {
     Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
       Column() { this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }), true, false, true) }
@@ -611,7 +625,7 @@ struct Index {
     if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor($r('app.color.brand_muted')) }
     ForEach(this.homeFailures, (failure: HomeFailure) => {
       Column({ space: 8 }) {
-        Text(failure.name || $r('app.string.home_section_failed')).width('100%').fontSize(12).fontColor('#FF9F9F')
+        Text(failure.name || $r('app.string.home_section_failed')).width('100%').fontSize(12).fontColor($r('app.color.brand_danger'))
         BrandButton({ label: $r('app.string.retry'), icon: $r('app.media.menu_sync'), onSelect: () => this.homeLoader?.retry(failure.id) })
       }.width('100%').padding({ left: 20, right: 20 })
     }, (failure: HomeFailure) => failure.id)
@@ -623,10 +637,10 @@ struct Index {
             onLibrary: (selected: HomeSection) => this.openLibrary(selected) })
         }
       }, (section: HomeSection) => `${section.id}|${JSON.stringify(section)}`)
+      if (!this.busy && this.homeSections.length === 0) { ListItem() {
+        BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_home_active') })
+      } }
     }.width('100%').layoutWeight(1).padding({ top: 8, bottom: 16 }).scrollBar(BarState.Off)
-    if (!this.busy && this.homeSections.length === 0) {
-      Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).padding(24)
-    }
   }
 
   @Builder
@@ -676,9 +690,6 @@ struct Index {
         }
         if (this.searchExpanded || this.mode === 'search') { this.searchPanel() }
         else {
-        if (this.busy) { LoadingProgress().width(26).height(26).color($r('app.color.brand_accent')) }
-        if (this.message) { Text(this.message).fontSize(12).fontColor('#FF9F9F').width('100%').padding({ left: 16, right: 16, bottom: 8 }) }
-        if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor('#EFC86A').width('100%').padding({ left: 16, right: 16, bottom: 8 }) }
         if (this.tab === 1 && !this.mode) { this.homePanel() }
         else {
           Column({ space: 12 }) {
@@ -688,9 +699,7 @@ struct Index {
             else if (this.tab === 2 && !this.mode) { this.libraryPanel() }
             else {
               this.mediaGrid()
-              if (this.mode && this.items.length < this.total) {
-                BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) })
-              }
+
             }
           }.width('100%').layoutWeight(1).padding({ left: 16, right: 16, top: 8, bottom: 8 })
         }

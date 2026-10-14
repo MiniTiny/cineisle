@@ -1,3 +1,4 @@
+global.BlurStyle={NONE:0};global.DialogButtonDirection={VERTICAL:1,HORIZONTAL:2};
 // Real services and page lifecycle/query methods. ArkUI builders are compiled by the SDK,
 // not rendered here; HTTP/Asset are mocks and file APIs adapt to isolated real temp files.
 const assert = require('node:assert/strict');
@@ -63,13 +64,14 @@ function load(relative) {
   } }).outputText;
   const module = { exports: {} }; modules.set(file, module);
   const localRequire = id => {
+    if(id.endsWith('/CompactDialog'))return {showBrandDialog:(_context,options)=>{ dialog=require('./dialog-fixture.cjs').dialogFixture(options); }};
     if (platform.has(id)) return platform.get(id);
     if (!id.startsWith('.')) throw new Error('Unexpected dependency ' + id);
     const base = path.resolve(path.dirname(file), id);
     return load(fs.existsSync(base + '.ts') ? base + '.ts' : base + '.ets');
   };
   vm.runInThisContext('(function(require,module,exports,getContext,$r,AlertDialog,canIUse){' + js + '\n})', { filename: file })
-    (localRequire, module, module.exports, () => context, id => ({ id }), { show: value => { dialog = value; } }, () => false);
+    (localRequire, module, module.exports, () => context, id => ({ id }), { show: value => { dialog = require('./dialog-fixture.cjs').dialogFixture(value); } }, () => false);
   return module.exports;
 }
 const { AppService } = load('service/AppService.ets');

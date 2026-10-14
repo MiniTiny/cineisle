@@ -84,7 +84,13 @@ const server = http.createServer((req, res) => {
     if (match && data.has(match[1])) result = data.get(match[1]);
   }
   if (result === undefined) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'unhandled local fixture path' })); return; }
-  res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(result));
+  if (process.env.CINEISLE_VISUAL_EMPTY_ALL === '1') {
+    if (Array.isArray(result)) result = [];
+    else if (Array.isArray(result.Items)) result = page([]);
+  }
+  const delay = Math.max(0, Math.min(15000, Number(process.env.CINEISLE_VISUAL_RESPONSE_DELAY_MS) || 0));
+  const send = () => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(result)); };
+  if (delay && req.method === 'GET') setTimeout(send, delay); else send();
 });
 server.listen(port, '127.0.0.1', () => console.log(`Native UI fixture listening on localhost:${port}; no external connections.`));
 function stop() {

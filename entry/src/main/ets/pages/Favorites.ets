@@ -1,3 +1,6 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandChoice } from '../components/BrandChoice';
+import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -95,10 +98,10 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    AlertDialog.show({ title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
-      primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('confirm'), action: () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
-      } } });
+      } }] }, this.viewportWidth, this.viewportHeight);
   }
   private async batch(items: MediaItem[], restore: boolean): Promise<void> {
     const revision = this.revision; this.busy = true; this.message = ''; const success: MediaItem[] = []; let failed = 0; let failure = '';
@@ -120,12 +123,14 @@ struct Favorites {
   private filtersPanel() {
       Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.favorite_filters'), icon: $r('app.media.menu_settings') })
-      Flex({ wrap: FlexWrap.Wrap }) {
-        Select([{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }])
-          .selected(['', 'Movie', 'Series', 'Episode'].indexOf(this.category)).value(text(['all', 'media_movie', 'media_series', 'media_episode'][['', 'Movie', 'Series', 'Episode'].indexOf(this.category)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).width('100%').margin({ bottom: 8 }).onSelect((i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); })
-        Select([{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))]).enabled(this.genres.length > 0)
-          .selected(this.genres.indexOf(this.genre) + 1).value(this.genre || text('all_genres')).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).width('100%').margin({ bottom: 8 }).onSelect((i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); })
-      }.width('100%')
+      BrandChoice({ label: $r('app.string.favorite_type'), icon: $r('app.media.detail_film'),
+        choices: [{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
+        selected: ['', 'Movie', 'Series', 'Episode'].indexOf(this.category),
+        onSelect: (i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); } })
+      BrandChoice({ label: $r('app.string.favorite_genre'), icon: $r('app.media.nav_star_active'),
+        choices: [{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))],
+        selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
+        onSelect: (i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); } })
       Text($r('app.string.favorite_search')).fontSize(12).fontColor($r('app.color.brand_muted'))
       TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
       Flex({ wrap: FlexWrap.Wrap }) {
@@ -133,8 +138,10 @@ struct Favorites {
           Text($r('app.string.unwatched_only')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
           Checkbox().select(this.unwatched).selectedColor($r('app.color.brand_action')).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
         }.width('100%').margin({ bottom: 8 })
-        Select([{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }])
-          .selected(['name', 'nameDesc', 'continue'].indexOf(this.order)).value(text(['name_ascending', 'name_descending', 'continue_first'][['name', 'nameDesc', 'continue'].indexOf(this.order)])).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).width('100%').margin({ bottom: 8 }).onSelect((i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); })
+        BrandChoice({ label: $r('app.string.favorite_order'), icon: $r('app.media.menu_settings'),
+          choices: [{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }],
+          selected: ['name', 'nameDesc', 'continue'].indexOf(this.order),
+          onSelect: (i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); } })
       }
       Flex({ wrap: FlexWrap.Wrap }) {
         Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).width('100%')
@@ -150,9 +157,9 @@ struct Favorites {
         BrandButton({ label: $r('app.string.batch_unfavorite'), icon: $r('app.media.detail_remove'), available: this.selected.length > 0 && !this.busy, destructive: true, onSelect: () => this.remove() })
       }
       if (this.undoItems.length) { BrandButton({ label: $r('app.string.undo'), icon: $r('app.media.menu_back'), available: !this.busy, onSelect: () => this.batch(this.undoItems, true) }) }
-      if (this.busy) { LoadingProgress().width(24).height(24) }
+      if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
-      if (!this.visibleItems.length && !this.busy) { Text(this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites')).fontColor($r('app.color.brand_muted')) }
+      if (!this.visibleItems.length && !this.busy) { BrandState({ label: this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites'), icon: $r('app.media.detail_heart') }) }
       }.padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).width('100%').alignItems(HorizontalAlign.Start)
   }
   @Builder
@@ -163,7 +170,7 @@ struct Favorites {
       ForEach(this.visibleItems, (item: MediaItem) => {
         GridItem() {
           Column() {
-            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
+            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).selectedColor($r('app.color.brand_action')).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
             MediaCard({ item: item, onSelect: (selected: MediaItem) => this.choose(selected) })
           }.gesture(LongPressGesture().onAction(() => { if (!this.busy) { this.selection = true; this.selected = [item.Id]; } }))
         }

@@ -1,3 +1,4 @@
+import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -93,7 +94,7 @@ struct Actor {
       Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.actor_profile'), icon: $r('app.media.nav_user_active') })
       BrandButton({ label: this.followed ? $r('app.string.unfollow') : $r('app.string.follow'), icon: this.followed ? $r('app.media.detail_heart_filled') : $r('app.media.detail_heart'), primary: this.followed, onSelect: () => this.follow() })
-      if (this.biographyLoading) { Text($r('app.string.biography_loading')).fontColor($r('app.color.brand_muted')) }
+      if (this.biographyLoading) { BrandState({ label: $r('app.string.biography_loading'), loading: true }) }
       if (this.overview) { Text(this.overview).fontColor('#F2F3FA').fontSize(14).width('100%') }
       BrandHeading({ label: $r('app.string.actor_credits'), icon: $r('app.media.nav_library_active') })
       Row({ space: 8 }) {
@@ -109,7 +110,7 @@ struct Actor {
       }
       Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
       if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
-      if (this.busy) { LoadingProgress().width(24).height(24) }
+      if (this.busy && !this.biographyLoading) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
   }
   @Builder
@@ -117,6 +118,7 @@ struct Actor {
     List({ space: 14 }) {
       ListItem() { this.filtersPanel() }
 
+      if (!this.busy && !this.shown().length) { ListItem() { BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_library_active') }) } }
       ForEach(this.shown(), (item: MediaItem) => {
         ListItem() {
           Column({ space: 8 }) {

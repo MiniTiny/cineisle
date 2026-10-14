@@ -1,3 +1,5 @@
+import { showBrandDialog } from '../components/CompactDialog';
+import { BrandState } from '../components/BrandState';
 import { UiLayout } from '../utils/UiLayout';
 import router from '@ohos.router';
 import { BrandButton } from '../components/BrandButton';
@@ -87,10 +89,10 @@ struct Accounts {
   }
   private remove(account: AccountSummary): void {
     const revision = this.revision;
-    AlertDialog.show({ title: text('remove_saved_account'), message: text('remove_account_confirm'), primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('confirm'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_account'), message: text('remove_account_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.removeAccount(account.key); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
-    } } });
+    } }] }, this.viewportWidth, this.viewportHeight);
   }
   private editServer(server: ServerProfile): void { this.editingId = server.id; this.serverName = server.name; this.addressText = server.addresses.join('\n'); this.adding = false; this.message = ''; this.top(); }
   private async saveServer(): Promise<void> {
@@ -104,17 +106,17 @@ struct Accounts {
   }
   private removeServer(): void {
     const id = this.editingId; const revision = this.revision;
-    AlertDialog.show({ title: text('remove_saved_server'), message: text('remove_server_confirm'), primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('confirm'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_server'), message: text('remove_server_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.removeServer(id); this.endEditing(); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
-    } } });
+    } }] }, this.viewportWidth, this.viewportHeight);
   }
   private resetAccounts(): void {
     const revision = this.revision;
-    AlertDialog.show({ title: text('reset_saved_accounts'), message: text('reset_accounts_confirm'), primaryButton: { value: text('cancel'), action: () => {} }, secondaryButton: { value: text('confirm'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('reset_saved_accounts'), message: text('reset_accounts_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.resetAccounts(); this.message = ''; this.endEditing(); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
-    } } });
+    } }] }, this.viewportWidth, this.viewportHeight);
   }
   @Builder
   private fieldCaption(label: Resource) {
@@ -167,7 +169,7 @@ struct Accounts {
   @Builder
   private accountCards() {
     BrandHeading({ label: $r('app.string.saved_accounts'), icon: $r('app.media.nav_user_active') })
-    if (!this.accounts.length) { Text($r('app.string.no_saved_accounts')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20) }
+    if (!this.accounts.length) { BrandState({ label: $r('app.string.no_saved_accounts'), icon: $r('app.media.menu_accounts') }) }
     ForEach(this.accounts, (account: AccountSummary) => {
       Column({ space: 12 }) {
         Row({ space: 12 }) {
@@ -194,6 +196,7 @@ struct Accounts {
   @Builder
   private serverCards() {
     BrandHeading({ label: $r('app.string.saved_servers'), icon: $r('app.media.menu_server') })
+    if (!this.servers.length) { BrandState({ label: $r('app.string.no_saved_servers'), icon: $r('app.media.menu_server') }) }
     ForEach(this.servers, (server: ServerProfile) => {
       Column({ space: 12 }) {
         Row({ space: 12 }) {
@@ -225,6 +228,7 @@ struct Accounts {
           }
           Scroll(this.scroller) {
             Column({ space: 18 }) {
+              if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
               if (this.editingId) { this.serverForm() }
               else {
                 if (this.adding) {

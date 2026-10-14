@@ -71,7 +71,7 @@ export struct MediaCard {
         Row() {
           Text(this.item.ProductionYear?.toString() ?? this.typeLabel()).fontSize(12).fontColor($r('app.color.brand_muted'))
           Blank()
-          if (this.item.CommunityRating) { Text(this.item.CommunityRating.toFixed(1)).fontSize(12).fontColor('#EFC86A') }
+          if (this.item.CommunityRating) { Text(this.item.CommunityRating.toFixed(1)).fontSize(12).fontColor($r('app.color.brand_warm')) }
         }.width('100%')
       }
     }.width('100%').alignItems(HorizontalAlign.Start).onClick(() => this.onSelect(this.item))

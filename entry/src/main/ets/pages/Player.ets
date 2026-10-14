@@ -1,3 +1,4 @@
+import { BrandState } from '../components/BrandState';
 import { BrandButton } from '../components/BrandButton';
 import { BrandHeading } from '../components/BrandHeading';
 import { PlayerChoice } from '../components/PlayerChoice';
@@ -258,7 +259,7 @@ struct Player {
               } else {
                 Text($r('app.string.player_locked_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
               }
-              if (this.busy) { Text($r('app.string.playback_loading')).fontColor($r('app.color.brand_muted')) }
+              if (this.busy) { BrandState({ label: $r('app.string.playback_loading'), loading: true }) }
               if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
               if (this.reportMessage) { Text(this.reportMessage).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
               Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint'))
@@ -311,7 +312,7 @@ struct Player {
           available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(this.audio[index].key, true); } })
       } else {
         BrandHeading({ label: $r('app.string.audio_track'), icon: $r('app.media.player_audio') })
-        Text($r('app.string.no_audio_tracks')).fontColor($r('app.color.brand_muted')).fontSize(12)
+        BrandState({ label: $r('app.string.no_audio_tracks'), icon: $r('app.media.player_audio') })
       }
       PlayerChoice({ label: $r('app.string.subtitle_track'), icon: $r('app.media.player_subtitle'),
         choices: [{ value: text('subtitles_off') }, ...this.subtitles.map((track: TrackChoice): SelectOption => ({ value: track.label }))],
@@ -352,6 +353,7 @@ struct Player {
         }.width(this.controlWidth >= 480 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
       }.width('100%')
       Text($r('app.string.playback_preferences_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      if (this.settingsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.settingsMessage) { Text(this.settingsMessage).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
     }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
   }
