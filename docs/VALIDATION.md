@@ -133,3 +133,13 @@ CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-player-emulator.t
 ```
 
 视频夹具可由ffmpeg生成640×360 H.264、双AAC音轨的有效MP4，通过`CINEISLE_VISUAL_VIDEO`传给`tests/visual-fixture-server.cjs`。启用该选项时服务支持字节范围读取和外部SRT字幕；默认无此选项时保持原有不可解码的布局夹具。测试视频只能证明对应模拟器/编码的显示、暂停及比例，不替代真实Jellyfin、其他编码、真机、画中画和后台/锁屏的完整生命周期验收。正式包覆盖安装和系统安全区单独验证。
+
+## 首页、推荐与演员品牌布局
+
+`node tests/brand-discovery.test.cjs` 使用实际ArkUI编译器检查三类页面及演员详情，覆盖分组语义图标、查看全部/失败重试、推荐模式选中态和回调、独立搜索/刷新、演员排序和非法索引、筛选重置、人物导航、标签与关注、滚动归属及两倍字号按钮增高；纳入全套回归。
+
+原生矩阵使用独立QA包的实际产品页面，检查320×640vp、360×740vp普通/两倍字号和760×280vp短横屏普通/两倍字号。该PNG回归需要Pillow。窗口尺寸与应用字号必须从原生配置核对；检查完整按钮/图标边界、分组可滚动访问、选择状态与页面返回。夹具只证明布局与对应回调，不替代真实Jellyfin推荐质量、人物元数据及真机验收。`CINEISLE_VISUAL_EMPTY_CATALOG=1`使本地夹具返回空推荐/目录，用于检查短横屏空状态是否挤压切换入口。正式签名包覆盖安装与首页、推荐、演员空/实数据另行检查。截图、日志与报告只存于忽略的`.local`目录。
+
+```bash
+CINEISLE_UI_CAPTURE_DIR=.local/ui-captures python3 tests/brand-discovery-emulator.test.py
+```

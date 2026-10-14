@@ -1259,6 +1259,30 @@
     {
       "name": "player_no_selection",
       "value": "未选择"
+    },
+    {
+      "name": "recommend_group",
+      "value": "光影发现"
+    },
+    {
+      "name": "actor_filters",
+      "value": "演员筛选"
+    },
+    {
+      "name": "actor_sort",
+      "value": "排序方式"
+    },
+    {
+      "name": "actor_profile",
+      "value": "人物与关注"
+    },
+    {
+      "name": "actor_credits",
+      "value": "作品与标签"
+    },
+    {
+      "name": "actor_tags",
+      "value": "作品标签"
     }
   ]
 }

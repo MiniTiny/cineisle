@@ -1,6 +1,6 @@
 @Component
 export struct BrandHeading {
-  @Prop label: Resource;
+  @Prop label: ResourceStr;
   @Prop icon: Resource;
   build() {
     Row({ space: 10 }) {

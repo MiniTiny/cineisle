@@ -4,6 +4,9 @@ export class UiLayout {
   static scale(value: number | undefined): number { return value !== undefined && Number.isFinite(value) && value > 0 ? Math.min(3.2, Math.max(1, value)) : 1; }
   static buttonHeight(scale: number): number { return 40 * UiLayout.scale(scale); }
   static headerHeight(scale: number): number { return Math.max(56, UiLayout.buttonHeight(scale) + 8); }
+  static primaryHeaderHeight(height: number, scale: number, landscape: boolean): number {
+    return landscape && height < 440 ? Math.max(56, 28 * UiLayout.scale(scale) + 8) : UiLayout.headerHeight(scale);
+  }
   static navHeight(scale: number): number { return Math.max(80, 50 + 16 * UiLayout.scale(scale)); }
   static columns(width: number, scale: number): string {
     const available = Number.isFinite(width) && width > 0 ? width : 360;

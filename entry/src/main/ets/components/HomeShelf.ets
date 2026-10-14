@@ -1,3 +1,5 @@
+import { BrandHeading } from './BrandHeading';
+import { BrandButton } from './BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { HomeSection, MediaItem } from '../model/Models';
 import { MediaCard } from './MediaCard';
@@ -21,14 +23,14 @@ export struct HomeShelf {
 
   build() {
     Column({ space: 12 }) {
-      Row() {
-        Text(this.title()).fontSize(18).fontWeight(FontWeight.Medium).fontColor('#F2F3FA')
-          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+      Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+        Column() { BrandHeading({ label: this.title(), icon: this.section.kind === 'resume' ? $r('app.media.detail_play') : this.section.kind === 'nextup' ? $r('app.media.player_next') : $r('app.media.nav_library_active') }) }
+          .width(this.fontScale > 1 || this.viewportWidth < 360 || !this.section.libraryId ? '100%' : '65%')
         if (this.section.libraryId) {
-          Button($r('app.string.view_all'), { type: ButtonType.Normal }).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(13).fontColor($r('app.color.brand_accent'))
-            .backgroundColor(Color.Transparent).height(UiLayout.buttonHeight(this.fontScale)).onClick(() => this.onLibrary(this.section))
+          Column() { BrandButton({ label: $r('app.string.view_all'), icon: $r('app.media.menu_chevron'), compact: true, onSelect: () => this.onLibrary(this.section) }) }
+            .width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '33%').margin({ top: 8 })
         }
-      }.width('100%').padding({ left: 20, right: 12 })
+      }.width('100%').padding({ left: 20, right: 20 })
       List({ space: 16 }) {
         ForEach(this.section.items, (item: MediaItem) => {
           ListItem() {

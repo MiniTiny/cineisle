@@ -55,7 +55,7 @@ const server = http.createServer((req, res) => {
   else if (p.endsWith('/Episodes')) result = page([episode]);
   else if (p.endsWith('/Items/Resume') || p === '/UserItems/Resume') result = page([movie]);
   else if (p.endsWith('/Items/Latest')) result = q.get('parentid') === showsId ? [show] : q.get('parentid') === moviesId ? [movie] : [movie, show];
-  else if (p === '/Movies/Recommendations') result = [{ Items: [movie] }];
+  else if (p === '/Movies/Recommendations') result = process.env.CINEISLE_VISUAL_EMPTY_CATALOG === '1' ? [] : [{ Items: [movie] }];
   else if (p === '/Persons') result = page([]);
   else if (p.endsWith('/PlaybackInfo')) result = { MediaSources: videoFile?[source,{...source,Id:id(11),Name:'备用媒体源 · 同一测试视频'}]:[source], PlaySessionId: id(21) };
   else if (/\/(?:User)?(FavoriteItems|PlayedItems)\//.test(p) || /\/Sessions\/Playing/.test(p)) { res.writeHead(204); res.end(); return; }
@@ -65,6 +65,7 @@ const server = http.createServer((req, res) => {
     if (q.get('filters') === 'IsFavorite') items = items.filter(x => x.UserData.IsFavorite);
     if (q.get('searchterm')) items = items.filter(x => x.Name.includes(q.get('searchterm')));
     if (q.get('includeitemtypes')) items = items.filter(x => q.get('includeitemtypes').split(',').includes(x.Type));
+    if (process.env.CINEISLE_VISUAL_EMPTY_CATALOG === '1') items = [];
     const start = Number(q.get('startindex') || 0), limit = Number(q.get('limit') || items.length); result = { Items: items.slice(start, start + limit), TotalRecordCount: items.length, StartIndex: start };
   } else if (/\/Images\//.test(p)) { res.writeHead(404); res.end(); return; }
   else if (/\/Subtitles\/\d+\/Stream\.srt$/.test(p) && videoFile) {

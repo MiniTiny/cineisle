@@ -1,3 +1,4 @@
+import { BrandChoice } from '../components/BrandChoice';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -270,20 +271,28 @@ struct Index {
 
   @Builder
   private recommendFilters() {
-Column({ space: 8 }) {
-                Flex({ wrap: FlexWrap.Wrap }) {
-                  Button($r('app.string.discover')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.discover ? $r('app.color.brand_action') : $r('app.color.brand_surface')).onClick(() => { this.discover = true; this.load(); })
-                  Button($r('app.string.rewatch')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).margin({ right: 8, bottom: 8 }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor(this.discover ? $r('app.color.brand_surface') : $r('app.color.brand_action')).onClick(() => { this.discover = false; this.load(); })
-                }
-                Text(this.discover ? $r('app.string.discovery_hint') : $r('app.string.recommend_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-                }.width('100%')
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.recommend_group'), icon: $r('app.media.nav_star_active') })
+      Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+        Column() { BrandButton({ label: $r('app.string.discover'), icon: $r('app.media.nav_star_active'), primary: this.discover, onSelect: () => { this.discover = true; this.load(); } }) }
+          .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+        Column() { BrandButton({ label: $r('app.string.rewatch'), icon: $r('app.media.menu_sync'), primary: !this.discover, onSelect: () => { this.discover = false; this.load(); } }) }
+          .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
+      }.width('100%')
+      Text(this.discover ? $r('app.string.discovery_hint') : $r('app.string.recommend_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+    }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
   }
 
   @Builder
     mediaGrid() {
     Grid() {
-      if (!this.mode && this.tab === 0 && !UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
+      if (!this.mode && this.tab === 0) {
         GridItem() { this.recommendFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+      }
+
+      if (this.items.length === 0 && !this.busy) {
+        GridItem() { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).width('100%').padding(24) }
+          .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
 
         ForEach(this.items, (item: MediaItem) => {
@@ -347,60 +356,66 @@ Column({ space: 8 }) {
 
   @Builder
   private actorFilters() {
-    Column({ space: 10 }) {
-    TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface'))
-      .onChange((value: string) => { this.actorQuery = value; this.refreshActors(); })
-    Select([{ value: $r('app.string.actor_order_play') }, { value: $r('app.string.actor_order_watched') }, { value: $r('app.string.actor_order_unplayed') }, { value: $r('app.string.actor_order_works') }, { value: $r('app.string.actor_order_recent') }, { value: $r('app.string.actor_order_name') }, { value: $r('app.string.actor_order_recommended') }])
-      .selected(['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder))
-      .value(text(['actor_order_play', 'actor_order_watched', 'actor_order_unplayed', 'actor_order_works', 'actor_order_recent', 'actor_order_name', 'actor_order_recommended'][['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder)]))
-      .fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).onSelect((index: number) => { this.actorOrder = ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'][index]; this.actorSettings(); })
-    Flex({ wrap: FlexWrap.Wrap }) {
-      Row() { Checkbox().select(this.followedOnly).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
-      Text($r('app.string.followed_only')).fontColor($r('app.color.brand_muted')).fontSize(13) }.margin({ right: 8, bottom: 8 })
-      Row() { Checkbox().select(this.showTags).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.showTags = value; this.actorSettings(); })
-      Text($r('app.string.show_actor_tags')).fontColor($r('app.color.brand_muted')).fontSize(13) }.margin({ right: 8, bottom: 8 })
-      if (this.actorTag) { Button($r('app.string.clear_filters')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).onClick(() => { this.actorTag = ''; this.actorQuery = ''; this.followedOnly = false; this.actorSettings(); }) }
-    }
-    if (!AppService.snapshot.syncedAt) {
-      Text($r('app.string.actors_sync_hint')).fontColor($r('app.color.brand_muted'))
-      Button($r('app.string.sync_library')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_action')).enabled(!this.syncing).onClick(() => this.sync())
-    }
-    }.width('100%')
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.actor_filters'), icon: $r('app.media.menu_settings') })
+      Text($r('app.string.actor_search')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+      TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(14).width('100%')
+        .onChange((value: string) => { this.actorQuery = value; this.refreshActors(); })
+      BrandChoice({ label: $r('app.string.actor_sort'), icon: $r('app.media.menu_settings'),
+        choices: [{ value: text('actor_order_play') }, { value: text('actor_order_watched') }, { value: text('actor_order_unplayed') }, { value: text('actor_order_works') }, { value: text('actor_order_recent') }, { value: text('actor_order_name') }, { value: text('actor_order_recommended') }],
+        selected: Math.max(0, ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder)),
+        onSelect: (index: number) => { this.actorOrder = ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'][index]; this.actorSettings(); } })
+      Row({ space: 8 }) {
+        Checkbox().select(this.followedOnly).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
+        Text($r('app.string.followed_only')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+      }.width('100%')
+      Row({ space: 8 }) {
+        Checkbox().select(this.showTags).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.showTags = value; this.actorSettings(); })
+        Text($r('app.string.show_actor_tags')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+      }.width('100%')
+      if (this.actorTag || this.actorQuery || this.followedOnly) {
+        BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.actorTag = ''; this.actorQuery = ''; this.followedOnly = false; this.actorSettings(); } })
+      }
+      if (!AppService.snapshot.syncedAt) {
+        Text($r('app.string.actors_sync_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        BrandButton({ label: $r('app.string.sync_library'), icon: $r('app.media.menu_sync'), primary: true, available: !this.syncing, onSelect: () => this.sync() })
+      }
+    }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
   }
 
   @Builder
   actorPanel() {
-    if (UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
-      Scroll() { this.actorFilters() }.height(UiLayout.filters(this.viewportHeight, this.fontScale)).width('100%').align(Alignment.TopStart)
-    }
     List({ space: 12 }) {
-      if (!UiLayout.separateFilters(this.viewportHeight, this.landscape)) { ListItem() { this.actorFilters() } }
+      ListItem() { this.actorFilters() }
 
       ForEach(this.profiles, (actor: ActorProfile) => {
         ListItem() {
           Column({ space: 8 }) {
+            Button({ type: ButtonType.Normal }) {
             Row({ space: 14 }) {
-              Image(AppService.client?.image(actor.person.Id, actor.person.PrimaryImageTag) ?? '').width(56).height(56).borderRadius(28).backgroundColor($r('app.color.brand_surface'))
+              Image(AppService.client?.image(actor.person.Id, actor.person.PrimaryImageTag) ?? '').alt($r('app.media.nav_user_active')).width(56).height(56).borderRadius(28).flexShrink(0).backgroundColor($r('app.color.brand_surface'))
               Column({ space: 6 }) {
-                Text(actor.person.Name).fontColor('#F2F3FA').fontSize(16)
-                Text($r('app.string.actor_counts', actor.works.length, actor.watched, actor.unplayed)).fontColor($r('app.color.brand_muted')).fontSize(12)
-                if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor($r('app.color.brand_accent')).fontSize(12) }
+                Text(actor.person.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
               }.alignItems(HorizontalAlign.Start).layoutWeight(1)
-              Text('›').fontColor($r('app.color.brand_accent')).fontSize(24)
-            }.width('100%').onClick(() => router.pushUrl({ url: 'pages/Actor', params: { personId: actor.person.Id, personName: actor.person.Name } }))
+              Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no')
+            }.width('100%').hitTestBehavior(HitTestMode.None)
+            }.width('100%').padding(0).backgroundColor(Color.Transparent).borderRadius(14).accessibilityText(actor.person.Name).onClick(() => router.pushUrl({ url: 'pages/Actor', params: { personId: actor.person.Id, personName: actor.person.Name } }))
+            Text($r('app.string.actor_counts', actor.works.length, actor.watched, actor.unplayed)).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+            if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor($r('app.color.brand_accent')).fontSize(12).width('100%') }
             if (this.showTags) {
               Flex({ wrap: FlexWrap.Wrap }) {
                 ForEach(actor.tags.slice(0, 3), (tag: ActorTag) => {
-                  Button(tag.theme ? $r('app.string.theme_' + tag.title) : tag.title, { type: ButtonType.Normal }).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(11).fontColor($r('app.color.brand_accent')).backgroundColor($r('app.color.brand_selected')).borderRadius(8).height(30)
-                    .onClick(() => { this.actorTag = tag.key; this.refreshActors(); })
+                  Column() { BrandButton({ label: tag.theme ? $r('app.string.theme_' + tag.title) : tag.title, icon: $r('app.media.nav_star_active'), compact: true, primary: this.actorTag === tag.key, onSelect: () => { this.actorTag = tag.key; this.refreshActors(); } }) }
+                    .width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '48%').margin({ right: 4, bottom: 8 })
                 }, (tag: ActorTag) => tag.key)
               }
             }
-          }.padding(12).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(14)
+          }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
         }
       }, (actor: ActorProfile) => `${actor.person.Id}|${actor.watched}:${actor.unplayed}:${actor.playCount}:${actor.followed}:${actor.newCount}:${JSON.stringify(actor.tags)}`)
+      if (this.profiles.length === 0 && AppService.snapshot.syncedAt) { ListItem() { Text($r('app.string.no_filter_matches')).fontColor($r('app.color.brand_muted')).width('100%') } }
     }.layoutWeight(1).width('100%')
-    if (this.profiles.length === 0 && AppService.snapshot.syncedAt) { Text($r('app.string.no_filter_matches')).fontColor($r('app.color.brand_muted')) }
+
   }
 
   @Builder
@@ -521,9 +536,9 @@ Column({ space: 8 }) {
     }.width('100%').padding({ left: 20, right: 20 })
     if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor($r('app.color.brand_muted')) }
     ForEach(this.homeFailures, (failure: HomeFailure) => {
-      Row() {
-        Text(failure.name || $r('app.string.home_section_failed')).layoutWeight(1).fontSize(12).fontColor('#FF9F9F')
-        Button($r('app.string.retry')).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).backgroundColor($r('app.color.brand_surface')).onClick(() => this.homeLoader?.retry(failure.id))
+      Column({ space: 8 }) {
+        Text(failure.name || $r('app.string.home_section_failed')).width('100%').fontSize(12).fontColor('#FF9F9F')
+        BrandButton({ label: $r('app.string.retry'), icon: $r('app.media.menu_sync'), onSelect: () => this.homeLoader?.retry(failure.id) })
       }.width('100%').padding({ left: 20, right: 20 })
     }, (failure: HomeFailure) => failure.id)
       }.width('100%') }
@@ -572,12 +587,12 @@ Column({ space: 8 }) {
           if (this.tab !== 4 && this.mode !== 'downloads') {
             Button({ type: ButtonType.Normal }) {
               Image($r('app.media.nav_search_muted')).width(24).height(24)
-            }.width(44).height(44).padding(10).backgroundColor(Color.Transparent).accessibilityText($r('app.string.search_hint'))
+            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface')).accessibilityText($r('app.string.search_hint'))
               .onClick(() => { this.searchExpanded = !this.searchExpanded; })
           }
-          Button($r('app.string.refresh'), { type: ButtonType.Normal }).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(13).fontColor($r('app.color.brand_accent'))
-            .backgroundColor(Color.Transparent).height(44).padding({ left: 8, right: 8 }).enabled(!this.busy).onClick(() => this.load())
-        }.height(UiLayout.headerHeight(this.fontScale)).width('100%').padding({ left: 20, right: 12 })
+          Button({ type: ButtonType.Normal }) { Image($r('app.media.menu_sync')).width(24).height(24).accessibilityLevel('no') }
+            .width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface')).enabled(!this.busy).accessibilityText($r('app.string.refresh')).onClick(() => this.load())
+        }.height(UiLayout.primaryHeaderHeight(this.viewportHeight, this.fontScale, this.landscape)).width('100%').padding({ left: 20, right: 12 })
           }
         }
         if (this.tab !== 4 && this.mode !== 'downloads' && this.searchExpanded) {
@@ -588,8 +603,8 @@ Column({ space: 8 }) {
         }
         if (this.searchExpanded && !this.mode) {
           Scroll() { Row({ space: 8 }) { ForEach(this.recentSearches, (value: string) => {
-            Button(value).labelStyle({ maxLines: 2, overflow: TextOverflow.Clip }).constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale), maxWidth: '100%' }).fontSize(12).backgroundColor($r('app.color.brand_surface')).onClick(() => { this.search = value; this.performSearch(); })
-          }, (value: string) => value) } }.scrollable(ScrollDirection.Horizontal).width('100%').height(UiLayout.buttonHeight(this.fontScale))
+            Column() { BrandButton({ label: value, icon: $r('app.media.nav_search_muted'), compact: true, onSelect: () => { this.search = value; this.performSearch(); } }) }.width(180 * this.fontScale)
+          }, (value: string) => value) } }.scrollable(ScrollDirection.Horizontal).width('100%').height(Math.max(36, 32 * this.fontScale) + 16)
         }
         if (this.mode) {
           Column() {
@@ -607,10 +622,6 @@ Column({ space: 8 }) {
             else if (this.tab === 3 && !this.mode) { this.actorPanel() }
             else if (this.tab === 2 && !this.mode) { this.libraryPanel() }
             else {
-              if (!this.mode && this.tab === 0 && UiLayout.separateFilters(this.viewportHeight, this.landscape)) {
-                Scroll() { this.recommendFilters() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
-              }
-              if (this.items.length === 0 && !this.busy) { Text($r('app.string.no_items')).fontColor($r('app.color.brand_muted')).padding(24) }
               this.mediaGrid()
               if (this.mode && this.items.length < this.total) {
                 BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) })

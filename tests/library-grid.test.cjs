@@ -38,6 +38,7 @@ function compile(method, call, home = false, detail = false) {
   validation.resetValidateUiSyntax(); ui.resetLog();
   validation.componentCollection.customComponents.add('MediaCard');
   validation.componentCollection.customComponents.add('HomeShelf');
+  for(const n of ['BrandButton','BrandHeading']) validation.componentCollection.customComponents.add(n);
   const state = detail ? "@State children: MediaItem[] = [];\n@State item: MediaItem = { Id: 'show', Type: 'Series' };" : home ? '@State homeSections: HomeSection[] = []; @State homeFailures: Object[] = []; @State usingCache: boolean = false;\n@State busy: boolean = false;' : '@State items: MediaItem[] = [];';
   const text = `interface HomeSection { id: string; items: MediaItem[] }\ninterface MediaItem { Id: string; Type?: string; Name?: string; UserData?: Object }\n@Component\nstruct GridProbe {\n@State fontScale: number = 1; @State viewportWidth: number = 360; @State viewportHeight: number = 800;\n@State tab: number = 1; @State mode: string = ''; @State landscape: boolean = false; @State discover: boolean = true;\n${state}\n${page.members.filter(n=>['menuAction','menuHeading'].includes(n.name?.getText(source))).map(n=>n.getText(source)).join('\n')}\n${method}\n${page.members.find(n=>n.name?.getText(source)==='recommendFilters').getText(source)}\nprivate open(item: MediaItem): void {}\nprivate openChild(item: MediaItem): void {}\nprivate openLibrary(section: HomeSection): void {}\nbuild() { ${call} }\n}`;
   const input = ts.createSourceFile(path.join(root, 'GridProbe.ets'), text, ts.ScriptTarget.Latest, true, ts.ScriptKind.ETS, options);
@@ -78,7 +79,7 @@ function fixture(code) {
       const start = this.nextId; build(); this.branches.set(id, { branch, children: Array.from({ length: this.nextId - start }, (_, n) => start + n) });
     }
     updateStateVarsOfChildByElmtId() {}
-    static create(card) { created.push(card.item?.Id ?? card.section.id); }
+    static create(card) { if(card.item||card.section)created.push(card.item?.Id ?? card.section.id); }
   }
   class Observed {
     constructor(value, owner) { this.value = value; this.owner = owner; this.dependencies = new Set(); }
@@ -95,6 +96,7 @@ function fixture(code) {
   const context = { UiLayout: require('./ui-layout-fixture.cjs').UiLayout, ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Column:component, Row: component, Flex:component, Button: component, Checkbox: component, Grid: component, GridItem: gridItem, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
     FlexWrap: { Wrap:1 }, TextOverflow:{Clip:2,Ellipsis:1},ButtonType:{Normal:1},FontWeight:{Medium:500},FlexAlign:{Center:1,SpaceBetween:2},TextAlign:{Start:1},HitTestMode:{None:1},Image:component, Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
     MediaCard: class { constructor(parent, params) { this.item = params.item; } },
+    BrandButton: class { constructor(parent, params) {} }, BrandHeading: class { constructor(parent, params) {} },
     HomeShelf: class { constructor(parent, params) { this.section = params.section; } } };
   vm.createContext(context); vm.runInContext(code + '\nthis.Probe = GridProbe;', context);
   const view = new context.Probe(undefined, {}); view.initialRender();
@@ -130,8 +132,8 @@ const tests = [
 tests.push(['short landscape recommendation controls occupy one complete grid row', () => {
  const f=fixture(current);f.view.tab=0;f.view.landscape=true;f.view.viewportHeight=280;f.view.viewportWidth=760;f.view.fontScale=2;f.view.rerender();assert.ok(f.spans.some(s=>s.columnStart===0&&s.columnEnd===2));f.update(movies(2));assert.equal(f.created.length,2);
 }]);
-tests.push(['keyboard-like portrait height changes retain the separate filter mode', () => {
- const f=fixture(current);f.view.tab=0;f.view.viewportHeight=280;f.view.landscape=false;f.view.rerender();assert.equal(f.spans.filter(s=>s.columnStart===0).length,0);
+tests.push(['keyboard-like portrait height changes keep recommendations in a full-span grid row', () => {
+ const f=fixture(current);f.view.tab=0;f.view.viewportHeight=280;f.view.landscape=false;f.view.rerender();assert.ok(f.spans.some(s=>s.columnStart===0));
 }]);
 module.exports = { createGrid: () => fixture(current), createHome: () => fixture(home), createDetail: () => fixture(detail) };
 tests.push(['same movie identity republishes changed watched/metadata into a new card', () => { const f = fixture(current); const first = movies(1); f.update(first); f.update([{ ...first[0], Name: 'Changed', UserData: { Played: true } }]); assert.deepEqual(f.visible(), ['movie-0']); assert.equal(f.created.length, 2); }]);
