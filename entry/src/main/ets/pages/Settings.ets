@@ -1,4 +1,5 @@
 import { BrandState } from '../components/BrandState';
+import { showBrandDialog } from '../components/CompactDialog';
 import { UiLayout } from '../utils/UiLayout';
 import { BrandButton } from '../components/BrandButton';
 import { BrandHeading } from '../components/BrandHeading';
@@ -14,6 +15,8 @@ import { deviceNameValue } from '../utils/DeviceOptions';
 import { PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
 import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
+import { PosterCache } from '../service/PosterCache';
+import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
 @Entry
 @Component
 struct Settings {
@@ -46,6 +49,14 @@ struct Settings {
   @State autoCache: boolean = true;
   @State networkBusy: boolean = false;
   @State networkMessage: string = '';
+  @State posterEnabled: boolean = true;
+  @State posterCapacity: string = '20';
+  @State posterBytes: number = 0;
+  @State posterFiles: number = 0;
+  @State posterKnown: boolean = false;
+  @State posterBusy: boolean = false;
+  @State posterMessage: string = '';
+  private posterRevision: number = 0;
   private networkRevision: number = 0;
   private deviceRevision: number = 0;
   private deviceVisible: boolean = false;
@@ -56,14 +67,51 @@ struct Settings {
     if (this.ownerClient !== AppService.client) { this.onPageHide(); router.back(); return; }
     this.deviceVisible = true;
     this.loadNetworkDraft();
+    this.loadPosters();
     this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
     this.loadDeviceName();
   }
-  onPageHide(): void { this.deviceVisible = false; ++this.networkRevision; this.invalidateDevice(); }
+  onPageHide(): void { this.deviceVisible = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
   aboutToDisappear(): void { this.onPageHide(); }
   private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
-  private deviceLockChanged(): void { if (this.locked) { ++this.networkRevision; this.invalidateDevice(); } }
+  private deviceLockChanged(): void { if (this.locked) { ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
+  private invalidatePosters(): void { ++this.posterRevision; this.posterBusy = false; this.posterKnown = false; }
+  private posterPermit(revision: number, cache: PosterCache): boolean {
+    return this.deviceVisible && revision === this.posterRevision && !this.locked && AppLock.permit() && this.ownerClient === AppService.client && cache === AppService.posters;
+  }
+  private async posterUsage(cache: PosterCache, revision: number): Promise<void> {
+    try { const usage = await cache.usage(); if (this.posterPermit(revision, cache)) { this.posterBytes = usage.bytes; this.posterFiles = usage.files; this.posterKnown = true; if (usage.issue) { const message = text(usage.issue); this.posterMessage = this.posterMessage ? this.posterMessage + ' · ' + message : message; } } }
+    catch (e) { if (this.posterPermit(revision, cache)) { this.posterKnown = false; this.posterMessage = this.posterMessage ? this.posterMessage + ' · ' + text('poster_cache_unavailable') : text('poster_cache_unavailable'); } }
+  }
+  private async loadPosters(): Promise<void> {
+    const cache = AppService.posters; if (!cache || this.posterBusy || !this.posterPermit(this.posterRevision, cache)) { return; }
+    const revision = this.posterRevision; this.posterBusy = true;
+    const value = cache.snapshot(); this.posterEnabled = value.enabled; this.posterCapacity = value.maxMb.toString();
+    await this.posterUsage(cache, revision); if (revision === this.posterRevision) { this.posterBusy = false; }
+  }
+  private async savePosters(): Promise<void> {
+    const cache = AppService.posters; if (!cache || this.posterBusy || !this.posterPermit(this.posterRevision, cache)) { return; }
+    const next: PosterOptions = { enabled: this.posterEnabled, maxMb: this.posterEnabled ? Number(this.posterCapacity) : cache.snapshot().maxMb };
+    if ((this.posterEnabled && !/^[0-9]{1,3}$/.test(this.posterCapacity)) || !validPosterOptions(next)) { this.posterMessage = text('poster_options_invalid'); return; }
+    const revision = this.posterRevision; this.posterBusy = true; this.posterMessage = '';
+    try { const value = await cache.save(next, () => this.posterPermit(revision, cache)); if (this.posterPermit(revision, cache)) { this.posterEnabled = value.enabled; this.posterCapacity = value.maxMb.toString(); this.posterMessage = text('poster_options_saved'); } }
+    catch (e) { if (this.posterPermit(revision, cache)) { this.posterMessage = text((e as Error).message === 'poster_options_restore_failed' ? 'poster_options_restore_failed' : 'poster_options_save_failed'); } }
+    finally { await this.posterUsage(cache, revision); if (revision === this.posterRevision) { this.posterBusy = false; } }
+  }
+  private clearPosters(): void {
+    const cache = AppService.posters; const revision = this.posterRevision;
+    if (!cache || this.posterBusy || !this.posterPermit(revision, cache)) { return; }
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined,
+      backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('poster_cache_clear'), message: text('poster_cache_clear_confirm'),
+      buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
+        { value: text('confirm'), fontColor: $r('app.color.brand_warm'), action: async () => {
+          if (this.posterBusy || !this.posterPermit(revision, cache)) { return; } this.posterBusy = true; this.posterMessage = '';
+          try { await cache.clear(() => this.posterPermit(revision, cache)); if (this.posterPermit(revision, cache)) { this.posterMessage = text('poster_cache_cleared'); } }
+          catch (e) { if (this.posterPermit(revision, cache)) { this.posterMessage = text('poster_cache_clear_failed'); } }
+          finally { await this.posterUsage(cache, revision); if (revision === this.posterRevision) { this.posterBusy = false; } }
+        } }] }, this.viewportWidth, this.viewportHeight);
+  }
   private loadNetworkDraft(): void {
     const value = NetworkPolicy.snapshot(); this.requestSeconds = (value.requestMs / 1000).toString();
     this.connectSeconds = (value.connectMs / 1000).toString(); this.readSeconds = (value.readMs / 1000).toString(); this.autoCache = value.autoCache;
@@ -160,6 +208,28 @@ struct Settings {
     Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
   }
 
+  @Builder
+  private posterSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.poster_cache_group'), icon: $r('app.media.menu_offline') })
+      Text($r('app.string.poster_cache_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.poster_cache_enabled')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+        Checkbox().select(this.posterEnabled).enabled(!this.posterBusy).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.poster_cache_enabled')).onChange((v: boolean) => { this.posterEnabled = v; })
+      }.width('100%')
+      this.fieldCaption($r('app.string.poster_cache_capacity'))
+      TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
+        .backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
+        .onChange((v: string) => { this.posterCapacity = v; })
+      if (this.posterKnown) { Text($r('app.string.poster_cache_usage', (this.posterBytes / 1048576).toFixed(2), this.posterFiles)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
+      else { Text($r('app.string.poster_cache_unknown')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
+      BrandButton({ label: $r('app.string.poster_options_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.posterBusy, onSelect: () => this.savePosters() })
+      BrandButton({ label: $r('app.string.poster_cache_clear'), icon: $r('app.media.menu_reset'), available: !this.posterBusy, onSelect: () => this.clearPosters() })
+      if (this.posterBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.posterMessage) { Text(this.posterMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+  }
   @Builder
   private networkField(label: Resource, key: number) {
     this.fieldCaption(label)
@@ -268,6 +338,7 @@ struct Settings {
             Column({ space: 18 }) {
                 this.deviceSettings()
               this.apiNetworkSettings()
+              this.posterSettings()
               this.playerSettings()
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })

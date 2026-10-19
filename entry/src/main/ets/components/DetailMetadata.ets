@@ -1,7 +1,7 @@
 import { BrandHeading } from './BrandHeading';
 import { MediaItem, Person } from '../model/Models';
 import { detailMetadata, DetailRow } from '../utils/DetailPresentation';
-import { AppService } from '../service/AppService';
+import { CachedImage } from './CachedImage';
 @Component
 export struct DetailMetadataPanel {
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -51,8 +51,8 @@ export struct DetailMetadataPanel {
           ForEach(detailMetadata(this.item).actors, (person: Person) => {
             Button({ type: ButtonType.Normal }) {
               Row({ space: 12 }) {
-                Image(AppService.client?.image(person.Id, person.PrimaryImageTag) ?? '').alt($r('app.media.nav_user_muted'))
-                  .width(48).height(48).objectFit(ImageFit.Cover).borderRadius(24).flexShrink(0).backgroundColor($r('app.color.brand_surface')).accessibilityLevel('no')
+                        CachedImage({ imageId: person.Id, tag: person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 24, placeholder: $r('app.media.nav_user_muted') })
+                          .width(48).height(48).flexShrink(0)
                 Column({ space: 6 }) {
                   Text(person.Name).fontColor('#F2F3FA').fontSize(14).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
                   if (person.Role) { Text(person.Role).fontColor($r('app.color.brand_muted')).fontSize(12).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%') }

@@ -20,7 +20,7 @@ export class NativeHttpTransport implements ApiTransport {
   endpointChanged: ((address: string) => void) | undefined = undefined;
   constructor(session: Session) { this.session = session; }
 
-  private authorization(includeToken: boolean = true): string {
+  protected authorization(includeToken: boolean = true): string {
     if ([this.session.deviceId, this.session.token].some((value: string) => /["\r\n]/.test(value))) { throw new Error('api_session_invalid'); }
     const base = `MediaBrowser Client="${ProductIdentity.CLIENT_NAME}", Device="HarmonyOS Phone", DeviceId="${this.session.deviceId}", Version="${ProductIdentity.VERSION}"`;
     return includeToken && this.session.token ? `${base}, Token="${this.session.token}"` : base;

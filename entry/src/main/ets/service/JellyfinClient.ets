@@ -4,6 +4,8 @@ import { addresses } from '../utils/Accounts';
 import { deviceNameValue } from '../utils/DeviceOptions';
 import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
+import { PosterTransport } from '../api/PosterTransport';
+import { PosterTarget, PosterTransfer } from '../utils/PosterOptions';
 import { ApiTransport, JellyfinApi, getItemsFromQuery } from '../api/generated/JellyfinApi';
 import { BaseItemKind, ImageType, ItemFields, MediaType, PlayMethod, RecommendationDto, AuthenticationResult, PublicSystemInfo, QuickConnectResult } from '../api/generated/Models';
 import { itemPage, listItems, mediaItem, mediaItems, playbackInfo } from '../api/DomainMapping';
@@ -224,6 +226,8 @@ export class JellyfinClient {
     }
     return this.api.getItemImageUrl({ itemId: id, imageType: ImageType.Primary, maxWidth: 360, quality: 85, tag: tag || undefined });
   }
+
+  poster(target: PosterTarget, allowed: () => boolean): PosterTransfer { return new PosterTransport(this.session).fetch(target, allowed); }
 
   async playbackInfo(id: string): Promise<PlaybackInfo> {
     await this.ready();

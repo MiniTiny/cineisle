@@ -1,5 +1,6 @@
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
+import { CachedImage } from '../components/CachedImage';
 import { BrandChoice } from '../components/BrandChoice';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
@@ -574,7 +575,7 @@ struct Index {
           Column({ space: 8 }) {
             Button({ type: ButtonType.Normal }) {
             Row({ space: 14 }) {
-              Image(AppService.client?.image(actor.person.Id, actor.person.PrimaryImageTag) ?? '').alt($r('app.media.nav_user_active')).width(56).height(56).borderRadius(28).flexShrink(0).backgroundColor($r('app.color.brand_surface'))
+                  CachedImage({ imageId: actor.person.Id, tag: actor.person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 28, placeholder: $r('app.media.nav_user_active') }).width(56).height(56).flexShrink(0)
               Column({ space: 6 }) {
                 Text(actor.person.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
               }.alignItems(HorizontalAlign.Start).layoutWeight(1)
