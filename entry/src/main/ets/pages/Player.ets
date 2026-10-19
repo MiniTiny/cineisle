@@ -17,7 +17,7 @@ import { TrackChoice } from '../utils/Playback';
 import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
 import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
-import { PlaybackController } from '../service/PlaybackController';
+import { PlaybackController, PlaybackStatus } from '../service/PlaybackController';
 import { PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
@@ -124,6 +124,7 @@ struct Player {
     this.controller = new PlaybackController(AppService.client, {
       state: (state: string) => { if (this.alive) { this.state = state; if (state === 'error') { this.options = false; this.clearIntro(); this.clearTrickplay(); this.system?.stopPiP(); } if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
       frame: (ready: boolean) => { if (this.alive) { this.frameReady = ready; } },
+      closed: (status: PlaybackStatus) => { this.finishOffline(status); },
       time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
@@ -270,7 +271,10 @@ struct Player {
   private async toggle(): Promise<void> {
     if (this.state === 'error') { await this.retry(); return; }
     this.finished = false;
-    if (this.state === 'released') { this.connectSystem(); await this.controller?.open(this.route, this.surfaceId); }
+    if (this.state === 'released') {
+      if (this.route.offline) { this.route.item = AppService.snapshot.items.find((item) => item.Id === this.route.item.Id) ?? this.route.item; }
+      this.connectSystem(); await this.controller?.open(this.route, this.surfaceId);
+    }
     else if (this.state === 'playing') { await this.system?.pause(); }
     else { await this.system?.play(); }
   }
@@ -279,9 +283,14 @@ struct Player {
     if (!this.route.offline || !this.alive || this.ownerClient !== AppService.client) { return; }
     const status = this.controller?.snapshot();
     // Loading clocks and pending seeks are presentation, not a new durable playback position.
-    if (!status || !status.route.offline || status.route.item.Id !== this.route.item.Id ||
+    if (!status || status.state === 'released' || !status.route.offline || status.route.item.Id !== this.route.item.Id ||
       status.route.mediaSourceId !== this.route.mediaSourceId || status.route.filePath !== this.route.filePath || status.checkpoint === undefined) { return; }
-    try { AppService.recordOfflinePosition(this.route.item, status.checkpoint, completed || this.finished || status.state === 'completed'); this.lastOfflineSave = Date.now(); }
+    try { AppService.recordOfflinePosition(this.route.item, status.checkpoint, completed || (status.checkpointCompleted ?? false)); this.lastOfflineSave = Date.now(); }
+    catch (e) { this.reportMessage = text('progress_not_saved'); }
+  }
+  private finishOffline(status: PlaybackStatus): void {
+    if (this.ownerClient !== AppService.client || !status.route.offline || status.checkpoint === undefined) { return; }
+    try { AppService.recordOfflineStop(status.route.item, status.checkpoint, status.duration); }
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
   onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }

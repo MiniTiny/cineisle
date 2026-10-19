@@ -199,10 +199,11 @@ test('offline progress survives cold reconstruction and overlays a later online 
   assert.equal(AppService.snapshot.items[0].UserData.PlaybackPositionTicks, 123450000); const current = AppService.client; current.detail = async () => item;
   const result = await loadDetail(current, 'a'); assert.equal(result.item.UserData.PlaybackPositionTicks, 123450000); assert.equal(result.item.UserData.IsFavorite, true);
 });
-test('offline completion keeps zero position and played edit; response confirms only matching position revision', async () => {
+test('offline completion keeps zero position and played edit; concurrent progress retains the whole item for replay', async () => {
   const client = h.activate(); const item = film('a', { UserData: { PlaybackPositionTicks: 9999 } }); AppService.recordOfflinePosition(item, 12345, true); await AppService.edit(item, false, true, true);
   assert.equal(AppService.snapshot.items[0].UserData.PlaybackPositionTicks, 0); const d = h.deferred(); client.offlinePosition = () => d.promise; client.played = async () => {};
-  const op = AppService.flushPending(); await settle(); AppService.recordOfflinePosition(item, 33333); d.resolve(); await op; assert.equal(state().positions.length, 1); assert.equal(state().pending.length, 0);
+  const op = AppService.flushPending(); await settle(); AppService.recordOfflinePosition(item, 33333); d.resolve(); await op; assert.equal(state().positions.length, 1); assert.equal(state().positions[0].ticks, 333330000); assert.equal(state().pending.length, 1); assert.equal(state().pending[0].value, true);
+  await AppService.flushPending(); assert.equal(state().positions.length, 0); assert.equal(state().pending.length, 0);
 });
 test('download retry preserves a failed record and reason if replacement creation fails', async () => {
   const client = h.activate(); const record = { id: 'a', item: film('a'), path: AppService.local.directory + '/a.mp4', state: 'failed', progress: 0, mediaSourceId: 'removed' }; AppService.downloads = [record];
