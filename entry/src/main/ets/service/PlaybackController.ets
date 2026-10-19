@@ -18,6 +18,7 @@ export interface PlayerView {
   complete: () => void;
   beforePlay?: () => Promise<boolean>;
   interrupted?: () => void;
+  frame?: (ready: boolean) => void;
 }
 interface PendingReport { route: PlaybackRoute; position: number; paused: boolean }
 export interface PlaybackStatus {
@@ -29,6 +30,10 @@ export class PlaybackController {
   private player: media.AVPlayer | undefined = undefined;
   private file: fs.File | undefined = undefined;
   private generation: number = 0;
+  private failed: boolean = false;
+  private closed: boolean = true;
+  private retryPosition: number = 0;
+  private releasing: Promise<void> = Promise.resolve();
   private selection: number = 0;
   private audioSelection: number = 0;
   private preferenceRevision: number = 0;
@@ -62,7 +67,7 @@ export class PlaybackController {
   }
 
   private active(player: media.AVPlayer, generation: number): boolean {
-    return this.player === player && this.generation === generation;
+    return !this.closed && !this.failed && this.player === player && this.generation === generation;
   }
 
   private send(event: string): void {
@@ -88,24 +93,48 @@ export class PlaybackController {
   }
 
   async close(): Promise<void> {
+    this.closed = true;
+    await this.releasePlayer();
+  }
+
+  private async releasePlayer(): Promise<void> {
     this.stopReport(); ++this.generation; ++this.selection; ++this.audioSelection; ++this.preferenceRevision;
     this.audioOperations = Promise.resolve(); this.pendingAudio = 0;
     const player = this.player; const file = this.file;
     this.player = undefined; this.file = undefined;
-    this.cues = []; this.nativeSubtitle = ''; this.view.subtitle('');
-    try { if (player) { await player.release(); } }
-    catch (e) { this.view.error(text('player_release_failed')); }
-    finally { if (file) { fs.closeSync(file); } }
+    this.cues = []; this.nativeSubtitle = ''; this.view.subtitle(''); this.view.frame?.(false);
+    if (!player && !file) { return; }
+    // New loads wait for every detached player, including one released after a fatal error.
+    this.releasing = this.releasing.then(async () => {
+      try { if (player) { await player.release(); } }
+      catch (e) { if (!this.failed) { this.view.error(text('player_release_failed')); } }
+      finally { if (file) { fs.closeSync(file); } }
+    });
+    await this.releasing;
+  }
+
+  private fail(generation: number): void {
+    if (generation !== this.generation || this.closed || this.failed) { return; }
+    this.failed = true; this.paused = true; this.subtitleEnded = true; this.position = this.retryPosition;
+    this.releasePlayer();
+    this.view.state('error'); this.view.error(text('play_error'));
+  }
+
+  async retry(surface: string): Promise<void> {
+    if (!this.failed || this.hidden) { return; }
+    await this.open(this.route, surface, this.retryPosition);
   }
 
   async open(route: PlaybackRoute, surface: string, position: number = -1, paused: boolean = false): Promise<void> {
     const closing = this.close(); const generation = this.generation;
-    await closing;
+    await closing; await this.releasing;
     if (generation !== this.generation) { return; }
+    this.closed = false; this.failed = false;
     this.route = route; this.position = 0; this.paused = paused; this.started = false; this.subtitleEnded = false;
     this.audio = []; this.subtitles = []; this.audioKey = ''; this.subtitleKey = ''; this.lastReport = 0;
     this.view.tracks([], [], '', ''); this.view.time(0, 0); this.view.state('loading');
     const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / 10000;
+    this.retryPosition = Number.isFinite(resume) && resume >= 0 ? resume : 0;
     try {
       const player = await media.createAVPlayer();
       if (generation !== this.generation) { await player.release(); return; }
@@ -113,11 +142,14 @@ export class PlaybackController {
       player.on('stateChange', (state: string) => {
         if (!this.active(player, generation)) { return; }
         if (state === 'playing' && this.paused) { this.pausePlayback(); return; }
+        if (state === 'error') { this.fail(generation); return; }
         this.view.state(state);
         if (state === 'initialized') {
-          player.surfaceId = surface;
-          player.audioRendererInfo = { usage: audio.StreamUsage.STREAM_USAGE_MOVIE, rendererFlags: 0 };
-          player.prepare().catch(() => { if (this.active(player, generation)) { this.view.error(text('play_error')); } });
+          try {
+            player.surfaceId = surface;
+            player.audioRendererInfo = { usage: audio.StreamUsage.STREAM_USAGE_MOVIE, rendererFlags: 0 };
+            player.prepare().catch(() => { if (this.active(player, generation)) { this.fail(generation); } });
+          } catch (e) { this.fail(generation); }
         } else if (state === 'prepared') {
           this.prepared(player, generation, resume);
         } else if (state === 'playing') {
@@ -128,11 +160,11 @@ export class PlaybackController {
         } else if (state === 'completed') {
           this.subtitleEnded = true; this.nativeSubtitle = ''; this.view.subtitle('');
           this.position = player.duration; this.view.time(this.position, player.duration); this.stopReport(); this.view.complete();
-        } else if (state === 'error') { this.subtitleEnded = true; this.view.subtitle(''); this.stopReport(); this.view.error(text('play_error')); }
+        }
       });
       player.on('timeUpdate', (position: number) => {
         if (!this.active(player, generation)) { return; }
-        this.position = position; this.view.time(position, player.duration); this.renderSubtitle();
+        this.position = position; if (this.started || position > 0) { this.retryPosition = position; } this.view.time(position, player.duration); this.renderSubtitle();
         if (this.started && !this.paused && Date.now() - this.lastReport >= 10000) { this.lastReport = Date.now(); this.send('Progress'); }
       });
       player.on('subtitleUpdate', (info: media.SubtitleInfo) => {
@@ -142,7 +174,8 @@ export class PlaybackController {
         this.subtitleEnd = this.subtitleStart + (info.duration ?? 0);
         this.renderSubtitle();
       });
-      player.on('error', () => { if (this.active(player, generation)) { this.subtitleEnded = true; this.view.subtitle(''); this.stopReport(); this.view.error(text('play_error')); } });
+      player.on('startRenderFrame', () => { if (this.active(player, generation)) { this.view.frame?.(true); } });
+      player.on('error', () => { if (this.active(player, generation)) { this.fail(generation); } });
       player.on('audioInterrupt', (event: audio.InterruptEvent) => {
           if (!this.active(player, generation)) { return; }
           if (event.hintType === audio.InterruptHint.INTERRUPT_HINT_PAUSE || event.hintType === audio.InterruptHint.INTERRUPT_HINT_STOP) {
@@ -154,7 +187,7 @@ export class PlaybackController {
         this.file = fs.openSync(route.filePath, fs.OpenMode.READ_ONLY);
         player.fdSrc = { fd: this.file.fd, offset: 0, length: fs.statSync(route.filePath).size };
       } else { player.url = route.url; }
-    } catch (e) { if (generation === this.generation) { await this.close(); this.view.error(text('play_error')); } }
+    } catch (e) { this.fail(generation); }
   }
 
   private async prepared(player: media.AVPlayer, generation: number, resume: number): Promise<void> {
@@ -201,7 +234,7 @@ export class PlaybackController {
         const permitted = this.view.beforePlay ? await this.view.beforePlay() : true;
         if (permitted && this.active(player, generation) && !this.paused && !this.hidden) { await player.play(); }
       }
-    } catch (e) { if (this.active(player, generation)) { this.view.error(text('play_error')); } }
+    } catch (e) { if (this.active(player, generation)) { this.fail(generation); } }
   }
 
   get relativeVolume(): number { return this.volume; }
@@ -299,7 +332,7 @@ export class PlaybackController {
   }
 
   snapshot(): PlaybackStatus {
-    return { route: this.route, state: this.player?.state ?? 'released', position: this.position,
+    return { route: this.route, state: this.closed ? 'released' : this.failed ? 'error' : this.player?.state ?? 'loading', position: this.position,
       duration: this.player?.duration ?? 0, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0 };
   }
 
@@ -315,7 +348,7 @@ export class PlaybackController {
   seek(position: number): void {
     if (!Number.isFinite(position) || !this.player || !['prepared', 'playing', 'paused', 'completed'].includes(this.player.state)) { return; }
     try { this.player.seek(Math.max(0, Math.min(position, this.player.duration)), media.SeekMode.SEEK_CLOSEST);
-      this.position = Math.max(0, Math.min(position, this.player.duration)); this.nativeSubtitle = ''; this.renderSubtitle();
+      this.position = Math.max(0, Math.min(position, this.player.duration)); this.retryPosition = this.position; this.nativeSubtitle = ''; this.renderSubtitle();
     } catch (e) { this.view.error(text('play_error')); }
   }
   setSpeed(speed: number): void {

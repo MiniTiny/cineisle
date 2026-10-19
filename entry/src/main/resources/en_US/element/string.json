@@ -1,5 +1,7 @@
 {
   "string": [
+    {"name": "player_retry", "value": "Retry playback"},
+    {"name": "player_failure_hint", "value": "Playback could not continue. Retry this version or choose another version in playback options."},
     {
       "name": "player_skip_intro",
       "value": "Skip intro"
