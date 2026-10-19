@@ -16,7 +16,7 @@ import { MediaCard } from '../components/MediaCard';
 import { HomeShelf } from '../components/HomeShelf';
 import { cachedHome } from '../service/HomeFeed';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { browseParams, cachedItems, librarySortFields } from '../utils/Browse';
+import { browseParams, cachedItems, librarySortFields, searchTypes, searchPage } from '../utils/Browse';
 
 import { ProgressiveHome, HomeFailure, HomeUpdate } from '../service/ProgressiveHome';
 import { ActorProfile, ActorTag, Discovery, ExperienceState, actorProfiles, sortActors, discovery, applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
@@ -40,6 +40,8 @@ struct Index {
   @State message: string = '';
   @State tab: number = 1;
   @State search: string = '';
+  @State searchQuery: string = '';
+  @State searchType: string = '';
   @State mode: string = '';
   @State parentId: string = '';
   @State collectionType: string = '';
@@ -93,7 +95,7 @@ struct Index {
     } catch (e) { this.message = errorText(e as Error); this.ready = true; }
   }
 
-  onPageHide(): void { this.homeLoader?.cancel(); AppService.unsubscribeDownloads(this.downloadChanged); AppService.unsubscribeAccount(this.accountChanged); }
+  onPageHide(): void { if (this.mode === 'search') { ++this.generation; this.busy = false; } this.homeLoader?.cancel(); AppService.unsubscribeDownloads(this.downloadChanged); AppService.unsubscribeAccount(this.accountChanged); }
 
   onPageShow(): void {
     AppService.subscribeDownloads(this.downloadChanged); AppService.subscribeAccount(this.accountChanged);
@@ -112,7 +114,13 @@ struct Index {
   }
 
   private params(): QueryParam[] {
-    return browseParams(this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending, this.collectionType);
+    return browseParams(this.mode, this.searchQuery || this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending, this.collectionType, this.searchType);
+  }
+
+  private async changeSearchType(index: number): Promise<void> {
+    if (this.busy || this.locked || !this.signedIn || !Number.isInteger(index) || index < 0 || index >= searchTypes.length || this.searchType === searchTypes[index]) { return; }
+    this.searchType = searchTypes[index];
+    if (this.mode === 'search') { await this.load(); }
   }
 
   private async changeLibrarySort(index: number, order: boolean = false): Promise<void> {
@@ -132,7 +140,7 @@ struct Index {
     const state = AppService.experience?.snapshot();
     this.librarySort = state?.librarySort ?? 'SortName'; this.libraryDescending = state?.libraryDescending ?? false;
     this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
-    this.mode = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
+    this.mode = ''; this.search = ''; this.searchQuery = ''; this.searchType = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
     this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
     this.message = ''; this.syncMessage = ''; this.syncing = false; this.busy = false; this.usingCache = false;
@@ -159,7 +167,7 @@ struct Index {
         this.items = cachedItems(AppService.snapshot, this.mode, '', '', '', this.librarySort, this.libraryDescending); this.total = this.items.length;
       }
     } else {
-      this.items = cachedItems(AppService.snapshot, this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending);
+      this.items = cachedItems(AppService.snapshot, this.mode, this.searchQuery || this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending, this.searchType);
       this.total = this.items.length;
     }
     this.resume = [];
@@ -193,7 +201,7 @@ struct Index {
         const start = more ? this.items.length : 0;
         const result = await client.items([...this.params(), { key: 'StartIndex', value: start.toString() }, { key: 'Limit', value: '60' }]);
         if (this.current(version, client)) {
-          this.items = more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
+            this.items = this.mode === 'search' ? searchPage(more ? this.items : [], result.Items ?? [], result.TotalRecordCount, this.searchType) : more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
         }
       } else if (this.tab === 0) {
         const candidates = this.discover ? await client.discoveryCandidates() : await client.recommend();
@@ -227,7 +235,7 @@ struct Index {
 
   private switchTab(index: number): void {
     try { AppService.experience?.update((state: ExperienceState) => { state.tab = index === 2 ? 4 : index; }); } catch (e) { this.message = errorText(e as Error); }
-    this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false;
+    this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchQuery = ''; this.searchType = ''; this.searchExpanded = false; this.searchFocused = false;
     this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = [];
     this.sectionTitle = ''; this.total = 0; this.usingCache = false;
@@ -338,6 +346,9 @@ struct Index {
             .onChange((value: string) => { this.search = value; }).onSubmit(() => this.performSearch())
           BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
           BrandButton({ label: $r('app.string.close_search'), icon: $r('app.media.menu_cancel'), onSelect: () => this.switchTab(this.tab) })
+          BrandChoice({ label: $r('app.string.search_type'), icon: $r('app.media.nav_library_active'), available: !this.busy,
+            choices: [{ value: text('search_type_all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
+            selected: Math.max(0, searchTypes.indexOf(this.searchType)), onSelect: (index: number) => this.changeSearchType(index) })
           if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_danger')).width('100%') }
           if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
@@ -357,15 +368,32 @@ struct Index {
         }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
       if (this.mode === 'search') {
-        GridItem() { BrandHeading({ label: $r('app.string.search_results'), icon: $r('app.media.detail_film') }) }
+        GridItem() {
+          Column({ space: 8 }) {
+            BrandHeading({ label: $r('app.string.search_results'), icon: $r('app.media.detail_film') })
+            Text($r('app.string.search_results_for', this.searchQuery || this.search)).fontSize(14).fontColor('#F2F3FA').width('100%')
+            if (this.items.length > 0 || this.usingCache || (!this.busy && !this.message)) {
+              Text(this.usingCache ? $r('app.string.search_cached_count', this.items.length) : $r('app.string.search_loaded_count', this.items.length, this.total))
+                .fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+              if (!this.usingCache && this.items.length < this.total) { Text($r('app.string.search_group_partial')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+            }
+          }.width('100%')
+        }
           .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
-        if (this.items.length === 0 && !this.busy) {
+        if (this.items.length === 0 && !this.busy && (!this.message || this.usingCache)) {
           GridItem() { BrandState({ label: $r('app.string.no_items'), icon: $r('app.media.nav_search_active') }) }
             .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
         }
-        ForEach(this.items, (item: MediaItem) => {
-          GridItem() { MediaCard({ item: item, onSelect: (selected: MediaItem) => this.open(selected) }) }
-        }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
+        ForEach(searchTypes.slice(1), (type: string) => {
+          if (this.items.some((item: MediaItem) => item.Type === type)) {
+            GridItem() { Text($r('app.string.search_group_count', text(type === 'Movie' ? 'media_movie' : type === 'Series' ? 'media_series' : 'media_episode'), this.items.filter((item: MediaItem) => item.Type === type).length))
+              .fontSize(16).fontColor('#F2F3FA').fontWeight(FontWeight.Medium).width('100%') }
+              .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+            ForEach(this.items.filter((item: MediaItem) => item.Type === type), (item: MediaItem) => {
+              GridItem() { MediaCard({ item: item, onSelect: (selected: MediaItem) => this.open(selected) }) }
+            }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
+          }
+        }, (type: string) => type)
         if (this.items.length < this.total) {
           GridItem() { BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) }) }
             .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
@@ -471,6 +499,7 @@ struct Index {
     this.getUIContext().getFocusController().clearFocus(); this.searchFocused = false;
     try { AppService.experience?.search(this.search); this.recentSearches = AppService.experience?.snapshot().searches ?? []; }
     catch (e) { this.message = errorText(e as Error); }
+    this.searchQuery = this.search.trim();
     this.mode = 'search'; this.sectionTitle = ''; this.parentId = ''; this.personId = ''; this.searchExpanded = true; this.load();
   }
   private reason(item: MediaItem): void {

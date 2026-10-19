@@ -1655,6 +1655,34 @@
     {
       "name": "player_remember_brightness",
       "value": "记住此账户的窗口亮度"
+    },
+    {
+      "name": "search_type",
+      "value": "搜索类型"
+    },
+    {
+      "name": "search_type_all",
+      "value": "全部类型"
+    },
+    {
+      "name": "search_results_for",
+      "value": "搜索词：%s"
+    },
+    {
+      "name": "search_loaded_count",
+      "value": "已加载 %d / %d 项"
+    },
+    {
+      "name": "search_cached_count",
+      "value": "当前账户缓存中找到 %d 项"
+    },
+    {
+      "name": "search_group_partial",
+      "value": "分组仅包含已加载的结果。继续加载更多，或选择类型搜索该类型的全部结果。"
+    },
+    {
+      "name": "search_group_count",
+      "value": "%s · 已加载 %d 项"
     }
   ]
 }

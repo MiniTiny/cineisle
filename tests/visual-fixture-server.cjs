@@ -38,9 +38,11 @@ movie.People = cast; movie.Genres = ['犯罪', '悬疑']; show.People = cast; sh
 const extraMovie = item(id(51), '岛屿谜案 · 新发现', 'Movie', { People: cast, Genres: ['Crime'], CanDownload: true, MediaSources: [source], UserData: { IsFavorite: true, Played: false } });
 const episodes = process.env.CINEISLE_VISUAL_EPISODES === '2' ? [episode, { ...episode, Id: id(73), Name: '潮汐的回响 · 第二集', IndexNumber: 2 }] : [episode];
 const catalog = [movie, show, extraMovie, season, ...episodes];
+const searchCount = Math.max(0, Math.min(180, Number(process.env.CINEISLE_VISUAL_SEARCH_ITEMS) || 0));
+const searchCatalog = Array.from({ length: searchCount }, (_, n) => item(id(1000 + n), `Island ${String(n).padStart(3, '0')}`, ['Movie', 'Series', 'Episode'][n % 3]));
 const boxId=id(70), boxesId=id(71), box=item(boxId,'光影与潮汐 · 合集回归','BoxSet');
 if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')libraries.push(item(boxesId,'合集 · UI 测试','CollectionFolder',{CollectionType:'boxsets'}));
-const data = new Map([...catalog, person, ...libraries].map(x => [x.Id, x]));
+const data = new Map([...catalog, ...searchCatalog, person, ...libraries].map(x => [x.Id, x]));
 if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')data.set(boxId,box);
 const page = Items => ({ Items, TotalRecordCount: Items.length, StartIndex: 0 });
 const routes = [];
@@ -67,6 +69,7 @@ const server = http.createServer((req, res) => {
   else if (/\/(?:User)?(FavoriteItems|PlayedItems)\//.test(p) || /\/Sessions\/Playing/.test(p)) { res.writeHead(204); res.end(); return; }
   else if (p === '/Items' || p === `/Users/${userId}/Items`) {
     let items = q.get('parentid') === showsId ? [show, season, episode] : q.get('parentid') === moviesId ? [movie, extraMovie] : catalog;
+    if (searchCount && q.get('searchterm')) items = searchCatalog;
     if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1' && q.get('parentid')===boxesId)items=[box];
     if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1' && q.get('parentid')===boxId)items=[movie,show,episode];
     if (q.get('personids')) items = items.filter(x => x.People.some(p => p.Id === q.get('personids')));
