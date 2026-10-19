@@ -312,6 +312,8 @@ test('Quick Connect and saved-account validation use all new generated operation
   queue.push(response({ Authenticated: true })); await api.getQuickConnectState({ secret: 'fixture secret&' }); route('GetQuickConnectState', '/QuickConnect/Connect'); assert.equal(param('secret'), 'fixture secret&');
   queue.push(response({ User: { Id: 'account-a' }, AccessToken: 'fixture-token' })); await api.authenticateWithQuickConnect({ body: { Secret: 'fixture-secret' } }); route('AuthenticateWithQuickConnect', '/Users/AuthenticateWithQuickConnect', 'POST'); assert.deepEqual(JSON.parse(last().options.extraData), { Secret: 'fixture-secret' });
   queue.push(response({ Id: 'account-a' })); await api.getCurrentUser(); route('GetCurrentUser', '/Users/Me');
+  queue.push(response([{ Id: 'public-user', Name: 'Public' }])); assert.equal((await api.getPublicUsers())[0].Name, 'Public'); covered.add('GetPublicUsers'); assert.equal(url().pathname, '/jellyfin/Users/Public'); assert.equal(last().options.method, 'GET');
+  assert.ok(!last().options.header.Authorization.includes('Token='));
 });
 test('10.8 Quick Connect initiation uses pinned GET method and operation aliases', async () => {
   const api = new JellyfinApi(new NativeHttpTransport(session())); api.setServerVersion('10.8.13'); queue.push(response({ Code: '123456' })); await api.initiateQuickConnect(); assert.equal(last().options.method, 'GET'); assert.equal(url().pathname, '/jellyfin/QuickConnect/Initiate');

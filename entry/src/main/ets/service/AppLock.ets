@@ -10,6 +10,7 @@ export class AppLock {
   static enabled: boolean = false;
   static fault: boolean = false;
   private static initialized: boolean = false;
+  private static initialization: Promise<void> | undefined = undefined;
   private static secret: LockSecret | undefined = undefined;
   private static backgroundAt: number = 0;
   private static blockedUntil: number = 0;
@@ -33,6 +34,11 @@ export class AppLock {
       if ((e as BusinessError).code === 24000002) { AppLock.secret = undefined; AppLock.enabled = false; AppLock.fault = false; AppLock.initialized = true; AppLock.publish(false); return; }
       AppLock.fault = true; AppLock.publish(true); throw new Error('lock_storage_failed');
     }
+  }
+  static ensureInitialized(): Promise<void> {
+    if (AppLock.initialized) { return Promise.resolve(); }
+    if (!AppLock.initialization) { AppLock.initialization = AppLock.initialize().finally(() => { AppLock.initialization = undefined; }); }
+    return AppLock.initialization;
   }
   private static async derive(pin: string, salt: number[], iterations: number): Promise<number[]> {
     const spec: crypto.PBKDF2Spec = { algName: 'PBKDF2', password: pin, salt: new Uint8Array(salt), iterations: iterations, keySize: 32 };
@@ -68,5 +74,8 @@ export class AppLock {
   static lock(): void { if (AppLock.enabled || AppLock.fault) { AppLock.publish(true); } }
   static background(): void { AppLock.backgroundAt = Date.now(); }
   static foreground(): void { if (AppLock.backgroundAt && Date.now() - AppLock.backgroundAt >= 15 * 60 * 1000) { AppLock.lock(); } AppLock.backgroundAt = 0; }
-  static permit(): boolean { return AppLock.initialized && !AppLock.locked && !AppLock.fault; }
+  static permit(): boolean {
+    if (AppLock.enabled && !AppLock.locked && AppLock.backgroundAt && Date.now() - AppLock.backgroundAt >= 15 * 60 * 1000) { AppLock.lock(); }
+    return AppLock.initialized && !AppLock.locked && !AppLock.fault;
+  }
 }

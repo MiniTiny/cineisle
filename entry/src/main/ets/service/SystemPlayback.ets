@@ -22,6 +22,11 @@ export interface SystemPlayerView {
 // One owner per UIAbility. Page exit and ability destruction tear down the same resources.
 export class SystemPlayback {
   static current: SystemPlayback | undefined = undefined;
+  private autoPiP: () => boolean;
+  private autoQueued: boolean = false;
+  private autoArmed: boolean = false;
+  private autoRetryAt: number = 0;
+  private autoWait: (() => void) | undefined = undefined;
   private context: common.UIAbilityContext;
   private controller: PlaybackController;
   private surface: XComponentController;
@@ -53,7 +58,8 @@ export class SystemPlayback {
   private publication: Promise<void> | undefined = undefined;
   private lastPublication: number = 0;
 
-  constructor(context: common.UIAbilityContext, controller: PlaybackController, surface: XComponentController, route: PlaybackRoute, view: SystemPlayerView) {
+  constructor(context: common.UIAbilityContext, controller: PlaybackController, surface: XComponentController, route: PlaybackRoute, view: SystemPlayerView, autoPiP: () => boolean = () => false) {
+    this.autoPiP = autoPiP;
     this.context = context; this.controller = controller; this.surface = surface; this.view = view;
     this.latest = { route: route, state: 'loading', position: 0, duration: (route.item.RunTimeTicks ?? 0) / 10000, speed: 1, width: 0, height: 0 };
     try { this.pipSupported = canIUse('SystemCapability.Window.SessionManager') && PiPWindow.isPiPEnabled(); } catch (e) { this.pipSupported = false; }
@@ -143,13 +149,14 @@ export class SystemPlayback {
     if (changed && (status.state === 'paused' || status.state === 'error' || status.state === 'released')) {
       this.playIntent = false; ++this.commandRevision; this.setTask(false);
     }
-    if (this.pip) {
+    if (this.pip && this.pipActive) {
       try {
         this.pip.updatePiPControlStatus(PiPWindow.PiPControlType.VIDEO_PLAY_PAUSE,
           status.state === 'playing' ? PiPWindow.PiPControlStatus.PLAY : PiPWindow.PiPControlStatus.PAUSE);
         if (status.width > 0 && status.height > 0) { this.pip.updateContentSize(status.width, status.height); }
       } catch (e) { this.view.error(text('pip_failed')); }
     }
+    this.refreshAutoPiP();
     if (!this.ready || (!force && !changed && Date.now() - this.lastPublication < 1000)) { return; }
     this.lastPublication = Date.now(); this.pending = status;
     if (!this.publication) { this.publication = this.publish().finally(() => {
@@ -234,6 +241,8 @@ export class SystemPlayback {
   async pause(): Promise<void> {
     if (this.disposed) { return; }
     ++this.commandRevision; this.playIntent = false;
+    this.setAutoStart(false);
+    this.autoWait?.();
     if (!await this.controller.pausePlayback()) { await this.stop(); return; }
     await this.setTask(false); this.sync(true);
   }
@@ -253,62 +262,127 @@ export class SystemPlayback {
     if (!this.disposed && revision === this.commandRevision) { this.playIntent = true; await this.view.next(); }
   }
 
-  async background(): Promise<void> {
-    if (!this.disposed) { this.hidden = true; if (!await this.controller.hide(this.canContinue)) { await this.stop(); } }
+  private wantsAutoPiP(): boolean {
+    return !this.disposed && this.pipSupported && AppLock.permit() && this.autoPiP() && this.playIntent && this.controller.snapshot().state === 'playing';
   }
-  foreground(): void { if (!this.disposed) { this.hidden = false; this.controller.show(); } }
+  private setAutoStart(enabled: boolean): boolean {
+    if (!this.pip) { return false; }
+    if (this.autoArmed === enabled) { return true; }
+    try { this.pip.setAutoStartEnabled(enabled); this.autoArmed = enabled; return true; }
+    catch (e) { this.view.error(text('auto_pip_failed')); return false; }
+  }
+  refreshAutoPiP(): void {
+    if (this.disposed) { return; }
+    const wanted = this.wantsAutoPiP() && !this.pipActive;
+    if (!wanted) { this.setAutoStart(false); }
+    if (!this.ready || !this.pipSupported || this.autoQueued) { return; }
+    if (wanted && (this.autoArmed || Date.now() < this.autoRetryAt)) { return; }
+    if (!wanted && (!this.taskActive || this.backgroundEnabled || this.pipActive || this.pipStarting)) { return; }
+    this.autoQueued = true;
+    const work = this.pipWork.then(async () => {
+      try {
+        if (this.wantsAutoPiP() && !this.hidden && !this.pipActive) {
+          await this.ensurePiP();
+          if (!this.wantsAutoPiP() || this.hidden) { return; }
+          if (!await this.setTask(true)) { throw new Error('background_unavailable'); }
+          if (this.wantsAutoPiP() && !this.hidden && !this.setAutoStart(true)) { throw new Error('auto_pip_failed'); }
+        } else {
+          this.setAutoStart(false);
+          if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); }
+        }
+      } catch (e) {
+        this.autoRetryAt = Date.now() + 30000;
+        if (!this.disposed) { this.setAutoStart(false); this.view.error(text('auto_pip_failed'));
+          if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); } }
+      }
+      finally { this.autoQueued = false; }
+    });
+    this.pipWork = work;
+  }
+  async background(): Promise<void> {
+    if (this.disposed) { return; }
+    this.hidden = true;
+    // Native auto entry is armed while the main window is visible. Starting a new PiP from
+    // onBackground is too late on devices that require a foreground main window.
+    if (this.wantsAutoPiP() && this.autoArmed && !this.pipActive && !this.pipStarting) {
+      this.pipStarting = true;
+      let timer: number = -1;
+      await new Promise<void>((resolve) => { this.autoWait = resolve; timer = setTimeout(resolve, 1200); });
+      if (timer >= 0) { clearTimeout(timer); } this.autoWait = undefined;
+      if (!this.pipActive) {
+        this.pipStarting = false;
+        if (this.hidden) { this.setAutoStart(false); if (!this.disposed && this.playIntent) { this.view.error(text('auto_pip_failed')); } }
+      }
+    }
+    if (!this.disposed && this.hidden && !await this.controller.hide(this.canContinue)) { await this.stop(); }
+  }
+  foreground(): void { if (!this.disposed) { this.hidden = false; this.autoWait?.(); this.controller.show(); this.refreshAutoPiP(); } }
 
-  async queueEnded(): Promise<void> { this.playIntent = false; await this.setTask(false); this.sync(true); }
+  async queueEnded(): Promise<void> { this.playIntent = false; this.setAutoStart(false); await this.setTask(false); this.sync(true); }
 
-  startPiP(): Promise<void> {
+  private async ensurePiP(): Promise<void> {
+    if (this.pip || this.disposed) { return; }
+    const status = this.controller.snapshot();
+    this.captions?.dispose();
+    this.captions = new PiPSubtitleController(() => { this.view.error(text('pip_subtitle_failed')); });
+    this.captions.setText(this.subtitleText);
+    const pip = await PiPWindow.create({ context: this.context, componentController: this.surface,
+      templateType: PiPWindow.PiPTemplateType.VIDEO_PLAY, contentWidth: Math.max(1, status.width), contentHeight: Math.max(1, status.height),
+      customUIController: this.captions,
+      controlGroups: [status.route.item.Type === 'Episode' ? PiPWindow.VideoPlayControlGroup.VIDEO_PREVIOUS_NEXT : PiPWindow.VideoPlayControlGroup.FAST_FORWARD_BACKWARD] });
+    this.pip = pip; pip.setAutoStartEnabled(false);
+    if (this.disposed) { return; }
+    pip.on('stateChange', (state: PiPWindow.PiPState) => {
+      if (this.disposed) { return; }
+      if (state === PiPWindow.PiPState.STARTED) {
+        if (this.hidden && !this.pipStarting && !this.pipActive && !this.autoArmed) { pip.stopPiP().catch(() => {}); return; }
+        this.pipActive = true; this.pipStarting = false; this.emit();
+        this.autoWait?.();
+        if (!AppLock.permit()) { this.pause().then(() => this.stopPiP()); }
+        else if (this.controller.snapshot().state === 'playing') {
+          this.setTask(true).then(async (granted: boolean) => { if (!granted && !this.disposed) { await this.pause(); await this.stopPiP(); } });
+        }
+      } else if (state === PiPWindow.PiPState.ABOUT_TO_RESTORE) { this.restoring = true; this.foreground(); }
+      else if (state === PiPWindow.PiPState.STOPPED || state === PiPWindow.PiPState.ERROR) { this.pipStopped(state === PiPWindow.PiPState.ERROR); }
+    });
+    pip.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
+      if (this.disposed) { return; }
+      if (event === 'playbackStateChanged') { if (status === PiPWindow.PiPControlStatus.PLAY) { this.play(); } else { this.pause(); } }
+      else if (event === 'nextVideo') { this.next(); }
+      else if (event === 'fastForward') { this.skip(15000); }
+      else if (event === 'fastBackward') { this.skip(-15000); }
+    });
+    if (status.route.item.Type === 'Episode') {
+      pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_NEXT, true);
+      pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_PREVIOUS, false);
+    }
+  }
+  startPiP(automatic: boolean = false): Promise<void> {
     const operation = this.pipWork.then(async () => {
-      if (this.disposed || this.pipActive || this.pipStarting) { return; }
+      if (this.disposed || this.pipActive || this.pipStarting || !AppLock.permit() || (automatic && !this.wantsAutoPiP())) { return; }
       if (!this.pipSupported || !['playing', 'paused', 'prepared'].includes(this.controller.snapshot().state)) { this.view.error(text('pip_unavailable')); return; }
       await this.initialize(); if (this.disposed || !this.ready) { return; }
       this.pipStarting = true;
       try {
         if (this.controller.snapshot().state === 'playing' && !await this.setTask(true)) { throw new Error('background_unavailable'); }
-        if (this.disposed) { return; }
-        if (!this.pip) {
-          const status = this.controller.snapshot();
-          this.captions?.dispose();
-          this.captions = new PiPSubtitleController(() => { this.view.error(text('pip_subtitle_failed')); });
-          this.captions.setText(this.subtitleText);
-          const pip = await PiPWindow.create({ context: this.context, componentController: this.surface,
-            templateType: PiPWindow.PiPTemplateType.VIDEO_PLAY, contentWidth: Math.max(1, status.width), contentHeight: Math.max(1, status.height),
-            customUIController: this.captions,
-            controlGroups: [PiPWindow.VideoPlayControlGroup.VIDEO_PREVIOUS_NEXT, PiPWindow.VideoPlayControlGroup.FAST_FORWARD_BACKWARD] });
-          pip.setAutoStartEnabled(false);
-          if (this.disposed) { return; }
-          this.pip = pip;
-          pip.on('stateChange', (state: PiPWindow.PiPState) => {
-            if (this.disposed) { return; }
-            if (state === PiPWindow.PiPState.STARTED) { this.pipActive = true; this.pipStarting = false; this.emit(); }
-            else if (state === PiPWindow.PiPState.ABOUT_TO_RESTORE) { this.restoring = true; this.foreground(); }
-            else if (state === PiPWindow.PiPState.STOPPED || state === PiPWindow.PiPState.ERROR) { this.pipStopped(state === PiPWindow.PiPState.ERROR); }
-          });
-          pip.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
-            if (this.disposed) { return; }
-            if (event === 'playbackStateChanged') { if (status === PiPWindow.PiPControlStatus.PLAY) { this.play(); } else { this.pause(); } }
-            else if (event === 'nextVideo') { this.next(); }
-            else if (event === 'fastForward') { this.skip(15000); }
-            else if (event === 'fastBackward') { this.skip(-15000); }
-          });
-          pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_NEXT, this.latest.route.item.Type === 'Episode');
-          pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_PREVIOUS, false);
-        }
-        await this.pip.startPiP();
+        await this.ensurePiP();
+        if (this.disposed || !AppLock.permit() || (automatic && !this.wantsAutoPiP())) { this.pipStarting = false; return; }
+        await this.pip?.startPiP();
         if (!this.disposed) { this.pipActive = true; this.pipStarting = false; this.sync(true); this.emit(); }
-      } catch (e) { if (!this.disposed) { this.pipStarting = false; this.view.error(text('pip_failed'));
-          this.captions?.aboutToDisappear();
-        if (this.hidden && !this.backgroundEnabled) { await this.pause(); }
-        await this.setTask(this.backgroundEnabled && this.controller.snapshot().state === 'playing'); this.emit(); } }
+      } catch (e) {
+        if (!this.disposed && !this.pipActive) {
+          this.pipStarting = false; this.view.error(text('pip_failed')); this.captions?.aboutToDisappear();
+          if (this.hidden && !this.backgroundEnabled) { await this.pause(); }
+          await this.setTask(this.backgroundEnabled && this.controller.snapshot().state === 'playing'); this.emit();
+        }
+      }
     });
     this.pipWork = operation; return operation;
   }
 
   private async pipStopped(failed: boolean): Promise<void> {
     this.pipActive = false; this.pipStarting = false;
+    this.autoWait?.();
     this.captions?.aboutToDisappear();
     const restoring = this.restoring; this.restoring = false; this.emit();
     if (failed) { this.view.error(text('pip_failed')); }
@@ -317,6 +391,7 @@ export class SystemPlayback {
   }
 
   async stopPiP(): Promise<void> {
+    this.setAutoStart(false);
     await this.pipWork;
     if (!this.disposed && this.pip && this.pipActive) {
       try { await this.pip.stopPiP(); }
@@ -334,6 +409,7 @@ export class SystemPlayback {
       this.clearOwner();
     }); }
     this.disposed = true; this.ready = false; this.backgroundEnabled = false; this.taskWanted = false; ++this.preferenceRevision; ++this.commandRevision;
+    this.autoWait?.();
     this.controller.pausePlayback();
     this.subtitleText = ''; this.captions?.dispose();
     this.emit(); this.closing = this.cleanup(); return this.closing;
@@ -352,7 +428,7 @@ export class SystemPlayback {
     if (this.pip) {
       try { this.pip.setAutoStartEnabled(false); this.pip.off('stateChange'); this.pip.off('controlPanelActionEvent');
         if (this.pipActive || this.pipStarting) { await this.pip.stopPiP(); }
-        this.pip = undefined; this.pipActive = false; this.pipStarting = false; this.emit();
+          this.pip = undefined; this.autoArmed = false; this.pipActive = false; this.pipStarting = false; this.emit();
       } catch (e) { this.view.error(text('system_playback_cleanup_failed')); }
     }
   }

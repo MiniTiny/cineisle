@@ -6,6 +6,7 @@
   "output": "entry/src/main/ets/api/generated",
   "operations": [
     "GetPublicSystemInfo",
+    "GetPublicUsers",
     "AuthenticateUserByName",
     "GetUserViews",
     "GetItems",

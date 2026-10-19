@@ -50,6 +50,7 @@ const server = http.createServer((req, res) => {
   let result;
   if (p === '/System/Info/Public') result = { Id: id(20), ServerName: 'CineIsle Visual Fixture', Version: '10.10.0' };
   else if (p === '/Users/Me') result = { Id: userId, Name: 'UI 测试', Configuration: { EnableNextEpisodeAutoPlay: process.env.CINEISLE_VISUAL_AUTONEXT === '1' } };
+  else if (p === '/Users/Public') result = [{ Id: userId, Name: 'UI 测试', ServerId: id(20) }, { Id: id(90), Name: '公开用户 · 合成测试', ServerId: id(20) }];
   else if (p === '/QuickConnect/Enabled') result = true;
   else if (p === '/QuickConnect/Initiate' || p === '/QuickConnect/Connect') result = { Code: '246810', Secret: 'local-layout-quick-secret', Authenticated: false };
   else if (p === '/Users/AuthenticateByName') result = { User: { Id: userId, Name: 'UI 测试', Policy: { EnableContentDeletion: true } }, AccessToken: 'local-fixture-token' };

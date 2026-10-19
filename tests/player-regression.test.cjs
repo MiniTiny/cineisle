@@ -14,6 +14,7 @@ let routeParams = {}, closes = 0;
 const fileApi = { accessSync: fs.existsSync, openSync: p => ({ fd: fs.openSync(p, 'r') }),
   closeSync: file => { closes++; fs.closeSync(file.fd); }, statSync: fs.statSync, readTextSync: p => fs.readFileSync(p, 'utf8'), OpenMode: { READ_ONLY: 0 } };
 platform.set('@ohos.file.fs', fileApi);
+require('./sync-platform.cjs').files(fileApi);
 platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 for (const id of ['@ohos.app.ability.common', '@ohos.request', '@ohos.resourceManager', '@ohos.security.asset']) platform.set(id, {});
 const systemPlatform = require('./system-platform.cjs');

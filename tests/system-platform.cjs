@@ -35,6 +35,7 @@ class Window {
   setPiPControlEnabled(type, enabled) { (this.enabled ||= {})[type] = enabled; }
   async startPiP() { if (state.startPiPWait) await state.startPiPWait; if (state.failPiP) throw new Error('pip rejected'); this.started++;
     this.uiContext = state.uiContext(); this.captionNode = this.config.customUIController?.makeNode(this.uiContext); await this.emit('stateChange', 2); }
+  async autoEnter() { if (!this.auto) return; this.autoStarted=(this.autoStarted||0)+1; this.uiContext=state.uiContext(); this.captionNode=this.config.customUIController?.makeNode(this.uiContext); await this.emit('stateChange',2); }
   async stopPiP() { if (state.failStopPiP) throw new Error('stop PiP failed'); this.stopped++; this.config.customUIController?.aboutToDisappear(); await this.emit('stateChange', 4); }
 }
 state.install = platform => {
@@ -53,13 +54,13 @@ state.install = platform => {
     VideoPlayControlGroup: { VIDEO_PREVIOUS_NEXT: 101, FAST_FORWARD_BACKWARD: 102 },
     PiPControlType: { VIDEO_PLAY_PAUSE: 0, VIDEO_PREVIOUS: 1, VIDEO_NEXT: 2 }, PiPControlStatus: { PLAY: 1, PAUSE: 0 },
     PiPState: { STARTED: 2, STOPPED: 4, ABOUT_TO_RESTORE: 5, ERROR: 6 },
-    async create(config) { if (state.createPiPWait) await state.createPiPWait; const window = new Window(config); state.windows.push(window); return window; } });
+    async create(config) { state.calls.push(['pipCreate']); assert.ok(!(config.controlGroups?.includes(101)&&config.controlGroups?.includes(102)), 'SDK PiP groups are mutually exclusive'); if(state.failCreatePiP)throw Object.assign(Error('invalid PiP configuration'),{code:401}); if (state.createPiPWait) await state.createPiPWait; const window = new Window(config); state.windows.push(window); return window; } });
   platform.set('@ohos.app.ability.UIAbility', class {});
   platform.set('@ohos.app.ability.ConfigurationConstant', { ColorMode: { COLOR_MODE_DARK: 0 }, Direction: { DIRECTION_VERTICAL:0,DIRECTION_HORIZONTAL:1,DIRECTION_NOT_SET:-1 } });
   platform.set('@ohos.window', {});
 };
 state.reset = () => {
-  for (const key of ['sessionWait', 'metadataWait', 'taskWait', 'createPiPWait', 'startPiPWait', 'failSession', 'failWant', 'failTask', 'failStopTask', 'failPiP', 'failStopPiP', 'failDestroySession', 'failNodeBuild', 'failNodeUpdate', 'failNodeDispose', 'scope']) delete state[key];
+  for (const key of ['failCreatePiP', 'sessionWait', 'metadataWait', 'taskWait', 'createPiPWait', 'startPiPWait', 'failSession', 'failWant', 'failTask', 'failStopTask', 'failPiP', 'failStopPiP', 'failDestroySession', 'failNodeBuild', 'failNodeUpdate', 'failNodeDispose', 'scope']) delete state[key];
   state.nodes.length = 0;
   state.sessions.length = 0; state.windows.length = 0; state.calls.length = 0; state.taskActive = false;
   state.enabled = true; for (const key of Object.keys(state.capabilities)) delete state.capabilities[key];

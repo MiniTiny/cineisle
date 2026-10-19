@@ -23,6 +23,7 @@ const context = { filesDir: directory, resourceManager: {
   getStringSync: name => name, getStringByNameSync: (name, ...args) => name + ':' + args.join(',')
 } };
 platform.set('@ohos.file.fs', fileApi);
+require('./sync-platform.cjs').files(fileApi);
 platform.set('@ohos.app.ability.common', {});
 platform.set('@ohos.request', {});
 platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
@@ -97,6 +98,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 function reset() {
+  const { PendingSync } = load('service/PendingSync.ets'); PendingSync.stop(); PendingSync.context = undefined; PendingSync.owner = undefined; PendingSync.interactive = false; PendingSync.running = undefined; PendingSync.jobs = Promise.resolve(); PendingSync.net = undefined;
   capabilities.clear();
   const { AppLock } = load('service/AppLock.ets'); AppLock.initialized = true; AppLock.locked = false; AppLock.enabled = false; AppLock.fault = false;
   for (const entry of fs.readdirSync(directory)) fs.rmSync(path.join(directory, entry), { recursive: true, force: true });

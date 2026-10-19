@@ -1,5 +1,6 @@
 // Native space/network declarations are deterministic fixtures, never device acceptance.
 exports.install = platform => {
+  require('./sync-platform.cjs').install(platform);
   if (!platform.has('@ohos.file.statvfs')) platform.set('@ohos.file.statvfs', {});
   if (!platform.has('@ohos.net.connection')) platform.set('@ohos.net.connection', {});
   Object.assign(platform.get('@ohos.file.statvfs'), { getFreeSize: async () => 1024 ** 4 });

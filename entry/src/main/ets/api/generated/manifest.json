@@ -17,6 +17,19 @@
       ]
     },
     {
+      "operationId": "GetPublicUsers",
+      "method": "GET",
+      "path": "/Users/Public",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Users/Public",
+          "method": "GET"
+        }
+      ]
+    },
+    {
       "operationId": "AuthenticateUserByName",
       "method": "POST",
       "path": "/Users/AuthenticateByName",

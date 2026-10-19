@@ -7,6 +7,8 @@ import { ApiTransport, JellyfinApi, getItemsFromQuery } from '../api/generated/J
 import { BaseItemKind, ImageType, ItemFields, MediaType, PlayMethod, RecommendationDto, AuthenticationResult, PublicSystemInfo, QuickConnectResult } from '../api/generated/Models';
 import { itemPage, listItems, mediaItem, mediaItems, playbackInfo } from '../api/DomainMapping';
 
+export interface PublicUser { id: string; name: string }
+
 // Stable business facade. All application wire operations come from pinned OpenAPI.
 export class JellyfinClient {
   session: Session;
@@ -81,6 +83,18 @@ export class JellyfinClient {
     client.useServerVersion(info.Version ?? ''); client.session.serverId = info.Id; client.session.serverName = info.ServerName ?? ''; return client;
   }
   async quickEnabled(): Promise<boolean> { const enabled = await this.api.getQuickConnectEnabled(); if (typeof enabled !== 'boolean') { throw new Error('api_response_invalid'); } return enabled; }
+  async publicUsers(): Promise<PublicUser[]> {
+    if (this.session.token) { throw new Error('api_session_invalid'); }
+    const users = await this.api.getPublicUsers();
+    if (!Array.isArray(users) || users.length > 1000) { throw new Error('public_users_invalid'); }
+    const result: PublicUser[] = [];
+    for (const user of users) {
+      if (typeof user?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(user.Id) || typeof user.Name !== 'string' ||
+        !user.Name.trim() || user.Name.length > 256 || (user.ServerId != null && user.ServerId !== this.session.serverId)) { throw new Error('public_users_invalid'); }
+      if (!result.some((value: PublicUser) => value.id === user.Id)) { result.push({ id: user.Id, name: user.Name }); }
+    }
+    return result;
+  }
   async quickInitiate(): Promise<QuickConnectResult> { return this.api.initiateQuickConnect(); }
   async quickState(secret: string): Promise<QuickConnectResult> { return this.api.getQuickConnectState({ secret: secret }); }
   async quickAuthenticate(secret: string): Promise<void> {
