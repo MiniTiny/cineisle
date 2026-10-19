@@ -388,7 +388,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "设备轨道取决于解码支持。服务器文本字幕按 SRT 显示，不保留 ASS 样式；图片字幕暂不支持。离线仅可选文件内的设备轨道。"
+      "value": "设备内嵌轨道取决于解码支持。服务器及已缓存的外挂文本字幕按 SRT 显示，不保留 ASS 样式；图片字幕暂不支持。离线可选设备轨道与已缓存的外挂文本字幕。"
     },
     {
       "name": "track_switch_failed",
@@ -1945,6 +1945,17 @@
     {
       "name": "player_trickplay_save_failed",
       "value": "拖动进度缩略图设置保存失败"
-    }
+    },
+    {"name": "ui_language_group", "value": "应用界面语言"},
+    {"name": "ui_language_hint", "value": "支持简体中文与 English；其他系统语言暂使用英文。此设置全应用共用，仅影响界面，影片元数据与音轨/字幕偏好分别保留。"},
+    {"name": "ui_language_system", "value": "跟随系统"},
+    {"name": "ui_language_save", "value": "保存并应用界面语言"},
+    {"name": "ui_language_saved", "value": "界面语言已保存并应用"},
+    {"name": "ui_language_invalid", "value": "界面语言设置无效，请重新选择并保存"},
+    {"name": "ui_language_load_failed", "value": "无法读取界面语言设置，请重开设置页后重试"},
+    {"name": "ui_language_save_failed", "value": "界面语言未能保存，已恢复原设置，请重试"},
+    {"name": "ui_language_restore_failed", "value": "界面语言恢复失败，当前设置未确认，请重启后重新保存"},
+    {"name": "ui_language_cancelled", "value": "界面语言操作已取消"},
+    {"name": "ui_language_apply_failed", "value": "未能更新界面语言，请重开设置页后重试"}
   ]
 }

@@ -1,0 +1,2012 @@
+{
+  "string": [
+    {
+      "name": "player_skip_intro",
+      "value": "Skip intro"
+    },
+    {
+      "name": "player_intro_skipper",
+      "value": "Intro skip prompt"
+    },
+    {
+      "name": "player_intro_hint",
+      "value": "Requires Intro Skipper timestamps from the server. A prompt appears during valid segments; tap it to skip. Cached timestamps also work offline."
+    },
+    {
+      "name": "player_intro_save_failed",
+      "value": "Could not save the intro skip preference. Please retry."
+    },
+    {
+      "name": "download_legacy_version",
+      "value": "Legacy download (version unknown)"
+    },
+    {
+      "name": "offline_versions",
+      "value": "Downloaded versions"
+    },
+    {
+      "name": "module_desc",
+      "value": "CineIsle · Your private HarmonyOS media library"
+    },
+    {
+      "name": "login_intro",
+      "value": "Connect your Jellyfin and settle into a good story"
+    },
+    {
+      "name": "server_placeholder",
+      "value": "Server address, e.g. https://media.example.com/jellyfin"
+    },
+    {
+      "name": "username",
+      "value": "Username"
+    },
+    {
+      "name": "password",
+      "value": "Password"
+    },
+    {
+      "name": "https_hint",
+      "value": "Use HTTPS for public connections. Credentials are stored in secure system storage."
+    },
+    {
+      "name": "connecting",
+      "value": "Connecting…"
+    },
+    {
+      "name": "login",
+      "value": "Connect and sign in"
+    },
+    {
+      "name": "offline_cache",
+      "value": "Showing the last synchronized offline cache"
+    },
+    {
+      "name": "offline_detail_missing",
+      "value": "This account has no offline details for this item. Connect and synchronize the library."
+    },
+    {
+      "name": "actors_sync_hint",
+      "value": "Synchronize the library to browse actors by total play count"
+    },
+    {
+      "name": "sync_library",
+      "value": "Synchronize library"
+    },
+    {
+      "name": "actor_stats",
+      "value": "%d titles · %d plays"
+    },
+    {
+      "name": "download_complete",
+      "value": "Downloaded · Available offline"
+    },
+    {
+      "name": "download_progress",
+      "value": "Downloading %d%%"
+    },
+    {
+      "name": "download_interrupted",
+      "value": "Download incomplete. Remove it and download again."
+    },
+    {
+      "name": "play",
+      "value": "Play"
+    },
+    {
+      "name": "remove_download",
+      "value": "Remove download"
+    },
+    {
+      "name": "remove_download_confirm",
+      "value": "Delete the local video file and cancel any running download task?"
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "remove",
+      "value": "Remove"
+    },
+    {
+      "name": "no_downloads",
+      "value": "No downloads yet. Download a movie or episode from its details page."
+    },
+    {
+      "name": "favorites",
+      "value": "Favorites"
+    },
+    {
+      "name": "downloads",
+      "value": "Downloads"
+    },
+    {
+      "name": "syncing",
+      "value": "Synchronizing…"
+    },
+    {
+      "name": "last_sync",
+      "value": "Last synchronized: %s"
+    },
+    {
+      "name": "not_synced",
+      "value": "Library not synchronized yet"
+    },
+    {
+      "name": "change_account",
+      "value": "Sign out of this account"
+    },
+    {
+      "name": "logout_confirm",
+      "value": "Remove this account's local credentials? Other saved accounts, cached data and downloaded files will remain."
+    },
+    {
+      "name": "logout",
+      "value": "Sign out"
+    },
+    {
+      "name": "version",
+      "value": "CineIsle · 0.2.0"
+    },
+    {
+      "name": "refresh",
+      "value": "Refresh"
+    },
+    {
+      "name": "search_hint",
+      "value": "Search movies, series or episodes"
+    },
+    {
+      "name": "back",
+      "value": "Back"
+    },
+    {
+      "name": "search_results",
+      "value": "Search results"
+    },
+    {
+      "name": "continue_watching",
+      "value": "Continue watching"
+    },
+    {
+      "name": "recommend_hint",
+      "value": "Rediscover something you enjoyed"
+    },
+    {
+      "name": "latest",
+      "value": "Recently added"
+    },
+    {
+      "name": "no_items",
+      "value": "No media yet"
+    },
+    {
+      "name": "load_more",
+      "value": "Load more"
+    },
+    {
+      "name": "tab_recommend",
+      "value": "Discover"
+    },
+    {
+      "name": "tab_home",
+      "value": "Home"
+    },
+    {
+      "name": "tab_library",
+      "value": "Library"
+    },
+    {
+      "name": "tab_actors",
+      "value": "Actors"
+    },
+    {
+      "name": "tab_more",
+      "value": "More"
+    },
+    {
+      "name": "download_wifi",
+      "value": "Download over Wi-Fi"
+    },
+    {
+      "name": "download_confirm",
+      "value": "Download the original video? It may use substantial storage. Only unmetered networks will be used."
+    },
+    {
+      "name": "download",
+      "value": "Download"
+    },
+    {
+      "name": "unfavorite",
+      "value": "Remove from favorites"
+    },
+    {
+      "name": "favorite",
+      "value": "Add to favorites"
+    },
+    {
+      "name": "mark_unplayed",
+      "value": "Mark unwatched"
+    },
+    {
+      "name": "mark_played",
+      "value": "Mark watched"
+    },
+    {
+      "name": "cast",
+      "value": "Cast and crew"
+    },
+    {
+      "name": "progress_not_saved",
+      "value": "Playback progress has not been saved to the server. Check your connection."
+    },
+    {
+      "name": "play_error",
+      "value": "Playback failed. Check your connection and the device's codec support. This version supports direct playback only."
+    },
+    {
+      "name": "offline_playback",
+      "value": "Playing a local download"
+    },
+    {
+      "name": "direct_play_hint",
+      "value": "Direct play · Codec support depends on your device"
+    },
+    {
+      "name": "invalid_server",
+      "value": "Enter a complete http:// or https:// server address without a password, query string or fragment"
+    },
+    {
+      "name": "invalid_account",
+      "value": "The server returned an invalid account ID"
+    },
+    {
+      "name": "invalid_item",
+      "value": "Invalid media ID"
+    },
+    {
+      "name": "session_read_failed",
+      "value": "Could not read secure credentials. Unlock your device and retry."
+    },
+    {
+      "name": "session_clear_failed",
+      "value": "Could not clear secure credentials"
+    },
+    {
+      "name": "login_expired",
+      "value": "Your session has expired or the username or password is incorrect. Sign in again."
+    },
+    {
+      "name": "permission_denied",
+      "value": "This account does not have permission for this action"
+    },
+    {
+      "name": "http_failed",
+      "value": "Server request failed (HTTP %d)"
+    },
+    {
+      "name": "html_response",
+      "value": "The server address returned a web page. Check the Jellyfin address and reverse proxy path."
+    },
+    {
+      "name": "login_response_invalid",
+      "value": "The server returned an incomplete sign-in response"
+    },
+    {
+      "name": "tasks_active",
+      "value": "Wait for synchronization or downloads to finish, or cancel downloads first"
+    },
+    {
+      "name": "login_required",
+      "value": "Sign in to a server first"
+    },
+    {
+      "name": "sync_active",
+      "value": "Library synchronization is already running"
+    },
+    {
+      "name": "sync_progress",
+      "value": "Synchronized %d / %d items"
+    },
+    {
+      "name": "sync_complete",
+      "value": "Synchronized: %d items, %d actors"
+    },
+    {
+      "name": "no_media_source",
+      "value": "The server returned no playable media source"
+    },
+    {
+      "name": "download_exists",
+      "value": "A download already exists. Remove the old record before retrying."
+    },
+    {
+      "name": "no_download_source",
+      "value": "No downloadable media source"
+    },
+    {
+      "name": "cancel_download_failed",
+      "value": "Could not cancel the download. Please retry later."
+    },
+    {
+      "name": "cached_media",
+      "value": "Offline media (synchronize again to restore library folders)"
+    },
+    {
+      "name": "cache_library_unavailable",
+      "value": "This older cache has no library membership. Return to all offline media and synchronize when online."
+    },
+    {
+      "name": "cache_recovered",
+      "value": "The local cache was rebuilt. Damaged records and existing videos were preserved. Synchronize the library again."
+    },
+    {
+      "name": "cache_recovery_failed",
+      "value": "Could not preserve the damaged cache. Check free storage and file permissions, then retry."
+    },
+    {
+      "name": "sync_incomplete",
+      "value": "The library changed during synchronization or pagination was incomplete. The previous cache was kept. Synchronize again."
+    },
+    {
+      "name": "sync_library_progress",
+      "value": "%s: synchronized %d / %d items"
+    },
+    {
+      "name": "pause",
+      "value": "Pause"
+    },
+    {
+      "name": "playback_options",
+      "value": "Playback options"
+    },
+    {
+      "name": "next_episode",
+      "value": "Next episode"
+    },
+    {
+      "name": "media_source",
+      "value": "Media source"
+    },
+    {
+      "name": "audio_track",
+      "value": "Audio track"
+    },
+    {
+      "name": "subtitle_track",
+      "value": "Subtitles"
+    },
+    {
+      "name": "subtitles_off",
+      "value": "Subtitles off"
+    },
+    {
+      "name": "no_audio_tracks",
+      "value": "The device has not identified any selectable audio tracks"
+    },
+    {
+      "name": "auto_next",
+      "value": "Play next episode automatically"
+    },
+    {
+      "name": "playback_loading",
+      "value": "Loading playback options…"
+    },
+    {
+      "name": "audio_track_number",
+      "value": "Audio track %d"
+    },
+    {
+      "name": "subtitle_track_number",
+      "value": "Subtitle track %d"
+    },
+    {
+      "name": "server_subtitle",
+      "value": "Server text subtitles · %s"
+    },
+    {
+      "name": "subtitle_format_hint",
+      "value": "Embedded tracks depend on device decoding support. Server and cached external text subtitles use SRT without ASS styling; image subtitles are not supported yet. Offline playback offers embedded device tracks and cached external text subtitles."
+    },
+    {
+      "name": "track_switch_failed",
+      "value": "Could not switch audio tracks. Check the device's audio codec support."
+    },
+    {
+      "name": "subtitle_failed",
+      "value": "Could not load or switch subtitles. Check the connection and format, retry, or turn subtitles off."
+    },
+    {
+      "name": "source_switch_failed",
+      "value": "Could not switch media sources. Check your connection and retry."
+    },
+    {
+      "name": "next_episode_failed",
+      "value": "Could not load the next episode. Check your connection or downloads, then tap Next episode to retry."
+    },
+    {
+      "name": "queue_finished",
+      "value": "You have reached the end of the playable queue"
+    },
+    {
+      "name": "episode_order_unknown",
+      "value": "Episode ordering is incomplete. Automatic playback is unavailable."
+    },
+    {
+      "name": "episode_queue_failed",
+      "value": "The episode list is incomplete. Please retry."
+    },
+    {
+      "name": "next_not_downloaded",
+      "value": "The next episode is not downloaded. Offline autoplay has stopped."
+    },
+    {
+      "name": "speed_failed",
+      "value": "The device could not apply this playback speed"
+    },
+    {
+      "name": "player_release_failed",
+      "value": "Could not release player resources. Leave the player and retry."
+    },
+    {
+      "name": "pip_enter",
+      "value": "Picture in picture"
+    },
+    {
+      "name": "pip_exit",
+      "value": "Exit picture in picture"
+    },
+    {
+      "name": "pip_unavailable",
+      "value": "Picture in picture is not supported on this device"
+    },
+    {
+      "name": "pip_failed",
+      "value": "Picture-in-picture operation failed. Please retry."
+    },
+    {
+      "name": "background_playback",
+      "value": "Background playback"
+    },
+    {
+      "name": "background_playback_hint",
+      "value": "Listen in the background and use lock-screen controls. Closing picture in picture while in the background, or leaving the player, stops playback."
+    },
+    {
+      "name": "background_unavailable",
+      "value": "Background playback permission was unavailable. Playback will stay in the foreground."
+    },
+    {
+      "name": "background_stop_failed",
+      "value": "Could not end the background playback task. Exit the app and retry."
+    },
+    {
+      "name": "session_unavailable",
+      "value": "The system media session is unavailable. Lock-screen, background and picture-in-picture controls are unavailable."
+    },
+    {
+      "name": "session_update_failed",
+      "value": "Could not update the system playback status. Please retry."
+    },
+    {
+      "name": "system_playback_cleanup_failed",
+      "value": "Could not release system playback resources. Exit the app and retry."
+    },
+    {
+      "name": "pip_subtitle_failed",
+      "value": "Could not update picture-in-picture subtitles. Exit picture in picture and retry."
+    },
+    {
+      "name": "playback_language_preferences",
+      "value": "Audio and subtitle languages"
+    },
+    {
+      "name": "preferred_audio_language",
+      "value": "Preferred audio language"
+    },
+    {
+      "name": "preferred_subtitle_language",
+      "value": "Preferred subtitle language"
+    },
+    {
+      "name": "playback_language_placeholder",
+      "value": "Blank uses defaults; e.g. zh, en, ja, zh-Hant"
+    },
+    {
+      "name": "preferred_subtitles_off",
+      "value": "Keep subtitles off by default"
+    },
+    {
+      "name": "save_playback_preferences",
+      "value": "Save and apply"
+    },
+    {
+      "name": "reset_playback_preferences",
+      "value": "Reset language preferences"
+    },
+    {
+      "name": "playback_preferences_hint",
+      "value": "App-wide settings persist after sign-out and restart. Use two- or three-letter language codes with optional script or region tags. Without a match, the default track is kept. Manual selection lasts for the current playback; switching sources or episodes reapplies preferences. Resetting does not change the current manual track."
+    },
+    {
+      "name": "playback_preferences_saved",
+      "value": "Language preferences saved and applied to the current playback where possible"
+    },
+    {
+      "name": "playback_language_invalid",
+      "value": "Enter a valid language code such as zh, eng or zh-Hant; leave blank to use defaults"
+    },
+    {
+      "name": "playback_preferences_invalid",
+      "value": "Saved language preferences are invalid. Defaults are in use; save the settings again."
+    },
+    {
+      "name": "playback_preferences_load_failed",
+      "value": "Could not read language preferences. Defaults are in use; saving will retry."
+    },
+    {
+      "name": "playback_preferences_save_failed",
+      "value": "Could not save language preferences. The previous settings are still in use. Please retry."
+    },
+    {
+      "name": "playback_preferences_restore_failed",
+      "value": "Saving and restoring language preferences failed. The write is unconfirmed; save the settings again."
+    },
+    {
+      "name": "api_response_invalid",
+      "value": "Jellyfin returned incomplete or invalid data"
+    },
+    {
+      "name": "api_parameter_invalid",
+      "value": "Invalid request parameters. Please retry."
+    },
+    {
+      "name": "api_numeric_range",
+      "value": "Media data exceeds the integer range supported by this client"
+    },
+    {
+      "name": "api_session_invalid",
+      "value": "Invalid session. Sign in again."
+    },
+    {
+      "name": "next_up",
+      "value": "Next up"
+    },
+    {
+      "name": "latest_library",
+      "value": "Recently added · %s"
+    },
+    {
+      "name": "view_all",
+      "value": "View all"
+    },
+    {
+      "name": "media_movie",
+      "value": "Movie"
+    },
+    {
+      "name": "media_series",
+      "value": "Series"
+    },
+    {
+      "name": "media_episode",
+      "value": "Episode"
+    },
+    {
+      "name": "media_season",
+      "value": "Season"
+    },
+    {
+      "name": "media_video",
+      "value": "Video"
+    },
+    {
+      "name": "episode_label",
+      "value": "Season %d · Episode %d · %s"
+    },
+    {
+      "name": "poster_unavailable",
+      "value": "No poster available"
+    },
+    {
+      "name": "watched_indicator",
+      "value": "Watched"
+    },
+    {
+      "name": "present_year",
+      "value": "Present"
+    },
+    {
+      "name": "channel_count",
+      "value": "%d channels"
+    },
+    {
+      "name": "subtitle_chip",
+      "value": "CC"
+    },
+    {
+      "name": "detail_size",
+      "value": "File size"
+    },
+    {
+      "name": "detail_video",
+      "value": "Video"
+    },
+    {
+      "name": "detail_audio",
+      "value": "Audio"
+    },
+    {
+      "name": "detail_subtitles",
+      "value": "Subtitles"
+    },
+    {
+      "name": "detail_genres",
+      "value": "Genres"
+    },
+    {
+      "name": "detail_directors",
+      "value": "Directors"
+    },
+    {
+      "name": "detail_writers",
+      "value": "Writers"
+    },
+    {
+      "name": "bit_depth",
+      "value": "%d-bit"
+    },
+    {
+      "name": "runtime_minutes",
+      "value": "%d min"
+    },
+    {
+      "name": "community_score",
+      "value": "Rating %s"
+    },
+    {
+      "name": "play_not_allowed",
+      "value": "This account cannot play this item"
+    },
+    {
+      "name": "download_not_allowed",
+      "value": "This account cannot download this item"
+    },
+    {
+      "name": "delete_not_allowed",
+      "value": "This account cannot delete this item"
+    },
+    {
+      "name": "media_deleted_cache_failed",
+      "value": "The server item was deleted, but the local cache could not be saved. Return and synchronize again. Downloaded videos were kept."
+    },
+    {
+      "name": "no_playable_episode",
+      "value": "No playable episode available"
+    },
+    {
+      "name": "continue_play",
+      "value": "Continue playing"
+    },
+    {
+      "name": "start_over",
+      "value": "Start from beginning"
+    },
+    {
+      "name": "play_next_episode",
+      "value": "Play next episode"
+    },
+    {
+      "name": "media_versions",
+      "value": "Media versions for playback and download"
+    },
+    {
+      "name": "source_number",
+      "value": "Version %d"
+    },
+    {
+      "name": "server_delete",
+      "value": "Delete from server"
+    },
+    {
+      "name": "server_delete_confirm",
+      "value": "Permanently delete this movie and its media files from Jellyfin? This affects all users. Local downloaded files will be kept."
+    },
+    {
+      "name": "trailer",
+      "value": "Trailer"
+    },
+    {
+      "name": "trailer_failed",
+      "value": "Could not open the trailer. Check the link or install an app that supports it."
+    },
+    {
+      "name": "seasons",
+      "value": "Seasons"
+    },
+    {
+      "name": "episodes",
+      "value": "Episodes"
+    },
+    {
+      "name": "actor_search",
+      "value": "Search actor names"
+    },
+    {
+      "name": "actor_order_play",
+      "value": "Play count"
+    },
+    {
+      "name": "actor_order_watched",
+      "value": "Watched titles"
+    },
+    {
+      "name": "actor_order_unplayed",
+      "value": "Unwatched titles"
+    },
+    {
+      "name": "actor_order_works",
+      "value": "Number of titles"
+    },
+    {
+      "name": "actor_order_recent",
+      "value": "Recently watched"
+    },
+    {
+      "name": "actor_order_name",
+      "value": "Name"
+    },
+    {
+      "name": "actor_order_recommended",
+      "value": "Recommended actors"
+    },
+    {
+      "name": "followed_only",
+      "value": "Following only"
+    },
+    {
+      "name": "show_actor_tags",
+      "value": "Show style tags"
+    },
+    {
+      "name": "clear_filters",
+      "value": "Clear filters"
+    },
+    {
+      "name": "actor_counts",
+      "value": "%d titles · %d watched · %d unwatched"
+    },
+    {
+      "name": "actor_new_count",
+      "value": "Following · %d new titles"
+    },
+    {
+      "name": "no_filter_matches",
+      "value": "No actors match these filters"
+    },
+    {
+      "name": "home_section_failed",
+      "value": "Could not load this section"
+    },
+    {
+      "name": "retry",
+      "value": "Retry"
+    },
+    {
+      "name": "settings",
+      "value": "Settings"
+    },
+    {
+      "name": "cancel_sync",
+      "value": "Cancel synchronization"
+    },
+    {
+      "name": "sync_cancelled",
+      "value": "Synchronization cancelled. The previous library and downloads were kept."
+    },
+    {
+      "name": "pending_changes",
+      "value": "Pending changes: %d"
+    },
+    {
+      "name": "flush_changes",
+      "value": "Upload offline changes"
+    },
+    {
+      "name": "network_failed",
+      "value": "Network connection failed. Please retry later."
+    },
+    {
+      "name": "discover",
+      "value": "Discover new titles"
+    },
+    {
+      "name": "rewatch",
+      "value": "Worth another watch"
+    },
+    {
+      "name": "discovery_hint",
+      "value": "Suggestions based on followed actors and favorite genres; press and hold to see why"
+    },
+    {
+      "name": "discovery_reason",
+      "value": "Why this was recommended"
+    },
+    {
+      "name": "discovery_recent",
+      "value": "Recently added unwatched titles"
+    },
+    {
+      "name": "ok",
+      "value": "OK"
+    },
+    {
+      "name": "all",
+      "value": "All"
+    },
+    {
+      "name": "all_genres",
+      "value": "All genres"
+    },
+    {
+      "name": "favorite_search",
+      "value": "Search names, original titles or series"
+    },
+    {
+      "name": "unwatched_only",
+      "value": "Unwatched only"
+    },
+    {
+      "name": "name_ascending",
+      "value": "Name ascending"
+    },
+    {
+      "name": "name_descending",
+      "value": "Name descending"
+    },
+    {
+      "name": "continue_first",
+      "value": "Continue watching first"
+    },
+    {
+      "name": "favorites_loaded",
+      "value": "Loaded: %d / %d matches"
+    },
+    {
+      "name": "favorites_count",
+      "value": "%d matches / %d total"
+    },
+    {
+      "name": "select_items",
+      "value": "Select items"
+    },
+    {
+      "name": "select_all",
+      "value": "Select all"
+    },
+    {
+      "name": "batch_unfavorite",
+      "value": "Remove selected favorites"
+    },
+    {
+      "name": "batch_unfavorite_confirm",
+      "value": "Remove these %d items from favorites?"
+    },
+    {
+      "name": "confirm",
+      "value": "Confirm"
+    },
+    {
+      "name": "batch_result",
+      "value": "%d succeeded, %d failed"
+    },
+    {
+      "name": "undo",
+      "value": "Undo"
+    },
+    {
+      "name": "no_matches",
+      "value": "No favorites match these filters"
+    },
+    {
+      "name": "no_favorites",
+      "value": "No favorites yet"
+    },
+    {
+      "name": "download_active",
+      "value": "In progress"
+    },
+    {
+      "name": "download_completed",
+      "value": "Completed"
+    },
+    {
+      "name": "download_failed",
+      "value": "Needs attention"
+    },
+    {
+      "name": "stop_download",
+      "value": "Stop download"
+    },
+    {
+      "name": "download_failure_reason",
+      "value": "System download failed (%d). You can retry."
+    },
+    {
+      "name": "download_preferences",
+      "value": "Download preferences"
+    },
+    {
+      "name": "remember_source",
+      "value": "Remember download version preference"
+    },
+    {
+      "name": "source_default",
+      "value": "Download the default media version"
+    },
+    {
+      "name": "clear_source_preference",
+      "value": "Clear version preference"
+    },
+    {
+      "name": "download_location_hint",
+      "value": "Stored in this account's private app folder. Uninstalling the app removes these files."
+    },
+    {
+      "name": "follow",
+      "value": "Follow"
+    },
+    {
+      "name": "unfollow",
+      "value": "Unfollow"
+    },
+    {
+      "name": "biography_loading",
+      "value": "Loading biography; titles are already available to browse"
+    },
+    {
+      "name": "all_tags",
+      "value": "All styles"
+    },
+    {
+      "name": "tag_evidence",
+      "value": "These %d titles support this tag"
+    },
+    {
+      "name": "actor_tag_boundary",
+      "value": "Tags summarize genres and themes in your library. Cast roles come from server metadata."
+    },
+    {
+      "name": "credit_role",
+      "value": "As: %s"
+    },
+    {
+      "name": "theme_investigation",
+      "value": "Investigation"
+    },
+    {
+      "name": "theme_revenge",
+      "value": "Revenge"
+    },
+    {
+      "name": "theme_time_travel",
+      "value": "Time travel"
+    },
+    {
+      "name": "theme_growth",
+      "value": "Coming of age"
+    },
+    {
+      "name": "change_queued",
+      "value": "Changes saved locally and will upload when online"
+    },
+    {
+      "name": "batch_download",
+      "value": "Download this season"
+    },
+    {
+      "name": "batch_download_confirm",
+      "value": "Download the selected %d episodes over Wi-Fi? Existing tasks will be skipped."
+    },
+    {
+      "name": "app_lock",
+      "value": "App lock"
+    },
+    {
+      "name": "lock_unlock",
+      "value": "Unlock CineIsle"
+    },
+    {
+      "name": "lock_pin",
+      "value": "Enter PIN"
+    },
+    {
+      "name": "lock_pin_wrong",
+      "value": "Incorrect PIN or too many attempts. Please retry later."
+    },
+    {
+      "name": "lock_pin_format",
+      "value": "PIN must contain 6–12 digits"
+    },
+    {
+      "name": "lock_storage_failed",
+      "value": "Secure storage is unavailable. The app remains locked; restore system secure storage and restart the app."
+    },
+    {
+      "name": "lock_pin_mismatch",
+      "value": "The PINs do not match"
+    },
+    {
+      "name": "lock_policy",
+      "value": "Set a 6–12 digit PIN. The app locks after a cold start or more than 15 minutes in the background. Locking pauses playback and hides content."
+    },
+    {
+      "name": "lock_current_pin",
+      "value": "Current PIN"
+    },
+    {
+      "name": "lock_new_pin",
+      "value": "New PIN (6–12 digits)"
+    },
+    {
+      "name": "lock_confirm_pin",
+      "value": "Confirm new PIN"
+    },
+    {
+      "name": "lock_save",
+      "value": "Save PIN"
+    },
+    {
+      "name": "lock_now",
+      "value": "Lock now"
+    },
+    {
+      "name": "lock_disable",
+      "value": "Disable app lock"
+    },
+    {
+      "name": "offline_mode",
+      "value": "Offline mode (this account's cache and downloads only)"
+    },
+    {
+      "name": "offline_mode_enabled",
+      "value": "Turn off offline mode before synchronizing"
+    },
+    {
+      "name": "download_create_failed",
+      "value": "Could not create a system download task. You can retry."
+    },
+    {
+      "name": "controls_lock",
+      "value": "Lock controls"
+    },
+    {
+      "name": "controls_unlock",
+      "value": "Unlock controls"
+    },
+    {
+      "name": "download_queued",
+      "value": "Waiting to download (up to four concurrent tasks)"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "Accounts and servers"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "Saved accounts"
+    },
+    {
+      "name": "saved_servers",
+      "value": "Saved servers"
+    },
+    {
+      "name": "add_account_server",
+      "value": "Add account or server"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "No saved accounts yet"
+    },
+    {
+      "name": "active_account",
+      "value": "Current account"
+    },
+    {
+      "name": "switch_account",
+      "value": "Switch"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "Remove account"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "Remove only the locally saved credentials? This account's cache, offline changes and downloads will remain. Server content will not be deleted."
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "Remove server"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "Remove this server and all of its locally saved credentials? Cached data and downloads will remain. Server content will not be deleted."
+    },
+    {
+      "name": "save_server_only",
+      "value": "Save server only"
+    },
+    {
+      "name": "server_display_name",
+      "value": "Server display name"
+    },
+    {
+      "name": "server_addresses",
+      "value": "Server name and addresses"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "Manage addresses"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "One full address per line, up to 8. Keep paths such as /jellyfin. On connection failure, addresses are verified as the same server before switching in order."
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Sign in with Quick Connect"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "Open Settings → Quick Connect in a signed-in Jellyfin client and enter this code to authorize. Checked every 5 seconds; request a new code after 5 minutes."
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "I have authorized · Check sign-in"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "Quick Connect is not enabled on this server. Sign in with a username and password."
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "The Quick Connect code expired. Request a new code."
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "Quick Connect cancelled"
+    },
+    {
+      "name": "account_switching",
+      "value": "An account switch is in progress. Please wait."
+    },
+    {
+      "name": "account_not_found",
+      "value": "This account was removed. Sign in again."
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "This address belongs to another server. No account token was sent."
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "This address already belongs to another saved server"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "None of the saved addresses are reachable. Check your connection or manage server addresses."
+    },
+    {
+      "name": "account_store_full",
+      "value": "Account storage is full. Remove unused accounts first."
+    },
+    {
+      "name": "session_save_failed",
+      "value": "Could not save credentials. The previous account was kept."
+    },
+    {
+      "name": "save",
+      "value": "Save"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "Sign-in cancelled. Connect again to retry."
+    },
+    {
+      "name": "account_unnamed",
+      "value": "Unnamed account"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "Reset account storage"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "Remove all saved servers and credentials from this device? This can repair damaged account storage. Cached data, offline changes, downloads and your PIN will remain. Server content will not be deleted."
+    },
+    {
+      "name": "menu_collection",
+      "value": "My library"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "Accounts and preferences"
+    },
+    {
+      "name": "menu_data",
+      "value": "Data and synchronization"
+    },
+    {
+      "name": "server_address_label",
+      "value": "Server address"
+    },
+    {
+      "name": "credentials_group",
+      "value": "Local credentials"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "Manage locally saved credentials only. Cached data and downloaded files will remain."
+    },
+    {
+      "name": "offline_group",
+      "value": "Browsing and offline"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "Favorite filters"
+    },
+    {
+      "name": "download_status",
+      "value": "Download status"
+    },
+    {
+      "name": "selected_count",
+      "value": "%d items selected"
+    },
+    {
+      "name": "player_seek",
+      "value": "Playback position"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "Controls are locked. Tap the top-right button to unlock."
+    },
+    {
+      "name": "player_system_group",
+      "value": "System playback"
+    },
+    {
+      "name": "player_media_group",
+      "value": "Media and subtitles"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "Speed and queue"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "Nothing selected"
+    },
+    {
+      "name": "recommend_group",
+      "value": "Discover stories"
+    },
+    {
+      "name": "actor_filters",
+      "value": "Actor filters"
+    },
+    {
+      "name": "actor_sort",
+      "value": "Sort by"
+    },
+    {
+      "name": "actor_profile",
+      "value": "Profile and following"
+    },
+    {
+      "name": "actor_credits",
+      "value": "Titles and tags"
+    },
+    {
+      "name": "actor_tags",
+      "value": "Title tags"
+    },
+    {
+      "name": "media_detail",
+      "value": "Media details"
+    },
+    {
+      "name": "detail_actions",
+      "value": "Play and manage"
+    },
+    {
+      "name": "detail_story",
+      "value": "Story and information"
+    },
+    {
+      "name": "detail_technical",
+      "value": "Versions and specifications"
+    },
+    {
+      "name": "login_credentials",
+      "value": "Connect your library"
+    },
+    {
+      "name": "login_connections",
+      "value": "More connection options"
+    },
+    {
+      "name": "search_group",
+      "value": "Search library"
+    },
+    {
+      "name": "search_action",
+      "value": "Search"
+    },
+    {
+      "name": "close_search",
+      "value": "Close search"
+    },
+    {
+      "name": "search_history",
+      "value": "Recent searches"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "Enter a server address to request a pairing code, then authorize it in a signed-in Jellyfin client."
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "Pairing sign-in"
+    },
+    {
+      "name": "loading",
+      "value": "Loading…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "Media type"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "Genre"
+    },
+    {
+      "name": "favorite_order",
+      "value": "Sort"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "No saved servers yet"
+    },
+    {
+      "name": "no_seasons",
+      "value": "No seasons yet"
+    },
+    {
+      "name": "no_episodes",
+      "value": "No episodes yet"
+    },
+    {
+      "name": "library_sort",
+      "value": "Sort by"
+    },
+    {
+      "name": "library_order",
+      "value": "Sort direction"
+    },
+    {
+      "name": "sort_name",
+      "value": "Name"
+    },
+    {
+      "name": "sort_rating",
+      "value": "Community rating"
+    },
+    {
+      "name": "sort_critic",
+      "value": "Critic rating"
+    },
+    {
+      "name": "sort_added",
+      "value": "Date added"
+    },
+    {
+      "name": "sort_played",
+      "value": "Date played"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "Release date"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "Ascending"
+    },
+    {
+      "name": "sort_descending",
+      "value": "Descending"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "Offline subtitles · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "Could not cache external subtitles. Connect and retry."
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "Video downloaded; external subtitles are still being cached"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "External subtitles are missing or partly failed. The video can still play."
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "Cache or retry external subtitles"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "Autoplay follows the server account setting"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "An autoplay preference is saved locally for this account"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "Follow server setting again"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "Could not read autoplay preferences. Autoplay is off for now; retry following the server setting."
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "Could not save autoplay preferences. Please retry."
+    },
+    {
+      "name": "media_collection",
+      "value": "Collection"
+    },
+    {
+      "name": "collection_empty",
+      "value": "No titles in this collection yet"
+    },
+    {
+      "name": "collection_online_required",
+      "value": "Collection members are not cached offline. Connect to browse."
+    },
+    {
+      "name": "collection_cancelled",
+      "value": "Collection loading cancelled"
+    },
+    {
+      "name": "download_mobile",
+      "value": "Allow cellular and metered downloads"
+    },
+    {
+      "name": "download_roaming",
+      "value": "Allow roaming downloads"
+    },
+    {
+      "name": "download_network_hint",
+      "value": "Wi-Fi only by default, with metered and roaming downloads disabled. Applies to new videos, batch queues and subtitle caching. Changes do not affect existing tasks."
+    },
+    {
+      "name": "download_network_restricted",
+      "value": "The current network does not meet your download preferences. Connect to Wi-Fi or adjust settings."
+    },
+    {
+      "name": "download_space_check_failed",
+      "value": "Could not check free space in the download folder. Please retry later."
+    },
+    {
+      "name": "download_space_insufficient",
+      "value": "Downloads and active tasks need an estimated %d MB; %d MB is available. Free some space first."
+    },
+    {
+      "name": "download_size_unknown",
+      "value": "Media size is unknown. The space check cannot guarantee room for the complete download."
+    },
+    {
+      "name": "gesture_seek_preview",
+      "value": "Release to seek to %s"
+    },
+    {
+      "name": "gesture_speed_hold",
+      "value": "Temporary 2× · Release to restore"
+    },
+    {
+      "name": "gesture_hint",
+      "value": "Double-tap to skip back/forward, swipe horizontally to seek, hold for temporary speed, or pinch to zoom. Swipe vertically on the left for brightness, or on the right for player volume."
+    },
+    {
+      "name": "public_users_load",
+      "value": "Choose a public server user"
+    },
+    {
+      "name": "public_users_empty",
+      "value": "This server has no public users. You can still enter a username."
+    },
+    {
+      "name": "public_users_invalid",
+      "value": "Invalid public user data. Retry or enter a username manually."
+    },
+    {
+      "name": "player_gesture_preferences",
+      "value": "Playback gestures and picture in picture"
+    },
+    {
+      "name": "player_gestures_enabled",
+      "value": "Enable playback gestures"
+    },
+    {
+      "name": "player_seek_gesture",
+      "value": "Swipe horizontally to seek"
+    },
+    {
+      "name": "player_zoom_gesture",
+      "value": "Pinch to zoom"
+    },
+    {
+      "name": "player_start_maximized",
+      "value": "Crop to fill by default"
+    },
+    {
+      "name": "player_back_seconds",
+      "value": "Double-tap back: seconds (1–300)"
+    },
+    {
+      "name": "player_forward_seconds",
+      "value": "Double-tap forward: seconds (1–300)"
+    },
+    {
+      "name": "player_save_steps",
+      "value": "Save seek intervals"
+    },
+    {
+      "name": "player_steps_invalid",
+      "value": "Enter a whole number of seconds from 1 to 300."
+    },
+    {
+      "name": "player_auto_pip",
+      "value": "Enter picture in picture automatically in the background"
+    },
+    {
+      "name": "player_ui_preferences_hint",
+      "value": "Saved for the current account and applied on the next player entry. Auto picture in picture is off by default and depends on system support, playback and lock state. PiP and lock-screen buttons keep their own seek intervals."
+    },
+    {
+      "name": "auto_pip_failed",
+      "value": "Automatic picture in picture is unavailable for now. You can still try entering manually."
+    },
+    {
+      "name": "sync_schedule_unavailable",
+      "value": "Background scheduling is unavailable. Pending changes were kept; upload them manually from More."
+    },
+    {
+      "name": "sync_retry_waiting",
+      "value": "Upload failed. Changes were kept and will retry automatically."
+    },
+    {
+      "name": "sync_retry_exhausted",
+      "value": "Automatic upload retries are paused. Check the connection and upload manually."
+    },
+    {
+      "name": "sync_auth_required",
+      "value": "Automatic uploads are paused. Check account permissions or sign in again, then upload manually."
+    },
+    {
+      "name": "player_fullscreen",
+      "value": "Enter immersive fullscreen"
+    },
+    {
+      "name": "player_exit_fullscreen",
+      "value": "Exit fullscreen"
+    },
+    {
+      "name": "previous_episode",
+      "value": "Previous episode"
+    },
+    {
+      "name": "queue_first_episode",
+      "value": "This is the first episode."
+    },
+    {
+      "name": "previous_episode_failed",
+      "value": "Could not play the previous episode. Check your connection or downloads."
+    },
+    {
+      "name": "window_unavailable",
+      "value": "Could not adjust the player window. Exit fullscreen and retry."
+    },
+    {
+      "name": "screen_on_failed",
+      "value": "Could not keep the screen on. Check system settings."
+    },
+    {
+      "name": "brightness_failed",
+      "value": "Could not adjust window brightness."
+    },
+    {
+      "name": "volume_failed",
+      "value": "Could not adjust player volume."
+    },
+    {
+      "name": "player_display_save_failed",
+      "value": "Could not save display preferences. Adjustments still apply to this session."
+    },
+    {
+      "name": "player_display_group",
+      "value": "Brightness and night mode"
+    },
+    {
+      "name": "player_window_brightness",
+      "value": "Window brightness"
+    },
+    {
+      "name": "player_brightness_value",
+      "value": "Window brightness: %d%"
+    },
+    {
+      "name": "player_relative_volume",
+      "value": "Relative player volume"
+    },
+    {
+      "name": "player_volume_value",
+      "value": "Player volume: %d%"
+    },
+    {
+      "name": "player_relative_volume_hint",
+      "value": "Only changes this player's relative volume. If the system is muted or media volume is low, use the device volume keys."
+    },
+    {
+      "name": "player_night_mode",
+      "value": "Night overlay"
+    },
+    {
+      "name": "player_dim_opacity",
+      "value": "Night overlay darkness"
+    },
+    {
+      "name": "player_dim_value",
+      "value": "Overlay darkness: %d%"
+    },
+    {
+      "name": "player_vertical_gesture",
+      "value": "Swipe vertically for brightness and player volume"
+    },
+    {
+      "name": "player_remember_brightness",
+      "value": "Remember window brightness for this account"
+    },
+    {
+      "name": "search_type",
+      "value": "Search type"
+    },
+    {
+      "name": "search_type_all",
+      "value": "All types"
+    },
+    {
+      "name": "search_results_for",
+      "value": "Search: %s"
+    },
+    {
+      "name": "search_loaded_count",
+      "value": "Loaded %d / %d items"
+    },
+    {
+      "name": "search_cached_count",
+      "value": "Found %d items in this account's cache"
+    },
+    {
+      "name": "search_group_partial",
+      "value": "Groups include loaded results only. Load more, or choose a type to search all results of that type."
+    },
+    {
+      "name": "search_group_count",
+      "value": "%s · %d items loaded"
+    },
+    {
+      "name": "device_name_group",
+      "value": "Server device name"
+    },
+    {
+      "name": "device_name_hint",
+      "value": "Change this device's display name on the current server, up to 64 characters. Leave blank to restore the default. Requires server permission."
+    },
+    {
+      "name": "device_name_current",
+      "value": "Last confirmed name: %s"
+    },
+    {
+      "name": "device_name_unknown",
+      "value": "The server name has not been read or needs confirmation."
+    },
+    {
+      "name": "device_name_label",
+      "value": "Custom device name"
+    },
+    {
+      "name": "device_name_default",
+      "value": "Default device name"
+    },
+    {
+      "name": "device_name_refresh",
+      "value": "Read server name"
+    },
+    {
+      "name": "device_name_save",
+      "value": "Save device name"
+    },
+    {
+      "name": "device_name_online_required",
+      "value": "Server device names cannot be read or changed in offline mode."
+    },
+    {
+      "name": "device_name_invalid",
+      "value": "Use up to 64 characters without line breaks or control characters."
+    },
+    {
+      "name": "device_name_cancelled",
+      "value": "Operation cancelled. Read the device name again."
+    },
+    {
+      "name": "device_name_not_confirmed",
+      "value": "The server returned a name different from this change."
+    },
+    {
+      "name": "device_name_saved",
+      "value": "The server device name was confirmed saved."
+    },
+    {
+      "name": "device_name_save_failed",
+      "value": "Saving failed or is unconfirmed. Read the server name again before editing."
+    },
+    {
+      "name": "server_discovery_hint",
+      "value": "Search this local network for about 8 seconds. Selecting a server verifies it anonymously and fills its address; you must still sign in."
+    },
+    {
+      "name": "discovery_scanning",
+      "value": "Searching for local servers…"
+    },
+    {
+      "name": "discovery_verifying",
+      "value": "Verifying server identity…"
+    },
+    {
+      "name": "discovery_start",
+      "value": "Search local network again"
+    },
+    {
+      "name": "discovery_stop",
+      "value": "Stop search or verification"
+    },
+    {
+      "name": "discovery_empty",
+      "value": "No servers found. Check that devices share a network, or enter an address manually."
+    },
+    {
+      "name": "discovery_stopped",
+      "value": "Stopped. Enter an address manually or search again."
+    },
+    {
+      "name": "discovery_limit_reached",
+      "value": "This search reached its limit. Choose a server or search again."
+    },
+    {
+      "name": "discovery_failed",
+      "value": "Local search failed. Check the network and retry, or enter an address manually."
+    },
+    {
+      "name": "discovery_cancelled",
+      "value": "Search or verification cancelled."
+    },
+    {
+      "name": "discovery_verify_timeout",
+      "value": "Verification timed out. Check that the server is reachable and retry."
+    },
+    {
+      "name": "discovery_verify_failed",
+      "value": "Could not verify the server. Retry or enter an address manually."
+    },
+    {
+      "name": "api_network_group",
+      "value": "API connection and cache"
+    },
+    {
+      "name": "api_network_hint",
+      "value": "App-wide settings. Enter 1–120 seconds for each field; saved values apply to new API requests. The total HTTP deadline includes connection and reading; read timeout follows HarmonyOS semantics. Video, images, system downloads and local discovery use separate transfer policies."
+    },
+    {
+      "name": "network_request_seconds",
+      "value": "Total HTTP deadline (seconds)"
+    },
+    {
+      "name": "network_connect_seconds",
+      "value": "Connection timeout (seconds)"
+    },
+    {
+      "name": "network_read_seconds",
+      "value": "Read timeout (seconds)"
+    },
+    {
+      "name": "network_auto_cache",
+      "value": "Use account cache automatically on connection failure"
+    },
+    {
+      "name": "network_cache_hint",
+      "value": "When off, connection failures do not fall back to cache automatically. Manual offline mode, downloads and pending changes remain available. Save to apply."
+    },
+    {
+      "name": "network_options_save",
+      "value": "Save network settings"
+    },
+    {
+      "name": "network_options_reset",
+      "value": "Reset network defaults"
+    },
+    {
+      "name": "network_options_invalid",
+      "value": "Invalid network settings. Enter whole-number timeouts from 1 to 120 seconds."
+    },
+    {
+      "name": "network_options_load_failed",
+      "value": "Could not read network settings. Defaults or the last saved values are in use."
+    },
+    {
+      "name": "network_options_save_failed",
+      "value": "Could not save network settings. The previous settings and current input were kept."
+    },
+    {
+      "name": "network_options_restore_failed",
+      "value": "Could not roll back network settings. Reopen this page and confirm the values."
+    },
+    {
+      "name": "network_options_cancelled",
+      "value": "Network settings operation cancelled."
+    },
+    {
+      "name": "network_options_saved",
+      "value": "Network settings saved. New requests will use them."
+    },
+    {
+      "name": "poster_cache_group",
+      "value": "Poster and avatar cache"
+    },
+    {
+      "name": "poster_cache_hint",
+      "value": "Default 20 MB, shared app-wide, up to 512 image files isolated by account. Only viewed images are cached; uncached images show placeholders offline. Disabling stops disk reads and writes; online images still work and existing files can be cleared separately. The system may reclaim cached files."
+    },
+    {
+      "name": "poster_cache_enabled",
+      "value": "Use image disk cache"
+    },
+    {
+      "name": "poster_cache_capacity",
+      "value": "Capacity limit (1–200 MB)"
+    },
+    {
+      "name": "poster_cache_usage",
+      "value": "Image files: %s MB · %d files"
+    },
+    {
+      "name": "poster_cache_unknown",
+      "value": "Image cache usage is unavailable"
+    },
+    {
+      "name": "poster_options_save",
+      "value": "Save image cache settings"
+    },
+    {
+      "name": "poster_cache_clear",
+      "value": "Clear image disk cache"
+    },
+    {
+      "name": "poster_cache_clear_confirm",
+      "value": "Clear posters and avatars for all local accounts? Videos, metadata caches and pending changes are not affected. Current images may remain in memory; they cannot be downloaded again while offline."
+    },
+    {
+      "name": "poster_options_invalid",
+      "value": "Enter a whole-number capacity from 1 to 200 MB."
+    },
+    {
+      "name": "poster_options_saved",
+      "value": "Image cache preferences saved."
+    },
+    {
+      "name": "poster_options_load_failed",
+      "value": "Could not read image cache preferences. Defaults are in use."
+    },
+    {
+      "name": "poster_options_save_failed",
+      "value": "Image cache preferences were not confirmed saved. Keep your input and retry."
+    },
+    {
+      "name": "poster_options_restore_failed",
+      "value": "Could not roll back image cache preferences. Restart the app and confirm them."
+    },
+    {
+      "name": "poster_cache_unavailable",
+      "value": "Could not access or measure the image cache. Images can still try loading online."
+    },
+    {
+      "name": "poster_cache_trim_failed",
+      "value": "Preferences were saved, but trimming the cache did not finish. Retry clearing it."
+    },
+    {
+      "name": "poster_cache_cleared",
+      "value": "Image disk cache cleared."
+    },
+    {
+      "name": "poster_cache_clear_failed",
+      "value": "Clearing the image cache did not finish. Check remaining usage and retry."
+    },
+    {
+      "name": "player_trickplay",
+      "value": "Seek thumbnails"
+    },
+    {
+      "name": "player_trickplay_hint",
+      "value": "Requires Jellyscrub BIF previews from the server. Cached previews work offline. The 32 MiB / 16-file cache may remove older previews."
+    },
+    {
+      "name": "player_trickplay_frame",
+      "value": "Target time preview"
+    },
+    {
+      "name": "player_trickplay_save_failed",
+      "value": "Could not save the seek thumbnail preference"
+    },
+    {
+      "name": "ui_language_group",
+      "value": "App language"
+    },
+    {
+      "name": "ui_language_hint",
+      "value": "Supports Simplified Chinese and English. Other system languages currently use English. Shared across the app; media metadata and audio/subtitle preferences are managed separately."
+    },
+    {
+      "name": "ui_language_system",
+      "value": "Follow system"
+    },
+    {
+      "name": "ui_language_save",
+      "value": "Save and apply app language"
+    },
+    {
+      "name": "ui_language_saved",
+      "value": "App language saved and applied"
+    },
+    {
+      "name": "ui_language_invalid",
+      "value": "Invalid app language setting. Choose a language and save again."
+    },
+    {
+      "name": "ui_language_load_failed",
+      "value": "Could not read app language settings. Reopen Settings and retry."
+    },
+    {
+      "name": "ui_language_save_failed",
+      "value": "Could not save the app language. The previous setting was restored. Please retry."
+    },
+    {
+      "name": "ui_language_restore_failed",
+      "value": "Could not restore the app language. The current setting is unconfirmed. Restart the app and save again."
+    },
+    {
+      "name": "ui_language_cancelled",
+      "value": "App language change cancelled"
+    },
+    {
+      "name": "ui_language_apply_failed",
+      "value": "Could not update the app language. Reopen Settings and retry."
+    }
+  ]
+}
