@@ -10,6 +10,9 @@ import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
 import { PersistentDownload } from './PersistentDownload';
 import { OfflineSubtitles } from './OfflineSubtitles';
+import { DownloadSpace } from './DownloadSpace';
+import { DownloadNetworkGuard } from './DownloadNetworkGuard';
+import { DownloadNetwork, downloadNetwork } from '../utils/Downloads';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
 import { initializeStrings, text } from '../utils/Strings';
@@ -316,7 +319,16 @@ export class AppService {
     return result;
   }
 
-  static async download(item: MediaItem, sourceId: string = ''): Promise<void> {
+  static async download(item: MediaItem, sourceId: string = '', network?: DownloadNetwork): Promise<void> {
+    const client = AppService.requireClient(); const local = AppService.local!; let record: DownloadRecord | undefined;
+    await AppService.mutation('download-admission', async () => {
+      if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+      record = await AppService.startDownload(item, sourceId, network);
+    });
+    if (record) { await AppService.cacheSubtitles(record, client, local); }
+  }
+
+  private static async startDownload(item: MediaItem, sourceId: string, network?: DownloadNetwork): Promise<DownloadRecord> {
     const client = AppService.requireClient(); const local = AppService.local!;
     if (AppService.downloads.some((record: DownloadRecord) => record.id === item.Id)) { throw new Error('download_exists'); }
     if (item.CanDownload !== true) { throw new Error('download_not_allowed'); }
@@ -328,9 +340,13 @@ export class AppService {
       info.MediaSources?.find((value: MediaSource) => preferred && (value.Name || value.Container || '') === preferred) ?? info.MediaSources?.[0];
     if (!source) { throw new Error('no_download_source'); }
     const record = new DownloadRecord(); record.id = item.Id; record.item = item; record.mediaSourceId = source.Id;
+    record.network = network ?? downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
+    record.expectedSize = Number.isSafeInteger(source.Size) && (source.Size ?? 0) > 0 ? source.Size : undefined;
     const extension = /^[a-zA-Z0-9]+$/.test(source.Container ?? '') ? source.Container : 'media';
     record.path = `${local.directory}/${safeItemId(item.Id)}.${extension}`;
     record.subtitles = OfflineSubtitles.plan(record, source, local.directory); record.subtitleState = record.subtitles.length ? 'pending' : 'ready';
+    await DownloadSpace.check(local.directory, record, AppService.downloads);
+    if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
     if (PersistentDownload.available()) {
       const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record);
       AppService.downloads.push(record);
@@ -338,11 +354,12 @@ export class AppService {
       try { await PersistentDownload.create(AppService.context, record, client.stream(item.Id, source.Id), owned, save); }
       catch (e) { AppService.downloads = AppService.downloads.filter((r: DownloadRecord) => r !== record); if (client === AppService.client) { local.saveDownloads(AppService.downloads); } throw e as Error; }
       if (preference?.rememberDownloadSource) { AppService.experience?.update((next: ExperienceState) => { next.sourcePreference = source.Name || source.Container || ''; }); }
-      await AppService.cacheSubtitles(record, client, local);
-      return;
+      return record;
     }
+    await DownloadNetworkGuard.legacy(record.network);
+    if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
     const task = await request.downloadFile(AppService.context, { url: client.stream(item.Id, source.Id),
-      filePath: record.path, enableMetered: false, enableRoaming: false });
+      filePath: record.path, enableMetered: record.network.mobile, enableRoaming: record.network.mobile && record.network.roaming });
     if (client !== AppService.client || local !== AppService.local || AppService.downloads.some((value: DownloadRecord) => value.id === record.id)) {
       if (!await task.delete()) { throw new Error('cancel_download_failed'); }
       throw new Error(client !== AppService.client ? 'login_required' : 'download_exists');
@@ -371,13 +388,13 @@ export class AppService {
       local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); AppService.pumpDownloads();
     });
     AppService.downloadListener?.();
-    await AppService.cacheSubtitles(record, client, local);
+    return record;
   }
 
   private static async cacheSubtitles(record: DownloadRecord, client: JellyfinClient, local: LocalStore): Promise<void> {
     const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record);
     await AppService.mutation(`subtitles:${record.id}`, async () => {
-      await OfflineSubtitles.fetch(record, client, owned, () => { if (owned()) { local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); } });
+      await OfflineSubtitles.fetch(record, client, owned, () => { if (owned()) { local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); } }, AppService.context);
     });
   }
 
@@ -390,8 +407,16 @@ export class AppService {
     const source = info.MediaSources.find((s: MediaSource) => s.Id === record.mediaSourceId);
     if (!source) { throw new Error('no_media_source'); }
     const plan = OfflineSubtitles.plan(record, source, local.directory);
-    record.subtitles = plan.map((subtitle) => record.subtitles?.find((old) => old.index === subtitle.index && old.state === 'ready') ?? subtitle);
-    record.subtitleState = 'pending'; local.saveDownloads(AppService.downloads);
+    const prepared = new DownloadRecord(); prepared.path = record.path;
+    prepared.subtitles = plan.map((subtitle) => record.subtitles?.find((old) => old.index === subtitle.index && old.state === 'ready') ?? subtitle);
+    await AppService.mutation('download-admission', async () => {
+      await DownloadSpace.check(local.directory, prepared, AppService.downloads.filter((value: DownloadRecord) => value !== record), true);
+      if (client !== AppService.client || local !== AppService.local || !AppService.downloads.includes(record)) { throw new Error('login_required'); }
+      record.subtitles = prepared.subtitles; record.subtitleState = 'pending'; local.saveDownloads(AppService.downloads);
+    });
+    const preference = AppService.experience?.snapshot();
+    record.network = downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
+    local.saveDownloads(AppService.downloads);
     await AppService.cacheSubtitles(record, client, local);
   }
 
@@ -451,6 +476,7 @@ export class AppService {
       if (AppService.downloads.some((r: DownloadRecord) => r.id === item.Id)) { continue; }
       if (item.CanDownload !== true || !validMediaItem(item)) { failed.push(item.Id); continue; }
       const record = new DownloadRecord(); record.id = item.Id; record.item = item; record.state = 'queued'; record.mediaSourceId = sourceId;
+      const preference = AppService.experience?.snapshot(); record.network = downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
       record.path = `${local.directory}/${safeItemId(item.Id)}.media`; queued.push(record);
     }
     const records = [...AppService.downloads, ...queued]; local.saveDownloads(records); AppService.downloads = records; AppService.downloadListener?.(); await AppService.pumpDownloads();
@@ -469,7 +495,7 @@ export class AppService {
           if (client !== AppService.client || local !== AppService.local) { return; }
           if (!AppService.downloads.includes(record)) { continue; }
           AppService.downloads = AppService.downloads.filter((r: DownloadRecord) => r !== record);
-          await AppService.download(latest, record.mediaSourceId ?? '');
+          await AppService.download(latest, record.mediaSourceId ?? '', record.network);
         } catch (e) {
           if (client !== AppService.client || local !== AppService.local) { return; }
           record.state = 'failed'; record.failure = (e as Error).message;

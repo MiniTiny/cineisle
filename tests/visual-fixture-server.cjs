@@ -37,7 +37,10 @@ const cast = [{ Id: actorId, Name: person.Name, Type: 'Actor', Role: '侦探' }]
 movie.People = cast; movie.Genres = ['犯罪', '悬疑']; show.People = cast; show.Genres = ['Crime'];
 const extraMovie = item(id(51), '岛屿谜案 · 新发现', 'Movie', { People: cast, Genres: ['Crime'], CanDownload: true, MediaSources: [source], UserData: { IsFavorite: true, Played: false } });
 const catalog = [movie, show, extraMovie, season, episode];
+const boxId=id(70), boxesId=id(71), box=item(boxId,'光影与潮汐 · 合集回归','BoxSet');
+if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')libraries.push(item(boxesId,'合集 · UI 测试','CollectionFolder',{CollectionType:'boxsets'}));
 const data = new Map([...catalog, person, ...libraries].map(x => [x.Id, x]));
+if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')data.set(boxId,box);
 const page = Items => ({ Items, TotalRecordCount: Items.length, StartIndex: 0 });
 const routes = [];
 const server = http.createServer((req, res) => {
@@ -55,13 +58,15 @@ const server = http.createServer((req, res) => {
   else if (p.endsWith('/Seasons')) result = page([season]);
   else if (p.endsWith('/Episodes')) result = page([episode]);
   else if (p.endsWith('/Items/Resume') || p === '/UserItems/Resume') result = page([movie]);
-  else if (p.endsWith('/Items/Latest')) result = q.get('parentid') === showsId ? [show] : q.get('parentid') === moviesId ? [movie] : [movie, show];
+  else if (p.endsWith('/Items/Latest')) result = q.get('parentid') === boxesId ? [box] : q.get('parentid') === showsId ? [show] : q.get('parentid') === moviesId ? [movie] : [movie, show];
   else if (p === '/Movies/Recommendations') result = process.env.CINEISLE_VISUAL_EMPTY_CATALOG === '1' ? [] : [{ Items: [movie] }];
   else if (p === '/Persons') result = page([]);
   else if (p.endsWith('/PlaybackInfo')) result = { MediaSources: videoFile?[source,{...source,Id:id(11),Name:'备用媒体源 · 同一测试视频'}]:[source], PlaySessionId: id(21) };
   else if (/\/(?:User)?(FavoriteItems|PlayedItems)\//.test(p) || /\/Sessions\/Playing/.test(p)) { res.writeHead(204); res.end(); return; }
   else if (p === '/Items' || p === `/Users/${userId}/Items`) {
     let items = q.get('parentid') === showsId ? [show, season, episode] : q.get('parentid') === moviesId ? [movie, extraMovie] : catalog;
+    if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1' && q.get('parentid')===boxesId)items=[box];
+    if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1' && q.get('parentid')===boxId)items=[movie,show,episode];
     if (q.get('personids')) items = items.filter(x => x.People.some(p => p.Id === q.get('personids')));
     if (q.get('filters') === 'IsFavorite') items = items.filter(x => x.UserData.IsFavorite);
     if (q.get('filters') === 'IsUnplayed') items = items.filter(x => !x.UserData.Played);

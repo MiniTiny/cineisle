@@ -2,9 +2,9 @@ import { LibrarySnapshot, MediaItem, QueryParam } from '../model/Models';
 
 export const librarySortFields: string[] = ['SortName', 'CommunityRating', 'CriticRating', 'DateCreated', 'DatePlayed', 'PremiereDate'];
 
-export function browseParams(mode: string, search: string, parentId: string, personId: string, sort: string = 'SortName', descending: boolean = false): QueryParam[] {
+export function browseParams(mode: string, search: string, parentId: string, personId: string, sort: string = 'SortName', descending: boolean = false, collectionType: string = ''): QueryParam[] {
   const library = mode === 'library' || mode === 'offline-library';
-  const types = mode === 'search' || mode === 'favorites' ? 'Movie,Series,Episode' : 'Movie,Series';
+  const types = library && collectionType === 'boxsets' ? 'BoxSet' : mode === 'search' || mode === 'favorites' ? 'Movie,Series,Episode' : 'Movie,Series';
   const params: QueryParam[] = [{ key: 'IncludeItemTypes', value: types },
     { key: 'SortBy', value: library && librarySortFields.includes(sort) ? sort : 'SortName' },
     { key: 'SortOrder', value: library && descending ? 'Descending' : 'Ascending' }];

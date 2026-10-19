@@ -79,6 +79,8 @@ export function validSnapshot(snapshot: LibrarySnapshot): boolean {
 
 export function validDownloads(records: DownloadRecord[], directory: string): boolean {
   return Array.isArray(records) && records.every((record: DownloadRecord) => {
+    if (record?.network !== undefined && (!record.network || typeof record.network.mobile !== 'boolean' || typeof record.network.roaming !== 'boolean')) { return false; }
+    if (record?.expectedSize !== undefined && (!Number.isSafeInteger(record.expectedSize) || record.expectedSize <= 0)) { return false; }
     if ((record?.mediaSourceId != undefined && typeof record.mediaSourceId !== 'string') || !record || !validMediaItem(record.item) || record.id !== record.item.Id || typeof record.path !== 'string' ||
       !['queued', 'downloading', 'complete', 'failed', 'interrupted', 'missing'].includes(record.state) ||
       !Number.isFinite(record.progress) || record.progress < 0 || record.progress > 1) { return false; }

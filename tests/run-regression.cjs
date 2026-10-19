@@ -4,6 +4,8 @@ const root = path.resolve(__dirname, '..'), audit = path.resolve(root, process.e
 const suites = ['protocol', 'feature-regression', 'player-regression', 'system-playback', 'pip-subtitle', 'language-preferences', 'openapi-regression', 'media-presentation', 'detail-regression', 'branding', 'window-theme', 'library-grid', 'actor-baseline', 'accounts-regression', 'button-layout', 'responsive-layout', 'brand-forms','brand-library','brand-player','brand-discovery','brand-media-detail','brand-auth-search','brand-consistency'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` }));
 suites.push(...['original-icons', 'brand-package'].map(name => ({ name, command: process.env.PYTHON || 'python3', file: `tests/${name}.test.py` })));
 suites.unshift({ name: 'android-parity', command: process.execPath, file: 'tests/android-parity.test.cjs' });
+suites.unshift({ name: 'other-parity', command: process.execPath, file: 'tests/other-parity.test.cjs' });
+suites.unshift({ name: 'other-parity-ui', command: process.execPath, file: 'tests/other-parity-ui.test.cjs' });
 const results = [];
 for (const suite of suites) {
   const started = Date.now(), result = spawnSync(suite.command, [suite.file], { cwd: root, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });

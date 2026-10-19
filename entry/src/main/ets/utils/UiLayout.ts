@@ -16,11 +16,11 @@ export class UiLayout {
   static separateFilters(height: number, landscape: boolean): boolean { return !landscape || height >= 440; }
   static filters(height: number, scale: number): number { return Math.min(210 * UiLayout.scale(scale), Math.max(44, (height - UiLayout.headerHeight(scale) - UiLayout.navHeight(scale) - 48) * 0.45)); }
   static playerControls(height: number, scale: number, options: boolean): number { return Math.min(Math.max(48, (height - UiLayout.headerHeight(scale) - 36) * 0.6), (options ? 380 : 150) * UiLayout.scale(scale)); }
-  static videoFrame(width: number, height: number, aspect: number): VideoFrame {
+  static videoFrame(width: number, height: number, aspect: number, cover: boolean = false): VideoFrame {
     const w = Number.isFinite(width) && width > 0 ? width : 1;
     const h = Number.isFinite(height) && height > 0 ? height : 1;
     const ratio = Number.isFinite(aspect) && aspect > 0 ? aspect : 16 / 9;
-    const fittedWidth = Math.min(w, h * ratio);
+    const fittedWidth = cover ? Math.max(w, h * ratio) : Math.min(w, h * ratio);
     return { width: fittedWidth, height: fittedWidth / ratio };
   }
   static shelfWidth(width: number, wide: boolean, scale: number = 1): number { return Math.min(wide ? 240 : 120 * UiLayout.scale(scale), Math.max(100, width - 40)); }

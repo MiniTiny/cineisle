@@ -41,6 +41,7 @@ struct Index {
   @State search: string = '';
   @State mode: string = '';
   @State parentId: string = '';
+  @State collectionType: string = '';
   @State personId: string = '';
   @State sectionTitle: string = '';
   @State items: MediaItem[] = [];
@@ -109,7 +110,7 @@ struct Index {
   }
 
   private params(): QueryParam[] {
-    return browseParams(this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending);
+    return browseParams(this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending, this.collectionType);
   }
 
   private async changeLibrarySort(index: number, order: boolean = false): Promise<void> {
@@ -130,6 +131,7 @@ struct Index {
     this.librarySort = state?.librarySort ?? 'SortName'; this.libraryDescending = state?.libraryDescending ?? false;
     this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
     this.mode = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
+    this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
     this.message = ''; this.syncMessage = ''; this.syncing = false; this.busy = false; this.usingCache = false;
     this.cacheMessage = AppService.cacheRecovered ? getContext(this).resourceManager.getStringSync($r('app.string.cache_recovered').id) : '';
@@ -201,7 +203,7 @@ struct Index {
         const preview = stored.length ? stored : cachedHome(AppService.snapshot);
         this.homeLoader = new ProgressiveHome(client, (value: HomeUpdate) => {
           if (!this.current(version, client)) { return; }
-          this.homeSections = value.sections.map((section: HomeSection): HomeSection => ({ id: section.id, kind: section.kind, name: section.name, libraryId: section.libraryId, items: applyPending(section.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []) }));
+            this.homeSections = value.sections.map((section: HomeSection): HomeSection => ({ id: section.id, kind: section.kind, name: section.name, libraryId: section.libraryId, collectionType: section.collectionType, items: applyPending(section.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []) }));
           this.homeFailures = value.failures; this.busy = value.busy; this.usingCache = value.cached;
           this.resume = this.homeSections.find((section: HomeSection) => section.kind === 'resume')?.items ?? [];
           this.items = this.homeSections.filter((section: HomeSection) => section.kind === 'latest').flatMap((section: HomeSection) => section.items);
@@ -224,6 +226,7 @@ struct Index {
   private switchTab(index: number): void {
     try { AppService.experience?.update((state: ExperienceState) => { state.tab = index === 2 ? 4 : index; }); } catch (e) { this.message = errorText(e as Error); }
     this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false;
+    this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = [];
     this.sectionTitle = ''; this.total = 0; this.usingCache = false;
     this.load();
@@ -246,7 +249,7 @@ struct Index {
     return false;
   }
 
-  private open(item: MediaItem): void { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
+  private open(item: MediaItem): void { router.pushUrl({ url: item.Type === 'BoxSet' ? 'pages/Collection' : 'pages/Detail', params: { item: item } }); }
 
   private async sync(): Promise<void> {
     this.syncing = true;
@@ -257,6 +260,7 @@ struct Index {
   }
 
   private openLibrary(section: HomeSection): void {
+    this.collectionType = section.collectionType ?? this.libraries.find((library: MediaItem) => library.Id === section.libraryId)?.CollectionType ?? '';
     this.tab = 2; this.mode = 'library'; this.parentId = section.libraryId; this.personId = '';
     this.sectionTitle = section.name; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.load();
   }
@@ -432,12 +436,12 @@ struct Index {
               }.width(52).height(52).flexShrink(0).borderRadius(16).justifyContent(FlexAlign.Center).backgroundColor($r('app.color.brand_selected'))
               Column({ space: 4 }) {
                 Text(library.Name).fontSize(18).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').width('100%')
-                Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : $r('app.string.tab_library')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+                Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : library.CollectionType === 'boxsets' ? $r('app.string.media_collection') : $r('app.string.tab_library')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
               Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no')
             }.width('100%').padding({ left: 16, right: 16, top: this.landscape && this.viewportHeight < 440 ? 8 : 16, bottom: this.landscape && this.viewportHeight < 440 ? 8 : 16 }).hitTestBehavior(HitTestMode.None)
           }.padding(0).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
-            .accessibilityText(library.Name).onClick(() => { this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
+            .accessibilityText(library.Name).onClick(() => { this.collectionType = library.CollectionType ?? ''; this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
         }
       }, (library: MediaItem) => `${library.Id}|${library.Name}|${library.CollectionType}`)
       if (!this.libraries.length && !this.busy) { ListItem() {

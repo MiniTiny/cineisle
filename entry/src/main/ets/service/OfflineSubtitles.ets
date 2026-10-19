@@ -1,4 +1,7 @@
 import fs from '@ohos.file.fs';
+import common from '@ohos.app.ability.common';
+import { downloadNetwork } from '../utils/Downloads';
+import { SubtitleTransfer } from './SubtitleTransfer';
 import { DownloadRecord, DownloadSubtitle, MediaSource } from '../model/Models';
 import { parseSubtitles, SubtitleCue, textSubtitle } from '../utils/Playback';
 import { safeItemId } from '../utils/Protocol';
@@ -22,14 +25,15 @@ export class OfflineSubtitles {
     return cues;
   }
 
-  static async fetch(record: DownloadRecord, client: JellyfinClient, owned: () => boolean, save: () => void): Promise<void> {
+  static async fetch(record: DownloadRecord, client: JellyfinClient, owned: () => boolean, save: () => void, context: common.UIAbilityContext): Promise<void> {
     for (const subtitle of record.subtitles ?? []) {
       if (!owned()) { return; }
       try {
         if (subtitle.state === 'ready') { OfflineSubtitles.read(subtitle); continue; }
       } catch (e) { subtitle.state = 'pending'; }
       try {
-        const content = await client.subtitle(record.id, record.mediaSourceId ?? '', subtitle.index);
+        const content = await client.subtitle(record.id, record.mediaSourceId ?? '', subtitle.index,
+          new SubtitleTransfer(client.subtitleTransport(), context, subtitle.path, record.network ?? downloadNetwork(), owned));
         if (!owned()) { return; }
         if (content.length > 1024 * 1024 || !parseSubtitles(content).length) { throw new Error('offline_subtitle_failed'); }
         const file = fs.openSync(subtitle.path + '.tmp', fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNC);

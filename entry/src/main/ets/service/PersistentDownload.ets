@@ -3,6 +3,7 @@ import request from '@ohos.request';
 import fs from '@ohos.file.fs';
 import { DownloadRecord } from '../model/Models';
 import { text } from '../utils/Strings';
+import { downloadNetwork } from '../utils/Downloads';
 
 // The OS owns background file transfer. Only the task ID and safe status enter application JSON.
 export class PersistentDownload {
@@ -22,8 +23,9 @@ export class PersistentDownload {
     task.on('progress', update); task.on('completed', update); task.on('failed', update);
   }
   static async create(context: common.UIAbilityContext, record: DownloadRecord, url: string, owned: () => boolean, save: () => void): Promise<void> {
+    const policy = record.network ?? downloadNetwork();
     const task = await request.agent.create(context, { action: request.agent.Action.DOWNLOAD, url: url, title: record.item.Name.slice(0, 256),
-      mode: request.agent.Mode.BACKGROUND, saveas: record.path, overwrite: true, network: request.agent.Network.WIFI, metered: false, roaming: false, retry: true, redirect: false });
+      mode: request.agent.Mode.BACKGROUND, saveas: record.path, overwrite: true, network: policy.mobile ? request.agent.Network.ANY : request.agent.Network.WIFI, metered: policy.mobile, roaming: policy.mobile && policy.roaming, retry: true, redirect: false });
     if (!owned()) { await request.agent.remove(task.tid); throw new Error('login_required'); }
     record.agentId = task.tid;
     try { save(); PersistentDownload.bind(task, record, owned, save); await task.start(); }

@@ -9,6 +9,7 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-player-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
 const cache = new Map(), platform = new Map(), nativePlayers = [], nativeQueue = [], httpQueue = [], requests = [];
+require('./download-platform.cjs').install(platform);
 let routeParams = {}, closes = 0;
 const fileApi = { accessSync: fs.existsSync, openSync: p => ({ fd: fs.openSync(p, 'r') }),
   closeSync: file => { closes++; fs.closeSync(file.fd); }, statSync: fs.statSync, readTextSync: p => fs.readFileSync(p, 'utf8'), OpenMode: { READ_ONLY: 0 } };

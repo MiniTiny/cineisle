@@ -49,6 +49,11 @@ struct Player {
   @State pipSupported: boolean = false;
   @State pipActive: boolean = false;
   @State controlsLocked: boolean = false;
+  @State zoomed: boolean = false;
+  @State seekPreview: number = -1;
+  @State gestureHint: string = '';
+  private seekAnchor: number = -1;
+  private heldSpeed: number = 0;
   private lastOfflineSave: number = 0;
   @State audioLanguage: string = '';
   @State subtitleLanguage: string = '';
@@ -72,7 +77,7 @@ struct Player {
     this.showPreferences(AppService.playbackPreferences.snapshot());
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
     this.controller = new PlaybackController(AppService.client, {
-      state: (state: string) => { if (this.alive) { this.state = state; this.system?.sync(true); } },
+      state: (state: string) => { if (this.alive) { this.state = state; if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); } },
       time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
@@ -82,7 +87,7 @@ struct Player {
       reportError: (failed: boolean) => { if (this.alive) { this.reportMessage = failed ? text('progress_not_saved') : ''; } },
       complete: () => { this.completed(); },
       beforePlay: async () => { if (!AppLock.permit()) { return false; } return this.system ? this.system.permitPlay() : this.visible; },
-      interrupted: () => { this.system?.pause(); }
+      interrupted: () => { this.cancelGesture(); this.system?.pause(); }
     }, () => AppService.playbackPreferences.snapshot());
     this.connectSystem();
   }
@@ -156,13 +161,13 @@ struct Player {
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
   onBackPress(): boolean { return this.controlsLocked; }
-  aboutToDisappear(): void { this.saveOffline(); this.alive = false; ++this.loadRevision; if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
-  onPageHide(): void { this.saveOffline(); this.visible = false; if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
+  aboutToDisappear(): void { this.cancelGesture(); this.saveOffline(); this.alive = false; ++this.loadRevision; if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
+  onPageHide(): void { this.cancelGesture(); this.saveOffline(); this.visible = false; if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
   onPageShow(): void { this.visible = true; if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
 
   private async completed(): Promise<void> {
     if (this.finished || !this.alive) { return; }
-    this.finished = true; this.saveOffline(true);
+    this.cancelGesture(); this.finished = true; this.saveOffline(true);
     if (this.route.offline) { try { await AppService.edit(this.route.item, false, true, true); } catch (e) { this.reportMessage = text('progress_not_saved'); } }
     if (this.autoNextReady && this.autoNext && (this.visible || this.system?.canContinue) && this.route.item.Type === 'Episode') { await this.next(true); }
     else { await this.system?.queueEnded(); }
@@ -170,7 +175,7 @@ struct Player {
 
   private async next(automatic: boolean = false): Promise<void> {
     if (this.busy || !this.alive) { return; }
-    this.busy = true; this.message = ''; const transition = ++this.loadRevision;
+    this.cancelGesture(); this.busy = true; this.message = ''; const transition = ++this.loadRevision;
     try {
       const route = await AppService.nextPlayback(this.route);
       if (!this.alive || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && (!this.autoNextReady || !this.autoNext))) {
@@ -186,7 +191,7 @@ struct Player {
   private async source(index: number): Promise<void> {
     const source = this.route.sources[index];
     if (!source || this.busy || source.Id === this.route.mediaSourceId) { return; }
-    this.busy = true; this.message = ''; const transition = ++this.loadRevision;
+    this.cancelGesture(); this.busy = true; this.message = ''; const transition = ++this.loadRevision;
     try {
       const route = await AppService.playback(this.route.item, source.Id);
       if (!this.alive || transition !== this.loadRevision || this.system?.isClosed) { return; }
@@ -209,6 +214,48 @@ struct Player {
     return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
   }
 
+  private canGesture(): boolean {
+    return this.alive && this.visible && !this.locked && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.pipActive &&
+      ['prepared', 'playing', 'paused', 'completed'].includes(this.state);
+  }
+  private insideGesture(x: number, y: number): boolean {
+    return Number.isFinite(x) && Number.isFinite(y) && x >= 24 && x <= this.surfaceWidth - 24 && y >= 24 && y <= this.surfaceHeight - 24;
+  }
+  private cancelGesture(): void {
+    const previous = this.heldSpeed; this.heldSpeed = 0; this.seekAnchor = -1; this.seekPreview = -1; this.gestureHint = '';
+    if (previous > 0) { this.speed = previous; this.controller?.setSpeed(previous); this.system?.sync(true); }
+  }
+  private changeSpeed(speed: number): void { this.cancelGesture(); this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); }
+  private doubleTap(x: number, y: number): void {
+    if (!this.canGesture() || !this.insideGesture(x, y)) { return; }
+    this.cancelGesture();
+    if (x >= this.surfaceWidth * 0.4 && x <= this.surfaceWidth * 0.6) { this.toggle(); return; }
+    if (!Number.isFinite(this.duration) || this.duration <= 0) { return; }
+    this.controller?.seek(Math.max(0, Math.min(this.duration, this.playbackPosition + (x < this.surfaceWidth * 0.4 ? -5000 : 15000))));
+  }
+  private beginSeek(x: number, y: number): void {
+    if (!this.canGesture() || !this.insideGesture(x, y) || !Number.isFinite(this.duration) || this.duration <= 0) { return; }
+    this.cancelGesture(); this.seekAnchor = this.playbackPosition; this.seekPreview = this.playbackPosition;
+  }
+  private previewSeek(offset: number): void {
+    if (!this.canGesture()) { this.cancelGesture(); return; }
+    if (this.seekAnchor < 0 || !Number.isFinite(offset)) { return; }
+    this.seekPreview = Math.max(0, Math.min(this.duration, this.seekAnchor + offset * 90000 / Math.max(1, this.surfaceWidth)));
+    this.gestureHint = text('gesture_seek_preview', this.clock(this.seekPreview));
+  }
+  private endSeek(): void {
+    const position = this.seekPreview; const allowed = this.canGesture(); this.cancelGesture();
+    if (allowed && position >= 0) { this.controller?.seek(position); }
+  }
+  private holdSpeed(x: number, y: number): void {
+    if (!this.canGesture() || !this.insideGesture(x, y) || this.state !== 'playing' || this.heldSpeed > 0) { return; }
+    this.cancelGesture(); this.heldSpeed = this.speed; this.speed = 2; this.controller?.setSpeed(2); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
+  }
+  private pinch(scale: number): void {
+    if (!this.canGesture() || !Number.isFinite(scale) || scale <= 0) { return; }
+    this.cancelGesture(); if (Math.abs(scale - 1) > 0.1) { this.zoomed = scale > 1; }
+  }
+
   build() {
     Column() {
       if (this.locked) { PinGate() }
@@ -227,14 +274,14 @@ struct Player {
             }.width(44).height(44).padding(0).borderRadius(14)
               .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
               .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
-              .onClick(() => { this.controlsLocked = !this.controlsLocked; if (this.controlsLocked) { this.options = false; } })
+              .onClick(() => { this.cancelGesture(); this.controlsLocked = !this.controlsLocked; if (this.controlsLocked) { this.options = false; } })
           }.padding(12).width('100%')
           Flex({ direction: this.viewportWidth > this.viewportHeight ? FlexDirection.Row : FlexDirection.Column,
             alignItems: ItemAlign.Stretch }) {
           Stack({ alignContent: Alignment.Center }) {
             XComponent({ id: 'playbackSurface', type: XComponentType.SURFACE, controller: this.surface })
-              .width(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect).width)
-              .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect).height)
+              .width(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).width)
+              .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).height)
               .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); this.controller?.open(this.route, this.surfaceId); })
             if (this.subtitle) {
               Column() {
@@ -243,7 +290,18 @@ struct Player {
               }.width('100%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Center)
                 .padding({ bottom: 16 }).hitTestBehavior(HitTestMode.None)
             }
+            if (this.gestureHint) { Text(this.gestureHint).fontSize(16).fontColor('#FFFFFF').backgroundColor('#BB0D1924').padding(12).borderRadius(12).hitTestBehavior(HitTestMode.None) }
           }.layoutWeight(1).backgroundColor('#000000')
+            .clip(true)
+            .gesture(GestureGroup(GestureMode.Exclusive,
+              PinchGesture({ fingers: 2 }).onActionStart(() => this.cancelGesture()).onActionUpdate((event: GestureEvent) => this.pinch(event.scale)),
+              LongPressGesture({ fingers: 1, duration: 500 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
+                .onActionEnd(() => this.cancelGesture()).onActionCancel(() => this.cancelGesture()),
+              PanGesture({ fingers: 1, direction: PanDirection.Horizontal, distance: 12 })
+                .onActionStart((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.beginSeek(finger.localX - event.offsetX, finger.localY); this.previewSeek(event.offsetX); } })
+                .onActionUpdate((event: GestureEvent) => this.previewSeek(event.offsetX)).onActionEnd(() => this.endSeek()).onActionCancel(() => this.cancelGesture()),
+              TapGesture({ count: 2, fingers: 1 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.doubleTap(finger.localX, finger.localY); } })
+            ))
             .margin({ right: this.viewportWidth > this.viewportHeight ? 12 : 0, bottom: this.viewportWidth > this.viewportHeight ? 0 : 8 })
             .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
           Scroll() {
@@ -386,13 +444,14 @@ struct Player {
   queueOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_queue_group'), icon: $r('app.media.player_speed') })
+      Text($r('app.string.gesture_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
       Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
         ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
           Column() {
             Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
               .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)
               .backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
-              .accessibilityText(`${speed}×`).onClick(() => { this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); })
+              .accessibilityText(`${speed}×`).onClick(() => this.changeSpeed(speed))
           }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '31%' : '48%').margin({ bottom: 8 })
         })
       }.width('100%')

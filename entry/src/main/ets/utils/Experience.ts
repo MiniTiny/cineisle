@@ -4,6 +4,8 @@ export interface PendingEdit { id: string; field: string; value: boolean; revisi
 export interface PendingPosition { id: string; ticks: number; revision: number; item: MediaItem }
 export interface Follow { id: string; acknowledged: string[] }
 export class ExperienceState {
+  downloadMobile?: boolean = false;
+  downloadRoaming?: boolean = false;
   librarySort?: string = 'SortName';
   libraryDescending?: boolean = false;
   autoNextMode?: string = 'server';
@@ -162,6 +164,8 @@ export function connectionFailure(error: Error): boolean {
 }
 export function authorizationFailure(error: Error): boolean { return /\b(401|403)\b|http_(401|403)|login_expired|permission_denied/.test(error.message); }
 export function validExperience(value: ExperienceState): boolean {
+  if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||
+    (value?.downloadRoaming !== undefined && typeof value.downloadRoaming !== 'boolean')) { return false; }
   return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= 20 && value.searches.every((s: string) => typeof s === 'string') &&
     (value.librarySort === undefined || ['SortName', 'CommunityRating', 'CriticRating', 'DateCreated', 'DatePlayed', 'PremiereDate'].includes(value.librarySort)) &&
     (value.libraryDescending === undefined || typeof value.libraryDescending === 'boolean') &&

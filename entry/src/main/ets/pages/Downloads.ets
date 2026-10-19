@@ -88,6 +88,7 @@ struct Downloads {
           ListItem() {
             Column({ space: 10 }) {
               Text(record.item.Name).fontColor('#F2F3FA').fontSize(18).width('100%')
+              if (record.expectedSize === undefined) { Text($r('app.string.download_size_unknown')).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
               Text(record.state === 'queued' ? $r('app.string.download_queued') : record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
                 $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor($r('app.color.brand_muted')).width('100%')
               if (record.state === 'downloading') { Progress({ value: record.progress * 100, total: 100 }).color($r('app.color.brand_accent')).width('100%') }
