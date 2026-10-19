@@ -18,6 +18,7 @@ import { MediaCard } from '../components/MediaCard';
 @Entry
 @Component
 struct Favorites {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
@@ -99,7 +100,7 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
       } }] }, this.viewportWidth, this.viewportHeight);
@@ -133,7 +134,7 @@ struct Favorites {
         selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
         onSelect: (i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); } })
       Text($r('app.string.favorite_search')).fontSize(12).fontColor($r('app.color.brand_muted'))
-      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
+      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
       Flex({ wrap: FlexWrap.Wrap }) {
         Row({ space: 12 }) {
           Text($r('app.string.unwatched_only')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
@@ -161,7 +162,7 @@ struct Favorites {
       if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
       if (!this.visibleItems.length && !this.busy) { BrandState({ label: this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites'), icon: $r('app.media.detail_heart') }) }
-      }.padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).width('100%').alignItems(HorizontalAlign.Start)
+      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).width('100%').alignItems(HorizontalAlign.Start)
   }
   @Builder
   grid() {
@@ -188,7 +189,7 @@ struct Favorites {
         Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
       this.grid()
-    }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

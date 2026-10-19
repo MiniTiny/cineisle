@@ -1,5 +1,6 @@
 @Component
 export struct BrandChoice {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @Prop label: Resource;
   @Prop icon: Resource;
@@ -15,8 +16,8 @@ export struct BrandChoice {
       }.width('100%')
       Select(this.choices).selected(this.selected).value(this.choices[this.selected]?.value ?? '')
         .width('100%').constraintSize({ minHeight: 40 * this.fontScale }).font({ size: 14 })
-        .fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).borderRadius(14)
-        .optionBgColor($r('app.color.brand_surface')).optionFontColor('#F2F3FA')
+        .fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(14)
+        .optionBgColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).optionFontColor('#F2F3FA')
         .selectedOptionBgColor($r('app.color.brand_selected')).selectedOptionFontColor($r('app.color.brand_accent'))
         .enabled(this.available).accessibilityText(this.label).onSelect((index: number) => {
           if (this.available && Number.isInteger(index) && index >= 0 && index < this.choices.length) { this.onSelect(index); }

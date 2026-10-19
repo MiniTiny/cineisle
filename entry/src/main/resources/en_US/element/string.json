@@ -2007,6 +2007,18 @@
     {
       "name": "ui_language_apply_failed",
       "value": "Could not update the app language. Reopen Settings and retry."
-    }
+    },
+    {"name": "appearance_group", "value": "Appearance and details"},
+    {"name": "appearance_amoled", "value": "AMOLED black backgrounds"},
+    {"name": "appearance_amoled_hint", "value": "Use black page, card, input and system bar backgrounds. Turn off to restore the CineIsle dark palette. Shared app-wide, applied immediately and kept after restart."},
+    {"name": "appearance_extra_info", "value": "Show extra media information"},
+    {"name": "appearance_extra_hint", "value": "Show file size and full video, audio and subtitle specifications in movie and episode details. When off, the story, basic tags and cast remain visible."},
+    {"name": "appearance_saved", "value": "Appearance settings saved and applied"},
+    {"name": "appearance_invalid", "value": "Saved appearance settings are invalid. Choose your settings again."},
+    {"name": "appearance_load_failed", "value": "Could not read appearance settings. Reopen Settings and retry."},
+    {"name": "appearance_unavailable", "value": "Window appearance is unavailable. Reopen Settings and retry."},
+    {"name": "appearance_cancelled", "value": "Appearance change cancelled"},
+    {"name": "appearance_save_failed", "value": "Could not save appearance settings. Restoration was attempted. Please retry."},
+    {"name": "appearance_restore_failed", "value": "Appearance restoration is unconfirmed. Reopen Settings to verify and retry."}
   ]
 }

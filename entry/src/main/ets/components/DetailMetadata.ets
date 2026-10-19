@@ -4,6 +4,8 @@ import { detailMetadata, DetailRow } from '../utils/DetailPresentation';
 import { CachedImage } from './CachedImage';
 @Component
 export struct DetailMetadataPanel {
+  @StorageLink('cineIsleExtraInfo') extraInfo: boolean = false;
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @Prop item: MediaItem;
   @Prop sourceId: string = '';
@@ -31,9 +33,9 @@ export struct DetailMetadataPanel {
             Text(this.item.Overview).fontColor('#F2F3FA').fontSize(15).lineHeight(24).width('100%')
           }
           this.metadataRows(false)
-        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
       }
-      if (detailMetadata(this.item, this.sourceId).chips.length || this.rows(true).length) {
+      if (detailMetadata(this.item, this.sourceId).chips.length || (this.extraInfo && this.rows(true).length)) {
         Column({ space: 14 }) {
           BrandHeading({ label: $r('app.string.detail_technical'), icon: $r('app.media.nav_library_active') })
           Flex({ wrap: FlexWrap.Wrap }) {
@@ -42,8 +44,8 @@ export struct DetailMetadataPanel {
                 .backgroundColor($r('app.color.brand_selected')).borderRadius(12).margin({ right: 8, bottom: 8 })
             }, (chip: string) => chip)
           }.width('100%')
-          this.metadataRows(true)
-        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+          if (this.extraInfo) { this.metadataRows(true) }
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
       }
       if (detailMetadata(this.item).actors.length) {
         Column({ space: 14 }) {
@@ -59,10 +61,10 @@ export struct DetailMetadataPanel {
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
                 Image($r('app.media.menu_chevron')).width(20).height(20).flexShrink(0).accessibilityLevel('no')
               }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(12).hitTestBehavior(HitTestMode.None)
-            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor($r('app.color.brand_surface'))
+            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
               .accessibilityText(person.Name).onClick(() => this.onPerson(person))
           }, (person: Person) => person.Id + ':' + person.Name + ':' + (person.Role ?? '') + ':' + (person.PrimaryImageTag ?? ''))
-        }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
       }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }

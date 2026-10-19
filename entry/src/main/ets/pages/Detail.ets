@@ -24,6 +24,7 @@ interface DetailRoute { item: MediaItem }
 @Entry
 @Component
 struct Detail {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
   @State viewportHeight: number = 800;
@@ -150,7 +151,7 @@ struct Detail {
     if (this.busy || !this.canDownload() || this.deleted) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
     const record = this.record(); const sourceId = this.sourceId;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
       message: record ? $r('app.string.remove_download_confirm') : $r('app.string.download_confirm'),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: record ? $r('app.string.remove') : $r('app.string.download'), fontColor: record ? $r('app.color.brand_danger') : $r('app.color.brand_accent'), action: async () => {
         if (!this.current(token, client) || this.busy || this.record() !== record) { return; }
@@ -164,7 +165,7 @@ struct Detail {
   private deleteMedia(): void {
     if (!this.loaded || this.busy || this.usingCache || this.deleted || this.item.Type !== 'Movie' || this.item.CanDelete !== true) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.server_delete'), fontColor: $r('app.color.brand_danger'), action: async () => {
         if (!this.current(token, client) || this.busy || this.deleted) { return; }
         this.busy = true; this.message = '';
@@ -188,7 +189,7 @@ struct Detail {
   private batchEpisodes(): void {
     const chosen = this.children.filter((item: MediaItem) => this.selectedEpisodes.includes(item.Id));
     const client = this.pageClient; const token = this.generation;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('download'), fontColor: $r('app.color.brand_accent'), action: async () => {
         if (!client || !this.current(token, client) || this.busy) { return; }
         this.busy = true;
@@ -231,7 +232,7 @@ struct Detail {
             }.width('100%')
           }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
         }
-      }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+      }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
     } else if (this.loaded && !this.busy && ['Series', 'Season'].includes(this.item.Type)) {
       BrandState({ label: this.item.Type === 'Series' ? $r('app.string.no_seasons') : $r('app.string.no_episodes'), icon: $r('app.media.nav_library_active') })
     }
@@ -284,7 +285,7 @@ struct Detail {
                   available: !this.busy && !this.deleted, onSelect: () => this.deleteMedia() }).width(this.actionWidth()).margin({ bottom: 8 })
               }
             }.width('100%')
-          }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
           if (this.downloadState) { Text(this.downloadState).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }
           if (!this.usingCache && (this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.MediaSources?.length ?? 0) > 1) {
             Column({ space: 12 }) {
@@ -296,7 +297,7 @@ struct Detail {
                     onSelect: () => { this.sourceId = source.Id; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
                 }, (source: MediaSource) => `${source.Id}:${source.Name}`)
               }.width('100%')
-            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
           }
           if (this.usingCache && this.localRecords().length && (this.item.Type === 'Movie' || this.item.Type === 'Episode')) {
             Column({ space: 12 }) {
@@ -307,7 +308,7 @@ struct Detail {
                     available: !this.busy && !this.deleted, onSelect: () => { this.offlinePath = record.path; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
                 }, (record: DownloadRecord) => record.path)
               }.width('100%')
-            }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
           }
           DetailMetadataPanel({ item: this.metadataItem(), sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId, stacked: this.viewportWidth < 400 || this.fontScale > 1.2,
             onPerson: (person: Person) => this.openPerson(person) })
@@ -315,12 +316,12 @@ struct Detail {
             Column({ space: 12 }) {
               BrandHeading({ label: $r('app.string.next_up'), icon: $r('app.media.player_next') })
               MediaCard({ item: this.nextUp, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
-            }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
           }
           this.childrenPanel()
         }.padding(16).width('100%')
       }.layoutWeight(1).width('100%').align(Alignment.TopStart)
-    }.width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+    }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
