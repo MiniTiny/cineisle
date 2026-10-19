@@ -214,6 +214,40 @@ test('offline fallback includes only seasons belonging to the cached series', as
   client.detail = async () => { throw new Error('offline'); }; await p.refresh();
   assert.equal(p.usingCache, true); assert.deepEqual(ids(p.children), ['season-1', 'season-2']); assert.equal(p.nextUp, undefined);
 });
+for (const item of [movie(), show(), season(1)]) test('manual offline is successful cached detail without an error: ' + item.Type, async () => {
+  const { p, client } = await detail(item); const { NetworkPolicy, NetworkOptions } = load('utils/NetworkOptions.ts');
+  const options = new NetworkOptions(); options.autoCache = false; NetworkPolicy.publish(options);
+  try {
+    AppService.snapshot = snapshot([item, ...[season(1), season(2), episode(2), episode(1), season(0, { SeriesId: 'other' })].filter(value => value.Id !== item.Id)]);
+    AppService.experience.update(state => { state.offline = true; });
+    client.detail = client.children = client.nextUp = async () => { throw new Error('unexpected_http'); };
+    await p.refresh();
+    assert.equal(p.loaded, true); assert.equal(p.usingCache, true); assert.equal(p.message, ''); assert.equal(p.busy, false);
+    assert.deepEqual(ids(p.children), item.Type === 'Series' ? ['season-1', 'season-2'] : item.Type === 'Season' ? ['episode-1-1', 'episode-1-2'] : []);
+    assert.equal(p.nextUp, undefined);
+  } finally { NetworkPolicy.publish(new NetworkOptions()); }
+});
+test('missing manual offline detail fails with a localized message and stays unplayable', async () => {
+  const client = activate(); AppService.experience.update(state => { state.offline = true; });
+  client.detail = async () => { throw new Error('unexpected_http'); }; AppService.snapshot = snapshot([film('another')]);
+  routeParams = { item: movie() }; const p = new Detail(); await p.aboutToAppear();
+  assert.equal(p.loaded, false); assert.equal(p.usingCache, false); assert.equal(p.canPlay(), false); assert.equal(p.busy, false);
+  assert.equal(p.message, labels.get('offline_detail_missing')); assert.match(p.message, /本账户.*离线资料.*联网/);
+});
+test('manual offline refuses an old client before reading the new account cache', async () => {
+  const previous = activate('a'); activate('b'); AppService.snapshot = snapshot([movie({ Name: 'Private B' })]);
+  AppService.experience.update(state => { state.offline = true; });
+  await assert.rejects(loadDetail(previous, 'film'), /login_required/);
+});
+test('automatic fallback preserves the original connection warning', async () => {
+  const { p, client } = await detail(); AppService.snapshot = snapshot([movie()]);
+  client.detail = async () => { throw new Error('network_failed'); }; await p.refresh();
+  assert.equal(p.usingCache, true); assert.equal(p.message, labels.get('network_failed'));
+});
+for (const code of [401, 403]) test('online permission failure cannot become a clean cached success: ' + code, async () => {
+  const client = activate(); AppService.snapshot = snapshot([movie()]); client.detail = async () => { throw new Error('http_' + code); };
+  await assert.rejects(loadDetail(client, 'film'), new RegExp('http_' + code));
+});
 test('wrong-series next-up is rejected and never presented or played', async () => {
   const { p, client } = await detail(show()); client.nextUp = async () => [episode(1, 1, { SeriesId: 'other' })];
   await p.refresh(); assert.equal(p.nextUp, undefined); assert.match(p.message, /单集列表/); await assert.rejects(AppService.detailPlayback(show()), /episode_queue_failed/);

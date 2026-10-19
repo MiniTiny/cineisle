@@ -37,6 +37,10 @@
       "value": "正在展示上次同步的离线缓存"
     },
     {
+      "name": "offline_detail_missing",
+      "value": "本账户没有当前媒体的离线资料，请联网同步后重试"
+    },
+    {
       "name": "actors_sync_hint",
       "value": "同步媒体库后，按演员作品的总播放量浏览演员"
     },
