@@ -11,6 +11,8 @@ node tests/run-regression.cjs
 
 构建前检查 OpenAPI 与图标生成漂移，并编译 ArkTS、ArkUI 和资源。默认未配置签名，生成 unsigned HAP。全套回归包含协议、业务、播放器、系统播放、字幕、语言偏好、媒体与详情、品牌、SDK 网格及固定基准检查。
 
+标准入口按文件名排序发现`tests`目录中的`.test.cjs`及本地`.test.py`，新增套件无需再维护固定清单。需要截图/布局输入的`*-emulator.test.py`和`emulator-*.test.py`单列为独立原生验收，不计入本地通过项，仍按下文专项采集后执行。证据记录全部发现项、逐套件文件指纹/日志/数量、首次失败后未运行项；空清单、进程失败或零用例都不能通过门禁。`node tests/regression-runner.test.cjs`用合成子进程验证这些边界。
+
 回归输出默认写入 `.local/test-results/regression`；可通过 `CINEISLE_TEST_OUTPUT_DIR` 指定本地输出目录。日志、证据 JSON、截图、服务探测、工作区快照和 HAP 不提交。原生 UI 检查需要自行采集截图与布局，使用 `CINEISLE_UI_CAPTURE_DIR` 指定目录，默认 `.local/ui-captures`。
 
 ## 账户与服务器专项检查
