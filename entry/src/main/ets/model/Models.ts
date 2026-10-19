@@ -75,6 +75,8 @@ export class PlaybackRoute {
 }
 export interface DownloadSubtitle { index: number; title: string; language: string; path: string; state: string }
 export class DownloadRecord {
+  fileId?: string;
+  sourceName?: string;
   network?: DownloadNetwork;
   expectedSize?: number;
   subtitles?: DownloadSubtitle[];

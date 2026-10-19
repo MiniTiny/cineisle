@@ -1,3 +1,4 @@
+import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
@@ -9,7 +10,7 @@ import router from '@ohos.router';
 import { DownloadRecord } from '../model/Models';
 import { AppService } from '../service/AppService';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { errorText } from '../utils/Strings';
+import { errorText, text } from '../utils/Strings';
 
 @Entry
 @Component
@@ -88,6 +89,7 @@ struct Downloads {
           ListItem() {
             Column({ space: 10 }) {
               Text(record.item.Name).fontColor('#F2F3FA').fontSize(18).width('100%')
+                Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor($r('app.color.brand_muted')).fontSize(13).width('100%')
               if (record.expectedSize === undefined) { Text($r('app.string.download_size_unknown')).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
               Text(record.state === 'queued' ? $r('app.string.download_queued') : record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
                 $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor($r('app.color.brand_muted')).width('100%')
@@ -95,7 +97,7 @@ struct Downloads {
                 Column({ space: 8 }) {
                   if (record.state === 'complete') {
                     BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: !this.busy, onSelect: async () => {
-                      try { await router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item, '', true) }); } catch (e) { this.message = errorText(e as Error); }
+                      try { await router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
                     } })
                     if (record.subtitleState !== 'ready') {
                       Text(record.subtitleState === 'pending' ? $r('app.string.offline_subtitles_pending') : $r('app.string.offline_subtitles_incomplete')).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%')
@@ -112,7 +114,7 @@ struct Downloads {
                 }.width('100%')
             }.padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20).width('100%')
           }
-        }, (r: DownloadRecord) => `${r.id}:${r.state}:${r.progress}:${r.failure}:${r.subtitleState}`)
+        }, (r: DownloadRecord) => `${r.path}:${r.state}:${r.progress}:${r.failure}:${r.subtitleState}`)
         if (!this.visibleRecords().length) { ListItem() {
           BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') })
         } }

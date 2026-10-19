@@ -1,3 +1,4 @@
+import { downloadStem } from './DownloadIdentity';
 import { ActorSummary, DownloadRecord, DownloadSubtitle, LibrarySnapshot, MediaItem, MediaLink, MediaSource, MediaStream, Person } from '../model/Models';
 
 function validPerson(person: Person): boolean {
@@ -78,12 +79,23 @@ export function validSnapshot(snapshot: LibrarySnapshot): boolean {
 }
 
 export function validDownloads(records: DownloadRecord[], directory: string): boolean {
+  const paths = new Set<string>(); const sources = new Set<string>(); const files = new Set<string>(); const stems = new Set<string>();
   return Array.isArray(records) && records.every((record: DownloadRecord) => {
     if (record?.network !== undefined && (!record.network || typeof record.network.mobile !== 'boolean' || typeof record.network.roaming !== 'boolean')) { return false; }
     if (record?.expectedSize !== undefined && (!Number.isSafeInteger(record.expectedSize) || record.expectedSize <= 0)) { return false; }
     if ((record?.mediaSourceId != undefined && typeof record.mediaSourceId !== 'string') || !record || !validMediaItem(record.item) || record.id !== record.item.Id || typeof record.path !== 'string' ||
       !['queued', 'downloading', 'complete', 'failed', 'interrupted', 'missing'].includes(record.state) ||
       !Number.isFinite(record.progress) || record.progress < 0 || record.progress > 1) { return false; }
+    if (!/^[a-zA-Z0-9-]+$/.test(record.id)) { return false; }
+    if (record.fileId !== undefined) {
+      if (typeof record.fileId !== 'string' || !/^[a-f0-9]{32}$/.test(record.fileId) || files.has(record.fileId)) { return false; }
+      files.add(record.fileId);
+    }
+    if (record.sourceName !== undefined && (typeof record.sourceName !== 'string' || record.sourceName.length > 256)) { return false; }
+    const stem = downloadStem(record); if (stems.has(stem)) { return false; } stems.add(stem);
+    const identity = JSON.stringify([record.id, record.mediaSourceId ?? '']);
+    if (paths.has(record.path) || sources.has(identity)) { return false; }
+    paths.add(record.path); sources.add(identity);
     if (record.agentId !== undefined && (typeof record.agentId !== 'string' || !/^[0-9]+$/.test(record.agentId))) { return false; }
     if (record.failure !== undefined && typeof record.failure !== 'string') { return false; }
     if (record.subtitleState !== undefined && !['pending', 'ready', 'failed'].includes(record.subtitleState)) { return false; }
@@ -93,12 +105,12 @@ export function validDownloads(records: DownloadRecord[], directory: string): bo
       if (!record.subtitles.every((subtitle: DownloadSubtitle) => {
         if (!subtitle || !Number.isSafeInteger(subtitle.index) || subtitle.index < 0 || seen.has(subtitle.index) ||
           typeof subtitle.title !== 'string' || typeof subtitle.language !== 'string' || !['pending', 'ready', 'failed'].includes(subtitle.state) ||
-          subtitle.path !== `${directory}/${record.id}.subtitle-${subtitle.index}.srt`) { return false; }
+          subtitle.path !== `${directory}/${downloadStem(record)}.subtitle-${subtitle.index}.srt`) { return false; }
         seen.add(subtitle.index); return true;
       })) { return false; }
     }
     if ([record.taskId, record.received, record.total].some((n: number | undefined) => n !== undefined && (!Number.isSafeInteger(n) || n < 0))) { return false; }
-    const prefix = `${directory}/${record.id}.`;
+    const prefix = `${directory}/${downloadStem(record)}.`;
     return record.path.startsWith(prefix) && /^[a-zA-Z0-9]+$/.test(record.path.slice(prefix.length));
   });
 }

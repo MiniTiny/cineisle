@@ -1,3 +1,4 @@
+import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
 import { CachedImage } from '../components/CachedImage';
@@ -608,12 +609,13 @@ struct Index {
         ListItem() {
           Column({ space: 10 }) {
             Text(record.item.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
+            Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor($r('app.color.brand_muted')).fontSize(13).width('100%')
             Text(record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
               $r('app.string.download_progress', Math.floor(record.progress * 100)) : $r('app.string.download_interrupted'))
               .fontSize(12).fontColor($r('app.color.brand_muted'))
             Flex({ wrap: FlexWrap.Wrap }) {
               Column() { BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: record.state === 'complete' && !this.busy, onSelect: async () => {
-                try { router.pushUrl({ url: 'pages/Player', params: await AppService.playback(record.item) }); } catch (e) { this.message = errorText(e as Error); }
+                try { router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
               Column() { BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => {
                 showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: $r('app.color.brand_surface_raised'), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
@@ -625,7 +627,7 @@ struct Index {
             }
           }.padding(16).width('100%').backgroundColor($r('app.color.brand_surface_raised')).borderRadius(14)
         }
-      }, (record: DownloadRecord) => record.id)
+      }, (record: DownloadRecord) => record.path)
       if (this.downloads.length === 0) { ListItem() { BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') }) } }
     }.layoutWeight(1).width('100%')
   }

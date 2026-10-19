@@ -36,7 +36,7 @@ platform.set('@ohos.request', { downloadFile: async (context, options) => {
 platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 platform.set('@ohos.resourceManager', {});
 require('./preferences-platform.cjs').install(platform, directory);
-platform.set('@ohos.util', { generateRandomUUID: () => 'mock-device',
+platform.set('@ohos.util', { generateRandomUUID: () => require('node:crypto').randomUUID(),
   TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } },
   TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 platform.set('@ohos.security.asset', { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return', ACCESSIBILITY: 'access', CONFLICT_RESOLUTION: 'conflict' },
@@ -374,7 +374,7 @@ test('in-progress download cancellation waits for native task deletion', async (
   assert.equal(AppService.downloads.length, 1); nativeDelete.resolve(true); await pending; assert.equal(AppService.downloads.length, 0); assert.equal(AppService.tasks.size, 0);
 });
 test('failed native cancellation retains record and exposes an error', async () => {
-  const { p } = await detail(); const record = localDownload(p.item, 'downloading'); AppService.tasks.set(record.id, { delete: async () => false });
+  const { p } = await detail(); const record = localDownload(p.item, 'downloading'); AppService.tasks.set(record.path, { delete: async () => false });
   p.download(); await dialog.secondaryButton.action(); assert.equal(AppService.downloads[0], record); assert.equal(fs.existsSync(record.path), true); assert.match(p.message, /下载任务未能取消/);
 });
 test('download progress/completion events update the visible detail status', async () => {
@@ -451,7 +451,7 @@ test('cancel and redownload ignores old progress, completion and failure without
   const { p, client } = await detail(); client.playbackInfo = async () => ({ MediaSources: [source('one')] }); await AppService.download(p.item);
   const oldTask = downloadTasks[0]; await AppService.removeDownload(AppService.downloads[0]); await AppService.download(p.item);
   const task = downloadTasks[1], record = AppService.downloads[0]; oldTask.handlers.get('progress')(100, 100); oldTask.handlers.get('complete')(); oldTask.handlers.get('fail')();
-  assert.equal(AppService.tasks.get('film'), task); assert.equal(record.state, 'downloading'); assert.equal(record.progress, 0);
+  assert.equal(AppService.tasks.get(record.path), task); assert.equal(record.state, 'downloading'); assert.equal(record.progress, 0);
   assert.equal(AppService.local.downloads()[0].state, 'downloading');
 });
 test('late failure or progress after completion cannot downgrade a completed download', async () => {
