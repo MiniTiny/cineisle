@@ -30,6 +30,7 @@ import { followingEpisode, precedingEpisode } from '../utils/Playback';
 import { firstEpisode } from '../utils/DetailPresentation';
 
 import { PlaybackPreferenceStore } from './PlaybackPreferenceStore';
+import { offlineStopState } from '../utils/OfflinePlayback';
 import { ServerProfile, sessionKey, addresses } from '../utils/Accounts';
 import { ExperienceStore } from './ExperienceStore';
 import { PendingSync, SyncOwner } from './PendingSync';
@@ -647,12 +648,28 @@ export class AppService {
   }
 
   static recordOfflinePosition(item: MediaItem, position: number, completed: boolean = false): void {
+    if (!Number.isFinite(position) || position < 0) { return; }
+    AppService.persistOfflinePosition(item, completed ? 0 : position);
+  }
+  static recordOfflineStop(item: MediaItem, position: number, duration: number): void {
+    const stopped = offlineStopState(position, duration);
+    if (!stopped) { AppService.persistOfflinePosition(item, position); return; }
+    AppService.persistOfflinePosition(item, stopped.position, stopped.played);
+  }
+  private static persistOfflinePosition(item: MediaItem, position: number, played?: boolean): void {
     const store = AppService.experience; const local = AppService.local; if (!store || !local || !Number.isFinite(position) || position < 0) { return; }
-    const copy = JSON.parse(JSON.stringify(AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item)) as MediaItem;
-    copy.UserData = copy.UserData ?? {}; const ticks = completed ? 0 : Math.round(position * 10000); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
+    const pending = store.snapshot();
+    const copy = applyPending([JSON.parse(JSON.stringify(AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item)) as MediaItem], pending.pending, pending.positions)[0];
+    copy.UserData = copy.UserData ?? {}; const ticks = Math.round(position * 10000); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
     copy.UserData.PlaybackPositionTicks = ticks; copy.UserData.LastPlayedDate = new Date().toISOString();
+    if (played !== undefined) { copy.UserData.Played = played; }
     const revision = AppService.editRevision = Math.max(Date.now(), AppService.editRevision + 1);
-    store.update((next: ExperienceState) => { next.positions = next.positions.filter((p: PendingPosition) => p.id !== item.Id); next.positions.push({ id: item.Id, ticks: ticks, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
+    store.update((next: ExperienceState) => {
+      next.positions = next.positions.filter((p: PendingPosition) => p.id !== item.Id); next.positions.push({ id: item.Id, ticks: ticks, revision: revision, item: copy });
+      if (played !== undefined) { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== 'played'); next.pending.push({ id: item.Id, field: 'played', value: played, revision: revision, item: copy }); }
+      next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false;
+    });
+    if (played !== undefined && AppService.client) { AppService.latestEdits.set(AppService.mutationKey(AppService.client, item.Id, 'played'), revision); }
     AppService.snapshot.items = [copy, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== item.Id)];
     AppService.snapshot.actors = rankActors(AppService.snapshot.items); local.saveSnapshot(AppService.snapshot);
     AppService.downloads.forEach((r: DownloadRecord) => { if (r.id === item.Id) { r.item = copy; } }); local.saveDownloads(AppService.downloads);

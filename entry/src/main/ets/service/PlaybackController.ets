@@ -19,11 +19,13 @@ export interface PlayerView {
   beforePlay?: () => Promise<boolean>;
   interrupted?: () => void;
   frame?: (ready: boolean) => void;
+  closed?: (status: PlaybackStatus) => void;
 }
 interface PendingReport { route: PlaybackRoute; position: number; paused: boolean }
 export interface PlaybackStatus {
   route: PlaybackRoute; state: string; position: number; duration: number; speed: number; width: number; height: number;
   checkpoint?: number;
+  checkpointCompleted?: boolean;
 }
 
 // Owns the native player and its FD. Every asynchronous callback is tied to one load.
@@ -36,6 +38,11 @@ export class PlaybackController {
   private retryPosition: number = 0;
   private checkpoint: number | undefined = undefined;
   private seeking: boolean = false;
+  private duration: number = 0;
+  private checkpointCompleted: boolean = false;
+  private finalCheckpoint: number | undefined = undefined;
+  private finalDuration: number = 0;
+  private finalized: boolean = true;
   private releasing: Promise<void> = Promise.resolve();
   private selection: number = 0;
   private audioSelection: number = 0;
@@ -95,8 +102,14 @@ export class PlaybackController {
     if (this.started) { this.paused = true; this.send('Stopped'); this.started = false; }
   }
 
-  async close(): Promise<void> {
+  async close(finalize: boolean = true): Promise<void> {
+    const status = this.snapshot();
+    if (status.checkpoint === undefined && this.finalCheckpoint !== undefined) { status.checkpoint = this.finalCheckpoint; status.duration = this.finalDuration; }
     this.closed = true;
+    if (finalize && !this.finalized) {
+      this.finalized = true;
+      try { this.view.closed?.(status); } catch (e) { this.view.reportError(true); }
+    }
     await this.releasePlayer();
   }
 
@@ -129,8 +142,12 @@ export class PlaybackController {
   }
 
   async open(route: PlaybackRoute, surface: string, position: number = -1, paused: boolean = false): Promise<void> {
-    const closing = this.close(); const generation = this.generation;
-    this.checkpoint = undefined; this.seeking = false;
+    const sameSession = !this.finalized && route.offline === this.route.offline && route.item.Id === this.route.item.Id &&
+      route.mediaSourceId === this.route.mediaSourceId && route.filePath === this.route.filePath;
+    const closing = this.close(false); const generation = this.generation;
+    this.finalized = false;
+    this.checkpoint = undefined; this.seeking = false; this.duration = 0; this.checkpointCompleted = false;
+    if (!sameSession) { this.finalCheckpoint = undefined; this.finalDuration = 0; }
     await closing; await this.releasing;
     if (generation !== this.generation) { return; }
     this.closed = false; this.failed = false;
@@ -164,7 +181,7 @@ export class PlaybackController {
           this.paused = true; if (this.started) { this.send('Progress'); }
         } else if (state === 'completed') {
           this.subtitleEnded = true; this.nativeSubtitle = ''; this.view.subtitle('');
-          this.checkpoint = player.duration; this.seeking = false;
+          this.confirmPosition(player.duration, player.duration, true); this.seeking = false;
           this.position = player.duration; this.view.time(this.position, player.duration); this.stopReport(); this.view.complete();
         }
       });
@@ -172,7 +189,7 @@ export class PlaybackController {
         if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
         this.position = position;
         if (!this.seeking) {
-          if (this.started) { this.checkpoint = position; }
+          if (this.started) { this.confirmPosition(position, player.duration); }
           if (this.started || position > 0) { this.retryPosition = position; }
         }
         this.view.time(position, player.duration); this.renderSubtitle();
@@ -180,7 +197,7 @@ export class PlaybackController {
       });
       player.on('seekDone', (position: number) => {
         if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
-        this.seeking = false; this.position = position; this.retryPosition = position; this.checkpoint = position;
+        this.seeking = false; this.position = position; this.retryPosition = position; this.confirmPosition(position, player.duration);
         this.view.time(position, player.duration); this.renderSubtitle();
       });
       player.on('subtitleUpdate', (info: media.SubtitleInfo) => {
@@ -207,6 +224,7 @@ export class PlaybackController {
   }
 
   private async prepared(player: media.AVPlayer, generation: number, resume: number): Promise<void> {
+    this.duration = Number.isFinite(player.duration) && player.duration > 0 ? player.duration : 0;
     try {
       const descriptions = await player.getTrackDescription();
       const selected = await player.getSelectedTracks();
@@ -251,6 +269,11 @@ export class PlaybackController {
         if (permitted && this.active(player, generation) && !this.paused && !this.hidden) { await player.play(); }
       }
     } catch (e) { if (this.active(player, generation)) { this.fail(generation); } }
+  }
+
+  private confirmPosition(position: number, duration: number, completed: boolean = false): void {
+    this.checkpoint = position; this.checkpointCompleted = completed;
+    this.finalCheckpoint = position; this.finalDuration = duration;
   }
 
   get relativeVolume(): number { return this.volume; }
@@ -335,7 +358,7 @@ export class PlaybackController {
     if (!player || this.hidden) { return false; }
     if (player.state === 'playing') { return true; }
     if (!['prepared', 'paused', 'completed'].includes(player.state)) { return false; }
-    try { if (player.state === 'completed') { this.checkpoint = undefined; this.seeking = false; } this.paused = false; this.subtitleEnded = false; await player.play(); return this.player === player && !this.paused && this.snapshot().state === 'playing'; }
+    try { if (player.state === 'completed') { this.checkpoint = undefined; this.seeking = false; this.checkpointCompleted = false; } this.paused = false; this.subtitleEnded = false; await player.play(); return this.player === player && !this.paused && this.snapshot().state === 'playing'; }
     catch (e) { this.view.error(text('play_error')); return false; }
   }
 
@@ -349,7 +372,7 @@ export class PlaybackController {
 
   snapshot(): PlaybackStatus {
     return { route: this.route, state: this.closed ? 'released' : this.failed ? 'error' : this.player?.state ?? 'loading', position: this.position,
-      duration: this.player?.duration ?? 0, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0, checkpoint: this.checkpoint };
+      duration: this.player?.duration ?? this.duration, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0, checkpoint: this.checkpoint, checkpointCompleted: this.checkpointCompleted };
   }
 
   async hide(continuePlayback: boolean = false): Promise<boolean> {

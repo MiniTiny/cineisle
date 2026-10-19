@@ -12,6 +12,7 @@ import { ExperienceState, PendingEdit, PendingPosition, connectionFailure } from
 import { sessionKey } from '../utils/Accounts';
 
 export interface SyncOwner { client: JellyfinClient; local: LocalStore; store: ExperienceStore }
+interface ItemSyncIntent { id: string; position?: PendingPosition; played?: PendingEdit; favorite?: PendingEdit }
 // The OS stores only a fixed job identity. Credentials remain in Asset, intents in account-private files.
 export class PendingSync {
   static get busy(): boolean { return !!PendingSync.running; }
@@ -131,19 +132,45 @@ export class PendingSync {
       state.positions.map((p: PendingPosition) => `${p.id}/${p.revision}`).join('|');
   }
   static async flush(client: JellyfinClient, store: ExperienceStore, allowed: () => Promise<boolean>): Promise<void> {
-    for (const position of store.snapshot().positions) {
-      if (!await allowed()) { return; }
-      if (!store.snapshot().positions.some((p: PendingPosition) => p.id === position.id && p.revision === position.revision)) { continue; }
-      await client.offlinePosition(position.id, position.ticks);
-      if (!await allowed()) { return; }
-      store.update((next: ExperienceState) => { next.positions = next.positions.filter((p: PendingPosition) => p.id !== position.id || p.revision !== position.revision); });
+    const initial = store.snapshot();
+    const ids = Array.from(new Set<string>([...initial.positions.map((p: PendingPosition) => p.id), ...initial.pending.map((p: PendingEdit) => p.id)]));
+    for (const id of ids) {
+      const intent = PendingSync.itemIntent(store.snapshot(), id);
+      if (!intent.position && !intent.played && !intent.favorite) { continue; }
+      let stale = false;
+      // Frozen Android sync applies played, favorite, then position. Marking unplayed resets the server position.
+      for (const edit of [intent.played, intent.favorite]) {
+        if (!edit) { continue; }
+        if (!await allowed()) { return; }
+        if (!PendingSync.sameIntent(store.snapshot(), intent)) { stale = true; break; }
+        if (edit.field === 'played') { await client.played(id, edit.value); } else { await client.favorite(id, edit.value); }
+        if (!await allowed()) { return; }
+        if (!PendingSync.sameIntent(store.snapshot(), intent)) { stale = true; break; }
+      }
+      if (stale) { continue; }
+      if (intent.position) {
+        if (!await allowed()) { return; }
+        if (!PendingSync.sameIntent(store.snapshot(), intent)) { continue; }
+        await client.offlinePosition(id, intent.position.ticks);
+        if (!await allowed()) { return; }
+      }
+      // Keep the whole item pending on partial failure or a concurrent edit, as Android's snapshot acknowledgement does.
+      store.update((next: ExperienceState) => {
+        if (!PendingSync.sameIntent(next, intent)) { return; }
+        next.positions = next.positions.filter((p: PendingPosition) => p.id !== id);
+        next.pending = next.pending.filter((p: PendingEdit) => p.id !== id);
+      });
     }
-    for (const edit of store.snapshot().pending) {
-      if (!await allowed()) { return; }
-      if (!store.snapshot().pending.some((p: PendingEdit) => p.id === edit.id && p.field === edit.field && p.revision === edit.revision)) { continue; }
-      if (edit.field === 'favorite') { await client.favorite(edit.id, edit.value); } else { await client.played(edit.id, edit.value); }
-      if (!await allowed()) { return; }
-      store.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== edit.id || p.field !== edit.field || p.revision !== edit.revision || p.value !== edit.value); });
-    }
+  }
+  private static itemIntent(state: ExperienceState, id: string): ItemSyncIntent {
+    return { id: id, position: state.positions.find((p: PendingPosition) => p.id === id),
+      played: state.pending.find((p: PendingEdit) => p.id === id && p.field === 'played'),
+      favorite: state.pending.find((p: PendingEdit) => p.id === id && p.field === 'favorite') };
+  }
+  private static sameIntent(state: ExperienceState, intent: ItemSyncIntent): boolean {
+    const latest = PendingSync.itemIntent(state, intent.id);
+    return latest.position?.revision === intent.position?.revision && latest.position?.ticks === intent.position?.ticks &&
+      latest.played?.revision === intent.played?.revision && latest.played?.value === intent.played?.value &&
+      latest.favorite?.revision === intent.favorite?.revision && latest.favorite?.value === intent.favorite?.value;
   }
 }
