@@ -1,3 +1,4 @@
+import { IntroSegment, IntroTicket, introTarget } from '../utils/Intro';
 import { BrandState } from '../components/BrandState';
 import { BrandButton } from '../components/BrandButton';
 import { BrandHeading } from '../components/BrandHeading';
@@ -43,6 +44,10 @@ struct Player {
   @State audioKey: string = '';
   @State subtitleKey: string = '';
   @State options: boolean = false;
+  @State intro: IntroSegment | undefined = undefined;
+  @State introEnabled: boolean = true;
+  private introRevision: number = 0;
+  private introTicket: IntroTicket | undefined;
   @State autoNext: boolean = false;
   @State autoNextReady: boolean = false;
   @State autoNextMode: string = 'server';
@@ -94,7 +99,7 @@ struct Player {
     if (!this.route?.url || !this.route.item?.Id) { router.back(); return; }
     this.alive = true;
     this.ownerClient = AppService.client; this.immersive = true;
-    this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.zoomed = this.ui.startMaximized;
+    this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.introEnabled = this.ui.introSkipper ?? true; this.zoomed = this.ui.startMaximized;
     this.dimOpacity = this.ui.dimOpacity ?? 0.6;
     this.window = new PlaybackWindow(getContext(this) as common.UIAbilityContext, (code: string) => { if (this.alive) { this.message = text(code); this.showControls(); } });
     if (this.ui.rememberBrightness && (this.ui.brightness ?? -1) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
@@ -115,7 +120,35 @@ struct Player {
       beforePlay: async () => { if (!AppLock.permit()) { return false; } return this.system ? this.system.permitPlay() : this.visible; },
       interrupted: () => { this.cancelGesture(); this.system?.pause(); }
     }, () => AppService.playbackPreferences.snapshot());
-    this.connectSystem();
+    this.connectSystem(); this.restoreIntro();
+  }
+
+  private clearIntro(): void { ++this.introRevision; this.introTicket?.cancel(); this.introTicket = undefined; this.intro = undefined; }
+  private restoreIntro(): void {
+    this.clearIntro();
+    if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.pipActive || !this.introEnabled || !['Episode', 'Movie'].includes(this.route.item.Type) || !AppService.intros || !this.ownerClient || this.ownerClient !== AppService.client) { return; }
+    const revision = this.introRevision; const route = this.route; const client = this.ownerClient;
+    const allowed = (): boolean => this.alive && this.visible && !this.locked && !this.pipActive && AppLock.permit() && this.introEnabled && this.route === route && client === AppService.client && revision === this.introRevision;
+    this.introTicket = AppService.intros.load(client, AppService.local, route.item.Id, route.offline || (AppService.experience?.snapshot().offline ?? false), allowed);
+    this.introTicket.result.then((segment: IntroSegment | undefined) => { if (allowed()) { this.intro = segment; } }).finally(() => { if (revision === this.introRevision) { this.introTicket = undefined; } });
+  }
+  private canSkipIntro(): boolean {
+    return this.introEnabled && this.alive && this.visible && !this.locked && AppLock.permit() && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.options && !this.pipActive &&
+      this.ownerClient === AppService.client && !!this.controller && ['playing', 'paused', 'prepared'].includes(this.state) && this.seekAnchor < 0 && this.heldSpeed === 0 && introTarget(this.intro, this.playbackPosition, this.duration) !== undefined;
+  }
+  private skipIntro(): void {
+    if (!this.canSkipIntro()) { return; }
+    const target = introTarget(this.intro, this.playbackPosition, this.duration);
+    if (target === undefined) { return; }
+    this.cancelGesture(); this.controller?.seek(target); this.playbackPosition = this.controller?.snapshot().position ?? this.playbackPosition; this.showControls();
+  }
+  private changeIntro(enabled: boolean): void {
+    if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.controlsLocked || this.busy || this.settingsBusy || this.ownerClient !== AppService.client || !AppService.experience) { return; }
+    try {
+      const options = playerOptions(AppService.experience.snapshot().playerUi); options.introSkipper = enabled;
+      AppService.experience.update((state: ExperienceState) => { state.playerUi = options; }); this.ui = options; this.introEnabled = enabled; this.settingsMessage = '';
+      if (enabled) { this.restoreIntro(); } else { this.clearIntro(); }
+    } catch (e) { this.settingsMessage = text('player_intro_save_failed'); }
   }
 
   private showPreferences(value: PlaybackPreferences): void {
@@ -166,7 +199,7 @@ struct Player {
   private connectSystem(): void {
     if (!this.controller) { return; }
     this.system = new SystemPlayback(getContext(this) as common.UIAbilityContext, this.controller, this.surface, this.route, {
-      changed: (state: SystemPlayerState) => { if (this.alive) { this.systemReady = state.ready; this.backgroundEnabled = state.backgroundEnabled; this.pipSupported = state.pipSupported; this.pipActive = state.pipActive; this.syncWindow(); } },
+      changed: (state: SystemPlayerState) => { if (this.alive) { this.systemReady = state.ready; this.backgroundEnabled = state.backgroundEnabled; this.pipSupported = state.pipSupported; const changedPiP = this.pipActive !== state.pipActive; this.pipActive = state.pipActive; if (changedPiP) { if (this.pipActive) { this.clearIntro(); } else if (this.visible) { this.restoreIntro(); } } this.syncWindow(); } },
       error: (message: string) => { if (this.alive) { this.message = message; } },
       next: async () => { await this.next(); },
       previous: async () => { await this.next(false, true); },
@@ -189,9 +222,9 @@ struct Player {
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
   onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }
-  aboutToDisappear(): void { this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
-  onPageHide(): void { this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
-  onPageShow(): void { this.visible = true; this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
+  aboutToDisappear(): void { this.clearIntro(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
+  onPageHide(): void { this.clearIntro(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
+  onPageShow(): void { this.visible = true; this.introEnabled = playerOptions(AppService.experience?.snapshot().playerUi).introSkipper ?? true; if (!this.intro && !this.introTicket) { this.restoreIntro(); } this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
 
   private async completed(): Promise<void> {
     if (this.finished || !this.alive) { return; }
@@ -203,7 +236,7 @@ struct Player {
 
   private async next(automatic: boolean = false, previous: boolean = false): Promise<void> {
     if (this.busy || !this.alive || this.controlsLocked || this.locked || !AppLock.permit()) { return; }
-    this.cancelGesture(); this.saveOffline(); this.busy = true; this.message = ''; this.showControls(); const transition = ++this.loadRevision; const client = AppService.client;
+    this.clearIntro(); this.cancelGesture(); this.saveOffline(); this.busy = true; this.message = ''; this.showControls(); const transition = ++this.loadRevision; const client = AppService.client;
     try {
       const route = previous ? await AppService.previousPlayback(this.route) : await AppService.nextPlayback(this.route);
       if (!this.alive || this.locked || !AppLock.permit() || this.controlsLocked || client !== AppService.client || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && (!this.autoNextReady || !this.autoNext))) {
@@ -213,13 +246,13 @@ struct Player {
       this.route = route; this.finished = false; this.reportMessage = '';
       await this.controller?.open(route, this.surfaceId, 0);
     } catch (e) { if (this.alive && client === AppService.client && transition === this.loadRevision) { this.message = text(previous ? 'previous_episode_failed' : 'next_episode_failed'); if (automatic) { await this.system?.queueEnded(); } } }
-    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; this.showControls(); } }
+    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; this.showControls(); this.restoreIntro(); } }
   }
 
   private async source(index: number): Promise<void> {
     const source = this.route.sources[index];
     if (!source || this.busy || source.Id === this.route.mediaSourceId) { return; }
-    this.cancelGesture(); this.busy = true; this.message = ''; const transition = ++this.loadRevision;
+    this.clearIntro(); this.cancelGesture(); this.busy = true; this.message = ''; const transition = ++this.loadRevision;
     try {
       const route = await AppService.playback(this.route.item, source.Id);
       if (!this.alive || transition !== this.loadRevision || this.system?.isClosed) { return; }
@@ -227,7 +260,7 @@ struct Player {
       this.route = route; this.finished = false; this.reportMessage = '';
       await this.controller?.open(route, this.surfaceId, position, paused);
     } catch (e) { if (this.alive && transition === this.loadRevision) { this.message = text('source_switch_failed'); } }
-    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; } }
+    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; this.restoreIntro(); } }
   }
 
   private async track(key: string, audio: boolean): Promise<void> {
@@ -286,7 +319,7 @@ struct Player {
   }
 
   private syncWindow(): void { this.window?.update({ visible: this.visible && this.alive, playing: this.state === 'playing', immersive: this.immersive, locked: this.locked || !AppLock.permit(), pip: this.pipActive }); }
-  private windowStateChanged(): void { if (this.locked) { this.cancelGesture(); this.clearHide(); this.controlsVisible = true; } this.syncWindow(); }
+  private windowStateChanged(): void { if (this.locked) { this.clearIntro(); this.cancelGesture(); this.clearHide(); this.controlsVisible = true; } else if (this.visible) { this.restoreIntro(); } this.syncWindow(); }
   private clearHide(): void { if (this.hideTimer >= 0) { clearTimeout(this.hideTimer); this.hideTimer = -1; } }
   private showControls(): void {
     this.clearHide(); this.controlsVisible = true;
@@ -382,6 +415,14 @@ struct Player {
               TapGesture({ count: 2, fingers: 1 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.doubleTap(finger.localX, finger.localY); } }),
               TapGesture({ count: 1, fingers: 1 }).onAction(() => this.singleTap())
             ))
+            if (this.immersive && !this.controlsVisible && this.canSkipIntro()) {
+              Column() { Blank().layoutWeight(1).hitTestBehavior(HitTestMode.None)
+                Row() { Blank().layoutWeight(1).hitTestBehavior(HitTestMode.None)
+                  BrandButton({ label: $r('app.string.player_skip_intro'), icon: $r('app.media.player_next'), compact: true, onSelect: () => this.skipIntro() })
+                    .width(this.fontScale > 1.2 || this.viewportWidth < 400 ? '100%' : 220)
+                }.width('100%')
+              }.width('100%').height('100%').padding(16).hitTestBehavior(HitTestMode.Transparent)
+            }
             if (this.immersive && this.controlsVisible && !this.pipActive) {
               Column() {
                 this.playerHeader()
@@ -430,6 +471,7 @@ struct Player {
     Scroll() {
       Column({ space: 12 }) {
         if (!this.controlsLocked) {
+          if (this.canSkipIntro()) { BrandButton({ label: $r('app.string.player_skip_intro'), icon: $r('app.media.player_next'), onSelect: () => this.skipIntro() }) }
           Column({ space: 12 }) {
             Row({ space: 8 }) {
               Text(this.clock(this.playbackPosition)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
@@ -499,6 +541,12 @@ struct Player {
   mediaOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_media_group'), icon: $r('app.media.nav_library_active') })
+      Row({ space: 12 }) {
+        Text($r('app.string.player_intro_skipper')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.introEnabled).enabled(!this.busy && !this.settingsBusy).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_intro_skipper')).onChange((enabled: boolean) => this.changeIntro(enabled))
+      }.width('100%')
+      Text($r('app.string.player_intro_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
       if (!this.route.offline && this.route.sources.length > 0) {
         PlayerChoice({ label: $r('app.string.media_source'), icon: $r('app.media.nav_library_active'),
           choices: this.route.sources.map((source: MediaSource, index: number): SelectOption => ({ value: source.Name || `${source.Container || text('media_source')} ${index + 1}` })),

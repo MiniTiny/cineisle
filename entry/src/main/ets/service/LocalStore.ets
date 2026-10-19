@@ -1,3 +1,4 @@
+import { IntroEntry, validIntroEntries } from '../utils/Intro';
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import { DownloadRecord, LibrarySnapshot, Session, HomeSection } from '../model/Models';
@@ -48,6 +49,8 @@ export class LocalStore {
     return this.read<DownloadRecord[]>('downloads', [], (records: DownloadRecord[]) => validDownloads(records, this.directory));
   }
   saveDownloads(records: DownloadRecord[]): void { this.write<DownloadRecord[]>('downloads', records); }
+  intros(): IntroEntry[] { return this.read<IntroEntry[]>('intros', [], validIntroEntries); }
+  saveIntros(entries: IntroEntry[]): void { this.write<IntroEntry[]>('intros', entries); }
   experience(): ExperienceState { return this.read<ExperienceState>('experience', new ExperienceState(), validExperience); }
   saveExperience(value: ExperienceState): void { this.write<ExperienceState>('experience', value); }
   changeExperience(change: (next: ExperienceState) => void): ExperienceState {

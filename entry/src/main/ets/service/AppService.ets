@@ -1,3 +1,4 @@
+import { IntroRepository } from './IntroRepository';
 import util from '@ohos.util';
 import { downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
 import background from '@ohos.resourceschedule.backgroundTaskManager';
@@ -34,6 +35,7 @@ import { ExperienceState, PendingEdit, PendingPosition, applyPending, connection
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
   static posters: PosterCache | undefined;
+  static intros: IntroRepository | undefined;
   private static accountBusy: boolean = false;
   private static accountListener: (() => void) | undefined = undefined;
   private static notifyAccount(): void {
@@ -75,7 +77,7 @@ export class AppService {
   private static tasks: Map<string, request.DownloadTask> = new Map();
 
   static async initialize(context: common.UIAbilityContext): Promise<void> {
-    AppService.context = context; initializeStrings(context.resourceManager);
+    AppService.context = context; AppService.intros = AppService.intros ?? new IntroRepository(); initializeStrings(context.resourceManager);
     if (AppService.initialized) { return; }
     if (!AppService.posters) { AppService.posters = new PosterCache(context); }
     await AppService.posters.initialize();
@@ -364,7 +366,11 @@ export class AppService {
       if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
       record = await AppService.startDownload(item, sourceId, network);
     });
-    if (record) { await AppService.cacheSubtitles(record, client, local); }
+    if (record) {
+      const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record!);
+      const intro = ['Episode', 'Movie'].includes(item.Type) ? AppService.intros?.load(client, local, item.Id, AppService.experience?.snapshot().offline ?? false, owned) : undefined;
+      await Promise.all([AppService.cacheSubtitles(record, client, local), intro?.result ?? Promise.resolve(undefined)]);
+    }
   }
 
   private static async startDownload(item: MediaItem, sourceId: string, network?: DownloadNetwork): Promise<DownloadRecord> {
