@@ -1,3 +1,5 @@
+import { IntroTransport } from '../api/IntroTransport';
+import { IntroTicket } from '../utils/Intro';
 import util from '@ohos.util';
 import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../model/Models';
 import { addresses } from '../utils/Accounts';
@@ -12,7 +14,7 @@ import { itemPage, listItems, mediaItem, mediaItems, playbackInfo } from '../api
 
 export interface PublicUser { id: string; name: string }
 
-// Stable business facade. All application wire operations come from pinned OpenAPI.
+// Core wire operations use pinned OpenAPI; optional plugin adapters keep their own explicit contracts.
 export class JellyfinClient {
   session: Session;
   private transport: NativeHttpTransport;
@@ -125,6 +127,8 @@ export class JellyfinClient {
     await this.ready(); const user = await this.api.getCurrentUser(); if (user?.Id !== this.session.userId || (user.Name != null && typeof user.Name !== 'string')) { throw new Error('login_response_invalid'); }
     this.session.userName = user.Name ?? this.session.userName;
   }
+
+  intro(id: string, allowed: () => boolean): IntroTicket { return new IntroTransport(this.session).fetch(id, allowed); }
 
   async autoNextEnabled(): Promise<boolean> {
     await this.ready(); const user = await this.api.getCurrentUser();

@@ -1,5 +1,9 @@
 {
   "string": [
+    { "name": "player_skip_intro", "value": "跳过片头" },
+    { "name": "player_intro_skipper", "value": "片头跳过提示" },
+    { "name": "player_intro_hint", "value": "需要服务器提供 Intro Skipper 时间段；只在有效时段提示，点击后跳过。离线可使用已缓存的媒体时间段。" },
+    { "name": "player_intro_save_failed", "value": "片头跳过偏好保存失败，请重试" },
     { "name": "download_legacy_version", "value": "旧版下载（未记录版本）" },
     { "name": "offline_versions", "value": "已下载的版本" },
     {
