@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandChoice } from '../components/BrandChoice';
 import { BrandState } from '../components/BrandState';
@@ -18,6 +19,7 @@ import { MediaCard } from '../components/MediaCard';
 @Entry
 @Component
 struct Favorites {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -100,8 +102,8 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
-      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
       } }] }, this.viewportWidth, this.viewportHeight);
   }
@@ -133,12 +135,12 @@ struct Favorites {
         choices: [{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))],
         selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
         onSelect: (i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); } })
-      Text($r('app.string.favorite_search')).fontSize(12).fontColor($r('app.color.brand_muted'))
-      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
+      Text($r('app.string.favorite_search')).fontSize(12).fontColor(this.palette.muted)
+      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
       Flex({ wrap: FlexWrap.Wrap }) {
         Row({ space: 12 }) {
           Text($r('app.string.unwatched_only')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
-          Checkbox().select(this.unwatched).selectedColor($r('app.color.brand_action')).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
+          Checkbox().select(this.unwatched).selectedColor(this.palette.action).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
         }.width('100%').margin({ bottom: 8 })
         BrandChoice({ label: $r('app.string.favorite_order'), icon: $r('app.media.menu_settings'),
           choices: [{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }],
@@ -146,7 +148,7 @@ struct Favorites {
           onSelect: (i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); } })
       }
       Flex({ wrap: FlexWrap.Wrap }) {
-        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor($r('app.color.brand_muted')).width('100%')
+        Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor(this.palette.muted).width('100%')
         Column() { BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_reset'), onSelect: () => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
         Column() {
           if (this.selection) { BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => { this.selection = false; this.selected = []; } }) }
@@ -155,14 +157,14 @@ struct Favorites {
       }.width('100%')
       if (this.selection) {
         BrandButton({ label: $r('app.string.select_all'), icon: $r('app.media.nav_check_active'), available: !this.busy, onSelect: () => { this.selected = this.visibleItems.map((i: MediaItem) => i.Id); } })
-        Text($r('app.string.selected_count', this.selected.length)).fontSize(12).fontColor($r('app.color.brand_muted'))
+        Text($r('app.string.selected_count', this.selected.length)).fontSize(12).fontColor(this.palette.muted)
         BrandButton({ label: $r('app.string.batch_unfavorite'), icon: $r('app.media.detail_remove'), available: this.selected.length > 0 && !this.busy, destructive: true, onSelect: () => this.remove() })
       }
       if (this.undoItems.length) { BrandButton({ label: $r('app.string.undo'), icon: $r('app.media.menu_back'), available: !this.busy, onSelect: () => this.batch(this.undoItems, true) }) }
       if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(12) }
       if (!this.visibleItems.length && !this.busy) { BrandState({ label: this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites'), icon: $r('app.media.detail_heart') }) }
-      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).width('100%').alignItems(HorizontalAlign.Start)
+      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).width('100%').alignItems(HorizontalAlign.Start)
   }
   @Builder
   grid() {
@@ -172,7 +174,7 @@ struct Favorites {
       ForEach(this.visibleItems, (item: MediaItem) => {
         GridItem() {
           Column() {
-            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).selectedColor($r('app.color.brand_action')).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
+            if (this.selection) { Checkbox().select(this.selected.includes(item.Id)).selectedColor(this.palette.action).enabled(!this.busy).onChange((value: boolean) => this.select(item.Id, value)) }
             MediaCard({ item: item, onSelect: (selected: MediaItem) => this.choose(selected) })
           }.gesture(LongPressGesture().onAction(() => { if (!this.busy) { this.selection = true; this.selected = [item.Id]; } }))
         }
@@ -189,7 +191,7 @@ struct Favorites {
         Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
       this.grid()
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

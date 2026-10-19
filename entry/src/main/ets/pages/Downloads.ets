@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
@@ -15,6 +16,7 @@ import { errorText, text } from '../utils/Strings';
 @Entry
 @Component
 struct Downloads {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -55,8 +57,8 @@ struct Downloads {
     finally { this.busy = false; this.changed(); }
   }
   private remove(record: DownloadRecord): void {
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.remove'), fontColor: $r('app.color.brand_danger'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
         if (this.client !== AppService.client) { return; }
         try { await AppService.removeDownload(record); this.changed(); } catch (e) { this.message = errorText(e as Error); }
       } }] }, this.viewportWidth, this.viewportHeight);
@@ -71,8 +73,8 @@ struct Downloads {
           Column() { BrandButton({ label: $r('app.string.download_failed'), icon: $r('app.media.menu_reset'), compact: true, primary: this.category === 'failed', onSelect: () => { this.category = 'failed'; } }) }.width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '32%').margin({ bottom: 8 })
         }.width('100%')
         if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-        if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')) }
-      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).width('100%')
+        if (this.message) { Text(this.message).fontColor(this.palette.danger) }
+      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).width('100%')
   }
   build() {
     Column() {
@@ -90,18 +92,18 @@ struct Downloads {
           ListItem() {
             Column({ space: 10 }) {
               Text(record.item.Name).fontColor('#F2F3FA').fontSize(18).width('100%')
-                Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor($r('app.color.brand_muted')).fontSize(13).width('100%')
-              if (record.expectedSize === undefined) { Text($r('app.string.download_size_unknown')).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
+                Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor(this.palette.muted).fontSize(13).width('100%')
+              if (record.expectedSize === undefined) { Text($r('app.string.download_size_unknown')).fontColor(this.palette.warm).fontSize(12).width('100%') }
               Text(record.state === 'queued' ? $r('app.string.download_queued') : record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
-                $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor($r('app.color.brand_muted')).width('100%')
-              if (record.state === 'downloading') { Progress({ value: record.progress * 100, total: 100 }).color($r('app.color.brand_accent')).width('100%') }
+                $r('app.string.download_progress', Math.floor(record.progress * 100)) : record.failure || $r('app.string.download_interrupted')).fontColor(this.palette.muted).width('100%')
+              if (record.state === 'downloading') { Progress({ value: record.progress * 100, total: 100 }).color(this.palette.accent).width('100%') }
                 Column({ space: 8 }) {
                   if (record.state === 'complete') {
                     BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: !this.busy, onSelect: async () => {
                       try { await router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
                     } })
                     if (record.subtitleState !== 'ready') {
-                      Text(record.subtitleState === 'pending' ? $r('app.string.offline_subtitles_pending') : $r('app.string.offline_subtitles_incomplete')).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%')
+                      Text(record.subtitleState === 'pending' ? $r('app.string.offline_subtitles_pending') : $r('app.string.offline_subtitles_incomplete')).fontColor(this.palette.warm).fontSize(12).width('100%')
                       BrandButton({ label: $r('app.string.retry_subtitles'), icon: $r('app.media.menu_sync'), available: !this.busy, onSelect: () => this.retrySubtitles(record) })
                     }
                   } else if (!['downloading', 'queued'].includes(record.state)) {
@@ -113,7 +115,7 @@ struct Downloads {
                     BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.remove(record) })
                   }
                 }.width('100%')
-            }.padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20).width('100%')
+            }.padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20).width('100%')
           }
         }, (r: DownloadRecord) => `${r.path}:${r.state}:${r.progress}:${r.failure}:${r.subtitleState}`)
         if (!this.visibleRecords().length) { ListItem() {
@@ -121,7 +123,7 @@ struct Downloads {
         } }
       }.layoutWeight(1).width('100%')
 
-    }.padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background'))).width('100%').height('100%')
+    }.padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.background)).width('100%').height('100%')
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

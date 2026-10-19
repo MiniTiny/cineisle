@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { AppearancePreferences } from '../service/AppearancePreferences';
 import { AppearanceOptions } from '../utils/Appearance';
 import { LanguagePreferences } from '../service/LanguagePreferences';
@@ -25,11 +26,13 @@ import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
 @Entry
 @Component
 struct Settings {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
   @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') @Watch('deviceLockChanged') locked: boolean = true;
+  @StorageLink('cineIslePaletteStatus') paletteStatus: string = 'dynamic_colors_loading';
   @State appearance: AppearanceOptions = new AppearanceOptions();
   @State appearanceBusy: boolean = false;
   @State appearanceMessage: string = '';
@@ -98,10 +101,10 @@ struct Settings {
     catch (e) { if (this.appearancePermit(revision)) { this.appearanceMessage = errorText(e as Error); } }
     finally { if (revision === this.appearanceRevision) { this.appearanceBusy = false; } }
   }
-  private async saveAppearance(amoled: boolean, extra: boolean): Promise<void> {
+  private async saveAppearance(amoled: boolean, extra: boolean, dynamic?: boolean): Promise<void> {
     if (this.appearanceBusy || !this.appearancePermit(this.appearanceRevision)) { return; }
     const revision = ++this.appearanceRevision; this.appearanceBusy = true; this.appearanceMessage = '';
-    try { const result = await AppearancePreferences.save({ amoled: amoled, extraInfo: extra }, () => this.appearancePermit(revision)); if (this.appearancePermit(revision)) { this.appearance = result; this.appearanceMessage = text('appearance_saved'); } }
+    try { const result = await AppearancePreferences.save({ amoled: amoled, extraInfo: extra, dynamicColors: dynamic ?? this.appearance.dynamicColors ?? true }, () => this.appearancePermit(revision)); if (this.appearancePermit(revision)) { this.appearance = result; this.appearanceMessage = text('appearance_saved'); } }
     catch (e) { if (this.appearancePermit(revision)) { this.appearanceMessage = errorText(e as Error); } }
     finally { if (revision === this.appearanceRevision) { this.appearanceBusy = false; } }
   }
@@ -153,9 +156,9 @@ struct Settings {
     const cache = AppService.posters; const revision = this.posterRevision;
     if (!cache || this.posterBusy || !this.posterPermit(revision, cache)) { return; }
     showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined,
-      backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('poster_cache_clear'), message: text('poster_cache_clear_confirm'),
-      buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} },
-        { value: text('confirm'), fontColor: $r('app.color.brand_warm'), action: async () => {
+      backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('poster_cache_clear'), message: text('poster_cache_clear_confirm'),
+      buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} },
+        { value: text('confirm'), fontColor: this.palette.warm, action: async () => {
           if (this.posterBusy || !this.posterPermit(revision, cache)) { return; } this.posterBusy = true; this.posterMessage = '';
           try { await cache.clear(() => this.posterPermit(revision, cache)); if (this.posterPermit(revision, cache)) { this.posterMessage = text('poster_cache_cleared'); } }
           catch (e) { if (this.posterPermit(revision, cache)) { this.posterMessage = text('poster_cache_clear_failed'); } }
@@ -257,7 +260,7 @@ struct Settings {
   }
   @Builder
   private fieldCaption(label: Resource) {
-    Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+    Text(label).fontColor(this.palette.muted).fontSize(12).width('100%')
   }
 
   @Builder
@@ -265,107 +268,114 @@ struct Settings {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.appearance_group'), icon: $r('app.media.menu_settings') })
       Row({ space: 12 }) {
+        Text($r('app.string.dynamic_colors')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+        Checkbox().select(this.appearance.dynamicColors ?? true).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
+          .accessibilityText($r('app.string.dynamic_colors')).onChange((value: boolean) => this.saveAppearance(this.appearance.amoled, this.appearance.extraInfo, value))
+      }.width('100%')
+      Text($r('app.string.dynamic_colors_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+      Text(text(this.paletteStatus)).fontSize(12).fontColor(this.palette.warm).width('100%')
+      Row({ space: 12 }) {
         Text($r('app.string.appearance_amoled')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
-        Checkbox().select(this.appearance.amoled).enabled(!this.appearanceBusy).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.appearance.amoled).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.appearance_amoled')).onChange((value: boolean) => this.saveAppearance(value, this.appearance.extraInfo))
       }.width('100%')
-      Text($r('app.string.appearance_amoled_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.appearance_amoled_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.appearance_extra_info')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
-        Checkbox().select(this.appearance.extraInfo).enabled(!this.appearanceBusy).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.appearance.extraInfo).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.appearance_extra_info')).onChange((value: boolean) => this.saveAppearance(this.appearance.amoled, value))
       }.width('100%')
-      Text($r('app.string.appearance_extra_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.appearance_extra_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       if (this.appearanceBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.appearanceMessage) { Text(this.appearanceMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-    }.width('100%').padding(16).borderRadius(20).backgroundColor(this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))
+      if (this.appearanceMessage) { Text(this.appearanceMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%').padding(16).borderRadius(20).backgroundColor(this.amoled ? '#000000' : this.palette.raised)
   }
 
   @Builder
   private languageSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.ui_language_group'), icon: $r('app.media.menu_settings') })
-      Text($r('app.string.ui_language_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.ui_language_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       Select([{ value: text('ui_language_system') }, { value: '简体中文' }, { value: 'English' }])
         .selected(['system', 'zh-CN', 'en-US'].indexOf(this.languageDraft))
-        .value(this.languageDraft === 'system' ? text('ui_language_system') : this.languageDraft === 'zh-CN' ? '简体中文' : 'English').fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
+        .value(this.languageDraft === 'system' ? text('ui_language_system') : this.languageDraft === 'zh-CN' ? '简体中文' : 'English').fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : this.palette.surface))
         .height(UiLayout.buttonHeight(this.fontScale)).width('100%').accessibilityText($r('app.string.ui_language_group')).enabled(!this.languageBusy)
         .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index <= 2 && Number.isInteger(index)) { this.languageDraft = ['system', 'zh-CN', 'en-US'][index] as UiLanguage; } })
       BrandButton({ label: $r('app.string.ui_language_save'), icon: $r('app.media.menu_save'), primary: true,
         available: !this.languageBusy && this.languageDraft !== this.languageSaved, onSelect: () => this.saveLanguage() })
       if (this.languageBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.languageMessage) { Text(this.languageMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      if (this.languageMessage) { Text(this.languageMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
 
   @Builder
   private posterSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.poster_cache_group'), icon: $r('app.media.menu_offline') })
-      Text($r('app.string.poster_cache_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.poster_cache_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.poster_cache_enabled')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
-        Checkbox().select(this.posterEnabled).enabled(!this.posterBusy).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.posterEnabled).enabled(!this.posterBusy).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.poster_cache_enabled')).onChange((v: boolean) => { this.posterEnabled = v; })
       }.width('100%')
       this.fieldCaption($r('app.string.poster_cache_capacity'))
       TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
-        .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
+        .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
         .onChange((v: string) => { this.posterCapacity = v; })
-      if (this.posterKnown) { Text($r('app.string.poster_cache_usage', (this.posterBytes / 1048576).toFixed(2), this.posterFiles)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
-      else { Text($r('app.string.poster_cache_unknown')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
+      if (this.posterKnown) { Text($r('app.string.poster_cache_usage', (this.posterBytes / 1048576).toFixed(2), this.posterFiles)).fontSize(12).fontColor(this.palette.muted).width('100%') }
+      else { Text($r('app.string.poster_cache_unknown')).fontSize(12).fontColor(this.palette.muted).width('100%') }
       BrandButton({ label: $r('app.string.poster_options_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.posterBusy, onSelect: () => this.savePosters() })
       BrandButton({ label: $r('app.string.poster_cache_clear'), icon: $r('app.media.menu_reset'), available: !this.posterBusy, onSelect: () => this.clearPosters() })
       if (this.posterBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.posterMessage) { Text(this.posterMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      if (this.posterMessage) { Text(this.posterMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
   @Builder
   private networkField(label: Resource, key: number) {
     this.fieldCaption(label)
     TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(3).accessibilityText(label)
-      .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.networkBusy && !this.locked)
+      .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.networkBusy && !this.locked)
       .onChange((v: string) => { if (key === 0) { this.requestSeconds = v; } else if (key === 1) { this.connectSeconds = v; } else { this.readSeconds = v; } })
   }
   @Builder
   private apiNetworkSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.api_network_group'), icon: $r('app.media.menu_server') })
-      Text($r('app.string.api_network_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.api_network_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       this.networkField($r('app.string.network_request_seconds'), 0)
       this.networkField($r('app.string.network_connect_seconds'), 1)
       this.networkField($r('app.string.network_read_seconds'), 2)
       Row({ space: 12 }) {
         Text($r('app.string.network_auto_cache')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
-        Checkbox().select(this.autoCache).enabled(!this.networkBusy && !this.locked).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.autoCache).enabled(!this.networkBusy && !this.locked).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.network_auto_cache')).onChange((v: boolean) => { this.autoCache = v; })
       }.width('100%')
-      Text($r('app.string.network_cache_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.network_cache_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       BrandButton({ label: $r('app.string.network_options_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork() })
       BrandButton({ label: $r('app.string.network_options_reset'), icon: $r('app.media.menu_reset'), available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork(true) })
       if (this.networkBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.networkMessage) { Text(this.networkMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      if (this.networkMessage) { Text(this.networkMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
   @Builder
   private deviceSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.device_name_group'), icon: $r('app.media.menu_accounts') })
-      Text($r('app.string.device_name_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.device_name_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       if (this.deviceLoaded) { Text($r('app.string.device_name_current', this.deviceSaved || text('device_name_default'))).fontSize(14).fontColor('#F2F3FA').width('100%') }
-      else { Text($r('app.string.device_name_unknown')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+      else { Text($r('app.string.device_name_unknown')).fontSize(12).fontColor(this.palette.warm).width('100%') }
       this.fieldCaption($r('app.string.device_name_label'))
       TextInput({ text: this.deviceDraft, placeholder: $r('app.string.device_name_default') }).type(InputType.Normal).maxLength(64)
-        .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12)
+        .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12)
         .enabled(this.deviceLoaded && !this.deviceBusy && !this.offline).accessibilityText($r('app.string.device_name_label'))
         .onChange((value: string) => { if (this.deviceLoaded && !this.deviceBusy && !this.offline && !this.locked && AppLock.permit()) { this.deviceDraft = value; this.deviceMessage = ''; } })
       BrandButton({ label: $r('app.string.device_name_refresh'), icon: $r('app.media.menu_sync'), available: !this.deviceBusy && !this.offline, onSelect: () => this.loadDeviceName() })
       BrandButton({ label: $r('app.string.device_name_save'), icon: $r('app.media.menu_save'), primary: true,
         available: this.deviceLoaded && !this.deviceBusy && !this.offline && this.deviceDraft !== this.deviceSaved, onSelect: () => this.saveDeviceName() })
       if (this.deviceBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.offline) { Text($r('app.string.device_name_online_required')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-      if (this.deviceMessage) { Text(this.deviceMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      if (this.offline) { Text($r('app.string.device_name_online_required')).fontSize(12).fontColor(this.palette.warm).width('100%') }
+      if (this.deviceMessage) { Text(this.deviceMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
 
   @Builder
@@ -374,60 +384,60 @@ struct Settings {
       BrandHeading({ label: $r('app.string.player_gesture_preferences'), icon: $r('app.media.player_speed') })
       Row({ space: 12 }) {
         Text($r('app.string.player_gestures_enabled')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.gestures).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_gestures_enabled')).onChange((value: boolean) => this.savePlayer('gestures', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_seek_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.seek).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.seek).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_seek_gesture')).onChange((value: boolean) => this.savePlayer('seek', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_zoom_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.zoom).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.zoom).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_zoom_gesture')).onChange((value: boolean) => this.savePlayer('zoom', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_start_maximized')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.startMaximized).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.startMaximized).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_start_maximized')).onChange((value: boolean) => this.savePlayer('maximized', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_vertical_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.vertical ?? true).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.vertical ?? true).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_vertical_gesture')).onChange((value: boolean) => this.savePlayer('vertical', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_remember_brightness')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.rememberBrightness ?? false).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.rememberBrightness ?? false).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_remember_brightness')).onChange((value: boolean) => this.savePlayer('brightness', value))
       }.width('100%')
       this.fieldCaption($r('app.string.player_back_seconds'))
       TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
-        .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
+        .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
       this.fieldCaption($r('app.string.player_forward_seconds'))
       TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
-        .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
+        .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
       BrandButton({ label: $r('app.string.player_save_steps'), icon: $r('app.media.menu_save'), onSelect: () => this.savePlayer() })
       Row({ space: 12 }) {
         Text($r('app.string.player_auto_pip')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.autoPiP).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.autoPiP).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_auto_pip')).onChange((value: boolean) => this.savePlayer('pip', value))
       }.width('100%')
       Row({ space: 12 }) {
         Text($r('app.string.player_intro_skipper')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.introSkipper ?? true).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.introSkipper ?? true).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_intro_skipper')).onChange((value: boolean) => this.savePlayer('intro', value))
       }.width('100%')
-      Text($r('app.string.player_intro_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      Text($r('app.string.player_intro_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 8 }) {
         Text($r('app.string.player_trickplay')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.trickplay ?? true).selectedColor($r('app.color.brand_action'))
+        Checkbox().select(this.playerUi.trickplay ?? true).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_trickplay')).onChange((enabled: boolean) => this.savePlayer('trickplay', enabled))
       }.width('100%')
-      Text($r('app.string.player_trickplay_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-      Text($r('app.string.player_ui_preferences_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      Text($r('app.string.player_trickplay_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
+      Text($r('app.string.player_ui_preferences_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
 
   build() {
@@ -448,54 +458,54 @@ struct Settings {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })
                 Row({ space: 12 }) {
                   Text($r('app.string.offline_mode')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-                  Checkbox().select(this.offline).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                  Checkbox().select(this.offline).selectedColor(this.palette.action).flexShrink(0)
                       .accessibilityText($r('app.string.offline_mode')).onChange((value: boolean) => { this.offline = value; this.save(); if (value) { this.invalidateDevice(); } })
                 }.width('100%')
-              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.download_preferences'), icon: $r('app.media.detail_download') })
                 Row({ space: 12 }) {
                   Text($r('app.string.download_mobile')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-                  Checkbox().select(this.downloadMobile).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                  Checkbox().select(this.downloadMobile).selectedColor(this.palette.action).flexShrink(0)
                     .accessibilityText($r('app.string.download_mobile')).onChange((value: boolean) => this.saveNetwork(value, this.downloadRoaming))
                 }.width('100%')
                 Row({ space: 12 }) {
                   Text($r('app.string.download_roaming')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-                  Checkbox().select(this.downloadRoaming).enabled(this.downloadMobile).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                  Checkbox().select(this.downloadRoaming).enabled(this.downloadMobile).selectedColor(this.palette.action).flexShrink(0)
                     .accessibilityText($r('app.string.download_roaming')).onChange((value: boolean) => this.saveNetwork(this.downloadMobile, value))
                 }.width('100%')
-                Text($r('app.string.download_network_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+                Text($r('app.string.download_network_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
                 Row({ space: 12 }) {
                   Text($r('app.string.remember_source')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
-                  Checkbox().select(this.remember).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                  Checkbox().select(this.remember).selectedColor(this.palette.action).flexShrink(0)
                     .accessibilityText($r('app.string.remember_source')).onChange((value: boolean) => { this.remember = value; this.save(); })
                 }.width('100%')
-                Text(this.preference || $r('app.string.source_default')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+                Text(this.preference || $r('app.string.source_default')).fontColor(this.palette.muted).fontSize(12).width('100%')
                 BrandButton({ label: $r('app.string.clear_source_preference'), icon: $r('app.media.menu_reset'), onSelect: () => { this.preference = ''; this.save(); } })
-                Text($r('app.string.download_location_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+                Text($r('app.string.download_location_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
+              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.app_lock'), icon: $r('app.media.menu_lock') })
-                Text($r('app.string.lock_policy')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+                Text($r('app.string.lock_policy')).fontColor(this.palette.muted).fontSize(12).width('100%')
                 if (this.protected) {
                   this.fieldCaption($r('app.string.lock_current_pin'))
-                  TextInput({ text: this.currentPin, placeholder: $r('app.string.lock_current_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.currentPin = v; })
+                  TextInput({ text: this.currentPin, placeholder: $r('app.string.lock_current_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.currentPin = v; })
                 }
                 this.fieldCaption($r('app.string.lock_new_pin'))
-                TextInput({ text: this.nextPin, placeholder: $r('app.string.lock_new_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.nextPin = v; })
+                TextInput({ text: this.nextPin, placeholder: $r('app.string.lock_new_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.nextPin = v; })
                 this.fieldCaption($r('app.string.lock_confirm_pin'))
-                TextInput({ text: this.confirmation, placeholder: $r('app.string.lock_confirm_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.confirmation = v; })
+                TextInput({ text: this.confirmation, placeholder: $r('app.string.lock_confirm_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.confirmation = v; })
                 BrandButton({ label: $r('app.string.lock_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.busy && this.nextPin.length >= 6, onSelect: () => this.changeLock() })
                 if (this.protected) {
                   BrandButton({ label: $r('app.string.lock_now'), icon: $r('app.media.menu_lock'), onSelect: () => AppLock.lock() })
                   BrandButton({ label: $r('app.string.lock_disable'), icon: $r('app.media.menu_unlock'), available: !this.busy, onSelect: () => this.changeLock(true) })
                 }
                 if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-                if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
-              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+                if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(13).width('100%') }
+              }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
             }.width('100%').padding({ bottom: 12 })
           }.layoutWeight(1).width('100%').align(Alignment.TopStart)
-        }.padding(20).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+        }.padding(20).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

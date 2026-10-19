@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import router from '@ohos.router';
 import { AppService } from '../service/AppService';
 import { JellyfinClient } from '../service/JellyfinClient';
@@ -15,6 +16,7 @@ interface CollectionRoute { item: MediaItem }
 @Entry
 @Component
 struct Collection {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -67,7 +69,7 @@ struct Collection {
             GridItem() {
               Column({ space: 12 }) {
                 if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-                if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(14).width('100%') }
+                if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(14).width('100%') }
               }.width('100%')
             }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
           }
@@ -86,7 +88,7 @@ struct Collection {
           }
         }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(20).width('100%').layoutWeight(1)
       }
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       .onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); })
   }
 }

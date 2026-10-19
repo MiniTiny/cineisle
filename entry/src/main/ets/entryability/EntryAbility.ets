@@ -42,7 +42,7 @@ export default class EntryAbility extends UIAbility {
       await AppearancePreferences.attach(this.context, main);
     } catch (e) { console.warn('CineIsle window theme unavailable'); }
   }
-  onBackground(): void { AppLock.background(); PendingSync.background(); PlaybackWindow.current?.background(); if (AppLock.enabled) { this.main?.setWindowPrivacyMode(true).catch(() => {}); } SystemPlayback.current?.background(); }
-  onForeground(): void { LanguagePreferences.systemChanged(); AppLock.foreground(); PendingSync.foreground(); PlaybackWindow.current?.foreground(); this.main?.setWindowPrivacyMode(AppLock.enabled && AppLock.locked).catch(() => {}); SystemPlayback.current?.foreground(); }
+  onBackground(): void { AppearancePreferences.background(); AppLock.background(); PendingSync.background(); PlaybackWindow.current?.background(); if (AppLock.enabled) { this.main?.setWindowPrivacyMode(true).catch(() => {}); } SystemPlayback.current?.background(); }
+  onForeground(): void { AppearancePreferences.foreground(); LanguagePreferences.systemChanged(); AppLock.foreground(); PendingSync.foreground(); PlaybackWindow.current?.foreground(); this.main?.setWindowPrivacyMode(AppLock.enabled && AppLock.locked).catch(() => {}); SystemPlayback.current?.foreground(); }
   onDestroy(): void { AppearancePreferences.detach(this.main); PendingSync.background(); AppLock.changed = undefined; PlaybackWindow.current?.dispose(); SystemPlayback.current?.dispose(); }
 }

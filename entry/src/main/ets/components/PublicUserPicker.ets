@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { BrandButton } from './BrandButton';
 import { BrandState } from './BrandState';
 import { PublicUser } from '../service/JellyfinClient';
@@ -6,6 +7,7 @@ import { errorText } from '../utils/Strings';
 
 @Component
 export struct PublicUserPicker {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @Prop @Watch('serverChanged') server: string = '';
   @Prop available: boolean = true;
   @State users: PublicUser[] = [];
@@ -40,8 +42,8 @@ export struct PublicUserPicker {
       BrandButton({ label: $r('app.string.public_users_load'), icon: $r('app.media.nav_user_active'),
         available: this.available && !this.busy && !!this.server.trim(), onSelect: () => this.load() })
       if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-      if (this.loaded && !this.users.length) { Text($r('app.string.public_users_empty')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
+      if (this.message) { Text(this.message).fontSize(12).fontColor(this.palette.warm).width('100%') }
+      if (this.loaded && !this.users.length) { Text($r('app.string.public_users_empty')).fontSize(12).fontColor(this.palette.muted).width('100%') }
       this.userButtons()
     }.width('100%')
   }
