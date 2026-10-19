@@ -259,6 +259,7 @@ struct Player {
   }
   private async retry(): Promise<void> {
     if (!this.canRetry()) { return; }
+    this.saveOffline(); this.finished = false;
     const revision = ++this.loadRevision; this.busy = true; this.message = ''; this.reportMessage = '';
     this.clearIntro(); this.clearTrickplay(); this.cancelGesture();
     if (!this.system || this.system.isClosed) { this.connectSystem(); }
@@ -275,8 +276,12 @@ struct Player {
   }
 
   private saveOffline(completed: boolean = false): void {
-    if (!this.route.offline || !this.alive) { return; }
-    try { AppService.recordOfflinePosition(this.route.item, this.playbackPosition, completed); this.lastOfflineSave = Date.now(); }
+    if (!this.route.offline || !this.alive || this.ownerClient !== AppService.client) { return; }
+    const status = this.controller?.snapshot();
+    // Loading clocks and pending seeks are presentation, not a new durable playback position.
+    if (!status || !status.route.offline || status.route.item.Id !== this.route.item.Id ||
+      status.route.mediaSourceId !== this.route.mediaSourceId || status.route.filePath !== this.route.filePath || status.checkpoint === undefined) { return; }
+    try { AppService.recordOfflinePosition(this.route.item, status.checkpoint, completed || this.finished || status.state === 'completed'); this.lastOfflineSave = Date.now(); }
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
   onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }

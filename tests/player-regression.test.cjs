@@ -41,7 +41,7 @@ class NativePlayer {
   async selectTrack(index) { this.calls.push(['select', index]); if (this.failSelect) throw new Error('unsupported'); this.selected = this.selected.filter(i => this.tracks.find(t => t.track_index === i)?.track_type !== this.tracks.find(t => t.track_index === index)?.track_type).concat(index); }
   async play() { this.calls.push(['play']); if (this.playWait) await this.playWait; this.change('playing'); }
   async pause() { this.calls.push(['pause']); if (this.failPause) throw new Error('pause failed'); this.change('paused'); }
-  seek(ms) { this.calls.push(['seek', ms]); this.emit('timeUpdate', ms); }
+  seek(ms) { this.calls.push(['seek', ms]); this.emit('timeUpdate', ms); this.emit('seekDone', ms); }
   setSpeed(speed) { this.calls.push(['speed', speed]); }
   setVolume(value) { if (this.failVolume) throw new Error('native volume rejected'); this.calls.push(['volume', value]); this.volume = value; }
   async release() { this.calls.push(['release']); this.state = 'released'; if (this.releaseWait) await this.releaseWait; }

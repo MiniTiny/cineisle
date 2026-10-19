@@ -23,6 +23,7 @@ export interface PlayerView {
 interface PendingReport { route: PlaybackRoute; position: number; paused: boolean }
 export interface PlaybackStatus {
   route: PlaybackRoute; state: string; position: number; duration: number; speed: number; width: number; height: number;
+  checkpoint?: number;
 }
 
 // Owns the native player and its FD. Every asynchronous callback is tied to one load.
@@ -33,6 +34,8 @@ export class PlaybackController {
   private failed: boolean = false;
   private closed: boolean = true;
   private retryPosition: number = 0;
+  private checkpoint: number | undefined = undefined;
+  private seeking: boolean = false;
   private releasing: Promise<void> = Promise.resolve();
   private selection: number = 0;
   private audioSelection: number = 0;
@@ -127,10 +130,12 @@ export class PlaybackController {
 
   async open(route: PlaybackRoute, surface: string, position: number = -1, paused: boolean = false): Promise<void> {
     const closing = this.close(); const generation = this.generation;
+    this.checkpoint = undefined; this.seeking = false;
     await closing; await this.releasing;
     if (generation !== this.generation) { return; }
     this.closed = false; this.failed = false;
-    this.route = route; this.position = 0; this.paused = paused; this.started = false; this.subtitleEnded = false;
+    this.route = route; this.position = 0;
+    this.paused = paused; this.started = false; this.subtitleEnded = false;
     this.audio = []; this.subtitles = []; this.audioKey = ''; this.subtitleKey = ''; this.lastReport = 0;
     this.view.tracks([], [], '', ''); this.view.time(0, 0); this.view.state('loading');
     const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / 10000;
@@ -159,13 +164,24 @@ export class PlaybackController {
           this.paused = true; if (this.started) { this.send('Progress'); }
         } else if (state === 'completed') {
           this.subtitleEnded = true; this.nativeSubtitle = ''; this.view.subtitle('');
+          this.checkpoint = player.duration; this.seeking = false;
           this.position = player.duration; this.view.time(this.position, player.duration); this.stopReport(); this.view.complete();
         }
       });
       player.on('timeUpdate', (position: number) => {
-        if (!this.active(player, generation)) { return; }
-        this.position = position; if (this.started || position > 0) { this.retryPosition = position; } this.view.time(position, player.duration); this.renderSubtitle();
+        if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
+        this.position = position;
+        if (!this.seeking) {
+          if (this.started) { this.checkpoint = position; }
+          if (this.started || position > 0) { this.retryPosition = position; }
+        }
+        this.view.time(position, player.duration); this.renderSubtitle();
         if (this.started && !this.paused && Date.now() - this.lastReport >= 10000) { this.lastReport = Date.now(); this.send('Progress'); }
+      });
+      player.on('seekDone', (position: number) => {
+        if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
+        this.seeking = false; this.position = position; this.retryPosition = position; this.checkpoint = position;
+        this.view.time(position, player.duration); this.renderSubtitle();
       });
       player.on('subtitleUpdate', (info: media.SubtitleInfo) => {
         if (!this.active(player, generation)) { return; }
@@ -227,7 +243,7 @@ export class PlaybackController {
       this.emitTracks(); this.view.time(0, player.duration);
       await this.applyPreferences(this.preferences(), false);
       if (!this.active(player, generation)) { return; }
-      if (Number.isFinite(resume) && resume > 0 && resume < player.duration) { player.seek(resume, media.SeekMode.SEEK_CLOSEST); this.position = resume; }
+      if (Number.isFinite(resume) && resume > 0 && resume < player.duration) { this.seeking = true; player.seek(resume, media.SeekMode.SEEK_CLOSEST); this.position = resume; }
       player.setSpeed(this.speed);
       if (this.volume !== 1) { player.setVolume(this.volume); }
       if (!this.paused && !this.hidden) {
@@ -319,7 +335,7 @@ export class PlaybackController {
     if (!player || this.hidden) { return false; }
     if (player.state === 'playing') { return true; }
     if (!['prepared', 'paused', 'completed'].includes(player.state)) { return false; }
-    try { this.paused = false; this.subtitleEnded = false; await player.play(); return this.player === player && !this.paused && this.snapshot().state === 'playing'; }
+    try { if (player.state === 'completed') { this.checkpoint = undefined; this.seeking = false; } this.paused = false; this.subtitleEnded = false; await player.play(); return this.player === player && !this.paused && this.snapshot().state === 'playing'; }
     catch (e) { this.view.error(text('play_error')); return false; }
   }
 
@@ -333,7 +349,7 @@ export class PlaybackController {
 
   snapshot(): PlaybackStatus {
     return { route: this.route, state: this.closed ? 'released' : this.failed ? 'error' : this.player?.state ?? 'loading', position: this.position,
-      duration: this.player?.duration ?? 0, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0 };
+      duration: this.player?.duration ?? 0, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0, checkpoint: this.checkpoint };
   }
 
   async hide(continuePlayback: boolean = false): Promise<boolean> {
@@ -347,9 +363,10 @@ export class PlaybackController {
   show(): void { this.hidden = false; }
   seek(position: number): void {
     if (!Number.isFinite(position) || !this.player || !['prepared', 'playing', 'paused', 'completed'].includes(this.player.state)) { return; }
-    try { this.player.seek(Math.max(0, Math.min(position, this.player.duration)), media.SeekMode.SEEK_CLOSEST);
+    const priorSeeking = this.seeking;
+    try { this.seeking = true; this.player.seek(Math.max(0, Math.min(position, this.player.duration)), media.SeekMode.SEEK_CLOSEST);
       this.position = Math.max(0, Math.min(position, this.player.duration)); this.retryPosition = this.position; this.nativeSubtitle = ''; this.renderSubtitle();
-    } catch (e) { this.view.error(text('play_error')); }
+    } catch (e) { this.seeking = priorSeeking; this.view.error(text('play_error')); }
   }
   setSpeed(speed: number): void {
     this.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed) ? speed : 1;
