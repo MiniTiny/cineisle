@@ -8,6 +8,7 @@ import { Session, DownloadRecord, ItemsResult, LibraryMembership, LibrarySnapsho
 import { rankActors, safeItemId, uniqueItems } from '../utils/Protocol';
 import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
+import { PosterCache } from './PosterCache';
 import { NetworkPreferences } from './NetworkPreferences';
 import { NetworkPolicy } from '../utils/NetworkOptions';
 import { PersistentDownload } from './PersistentDownload';
@@ -30,6 +31,7 @@ import { ExperienceState, PendingEdit, PendingPosition, applyPending, connection
 
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
+  static posters: PosterCache | undefined;
   private static accountBusy: boolean = false;
   private static accountListener: (() => void) | undefined = undefined;
   private static notifyAccount(): void {
@@ -73,6 +75,8 @@ export class AppService {
   static async initialize(context: common.UIAbilityContext): Promise<void> {
     AppService.context = context; initializeStrings(context.resourceManager);
     if (AppService.initialized) { return; }
+    if (!AppService.posters) { AppService.posters = new PosterCache(context); }
+    await AppService.posters.initialize();
     try { await NetworkPreferences.load(context); } catch (e) { /* Bounded defaults remain available; settings show the error. */ }
     try { await AppService.playbackPreferences.load(context); } catch (e) { /* Settings errors do not prevent login/browsing. */ }
     await AppLock.ensureInitialized();
@@ -108,6 +112,7 @@ export class AppService {
     if (AppService.experience) { AppService.experience.changed = undefined; }
     AppService.local = data.local; AppService.snapshot = data.snapshot; AppService.downloads = data.records; AppService.experience = data.experience;
     AppService.client = client; AppService.cacheRecovered = data.local.recovered;
+    AppService.posters?.cancelAll();
     data.experience.changed = () => PendingSync.wake();
     client.onEndpointChange((address: string) => { if (AppService.client === client) { SessionStore.rememberAddress(client.session.serverId, address).catch(() => {}); } });
     AppService.notifyAccount();
@@ -116,6 +121,7 @@ export class AppService {
   private static clearClient(): void {
     if (AppService.experience) { AppService.experience.changed = undefined; }
     AppService.client = undefined; AppService.local = undefined; AppService.experience = undefined; AppService.snapshot = new LibrarySnapshot();
+    AppService.posters?.cancelAll();
     AppService.downloads = []; AppService.cacheRecovered = false; AppService.notifyAccount();
     PendingSync.wake();
   }

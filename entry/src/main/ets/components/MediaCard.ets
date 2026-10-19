@@ -1,6 +1,6 @@
 import { UiLayout } from '../utils/UiLayout';
 import { MediaItem } from '../model/Models';
-import { AppService } from '../service/AppService';
+import { CachedImage } from './CachedImage';
 import { playbackPercent, posterTarget } from '../utils/MediaPresentation';
 
 @Component
@@ -11,11 +11,6 @@ export struct MediaCard {
   onSelect: (item: MediaItem) => void = () => {};
   onPlay: ((item: MediaItem) => void) | undefined = undefined;
   onReason: ((item: MediaItem) => void) | undefined = undefined;
-
-  private imageUrl(): string {
-    const target = posterTarget(this.item, this.wide);
-    return AppService.client?.image(target.id, target.tag, target.backdrop) ?? '';
-  }
 
   private typeLabel(): Resource {
     switch (this.item.Type) {
@@ -31,9 +26,9 @@ export struct MediaCard {
   build() {
     Column({ space: 4 }) {
       Stack() {
-        Image(this.imageUrl()).alt($r('app.media.poster_placeholder'))
-          .width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3).objectFit(ImageFit.Cover)
-          .borderRadius(8).backgroundColor($r('app.color.brand_surface')).accessibilityText(this.item.Name)
+        CachedImage({ imageId: posterTarget(this.item, this.wide).id, tag: posterTarget(this.item, this.wide).tag ?? '',
+          backdrop: posterTarget(this.item, this.wide).backdrop, pixelWidth: this.wide ? 1280 : 480, label: this.item.Name })
+          .width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3)
         if (this.item.UserData?.Played) {
           Row() {
             Blank()

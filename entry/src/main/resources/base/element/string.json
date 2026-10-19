@@ -1847,6 +1847,78 @@
     {
       "name": "network_options_saved",
       "value": "网络设置已保存，新请求生效。"
+    },
+    {
+      "name": "poster_cache_group",
+      "value": "海报与头像缓存"
+    },
+    {
+      "name": "poster_cache_hint",
+      "value": "默认20 MB，全应用共用容量，最多512个图片文件，按账户隔离。仅缓存已浏览图片；未缓存的图片离线显示占位。关闭后不读写磁盘，在线仍可显示，已有内容可单独清理。系统可能回收缓存。"
+    },
+    {
+      "name": "poster_cache_enabled",
+      "value": "使用图片磁盘缓存"
+    },
+    {
+      "name": "poster_cache_capacity",
+      "value": "容量上限（1–200 MB）"
+    },
+    {
+      "name": "poster_cache_usage",
+      "value": "图片文件占用：%s MB · %d 个文件"
+    },
+    {
+      "name": "poster_cache_unknown",
+      "value": "图片缓存占用暂不可用"
+    },
+    {
+      "name": "poster_options_save",
+      "value": "保存图片缓存设置"
+    },
+    {
+      "name": "poster_cache_clear",
+      "value": "清理图片磁盘缓存"
+    },
+    {
+      "name": "poster_cache_clear_confirm",
+      "value": "清理本机所有账户的海报和头像磁盘缓存，不影响视频、资料缓存和待回传修改。当前显示的图片可能仍保留在内存，离线时无法重新下载。"
+    },
+    {
+      "name": "poster_options_invalid",
+      "value": "容量请填写1–200的整数MB。"
+    },
+    {
+      "name": "poster_options_saved",
+      "value": "图片缓存偏好已保存。"
+    },
+    {
+      "name": "poster_options_load_failed",
+      "value": "无法读取图片缓存偏好，暂时使用默认值。"
+    },
+    {
+      "name": "poster_options_save_failed",
+      "value": "图片缓存偏好未确认保存，请保留输入并重试。"
+    },
+    {
+      "name": "poster_options_restore_failed",
+      "value": "图片缓存偏好回滚失败，请重启应用后确认。"
+    },
+    {
+      "name": "poster_cache_unavailable",
+      "value": "图片缓存读写或占用统计失败，图片仍可尝试在线加载。"
+    },
+    {
+      "name": "poster_cache_trim_failed",
+      "value": "偏好已保存，但缓存裁剪未完成，请重试清理。"
+    },
+    {
+      "name": "poster_cache_cleared",
+      "value": "图片磁盘缓存已清理。"
+    },
+    {
+      "name": "poster_cache_clear_failed",
+      "value": "图片缓存清理未完成，请确认剩余占用后重试。"
     }
   ]
 }

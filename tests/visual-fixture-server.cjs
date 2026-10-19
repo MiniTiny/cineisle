@@ -9,6 +9,8 @@ const userId = id(9), sourceId = id(10);
 const stream = [{ Type: 'Video', Index: 0, Codec: 'h264', Width: 1920, Height: 1080, BitDepth: 8 },
   { Type: 'Audio', Index: 1, Codec: 'aac', Language: 'zho', DisplayTitle: '中文 · AAC · Stereo', Channels: 2 },
   { Type: 'Subtitle', Index: 2, Codec: 'srt', Language: 'eng', DisplayTitle: 'English · SRT', IsExternal: true }];
+const posterFile=process.env.CINEISLE_VISUAL_POSTER_IMAGE;
+const posterImage=posterFile?fs.readFileSync(posterFile):undefined;
 const videoFile=process.env.CINEISLE_VISUAL_VIDEO;
 const videoSize=videoFile?fs.statSync(videoFile).size:0;
 if(videoFile)stream.splice(2,0,{Type:'Audio',Index:2,Codec:'aac',Language:'eng',DisplayTitle:'English · AAC · Mono'});
@@ -104,7 +106,10 @@ const server = http.createServer((req, res) => {
       return direction * (typeof left === 'number' && typeof right === 'number' ? left-right : String(left ?? '').localeCompare(String(right ?? '')));
     });
     const start = Number(q.get('startindex') || 0), limit = Number(q.get('limit') || items.length); result = { Items: items.slice(start, start + limit), TotalRecordCount: items.length, StartIndex: start };
-  } else if (/\/Images\//.test(p)) { res.writeHead(404); res.end(); return; }
+  } else if (/\/Images\//.test(p)) {
+    if(posterImage){res.writeHead(200,{'Content-Type':'image/jpeg','Content-Length':posterImage.length});res.end(posterImage);return;}
+    res.writeHead(404);res.end();return;
+  }
   else if (/\/Subtitles\/\d+\/Stream\.srt$/.test(p) && videoFile) {
     res.writeHead(200,{'Content-Type':'text/plain'});res.end('1\n00:00:00,000 --> 00:10:00,000\n映屿 · 字幕布局验证\n');return;
   }

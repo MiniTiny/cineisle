@@ -1,5 +1,6 @@
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
+import { CachedImage } from '../components/CachedImage';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
@@ -229,8 +230,8 @@ struct Detail {
       Scroll() {
         Column({ space: 18 }) {
           Column({ space: 12 }) {
-            Image(AppService.client?.image(this.item.Id, this.item.BackdropImageTags?.[0], true) ?? '').alt($r('app.media.poster_placeholder'))
-              .width('100%').height(Math.min(260, Math.max(140, (this.viewportWidth - 32) * 9 / 16))).objectFit(ImageFit.Cover).borderRadius(16).backgroundColor($r('app.color.brand_surface'))
+                  CachedImage({ imageId: this.item.Id, tag: this.item.BackdropImageTags?.[0] ?? '', backdrop: true, pixelWidth: 1280, radius: 16 })
+                    .width('100%').height(Math.min(260, Math.max(140, (this.viewportWidth - 32) * 9 / 16)))
             Text(this.item.Name).fontSize(26).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
             if (detailMetadata(this.item, this.sourceId).original) {
               Text(detailMetadata(this.item, this.sourceId).original).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
