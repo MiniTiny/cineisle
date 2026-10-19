@@ -11,6 +11,7 @@ import { ActorProfile, ActorTag, ExperienceState, actorProfiles, applyPending, a
 import { AppService } from '../service/AppService';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 import { MediaCard } from '../components/MediaCard';
 
 interface ActorRoute { personId: string; personName: string }
@@ -38,15 +39,15 @@ struct Actor {
     const route = router.getParams() as ActorRoute; if (!route?.personId) { router.back(); return; }
     this.person = { Id: route.personId, Name: route.personName ?? '' }; this.client = AppService.client; this.refresh();
   }
-  onPageShow(): void { if (this.client && this.client !== AppService.client) { this.clear(); router.back(); return; } if (!this.busy) { this.works = applyPending(this.works.map((i: MediaItem) => AppService.snapshot.items.find((v: MediaItem) => v.Id === i.Id) ?? i), AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []); this.describe(); } }
+  onPageShow(): void { if (this.client && this.client !== AppService.client) { this.clear(); router.back(); return; } if (!this.busy) { this.works = applyPending(this.works.map((i: MediaItem) => NetworkPolicy.cacheAllowed(AppService.experience?.snapshot().offline ?? false) ? AppService.snapshot.items.find((v: MediaItem) => v.Id === i.Id) ?? i : i), AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []); this.describe(); } }
   onPageHide(): void { ++this.revision; this.busy = false; this.biographyLoading = false; }
   private clear(): void { ++this.revision; this.works = []; this.profile = undefined; this.overview = ''; this.biographyLoading = false; this.busy = false; }
   private current(revision: number): boolean { return revision === this.revision && this.client === AppService.client; }
   private describe(): void { this.followed = AppService.experience?.snapshot().follows.some((f) => f.id === this.person.Id) ?? false; this.profile = actorProfiles(this.works, AppService.experience?.snapshot().follows ?? []).find((a: ActorProfile) => a.person.Id === this.person.Id); }
   private async refresh(): Promise<void> {
     const revision = ++this.revision; const client = AppService.requireClient(); this.busy = true; this.biographyLoading = true; this.message = '';
-    this.works = applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? [])
-      .filter((i: MediaItem) => ['Movie', 'Series'].includes(i.Type) && (i.People ?? []).some((p: Person) => p.Id === this.person.Id)); this.describe();
+    this.works = NetworkPolicy.cacheAllowed(AppService.experience?.snapshot().offline ?? false) ? applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? [])
+      .filter((i: MediaItem) => ['Movie', 'Series'].includes(i.Type) && (i.People ?? []).some((p: Person) => p.Id === this.person.Id)) : []; this.describe();
     if (AppService.experience?.snapshot().offline) { this.busy = false; this.biographyLoading = false; return; }
     const biography = async (): Promise<void> => {
       try { const item = await client.detail(this.person.Id); if (this.current(revision)) { this.person = { Id: item.Id, Name: item.Name }; this.overview = item.Overview ?? ''; } }

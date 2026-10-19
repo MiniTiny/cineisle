@@ -12,6 +12,8 @@ import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
 import { deviceNameValue } from '../utils/DeviceOptions';
 import { PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
+import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
+import { NetworkPreferences } from '../service/NetworkPreferences';
 @Entry
 @Component
 struct Settings {
@@ -38,6 +40,13 @@ struct Settings {
   @State deviceLoaded: boolean = false;
   @State deviceBusy: boolean = false;
   @State deviceMessage: string = '';
+  @State requestSeconds: string = '30';
+  @State connectSeconds: string = '6';
+  @State readSeconds: string = '10';
+  @State autoCache: boolean = true;
+  @State networkBusy: boolean = false;
+  @State networkMessage: string = '';
+  private networkRevision: number = 0;
   private deviceRevision: number = 0;
   private deviceVisible: boolean = false;
   private owner: string = '';
@@ -46,14 +55,34 @@ struct Settings {
   onPageShow(): void {
     if (this.ownerClient !== AppService.client) { this.onPageHide(); router.back(); return; }
     this.deviceVisible = true;
+    this.loadNetworkDraft();
     this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
     this.loadDeviceName();
   }
-  onPageHide(): void { this.deviceVisible = false; this.invalidateDevice(); }
+  onPageHide(): void { this.deviceVisible = false; ++this.networkRevision; this.invalidateDevice(); }
   aboutToDisappear(): void { this.onPageHide(); }
   private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
-  private deviceLockChanged(): void { if (this.locked) { this.invalidateDevice(); } }
+  private deviceLockChanged(): void { if (this.locked) { ++this.networkRevision; this.invalidateDevice(); } }
+  private loadNetworkDraft(): void {
+    const value = NetworkPolicy.snapshot(); this.requestSeconds = (value.requestMs / 1000).toString();
+    this.connectSeconds = (value.connectMs / 1000).toString(); this.readSeconds = (value.readMs / 1000).toString(); this.autoCache = value.autoCache;
+    this.networkMessage = NetworkPreferences.issue ? text(NetworkPreferences.issue) : '';
+  }
+  private async saveApiNetwork(reset: boolean = false): Promise<void> {
+    if (this.networkBusy || !this.deviceVisible || this.locked || !AppLock.permit() || this.ownerClient !== AppService.client) { return; }
+    const next: NetworkOptions = reset ? new NetworkOptions() : { requestMs: Number(this.requestSeconds) * 1000,
+      connectMs: Number(this.connectSeconds) * 1000, readMs: Number(this.readSeconds) * 1000, autoCache: this.autoCache };
+    if ((!reset && ![this.requestSeconds, this.connectSeconds, this.readSeconds].every((v: string) => /^[0-9]{1,3}$/.test(v))) || !validNetworkOptions(next)) {
+      this.networkMessage = text('network_options_invalid'); return;
+    }
+    const revision = this.networkRevision; const client = this.ownerClient;
+    const allowed = (): boolean => this.deviceVisible && !this.locked && AppLock.permit() && revision === this.networkRevision && client === this.ownerClient && client === AppService.client;
+    this.networkBusy = true; this.networkMessage = '';
+    try { await NetworkPreferences.save(next, allowed); if (allowed()) { this.loadNetworkDraft(); this.networkMessage = text('network_options_saved'); } }
+    catch (e) { if (allowed()) { this.networkMessage = errorText(e as Error); } }
+    finally { this.networkBusy = false; }
+  }
   private deviceCurrent(client: JellyfinClient, revision: number, id: string): boolean {
     return this.deviceVisible && revision === this.deviceRevision && client === this.ownerClient && client === AppService.client && client.session.deviceId === id;
   }
@@ -131,6 +160,33 @@ struct Settings {
     Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
   }
 
+  @Builder
+  private networkField(label: Resource, key: number) {
+    this.fieldCaption(label)
+    TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(3).accessibilityText(label)
+      .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.networkBusy && !this.locked)
+      .onChange((v: string) => { if (key === 0) { this.requestSeconds = v; } else if (key === 1) { this.connectSeconds = v; } else { this.readSeconds = v; } })
+  }
+  @Builder
+  private apiNetworkSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.api_network_group'), icon: $r('app.media.menu_server') })
+      Text($r('app.string.api_network_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      this.networkField($r('app.string.network_request_seconds'), 0)
+      this.networkField($r('app.string.network_connect_seconds'), 1)
+      this.networkField($r('app.string.network_read_seconds'), 2)
+      Row({ space: 12 }) {
+        Text($r('app.string.network_auto_cache')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+        Checkbox().select(this.autoCache).enabled(!this.networkBusy && !this.locked).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.network_auto_cache')).onChange((v: boolean) => { this.autoCache = v; })
+      }.width('100%')
+      Text($r('app.string.network_cache_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      BrandButton({ label: $r('app.string.network_options_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork() })
+      BrandButton({ label: $r('app.string.network_options_reset'), icon: $r('app.media.menu_reset'), available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork(true) })
+      if (this.networkBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.networkMessage) { Text(this.networkMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+  }
   @Builder
   private deviceSettings() {
     Column({ space: 12 }) {
@@ -211,6 +267,7 @@ struct Settings {
           Scroll() {
             Column({ space: 18 }) {
                 this.deviceSettings()
+              this.apiNetworkSettings()
               this.playerSettings()
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })

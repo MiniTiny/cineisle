@@ -4,6 +4,7 @@ import { JellyfinClient } from './JellyfinClient';
 import { errorText } from '../utils/Strings';
 import { applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
 import { orderedChildren } from '../utils/DetailPresentation';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 
 export interface DetailContent { item: MediaItem; children: MediaItem[]; nextUp?: MediaItem; offline: boolean; warning: string }
 function cachedChildren(item: MediaItem): MediaItem[] {
@@ -18,7 +19,7 @@ export async function loadDetail(client: JellyfinClient, id: string): Promise<De
     if (item.Id !== id) { throw new Error('api_response_invalid'); }
   } catch (e) {
     if (client !== AppService.client) { throw new Error('login_required'); }
-    if (!connectionFailure(e as Error)) { throw e as Error; }
+    if (!NetworkPolicy.cacheAllowed(AppService.experience?.snapshot().offline ?? false) || !connectionFailure(e as Error)) { throw e as Error; }
     const cached = applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []).find((value: MediaItem) => value.Id === id);
     if (!cached) { throw e as Error; }
     return { item: cached, children: cachedChildren(cached), offline: true, warning: errorText(e as Error) };
@@ -34,7 +35,7 @@ export async function loadDetail(client: JellyfinClient, id: string): Promise<De
         value.Type !== 'Episode' || value.SeasonId !== item.Id || value.SeriesId !== item.SeriesId)) { throw new Error('episode_queue_failed'); }
       result.children = orderedChildren(children);
     }
-    catch (e) { if (authorizationFailure(e as Error)) { throw e as Error; } result.warning = errorText(e as Error); if (client === AppService.client) { result.children = cachedChildren(item); } }
+    catch (e) { if (authorizationFailure(e as Error)) { throw e as Error; } result.warning = errorText(e as Error); if (client === AppService.client && NetworkPolicy.cacheAllowed()) { result.children = cachedChildren(item); } }
   }
   if (client !== AppService.client) { throw new Error('login_required'); }
   if (item.Type === 'Series') {

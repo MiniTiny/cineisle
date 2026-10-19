@@ -1,5 +1,6 @@
 import { HomeSection, MediaItem } from '../model/Models';
 import { JellyfinClient } from './JellyfinClient';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 import { authorizationFailure } from '../utils/Experience';
 
 export interface HomeFailure { id: string; name: string; message: string }
@@ -28,6 +29,7 @@ export class ProgressiveHome {
       failures: Array.from(this.errors.values()), busy: this.pending.size > 0, cached: this.cached });
   }
   start(preview: HomeSection[]): Promise<void> {
+    if (!NetworkPolicy.cacheAllowed()) { preview = []; }
     const finished = new Promise<void>((resolve) => { this.complete = resolve; });
     this.requests = [
       { id: 'resume', kind: 'resume', name: '', libraryId: '', fetch: () => this.client.resume() },

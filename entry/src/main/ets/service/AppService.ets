@@ -8,6 +8,8 @@ import { Session, DownloadRecord, ItemsResult, LibraryMembership, LibrarySnapsho
 import { rankActors, safeItemId, uniqueItems } from '../utils/Protocol';
 import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
+import { NetworkPreferences } from './NetworkPreferences';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 import { PersistentDownload } from './PersistentDownload';
 import { OfflineSubtitles } from './OfflineSubtitles';
 import { DownloadSpace } from './DownloadSpace';
@@ -71,6 +73,7 @@ export class AppService {
   static async initialize(context: common.UIAbilityContext): Promise<void> {
     AppService.context = context; initializeStrings(context.resourceManager);
     if (AppService.initialized) { return; }
+    try { await NetworkPreferences.load(context); } catch (e) { /* Bounded defaults remain available; settings show the error. */ }
     try { await AppService.playbackPreferences.load(context); } catch (e) { /* Settings errors do not prevent login/browsing. */ }
     await AppLock.ensureInitialized();
     PendingSync.configure(context, (): SyncOwner | undefined => AppService.client && AppService.local && AppService.experience ?
@@ -138,7 +141,7 @@ export class AppService {
   static async switchAccount(key: string): Promise<void> {
     await AppService.accountOperation(async () => {
       const session = await SessionStore.get(key); const client = new JellyfinClient(session); const data = AppService.prepareClient(client);
-      if (!data.experience.snapshot().offline) { try { await client.validateAccount(); } catch (e) { if (!connectionFailure(e as Error)) { throw e as Error; } } }
+      if (!data.experience.snapshot().offline) { try { await client.validateAccount(); } catch (e) { if (!NetworkPolicy.cacheAllowed() || !connectionFailure(e as Error)) { throw e as Error; } } }
       await AppService.closePlayback?.(); await SessionStore.save(client.session); AppService.useClient(client, data);
     });
     await AppService.restoreDownloads(); await AppService.pumpDownloads();
@@ -184,7 +187,7 @@ export class AppService {
       const latest = store?.snapshot();
       return latest?.autoNextMode === 'on' ? true : latest?.autoNextMode === 'off' ? false : enabled;
     } catch (e) {
-      if (client !== AppService.client || store !== AppService.experience || !connectionFailure(e as Error)) { throw e as Error; }
+      if (client !== AppService.client || store !== AppService.experience || !NetworkPolicy.cacheAllowed() || !connectionFailure(e as Error)) { throw e as Error; }
       return store?.snapshot().serverAutoNext ?? true;
     }
   }

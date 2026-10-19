@@ -9,6 +9,7 @@ import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { MediaItem } from '../model/Models';
 import { AppService } from '../service/AppService';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { ExperienceState, FavoriteFilter, filterFavorites, favoriteGenres, applyPending, connectionFailure } from '../utils/Experience';
 import { errorText, text } from '../utils/Strings';
@@ -64,7 +65,7 @@ struct Favorites {
   }
   private async refresh(): Promise<void> {
     const revision = ++this.revision; this.busy = true; this.message = ''; this.preview = true;
-    this.all = AppService.snapshot.items.filter((i: MediaItem) => i.UserData?.IsFavorite === true); this.filter(false);
+    this.all = NetworkPolicy.cacheAllowed(AppService.experience?.snapshot().offline ?? false) ? AppService.snapshot.items.filter((i: MediaItem) => i.UserData?.IsFavorite === true) : []; this.filter(false);
     if (AppService.experience?.snapshot().offline) { this.preview = false; this.busy = false; return; }
     try {
       const online = await AppService.allItems([{ key: 'IncludeItemTypes', value: 'Movie,Series,Episode' }, { key: 'Filters', value: 'IsFavorite' },

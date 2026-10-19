@@ -244,7 +244,7 @@ test('native transport retains timeouts and releases each connection on all fail
   for (const [fixture, error] of [[response('', 401), /login_expired/], [response('', 403), /permission_denied/], [response('', 500), /http_failed/],
     [response('<html>proxy</html>'), /html_response/], [response('{broken'), /api_response_invalid/], [new Error('timeout'), /timeout/]]) {
     const before = destroyed; queue.push(fixture); await assert.rejects(client.libraries(), error); assert.equal(destroyed, before + 1);
-    assert.equal(last().options.connectTimeout, 15000); assert.equal(last().options.readTimeout, 30000);
+    assert.equal(last().options.connectTimeout, 6000); assert.equal(last().options.readTimeout, 10000);
   }
 });
 test('native transport rejects unexpected binary data on a JSON operation', async () => {
