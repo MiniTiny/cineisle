@@ -99,6 +99,7 @@ export class AppService {
 
   private static prepareClient(client: JellyfinClient): PreparedAccount {
     const local = new LocalStore(AppService.context, client.session);
+    const experience = new ExperienceStore(local); experience.settleLocalEdits();
     const snapshot = local.snapshot();
     const records = local.downloads();
     // Basic download migration does not claim process-death resume. Retain completed media only as playable.
@@ -107,7 +108,6 @@ export class AppService {
       if (record.state === 'complete' && !fs.accessSync(record.path)) { record.state = 'missing'; }
     });
     local.saveDownloads(records);
-    const experience = new ExperienceStore(local);
     const edits = experience.snapshot().pending;
     const extra = [...edits.map((p: PendingEdit) => p.item), ...experience.snapshot().positions.map((p: PendingPosition) => p.item)].filter((i: MediaItem | undefined) => !!i && validMediaItem(i) && !snapshot.items.some((v: MediaItem) => v.Id === i.Id)) as MediaItem[];
     snapshot.items = applyPending(uniqueWorks([...snapshot.items, ...extra]), edits);
@@ -622,43 +622,49 @@ export class AppService {
     offline = offline || (store?.snapshot().offline ?? false); if (offline && !store) { throw new Error('cache_write_failed'); }
     const field = favorite ? 'favorite' : 'played'; const key = AppService.mutationKey(client, item.Id, field);
     const revision = AppService.editRevision = Math.max(Date.now(), AppService.editRevision + 1); AppService.latestEdits.set(key, revision);
-    const prior = store?.snapshot().pending.find((p: PendingEdit) => p.id === item.Id && p.field === field);
-    const copy = applyPending([JSON.parse(JSON.stringify(item)) as MediaItem], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0]; copy.UserData = copy.UserData ?? {};
-    if (favorite) { copy.UserData.IsFavorite = value; } else { copy.UserData.Played = value; }
-    // Intent is durable before an HTTP write. Unknown outcomes remain replayable after process death.
-    store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); next.pending.push({ id: item.Id, field: field, value: value, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
     let queued = offline;
-    if (!offline) {
-      try {
-        await AppService.mutation(key, async () => {
+    const operation = async (): Promise<void> => {
+      if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+      if (AppService.latestEdits.get(key) !== revision) { queued = true; return; }
+      store?.settleLocalEdits();
+      const state = store?.snapshot();
+      const prior = state?.pending.find((p: PendingEdit) => p.id === item.Id && p.field === field);
+      const latestItem = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item;
+      const copy = applyPending([JSON.parse(JSON.stringify(latestItem)) as MediaItem], state?.pending ?? [], state?.positions ?? [])[0];
+      copy.UserData = copy.UserData ?? {};
+      const previous = favorite ? copy.UserData.IsFavorite ?? false : copy.UserData.Played ?? false;
+      if (favorite) { copy.UserData.IsFavorite = value; } else { copy.UserData.Played = value; }
+      // The entire online operation serializes by field; later online intents capture the preceding resolved state.
+      store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); next.pending.push({ id: item.Id, field: field, value: value, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
+      if (!offline) {
+        try {
           await local!.transfer(async () => {
             if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+            if (store?.snapshot().offline) { queued = true; return; }
             if (!store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) { return; }
             if (favorite) { await client.favorite(item.Id, value); } else { await client.played(item.Id, value); }
           });
-        });
-      } catch (e) {
-        if (!connectionFailure(e as Error)) {
-          if (store === AppService.experience) { store?.update((next: ExperienceState) => {
-            if (!next.pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) { return; }
-            next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); if (prior) { next.pending.push(prior); }
-          }); }
-          throw e as Error;
+        } catch (e) {
+          if (!connectionFailure(e as Error)) {
+            if (store === AppService.experience) { store?.reject(item.Id, field, revision, previous, prior); }
+            throw e as Error;
+          }
+          queued = true;
         }
-        queued = true;
       }
-    }
-    if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
-    if (!queued) {
-      store?.acknowledge(item.Id, (next: ExperienceState): boolean => next.pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision), field);
-      return AppService.latestEdits.get(key) !== revision;
-    }
-    if (AppService.latestEdits.get(key) !== revision) { return true; }
-    const latest = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? copy;
-    const merged = applyPending([latest], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0];
-    AppService.snapshot.items = [merged, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== merged.Id)];
-    AppService.snapshot.actors = rankActors(AppService.snapshot.items); local?.saveSnapshot(AppService.snapshot);
-    if (local) { const sections = local.home(); sections.forEach((section) => { section.items = section.items.map((i: MediaItem) => i.Id === item.Id ? merged : i); }); local.saveHome(sections); }
+      if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+      if (!queued) {
+        store?.acknowledge(item.Id, (next: ExperienceState): boolean => next.pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision), field);
+        queued = AppService.latestEdits.get(key) !== revision; return;
+      }
+      if (AppService.latestEdits.get(key) !== revision) { return; }
+      const latest = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? copy;
+      const merged = applyPending([latest], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0];
+      AppService.snapshot.items = [merged, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== merged.Id)];
+      AppService.snapshot.actors = rankActors(AppService.snapshot.items); local?.saveSnapshot(AppService.snapshot);
+      if (local) { const sections = local.home(); sections.forEach((section) => { section.items = section.items.map((i: MediaItem) => i.Id === item.Id ? merged : i); }); local.saveHome(sections); }
+    };
+    if (offline) { await operation(); } else { await AppService.mutation(key, operation); }
     return queued;
   }
 
