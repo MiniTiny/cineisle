@@ -1,3 +1,6 @@
+import { LanguagePreferences } from '../service/LanguagePreferences';
+import { UiLanguage } from '../utils/UiLanguage';
+import common from '@ohos.app.ability.common';
 import { BrandState } from '../components/BrandState';
 import { showBrandDialog } from '../components/CompactDialog';
 import { UiLayout } from '../utils/UiLayout';
@@ -24,6 +27,11 @@ struct Settings {
   @State viewportWidth: number = 360;
   @State viewportHeight: number = 800;
   @StorageLink('cineIsleLocked') @Watch('deviceLockChanged') locked: boolean = true;
+  @State languageDraft: UiLanguage = 'system';
+  @State languageSaved: UiLanguage = 'system';
+  @State languageBusy: boolean = false;
+  @State languageMessage: string = '';
+  private languageRevision: number = 0;
   @State offline: boolean = false;
   @State remember: boolean = true;
   @State preference: string = '';
@@ -66,16 +74,35 @@ struct Settings {
   onPageShow(): void {
     if (this.ownerClient !== AppService.client) { this.onPageHide(); router.back(); return; }
     this.deviceVisible = true;
+    this.loadLanguage();
     this.loadNetworkDraft();
     this.loadPosters();
     this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
     this.loadDeviceName();
   }
-  onPageHide(): void { this.deviceVisible = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
+  onPageHide(): void { this.deviceVisible = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
   aboutToDisappear(): void { this.onPageHide(); }
+  private async loadLanguage(): Promise<void> {
+    const revision = ++this.languageRevision; this.languageBusy = true;
+    const allowed = (): boolean => revision === this.languageRevision && this.deviceVisible && !this.locked && this.ownerClient === AppService.client;
+    try {
+      await LanguagePreferences.attach(getContext(this) as common.UIAbilityContext);
+      if (allowed()) { this.languageDraft = LanguagePreferences.snapshot(); this.languageSaved = this.languageDraft; this.languageMessage = ''; }
+    } catch (e) { if (allowed()) { this.languageMessage = errorText(e as Error); } }
+    finally { if (revision === this.languageRevision) { this.languageBusy = false; } }
+  }
+  private async saveLanguage(): Promise<void> {
+    if (this.languageBusy || !this.deviceVisible || this.locked || !AppLock.permit() || this.ownerClient !== AppService.client) { return; }
+    const revision = ++this.languageRevision; const choice = this.languageDraft; this.languageBusy = true; this.languageMessage = '';
+    const allowed = (): boolean => revision === this.languageRevision && this.deviceVisible && !this.locked && AppLock.permit() && this.ownerClient === AppService.client;
+    try { await LanguagePreferences.save(choice, allowed); if (allowed()) { this.languageSaved = choice; this.languageMessage = text('ui_language_saved'); } }
+    catch (e) { if (allowed()) { this.languageMessage = errorText(e as Error); } }
+    finally { if (revision === this.languageRevision) { this.languageBusy = false; } }
+  }
+
   private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
-  private deviceLockChanged(): void { if (this.locked) { ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
+  private deviceLockChanged(): void { if (this.locked) { ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
   private invalidatePosters(): void { ++this.posterRevision; this.posterBusy = false; this.posterKnown = false; }
   private posterPermit(revision: number, cache: PosterCache): boolean {
     return this.deviceVisible && revision === this.posterRevision && !this.locked && AppLock.permit() && this.ownerClient === AppService.client && cache === AppService.posters;
@@ -208,6 +235,22 @@ struct Settings {
   @Builder
   private fieldCaption(label: Resource) {
     Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+  }
+
+  @Builder
+  private languageSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.ui_language_group'), icon: $r('app.media.menu_settings') })
+      Text($r('app.string.ui_language_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Select([{ value: text('ui_language_system') }, { value: '简体中文' }, { value: 'English' }])
+        .selected(['system', 'zh-CN', 'en-US'].indexOf(this.languageDraft)).fontColor('#F2F3FA').backgroundColor($r('app.color.brand_surface'))
+        .height(UiLayout.buttonHeight(this.fontScale)).width('100%').accessibilityText($r('app.string.ui_language_group')).enabled(!this.languageBusy)
+        .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index <= 2 && Number.isInteger(index)) { this.languageDraft = ['system', 'zh-CN', 'en-US'][index] as UiLanguage; } })
+      BrandButton({ label: $r('app.string.ui_language_save'), icon: $r('app.media.menu_save'), primary: true,
+        available: !this.languageBusy && this.languageDraft !== this.languageSaved, onSelect: () => this.saveLanguage() })
+      if (this.languageBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.languageMessage) { Text(this.languageMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
   }
 
   @Builder
@@ -350,7 +393,8 @@ struct Settings {
           BrandHeader({ label: $r('app.string.settings'), onBack: () => router.back() })
           Scroll() {
             Column({ space: 18 }) {
-                this.deviceSettings()
+              this.languageSettings()
+              this.deviceSettings()
               this.apiNetworkSettings()
               this.posterSettings()
               this.playerSettings()
