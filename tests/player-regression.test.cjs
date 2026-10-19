@@ -153,9 +153,9 @@ for (const bad of [[], [episode('e1', 1, 1)], [episode('other', 1, 2, { SeriesId
   await assert.rejects(() => AppService.nextPlayback(route()), /episode_queue_failed/); assert.equal(requests.length, 2);
 });
 test('offline continuation requires the immediate next download; never skips it or requests network', async () => {
-  AppService.client = undefined; AppService.snapshot.items = [episode('e1', 1, 1), episode('e2', 1, 2), episode('e3', 1, 3)];
+  AppService.client.playbackInfo = async () => { throw new Error('unexpected HTTP'); }; AppService.snapshot.items = [episode('e1', 1, 1), episode('e2', 1, 2), episode('e3', 1, 3)];
   const r = Object.assign(route(), { offline: true }); await assert.rejects(() => AppService.nextPlayback(r), /next_not_downloaded/); assert.equal(requests.length, 0);
-  const p = path.join(directory, 'next.mp4'); fs.writeFileSync(p, 'fake'); AppService.downloads = [{ id: 'e2', state: 'complete', path: p }];
+  const p = path.join(directory, 'next.mp4'); fs.writeFileSync(p, 'fake'); AppService.downloads = [{ id: 'e2', item: episode('e2', 1, 2), state: 'complete', path: p }];
   const next = await AppService.nextPlayback(r); assert.equal(next.item.Id, 'e2'); assert.equal(next.offline, true); assert.equal(requests.length, 0);
 });
 test('changed account rejects playback information from a prior client', async () => {

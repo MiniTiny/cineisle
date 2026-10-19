@@ -1,5 +1,7 @@
 {
   "string": [
+    { "name": "download_legacy_version", "value": "旧版下载（未记录版本）" },
+    { "name": "offline_versions", "value": "已下载的版本" },
     {
       "name": "module_desc",
       "value": "映屿 · CineIsle 鸿蒙私人影视库"

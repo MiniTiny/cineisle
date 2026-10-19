@@ -1,3 +1,4 @@
+import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
 import { CachedImage } from '../components/CachedImage';
@@ -38,6 +39,7 @@ struct Detail {
   @State selectedEpisodes: string[] = [];
   @State selectingEpisodes: boolean = false;
   @State sourceId: string = '';
+  @State offlinePath: string = '';
   @State downloadState: string = '';
   private visible: boolean = true;
   private generation: number = 0;
@@ -61,7 +63,7 @@ struct Detail {
   }
   private clearPage(): void {
     this.generation++; this.loaded = false; this.busy = false;
-    this.item = { Id: '', Name: '', Type: '' }; this.children = []; this.nextUp = undefined; this.downloadState = ''; this.sourceId = '';
+    this.item = { Id: '', Name: '', Type: '' }; this.children = []; this.nextUp = undefined; this.downloadState = ''; this.sourceId = ''; this.offlinePath = '';
   }
   private current(token: number, client: JellyfinClient): boolean {
     return this.visible && token === this.generation && client === this.pageClient && client === AppService.client;
@@ -82,7 +84,20 @@ struct Detail {
     } catch (e) { if (this.visible && token === this.generation && this.pageClient === AppService.client) { this.message = errorText(e as Error); } }
     finally { if (this.visible && token === this.generation) { this.busy = false; } }
   }
-  private record(): DownloadRecord | undefined { return AppService.downloads.find((record: DownloadRecord) => record.id === this.item.Id); }
+  private localRecords(): DownloadRecord[] { return AppService.downloads.filter((record: DownloadRecord) => record.id === this.item.Id && record.state === 'complete'); }
+  private version(record: DownloadRecord): string { return downloadVersion(record) || text('download_legacy_version'); }
+  private metadataItem(): MediaItem {
+    const record = this.record();
+    if (!this.usingCache || !record?.item.MediaSources) { return this.item; }
+    const item = JSON.parse(JSON.stringify(this.item)) as MediaItem; item.MediaSources = record.item.MediaSources; return item;
+  }
+  private record(): DownloadRecord | undefined {
+    const records = AppService.downloads.filter((record: DownloadRecord) => record.id === this.item.Id);
+    if (this.usingCache) { return records.find((record: DownloadRecord) => record.path === this.offlinePath) ?? records.find((record: DownloadRecord) => record.state === 'complete') ?? records[0]; }
+    const selected = this.sourceId || this.item.MediaSources?.[0]?.Id || '';
+    return records.find((record: DownloadRecord) => record.mediaSourceId === selected) ?? (!this.sourceId ?
+      records.find((record: DownloadRecord) => !record.mediaSourceId) ?? (!this.item.MediaSources?.length ? records[0] : undefined) : undefined);
+  }
   private updateDownload(): void {
     if (this.pageClient !== AppService.client) { this.downloadState = ''; return; }
     const record = this.record();
@@ -102,7 +117,7 @@ struct Detail {
     if (!this.canPlay()) { return; }
     const client = AppService.requireClient(); const token = this.generation; this.busy = true; this.message = '';
     try {
-      const route = await AppService.detailPlayback(this.item, this.usingCache ? '' : this.sourceId, this.usingCache, restart);
+      const route = await AppService.detailPlayback(this.item, this.usingCache ? '' : this.sourceId, this.usingCache, restart, this.usingCache ? this.record()?.path ?? '' : '');
       if (this.current(token, client)) { await router.pushUrl({ url: 'pages/Player', params: route }); }
     } catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
     finally { if (this.current(token, client)) { this.busy = false; } }
@@ -278,12 +293,23 @@ struct Detail {
                 ForEach(this.item.MediaSources ?? [], (source: MediaSource, index: number) => {
                   BrandButton({ label: source.Name || $r('app.string.source_number', index + 1), icon: $r('app.media.nav_library_active'),
                     primary: (this.sourceId || this.item.MediaSources?.[0]?.Id) === source.Id, available: !this.busy && !this.deleted,
-                    onSelect: () => { this.sourceId = source.Id; } }).width(this.actionWidth()).margin({ bottom: 8 })
+                    onSelect: () => { this.sourceId = source.Id; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
                 }, (source: MediaSource) => `${source.Id}:${source.Name}`)
               }.width('100%')
             }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
           }
-          DetailMetadataPanel({ item: this.item, sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId, stacked: this.viewportWidth < 400 || this.fontScale > 1.2,
+          if (this.usingCache && this.localRecords().length && (this.item.Type === 'Movie' || this.item.Type === 'Episode')) {
+            Column({ space: 12 }) {
+              BrandHeading({ label: $r('app.string.offline_versions'), icon: $r('app.media.menu_offline') })
+              Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+                ForEach(this.localRecords(), (record: DownloadRecord) => {
+                  BrandButton({ label: this.version(record), icon: $r('app.media.menu_offline'), primary: this.record()?.path === record.path,
+                    available: !this.busy && !this.deleted, onSelect: () => { this.offlinePath = record.path; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
+                }, (record: DownloadRecord) => record.path)
+              }.width('100%')
+            }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+          }
+          DetailMetadataPanel({ item: this.metadataItem(), sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId, stacked: this.viewportWidth < 400 || this.fontScale > 1.2,
             onPerson: (person: Person) => this.openPerson(person) })
           if (this.nextUp) {
             Column({ space: 12 }) {

@@ -4,7 +4,7 @@ import { downloadNetwork } from '../utils/Downloads';
 import { SubtitleTransfer } from './SubtitleTransfer';
 import { DownloadRecord, DownloadSubtitle, MediaSource } from '../model/Models';
 import { parseSubtitles, SubtitleCue, textSubtitle } from '../utils/Playback';
-import { safeItemId } from '../utils/Protocol';
+import { downloadStem } from '../utils/DownloadIdentity';
 import { JellyfinClient } from './JellyfinClient';
 
 // Only SRT text and safe metadata are persisted. Authenticated delivery URLs never enter JSON.
@@ -15,7 +15,7 @@ export class OfflineSubtitles {
       if (stream.IsExternal !== true || !textSubtitle(stream) || seen.has(stream.Index)) { return false; }
       seen.add(stream.Index); return true;
     }).map((stream): DownloadSubtitle => ({ index: stream.Index, title: (stream.DisplayTitle || stream.Language || stream.Codec || '').slice(0, 256),
-      language: (stream.Language ?? '').slice(0, 63), path: `${directory}/${safeItemId(record.id)}.subtitle-${stream.Index}.srt`, state: 'pending' }));
+      language: (stream.Language ?? '').slice(0, 63), path: `${directory}/${downloadStem(record)}.subtitle-${stream.Index}.srt`, state: 'pending' }));
   }
 
   static read(subtitle: DownloadSubtitle): SubtitleCue[] {
