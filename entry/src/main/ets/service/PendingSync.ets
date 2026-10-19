@@ -112,7 +112,7 @@ export class PendingSync {
       } catch (e) {
         if (!await allowed()) { continue; }
         if (PendingSync.stamp(store.snapshot()) !== stamp) { retryAt = Math.min(retryAt, Date.now() + 1000); continue; }
-        const transient = connectionFailure(e as Error);
+        const transient = connectionFailure(e as Error) || (e as Error).message === 'sync_cache_write_failed';
         const result = store.update((next: ExperienceState) => {
           next.syncAttempts = Math.min(5, (next.syncAttempts ?? 0) + 1);
           next.syncBlocked = !transient;
@@ -155,11 +155,7 @@ export class PendingSync {
         if (!await allowed()) { return; }
       }
       // Keep the whole item pending on partial failure or a concurrent edit, as Android's snapshot acknowledgement does.
-      store.update((next: ExperienceState) => {
-        if (!PendingSync.sameIntent(next, intent)) { return; }
-        next.positions = next.positions.filter((p: PendingPosition) => p.id !== id);
-        next.pending = next.pending.filter((p: PendingEdit) => p.id !== id);
-      });
+      store.acknowledge(id, (next: ExperienceState): boolean => PendingSync.sameIntent(next, intent));
     }
   }
   private static itemIntent(state: ExperienceState, id: string): ItemSyncIntent {

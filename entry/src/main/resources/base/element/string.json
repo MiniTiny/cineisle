@@ -1977,6 +1977,10 @@
     {"name": "dynamic_colors_active", "value": "已应用当前系统壁纸配色"},
     {"name": "dynamic_colors_off", "value": "使用原映屿配色"},
     {"name": "dynamic_colors_fallback", "value": "暂未获得可用壁纸颜色，使用原映屿配色；返回前台将重试。"},
-    {"name": "dynamic_colors_update_failed", "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"}
+    {"name": "dynamic_colors_update_failed", "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"},
+    {
+      "name": "sync_cache_write_failed",
+      "value": "回传已完成，但本机缓存保存失败；修改已保留，请释放存储空间后重试。"
+    }
   ]
 }
