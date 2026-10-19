@@ -406,7 +406,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "裝置內嵌軌道取決於解碼支援。伺服器及已快取的外掛文字字幕按 SRT 顯示，不保留 ASS 樣式；圖片字幕暫不支援。離線可選裝置軌道與已快取的外掛文字字幕。"
+      "value": "裝置內嵌軌道取決於解碼支援。伺服器及已快取的文字字幕按 SRT 顯示，不保留 ASS 樣式；圖片字幕暫不支援。下載會嘗試快取可轉換的內嵌與外掛文字軌，舊下載可連線上網補快取。離線可選裝置軌道與已快取的文字字幕。"
     },
     {
       "name": "track_switch_failed",
@@ -1434,19 +1434,19 @@
     },
     {
       "name": "offline_subtitle_failed",
-      "value": "外掛字幕未能快取，請連線上網重試"
+      "value": "文字字幕未能快取，請連線上網重試"
     },
     {
       "name": "offline_subtitles_pending",
-      "value": "視訊已下載，外掛字幕尚未快取完成"
+      "value": "視訊已下載，文字字幕尚未快取完成"
     },
     {
       "name": "offline_subtitles_incomplete",
-      "value": "外掛字幕尚未快取或部分失敗，視訊仍可播放"
+      "value": "文字字幕尚未快取或部分失敗，視訊仍可播放"
     },
     {
       "name": "retry_subtitles",
-      "value": "快取或重試外掛字幕"
+      "value": "快取或重試文字字幕"
     },
     {
       "name": "auto_next_server",

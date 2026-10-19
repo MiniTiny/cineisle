@@ -7,12 +7,13 @@ import { parseSubtitles, SubtitleCue, textSubtitle } from '../utils/Playback';
 import { downloadStem } from '../utils/DownloadIdentity';
 import { JellyfinClient } from './JellyfinClient';
 
+// Cache convertible text tracks, including embedded tracks unsupported by the native decoder.
 // Only SRT text and safe metadata are persisted. Authenticated delivery URLs never enter JSON.
 export class OfflineSubtitles {
   static plan(record: DownloadRecord, source: MediaSource, directory: string): DownloadSubtitle[] {
     const seen = new Set<number>();
     return (source.MediaStreams ?? []).filter((stream) => {
-      if (stream.IsExternal !== true || !textSubtitle(stream) || seen.has(stream.Index)) { return false; }
+      if (!textSubtitle(stream) || seen.has(stream.Index)) { return false; }
       seen.add(stream.Index); return true;
     }).map((stream): DownloadSubtitle => ({ index: stream.Index, title: (stream.DisplayTitle || stream.Language || stream.Codec || '').slice(0, 256),
       language: (stream.Language ?? '').slice(0, 63), path: `${directory}/${downloadStem(record)}.subtitle-${stream.Index}.srt`, state: 'pending' }));

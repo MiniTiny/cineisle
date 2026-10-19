@@ -388,7 +388,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "设备内嵌轨道取决于解码支持。服务器及已缓存的外挂文本字幕按 SRT 显示，不保留 ASS 样式；图片字幕暂不支持。离线可选设备轨道与已缓存的外挂文本字幕。"
+      "value": "设备内嵌轨道取决于解码支持。服务器及已缓存的文本字幕按 SRT 显示，不保留 ASS 样式；图片字幕暂不支持。下载会尝试缓存可转换的内嵌与外挂文本轨，旧下载可联网补缓存。离线可选设备轨道与已缓存的文本字幕。"
     },
     {
       "name": "track_switch_failed",
@@ -1416,19 +1416,19 @@
     },
     {
       "name": "offline_subtitle_failed",
-      "value": "外挂字幕未能缓存，请联网重试"
+      "value": "文本字幕未能缓存，请联网重试"
     },
     {
       "name": "offline_subtitles_pending",
-      "value": "视频已下载，外挂字幕尚未缓存完成"
+      "value": "视频已下载，文本字幕尚未缓存完成"
     },
     {
       "name": "offline_subtitles_incomplete",
-      "value": "外挂字幕尚未缓存或部分失败，视频仍可播放"
+      "value": "文本字幕尚未缓存或部分失败，视频仍可播放"
     },
     {
       "name": "retry_subtitles",
-      "value": "缓存或重试外挂字幕"
+      "value": "缓存或重试文本字幕"
     },
     {
       "name": "auto_next_server",
