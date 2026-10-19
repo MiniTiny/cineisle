@@ -1683,6 +1683,62 @@
     {
       "name": "search_group_count",
       "value": "%s · 已加载 %d 项"
+    },
+    {
+      "name": "device_name_group",
+      "value": "服务器设备名称"
+    },
+    {
+      "name": "device_name_hint",
+      "value": "修改当前服务器上此设备的显示名，最多64个字符；留空恢复默认名称。需要服务器授权。"
+    },
+    {
+      "name": "device_name_current",
+      "value": "最近确认的名称：%s"
+    },
+    {
+      "name": "device_name_unknown",
+      "value": "尚未读取或需要重新确认服务器名称。"
+    },
+    {
+      "name": "device_name_label",
+      "value": "自定义设备名称"
+    },
+    {
+      "name": "device_name_default",
+      "value": "默认设备名称"
+    },
+    {
+      "name": "device_name_refresh",
+      "value": "读取服务器名称"
+    },
+    {
+      "name": "device_name_save",
+      "value": "保存设备名称"
+    },
+    {
+      "name": "device_name_online_required",
+      "value": "离线模式下不能读取或修改服务器设备名称。"
+    },
+    {
+      "name": "device_name_invalid",
+      "value": "名称最多64个字符，不能包含换行或控制字符。"
+    },
+    {
+      "name": "device_name_cancelled",
+      "value": "操作已取消，请重新读取设备名称。"
+    },
+    {
+      "name": "device_name_not_confirmed",
+      "value": "服务器返回的名称与本次修改不一致。"
+    },
+    {
+      "name": "device_name_saved",
+      "value": "服务器设备名称已确认保存。"
+    },
+    {
+      "name": "device_name_save_failed",
+      "value": "保存失败或结果未确认，请先重新读取服务器名称再修改。"
     }
   ]
 }

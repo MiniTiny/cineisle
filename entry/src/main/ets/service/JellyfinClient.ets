@@ -1,6 +1,7 @@
 import util from '@ohos.util';
 import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../model/Models';
 import { addresses } from '../utils/Accounts';
+import { deviceNameValue } from '../utils/DeviceOptions';
 import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { ApiTransport, JellyfinApi, getItemsFromQuery } from '../api/generated/JellyfinApi';
@@ -48,6 +49,22 @@ export class JellyfinClient {
     const request = this.versionRequest;
     try { await request; }
     catch (e) { if (this.versionRequest === request) { this.versionRequest = undefined; } throw e as Error; }
+  }
+
+  private deviceAdmission(id: string, permit: () => boolean): void {
+    if (!id || id !== this.session.deviceId || !permit()) { throw new Error('device_name_cancelled'); }
+  }
+  async deviceName(permit: () => boolean): Promise<string> {
+    const id = this.session.deviceId; await this.ready(); this.deviceAdmission(id, permit);
+    const value = await this.api.getDeviceOptions({ id: id });
+    if (!value || typeof value !== 'object' || Array.isArray(value) || (value.DeviceId != null && value.DeviceId !== id) ||
+      (value.CustomName != null && (typeof value.CustomName !== 'string' || value.CustomName.length > 1024 || /[\u0000-\u001f\u007f]/.test(value.CustomName)))) { throw new Error('api_response_invalid'); }
+    return value.CustomName ?? '';
+  }
+  async updateDeviceName(name: string, permit: () => boolean): Promise<void> {
+    const value = deviceNameValue(name); const id = this.session.deviceId;
+    await this.ready(); this.deviceAdmission(id, permit);
+    await this.api.updateDeviceOptions({ id: id, body: { CustomName: value } });
   }
 
   // Low-level compatibility entry; application features use generated operations below.

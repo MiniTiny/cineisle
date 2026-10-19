@@ -52,7 +52,7 @@ function load(relative) {
     const builder = source.indexOf('\n  @Builder');
     const boundary = builder >= 0 ? builder : source.indexOf('\n  build()');
     assert.ok(boundary > 0, 'Expected an ArkUI builder boundary');
-    source = (source.slice(0, boundary) + '\n}').replace(/@Entry\s+@Component\s+struct (\w+)/, 'export class $1').replace(/@State\s+/g, '').replace(/@StorageLink\([^)]*\)\s+/g, '');
+    source = (source.slice(0, boundary) + '\n}').replace(/@Entry\s+@Component\s+struct (\w+)/, 'export class $1').replace(/@State\s+/g, '').replace(/@StorageLink\([^)]*\)\s+/g, '').replace(/@Watch\([^)]*\)\s*/g, '');
   }
   const js = ts.transpileModule(source, { compilerOptions: {
     module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2020

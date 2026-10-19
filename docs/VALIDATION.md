@@ -254,3 +254,15 @@ node tests/search-sections-ui.test.cjs
 协议与页面回归使用产品查询、分页和生命周期方法，覆盖三种类型、同名条目、60+1分页、服务器类型查询、全缓存过滤、重复/缺页/错误类型拒绝、失败追加保留偏移、已提交搜索词、离页/切账户/关闭/新查询的晚到响应，以及历史和返回行为。UI回归使用实际SDK编译Builder，检查320/760vp、普通/两倍字体下单一Grid滚动、非空分组、已加载提示、类型选择回调和缓存计数，错误不显示为空结果成功。
 
 原生验证使用独立包、额外启动Ability和仅监听本机的合成服务，逐文件核对产品源码资源一致后，检查类型选择、分组、分页提示与滚动。可用`CINEISLE_VISUAL_SEARCH_ITEMS`为已有界面夹具提供最多180条交错类型数据；默认数据不变。触控注入、合成服务和SDK夹具不能代替真实Jellyfin大库、实体设备键盘及多机型布局验收。
+
+## 服务器设备自定义名称
+
+```bash
+node tests/device-name.test.cjs
+node tests/device-name-ui.test.cjs
+node tests/openapi-regression.test.cjs
+```
+
+固定OpenAPI生成设备选项读写，协议套件覆盖10.8和10.10的设备ID查询、仅CustomName的JSON正文、引号/反斜杠编码及不变的认证头身份。专项覆盖名称边界、默认名称、错误DTO/不同设备响应、版本协商后的取消、POST后读取确认、401/403/503、未知写入结果、确认不匹配、刷新后再编辑、离页/账户/PIN/离线的晚到响应和重复页面显示。SDK界面回归覆盖窄屏/短横屏与两倍字体、滚动、输入限制、禁用态、实际保存/刷新回调，以及不把未确认名称显示为成功。
+
+原生验收使用独立QA身份、未修改的产品页面与合成`/Devices/Options`服务。`CINEISLE_VISUAL_DEVICE_OPTIONS`启用设备夹具，`CINEISLE_VISUAL_DEVICE_DENIED`返回403，`CINEISLE_VISUAL_DEVICE_FAIL_AFTER_WRITE`在实际更新合成值后返回503，用于验证未知写入不会自动重放。夹具不访问真实服务器，不记录认证头、查询或正文；真实服务器设备管理权限、并发改名与正式账户持久化仍须单独验收。

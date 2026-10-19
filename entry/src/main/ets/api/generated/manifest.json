@@ -392,10 +392,36 @@
           "method": "GET"
         }
       ]
+    },
+    {
+      "operationId": "GetDeviceOptions",
+      "method": "GET",
+      "path": "/Devices/Options",
+      "response": "json",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Devices/Options",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "operationId": "UpdateDeviceOptions",
+      "method": "POST",
+      "path": "/Devices/Options",
+      "response": "void",
+      "compatibility": [
+        {
+          "serverVersionPrefix": "10.8.",
+          "path": "/Devices/Options",
+          "method": "POST"
+        }
+      ]
     }
   ],
-  "modelAndRequestDefinitions": 115,
-  "modelDefinitions": 90,
+  "modelAndRequestDefinitions": 118,
+  "modelDefinitions": 91,
   "limitations": [
     "Selected application operations only; not a full Jellyfin SDK",
     "Binary responses are URL builders consumed by Image/AVPlayer/system download",
