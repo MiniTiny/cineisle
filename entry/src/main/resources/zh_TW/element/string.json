@@ -1,5 +1,7 @@
 {
   "string": [
+    {"name": "player_retry", "value": "重試播放"},
+    {"name": "player_failure_hint", "value": "播放未能繼續。可重試目前版本，或在播放選項中選擇其他版本。"},
     {
       "name": "player_skip_intro",
       "value": "跳過片頭"
