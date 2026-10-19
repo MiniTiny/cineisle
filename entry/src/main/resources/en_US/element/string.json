@@ -2028,6 +2028,10 @@
     {"name": "dynamic_colors_active", "value": "Current wallpaper colors applied"},
     {"name": "dynamic_colors_off", "value": "Using the original CineIsle palette"},
     {"name": "dynamic_colors_fallback", "value": "Wallpaper colors are unavailable. Using the original CineIsle palette; returning to the foreground will retry."},
-    {"name": "dynamic_colors_update_failed", "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."}
+    {"name": "dynamic_colors_update_failed", "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."},
+    {
+      "name": "sync_cache_write_failed",
+      "value": "Upload completed, but the local cache could not be saved. Changes are retained; free storage space and retry."
+    }
   ]
 }

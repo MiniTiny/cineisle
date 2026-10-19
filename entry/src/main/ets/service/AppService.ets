@@ -118,17 +118,27 @@ export class AppService {
 
   private static useClient(client: JellyfinClient, prepared?: PreparedAccount): void {
     const data = prepared ?? AppService.prepareClient(client);
-    if (AppService.experience) { AppService.experience.changed = undefined; }
+    if (AppService.experience) { AppService.experience.changed = undefined; AppService.experience.acknowledged = undefined; }
     AppService.local = data.local; AppService.snapshot = data.snapshot; AppService.downloads = data.records; AppService.experience = data.experience;
     AppService.client = client; AppService.cacheRecovered = data.local.recovered;
     AppService.posters?.cancelAll();
     data.experience.changed = () => PendingSync.wake();
+    data.experience.acknowledged = (pending: PendingEdit[], positions: PendingPosition[]) => {
+      if (AppService.experience !== data.experience) { return; }
+      const id = pending[0]?.id ?? positions[0]?.id;
+      const item = data.local.snapshot().items.find((value: MediaItem) => value.Id === id);
+      if (item && !AppService.snapshot.items.some((value: MediaItem) => value.Id === id)) { AppService.snapshot.items.push(item); }
+      AppService.snapshot.items = applyPending(AppService.snapshot.items, pending, positions);
+      AppService.snapshot.actors = rankActors(AppService.snapshot.items);
+      AppService.downloads.forEach((record: DownloadRecord) => { record.item = applyPending([record.item], pending, positions)[0]; });
+      AppService.downloadListener?.();
+    };
     client.onEndpointChange((address: string) => { if (AppService.client === client) { SessionStore.rememberAddress(client.session.serverId, address).catch(() => {}); } });
     AppService.notifyAccount();
     PendingSync.wake();
   }
   private static clearClient(): void {
-    if (AppService.experience) { AppService.experience.changed = undefined; }
+    if (AppService.experience) { AppService.experience.changed = undefined; AppService.experience.acknowledged = undefined; }
     AppService.client = undefined; AppService.local = undefined; AppService.experience = undefined; AppService.snapshot = new LibrarySnapshot();
     AppService.posters?.cancelAll();
     AppService.downloads = []; AppService.cacheRecovered = false; AppService.notifyAccount();
@@ -639,11 +649,16 @@ export class AppService {
       }
     }
     if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
-    if (!queued) { store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field || p.revision !== revision); }); }
+    if (!queued) {
+      store?.acknowledge(item.Id, (next: ExperienceState): boolean => next.pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision), field);
+      return AppService.latestEdits.get(key) !== revision;
+    }
     if (AppService.latestEdits.get(key) !== revision) { return true; }
-    AppService.snapshot.items = [copy, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== copy.Id)];
+    const latest = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? copy;
+    const merged = applyPending([latest], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0];
+    AppService.snapshot.items = [merged, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== merged.Id)];
     AppService.snapshot.actors = rankActors(AppService.snapshot.items); local?.saveSnapshot(AppService.snapshot);
-    if (local) { const sections = local.home(); sections.forEach((section) => { section.items = section.items.map((i: MediaItem) => i.Id === item.Id ? copy : i); }); local.saveHome(sections); }
+    if (local) { const sections = local.home(); sections.forEach((section) => { section.items = section.items.map((i: MediaItem) => i.Id === item.Id ? merged : i); }); local.saveHome(sections); }
     return queued;
   }
 
