@@ -11,18 +11,27 @@ function cachedChildren(item: MediaItem): MediaItem[] {
   return orderedChildren(AppService.snapshot.items.filter((value: MediaItem) => item.Type === 'Series' ?
     value.Type === 'Season' && value.SeriesId === item.Id : item.Type === 'Season' ? value.Type === 'Episode' && value.SeasonId === item.Id : false));
 }
+function cachedDetail(id: string, warning: string): DetailContent | undefined {
+  const cached = applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []).find((value: MediaItem) => value.Id === id);
+  return cached ? { item: cached, children: cachedChildren(cached), offline: true, warning: warning } : undefined;
+}
 export async function loadDetail(client: JellyfinClient, id: string): Promise<DetailContent> {
+  if (client !== AppService.client) { throw new Error('login_required'); }
+  if (AppService.experience?.snapshot().offline) {
+    const cached = cachedDetail(id, '');
+    if (!cached) { throw new Error('offline_detail_missing'); }
+    return cached;
+  }
   let item: MediaItem;
   try {
-    if (AppService.experience?.snapshot().offline) { throw new Error('offline'); }
     item = await client.detail(id);
     if (item.Id !== id) { throw new Error('api_response_invalid'); }
   } catch (e) {
     if (client !== AppService.client) { throw new Error('login_required'); }
     if (!NetworkPolicy.cacheAllowed(AppService.experience?.snapshot().offline ?? false) || !connectionFailure(e as Error)) { throw e as Error; }
-    const cached = applyPending(AppService.snapshot.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []).find((value: MediaItem) => value.Id === id);
+    const cached = cachedDetail(id, errorText(e as Error));
     if (!cached) { throw e as Error; }
-    return { item: cached, children: cachedChildren(cached), offline: true, warning: errorText(e as Error) };
+    return cached;
   }
   if (client !== AppService.client) { throw new Error('login_required'); }
   item = applyPending([item], AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? [])[0];
