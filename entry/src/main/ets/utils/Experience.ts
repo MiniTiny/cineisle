@@ -1,9 +1,14 @@
 import { MediaItem, Person, UserData } from '../model/Models';
+import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
 
 export interface PendingEdit { id: string; field: string; value: boolean; revision: number; item?: MediaItem }
 export interface PendingPosition { id: string; ticks: number; revision: number; item: MediaItem }
 export interface Follow { id: string; acknowledged: string[] }
 export class ExperienceState {
+  playerUi?: PlayerOptions;
+  syncAttempts?: number;
+  syncNextAt?: number;
+  syncBlocked?: boolean;
   downloadMobile?: boolean = false;
   downloadRoaming?: boolean = false;
   librarySort?: string = 'SortName';
@@ -164,6 +169,10 @@ export function connectionFailure(error: Error): boolean {
 }
 export function authorizationFailure(error: Error): boolean { return /\b(401|403)\b|http_(401|403)|login_expired|permission_denied/.test(error.message); }
 export function validExperience(value: ExperienceState): boolean {
+  if (value?.playerUi !== undefined && !validPlayerOptions(value.playerUi)) { return false; }
+  if ((value?.syncAttempts !== undefined && (!Number.isSafeInteger(value.syncAttempts) || value.syncAttempts < 0 || value.syncAttempts > 5)) ||
+    (value?.syncNextAt !== undefined && (!Number.isSafeInteger(value.syncNextAt) || value.syncNextAt < 0)) ||
+    (value?.syncBlocked !== undefined && typeof value.syncBlocked !== 'boolean')) { return false; }
   if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||
     (value?.downloadRoaming !== undefined && typeof value.downloadRoaming !== 'boolean')) { return false; }
   return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= 20 && value.searches.every((s: string) => typeof s === 'string') &&

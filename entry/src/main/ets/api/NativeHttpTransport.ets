@@ -87,7 +87,7 @@ export class NativeHttpTransport implements ApiTransport {
   }
   private async at(address: string, path: string, method: string, params: ApiQuery[], body: string, accept: string): Promise<string> {
     const nativeMethod = this.method(method);
-    const authorization = this.authorization(path !== '/System/Info/Public');
+    const authorization = this.authorization(path !== '/System/Info/Public' && path !== '/Users/Public');
     if (body) { parseJson(body); }
     const query = queryString(params);
     const connection = http.createHttp();

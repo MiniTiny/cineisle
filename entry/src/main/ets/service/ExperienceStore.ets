@@ -3,12 +3,14 @@ import { LocalStore } from './LocalStore';
 
 // Account-scoped, atomic metadata. Mutations publish only after the disk write succeeds.
 export class ExperienceStore {
-  private value: ExperienceState;
   private local: LocalStore;
-  constructor(local: LocalStore) { this.local = local; this.value = local.experience(); }
-  snapshot(): ExperienceState { return JSON.parse(JSON.stringify(this.value)) as ExperienceState; }
+  changed: (() => void) | undefined = undefined;
+  constructor(local: LocalStore) { this.local = local; }
+  snapshot(): ExperienceState { return this.local.experience(); }
   update(change: (next: ExperienceState) => void): ExperienceState {
-    const next = this.snapshot(); change(next); this.local.saveExperience(next); this.value = next; return this.snapshot();
+    const next = this.local.changeExperience(change);
+    try { this.changed?.(); } catch (e) { /* A scheduling failure cannot roll back an already durable edit. */ }
+    return next;
   }
   search(term: string): void {
     const value = term.trim().slice(0, 128); if (!value) { return; }

@@ -1495,6 +1495,82 @@
     {
       "name": "gesture_hint",
       "value": "视频区域：左右双击快退5秒/快进15秒，中间双击暂停；横滑预览进度，长按临时2倍速，双指缩放切换填充。"
+    },
+    {
+      "name": "public_users_load",
+      "value": "选择服务器公开用户"
+    },
+    {
+      "name": "public_users_empty",
+      "value": "服务器没有公开用户，可继续输入用户名登录。"
+    },
+    {
+      "name": "public_users_invalid",
+      "value": "公开用户数据无效，请重试或手动输入用户名。"
+    },
+    {
+      "name": "player_gesture_preferences",
+      "value": "播放手势与画中画"
+    },
+    {
+      "name": "player_gestures_enabled",
+      "value": "启用播放手势"
+    },
+    {
+      "name": "player_seek_gesture",
+      "value": "横滑跳转进度"
+    },
+    {
+      "name": "player_zoom_gesture",
+      "value": "双指缩放画面"
+    },
+    {
+      "name": "player_start_maximized",
+      "value": "默认裁剪填充画面"
+    },
+    {
+      "name": "player_back_seconds",
+      "value": "双击快退秒数（1–300）"
+    },
+    {
+      "name": "player_forward_seconds",
+      "value": "双击快进秒数（1–300）"
+    },
+    {
+      "name": "player_save_steps",
+      "value": "保存跳转步长"
+    },
+    {
+      "name": "player_steps_invalid",
+      "value": "请输入 1–300 的整数秒数。"
+    },
+    {
+      "name": "player_auto_pip",
+      "value": "退到后台自动画中画"
+    },
+    {
+      "name": "player_ui_preferences_hint",
+      "value": "按当前账户保存，下次进入播放器生效。自动画中画默认关闭，受系统支持、播放和锁定状态限制。PiP与锁屏按钮保留各自的跳转步长。"
+    },
+    {
+      "name": "auto_pip_failed",
+      "value": "自动画中画暂不可用，仍可尝试手动进入。"
+    },
+    {
+      "name": "sync_schedule_unavailable",
+      "value": "后台调度暂不可用；待回传修改已保留，可在更多中手动回传。"
+    },
+    {
+      "name": "sync_retry_waiting",
+      "value": "回传失败，修改已保留，将自动重试。"
+    },
+    {
+      "name": "sync_retry_exhausted",
+      "value": "自动回传重试已暂停，请检查连接后手动回传。"
+    },
+    {
+      "name": "sync_auth_required",
+      "value": "自动回传已暂停，请检查账户权限或重新登录后手动回传。"
     }
   ]
 }

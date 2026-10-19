@@ -6,6 +6,7 @@ import { BrandHeading } from '../components/BrandHeading';
 import { BrandButton } from '../components/BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
+import { PublicUserPicker } from '../components/PublicUserPicker';
 import common from '@ohos.app.ability.common';
 import router from '@ohos.router';
 import { errorText, text } from '../utils/Strings';
@@ -68,6 +69,7 @@ struct Index {
   @State lastSyncedAt: number = 0;
   @State pendingCount: number = 0;
   @State syncMessage: string = '';
+  @StorageLink('cineIsleSyncIssue') syncIssue: string = '';
   @State syncing: boolean = false;
   @State cacheMessage: string = '';
   @State usingCache: boolean = false;
@@ -290,10 +292,12 @@ struct Index {
           TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.server = value; })
             .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.username')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+            PublicUserPicker({ server: this.server, available: this.ready && !this.busy && !this.locked,
+              onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('index-login-password'); } })
           TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.username = value; })
             .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.password')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-          TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).type(InputType.Password)
+            TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('index-login-password').height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).type(InputType.Password)
             .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.https_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
           if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
@@ -628,7 +632,8 @@ struct Index {
           }
           if (this.syncing) { this.menuAction($r('app.string.cancel_sync'), $r('app.media.menu_cancel'), () => AppService.cancelSync()) }
           this.menuAction($r('app.string.flush_changes'), $r('app.media.menu_upload'), async () => { try { await AppService.flushPending(); this.pendingCount = (AppService.experience?.snapshot().pending.length ?? 0) + (AppService.experience?.snapshot().positions.length ?? 0); this.syncMessage = getContext(this).resourceManager.getStringSync($r('app.string.pending_changes').id, this.pendingCount); } catch (e) { this.syncMessage = errorText(e as Error); } })
-          Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
+          if (this.syncIssue) { Text(text(this.syncIssue)).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+                Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
           Text(this.lastSyncedAt ? $r('app.string.last_sync', new Date(this.lastSyncedAt).toLocaleString()) : $r('app.string.not_synced'))
             .fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
           if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }

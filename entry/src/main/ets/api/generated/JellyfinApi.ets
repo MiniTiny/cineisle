@@ -902,6 +902,12 @@ export class JellyfinApi {
     return this.transport.request<PublicSystemInfo>(`/System/Info/Public`, "GET", query, '');
   }
 
+  async getPublicUsers(): Promise<Array<UserDto>> {
+    const query: ApiQuery[] = [];
+    const profile0 = this.serverVersion.startsWith("10.8.");
+    return this.transport.request<Array<UserDto>>(`/Users/Public`, "GET", query, '');
+  }
+
   async authenticateUserByName(options: AuthenticateUserByNameRequest): Promise<AuthenticationResult> {
     const query: ApiQuery[] = [];
     const profile0 = this.serverVersion.startsWith("10.8.");

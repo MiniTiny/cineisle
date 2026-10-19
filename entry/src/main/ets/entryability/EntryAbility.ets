@@ -5,6 +5,7 @@ import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import window from '@ohos.window';
 import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
+import { PendingSync } from '../service/PendingSync';
 import { SystemPlayback } from '../service/SystemPlayback';
 export default class EntryAbility extends UIAbility {
   private main: window.Window | undefined = undefined;
@@ -25,6 +26,7 @@ export default class EntryAbility extends UIAbility {
       const main = await stage.getMainWindow(); this.main = main;
       AppLock.changed = () => {
         if (AppLock.locked) { SystemPlayback.current?.pause(); SystemPlayback.current?.stopPiP(); }
+        if (!AppLock.locked) { PendingSync.wake(); }
         this.main?.setWindowPrivacyMode(AppLock.enabled && AppLock.locked).catch(() => {});
       };
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
@@ -33,7 +35,7 @@ export default class EntryAbility extends UIAbility {
         statusBarContentColor: '#F2F3FA', navigationBarContentColor: '#F2F3FA' });
     } catch (e) { console.warn('CineIsle window theme unavailable'); }
   }
-  onBackground(): void { AppLock.background(); if (AppLock.enabled) { this.main?.setWindowPrivacyMode(true).catch(() => {}); } SystemPlayback.current?.background(); }
-  onForeground(): void { AppLock.foreground(); this.main?.setWindowPrivacyMode(AppLock.enabled && AppLock.locked).catch(() => {}); SystemPlayback.current?.foreground(); }
-  onDestroy(): void { AppLock.changed = undefined; SystemPlayback.current?.dispose(); }
+  onBackground(): void { AppLock.background(); PendingSync.background(); if (AppLock.enabled) { this.main?.setWindowPrivacyMode(true).catch(() => {}); } SystemPlayback.current?.background(); }
+  onForeground(): void { AppLock.foreground(); PendingSync.foreground(); this.main?.setWindowPrivacyMode(AppLock.enabled && AppLock.locked).catch(() => {}); SystemPlayback.current?.foreground(); }
+  onDestroy(): void { PendingSync.background(); AppLock.changed = undefined; SystemPlayback.current?.dispose(); }
 }

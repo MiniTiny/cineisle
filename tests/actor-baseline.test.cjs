@@ -139,7 +139,7 @@ test('offline edits survive cold reconstruction even if catalog save failed', as
 });
 test('outbox stale acknowledgement cannot remove a newer revision, even with identical value', async () => {
   const client = h.activate(); await AppService.edit(film('a'), true, true, true); const before = state().pending[0].revision;
-  const d = h.deferred(); client.favorite = () => d.promise; const flushing = AppService.flushPending(); await AppService.edit(film('a'), true, true, true); d.resolve(); await flushing;
+  const d = h.deferred(); client.favorite = () => d.promise; const flushing = AppService.flushPending(); await settle(); await AppService.edit(film('a'), true, true, true); d.resolve(); await flushing;
   assert.equal(state().pending.length, 1); assert.ok(state().pending[0].revision > before);
 });
 test('outbox confirms successes and retains network failure plus subsequent edits', async () => {
@@ -202,7 +202,7 @@ test('offline progress survives cold reconstruction and overlays a later online 
 test('offline completion keeps zero position and played edit; response confirms only matching position revision', async () => {
   const client = h.activate(); const item = film('a', { UserData: { PlaybackPositionTicks: 9999 } }); AppService.recordOfflinePosition(item, 12345, true); await AppService.edit(item, false, true, true);
   assert.equal(AppService.snapshot.items[0].UserData.PlaybackPositionTicks, 0); const d = h.deferred(); client.offlinePosition = () => d.promise; client.played = async () => {};
-  const op = AppService.flushPending(); AppService.recordOfflinePosition(item, 33333); d.resolve(); await op; assert.equal(state().positions.length, 1); assert.equal(state().pending.length, 0);
+  const op = AppService.flushPending(); await settle(); AppService.recordOfflinePosition(item, 33333); d.resolve(); await op; assert.equal(state().positions.length, 1); assert.equal(state().pending.length, 0);
 });
 test('download retry preserves a failed record and reason if replacement creation fails', async () => {
   const client = h.activate(); const record = { id: 'a', item: film('a'), path: AppService.local.directory + '/a.mp4', state: 'failed', progress: 0, mediaSourceId: 'removed' }; AppService.downloads = [record];
@@ -250,7 +250,7 @@ test('late online acknowledgement cannot remove or overwrite a newer offline int
 });
 test('online writes for the same field serialize in user intent order', async () => {
   const client = h.activate(), d = h.deferred(), calls = []; client.favorite = async (id, value) => { calls.push(value); if (!value) await d.promise; };
-  const first = AppService.edit(film('a'), true, false); const second = AppService.edit(film('a'), true, true); await settle(); assert.deepEqual(calls, [false]); d.resolve(); await Promise.all([first, second]); assert.deepEqual(calls, [false, true]); assert.equal(state().pending.length, 0); assert.equal(AppService.snapshot.items[0].UserData.IsFavorite, true);
+  const first = AppService.edit(film('a'), true, false); await settle(); const second = AppService.edit(film('a'), true, true); await settle(); assert.deepEqual(calls, [false]); d.resolve(); await Promise.all([first, second]); assert.deepEqual(calls, [false, true]); assert.equal(state().pending.length, 0); assert.equal(AppService.snapshot.items[0].UserData.IsFavorite, true);
 });
 test('a failed intent checkpoint sends no server mutation', async () => {
   const client = h.activate(); let calls = 0; client.favorite = async () => { calls++; }; AppService.local.saveExperience = () => { throw Error('disk full'); }; await assert.rejects(AppService.edit(film('a'), true, true), /disk full/); assert.equal(calls, 0); assert.equal(state().pending.length, 0);

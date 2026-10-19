@@ -10,6 +10,7 @@ import { AppLock } from '../service/AppLock';
 import { ExperienceState } from '../utils/Experience';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText } from '../utils/Strings';
+import { PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
 @Entry
 @Component
 struct Settings {
@@ -22,6 +23,9 @@ struct Settings {
   @State preference: string = '';
   @State downloadMobile: boolean = false;
   @State downloadRoaming: boolean = false;
+  @State playerUi: PlayerOptions = new PlayerOptions();
+  @State seekBack: string = '5';
+  @State seekForward: string = '15';
   @State currentPin: string = '';
   @State nextPin: string = '';
   @State confirmation: string = '';
@@ -31,7 +35,25 @@ struct Settings {
   private owner: string = '';
   private ownerClient: JellyfinClient | undefined;
   aboutToAppear(): void { this.ownerClient = AppService.client; const state = AppService.experience?.snapshot(); this.downloadMobile = state?.downloadMobile ?? false; this.downloadRoaming = this.downloadMobile && (state?.downloadRoaming ?? false); this.offline = state?.offline ?? false; this.remember = state?.rememberDownloadSource ?? true; this.preference = state?.sourcePreference ?? ''; this.protected = AppLock.enabled; this.owner = AppService.client?.session.userId ?? ''; }
-  onPageShow(): void { if (this.ownerClient !== AppService.client) { router.back(); } }
+  onPageShow(): void {
+    if (this.ownerClient !== AppService.client) { router.back(); return; }
+    this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
+    this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
+  }
+  private savePlayer(key: string = '', enabled: boolean = false): void {
+    if (this.ownerClient !== AppService.client || !AppService.experience) { return; }
+    const next = playerOptions(AppService.experience.snapshot().playerUi);
+    if (key === 'gestures') { next.gestures = enabled; }
+    else if (key === 'seek') { next.seek = enabled; }
+    else if (key === 'zoom') { next.zoom = enabled; }
+    else if (key === 'maximized') { next.startMaximized = enabled; }
+    else if (key === 'pip') { next.autoPiP = enabled; }
+    else { next.back = Number(this.seekBack) * 1000; next.forward = Number(this.seekForward) * 1000; }
+    if (!validPlayerOptions(next)) { this.message = getContext(this).resourceManager.getStringSync($r('app.string.player_steps_invalid').id); return; }
+    try {
+      AppService.experience.update((state: ExperienceState) => { state.playerUi = next; }); this.playerUi = next; this.message = '';
+    } catch (e) { this.message = errorText(e as Error); }
+  }
   private save(): void {
     try { AppService.experience?.update((state: ExperienceState) => { state.offline = this.offline; state.rememberDownloadSource = this.remember; state.sourcePreference = this.preference; }); }
     catch (e) { this.message = errorText(e as Error); }
@@ -56,6 +78,46 @@ struct Settings {
     Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
   }
 
+  @Builder
+  private playerSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.player_gesture_preferences'), icon: $r('app.media.player_speed') })
+      Row({ space: 12 }) {
+        Text($r('app.string.player_gestures_enabled')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_gestures_enabled')).onChange((value: boolean) => this.savePlayer('gestures', value))
+      }.width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_seek_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.seek).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_seek_gesture')).onChange((value: boolean) => this.savePlayer('seek', value))
+      }.width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_zoom_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.zoom).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_zoom_gesture')).onChange((value: boolean) => this.savePlayer('zoom', value))
+      }.width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_start_maximized')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.startMaximized).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_start_maximized')).onChange((value: boolean) => this.savePlayer('maximized', value))
+      }.width('100%')
+      this.fieldCaption($r('app.string.player_back_seconds'))
+      TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
+        .backgroundColor($r('app.color.brand_surface')).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
+      this.fieldCaption($r('app.string.player_forward_seconds'))
+      TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')
+        .backgroundColor($r('app.color.brand_surface')).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
+      BrandButton({ label: $r('app.string.player_save_steps'), icon: $r('app.media.menu_save'), onSelect: () => this.savePlayer() })
+      Row({ space: 12 }) {
+        Text($r('app.string.player_auto_pip')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.autoPiP).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_auto_pip')).onChange((value: boolean) => this.savePlayer('pip', value))
+      }.width('100%')
+      Text($r('app.string.player_ui_preferences_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
+  }
+
   build() {
     Column() {
       if (this.locked) { PinGate() }
@@ -64,6 +126,7 @@ struct Settings {
           BrandHeader({ label: $r('app.string.settings'), onBack: () => router.back() })
           Scroll() {
             Column({ space: 18 }) {
+              this.playerSettings()
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })
                 Row({ space: 12 }) {

@@ -6,9 +6,10 @@ import { validDownloads, validSnapshot, validMediaItem } from '../utils/Cache';
 import { ExperienceState, validExperience } from '../utils/Experience';
 
 export class LocalStore {
+  private static transfers: Map<string, Promise<void>> = new Map();
   readonly directory: string;
   recovered: boolean = false;
-  constructor(context: common.UIAbilityContext, session: Session) {
+  constructor(context: common.Context, session: Session) {
     this.directory = `${context.filesDir}/${accountKey(session.serverId, session.userId)}`;
     if (!fs.accessSync(this.directory)) { fs.mkdirSync(this.directory); }
   }
@@ -49,6 +50,23 @@ export class LocalStore {
   saveDownloads(records: DownloadRecord[]): void { this.write<DownloadRecord[]>('downloads', records); }
   experience(): ExperienceState { return this.read<ExperienceState>('experience', new ExperienceState(), validExperience); }
   saveExperience(value: ExperienceState): void { this.write<ExperienceState>('experience', value); }
+  changeExperience(change: (next: ExperienceState) => void): ExperienceState {
+    const lock = fs.openSync(`${this.directory}/experience.lock`, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE);
+    try {
+      lock.tryLock(true);
+      const next = this.experience(); change(next); this.saveExperience(next); return next;
+    } finally { fs.closeSync(lock); }
+  }
+  transfer(operation: () => Promise<void>): Promise<void> {
+    const key = this.directory;
+    const result = (LocalStore.transfers.get(key) ?? Promise.resolve()).then(async () => {
+      const lock = fs.openSync(`${key}/sync-transfer.lock`, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE);
+      try { await lock.lock(true); await operation(); } finally { fs.closeSync(lock); }
+    });
+    const settled = result.then(() => {}, () => {}); LocalStore.transfers.set(key, settled);
+    settled.then(() => { if (LocalStore.transfers.get(key) === settled) { LocalStore.transfers.delete(key); } });
+    return result;
+  }
   home(): HomeSection[] {
     return this.read<HomeSection[]>('home', [], (sections: HomeSection[]) => Array.isArray(sections) && sections.every((s: HomeSection) =>
       !!s && typeof s.id === 'string' && typeof s.kind === 'string' && typeof s.name === 'string' && typeof s.libraryId === 'string' && Array.isArray(s.items) && s.items.every(validMediaItem)));

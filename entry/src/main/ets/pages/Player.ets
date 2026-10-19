@@ -11,6 +11,7 @@ import { PlaybackRoute, MediaSource } from '../model/Models';
 import { TrackChoice } from '../utils/Playback';
 import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
+import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController } from '../service/PlaybackController';
 import { PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
@@ -50,6 +51,7 @@ struct Player {
   @State pipActive: boolean = false;
   @State controlsLocked: boolean = false;
   @State zoomed: boolean = false;
+  private ui: PlayerOptions = new PlayerOptions();
   @State seekPreview: number = -1;
   @State gestureHint: string = '';
   private seekAnchor: number = -1;
@@ -73,6 +75,7 @@ struct Player {
     this.route = router.getParams() as PlaybackRoute;
     if (!this.route?.url || !this.route.item?.Id) { router.back(); return; }
     this.alive = true;
+    this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.zoomed = this.ui.startMaximized;
     if (this.route.item.Type === 'Episode') { this.restoreAutoNext(); }
     this.showPreferences(AppService.playbackPreferences.snapshot());
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
@@ -144,7 +147,7 @@ struct Player {
       error: (message: string) => { if (this.alive) { this.message = message; } },
       next: async () => { await this.next(); },
       stopped: () => { if (this.alive) { ++this.loadRevision; this.busy = false; this.state = 'released'; this.system = undefined; } }
-    });
+    }, () => this.alive && !this.locked && !this.controlsLocked && !this.busy && this.ui.autoPiP);
     this.system.initialize();
   }
 
@@ -215,7 +218,7 @@ struct Player {
   }
 
   private canGesture(): boolean {
-    return this.alive && this.visible && !this.locked && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.pipActive &&
+    return this.ui.gestures && this.alive && this.visible && !this.locked && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.pipActive &&
       ['prepared', 'playing', 'paused', 'completed'].includes(this.state);
   }
   private insideGesture(x: number, y: number): boolean {
@@ -231,10 +234,10 @@ struct Player {
     this.cancelGesture();
     if (x >= this.surfaceWidth * 0.4 && x <= this.surfaceWidth * 0.6) { this.toggle(); return; }
     if (!Number.isFinite(this.duration) || this.duration <= 0) { return; }
-    this.controller?.seek(Math.max(0, Math.min(this.duration, this.playbackPosition + (x < this.surfaceWidth * 0.4 ? -5000 : 15000))));
+    this.controller?.seek(Math.max(0, Math.min(this.duration, this.playbackPosition + (x < this.surfaceWidth * 0.4 ? -this.ui.back : this.ui.forward))));
   }
   private beginSeek(x: number, y: number): void {
-    if (!this.canGesture() || !this.insideGesture(x, y) || !Number.isFinite(this.duration) || this.duration <= 0) { return; }
+    if (!this.ui.seek || !this.canGesture() || !this.insideGesture(x, y) || !Number.isFinite(this.duration) || this.duration <= 0) { return; }
     this.cancelGesture(); this.seekAnchor = this.playbackPosition; this.seekPreview = this.playbackPosition;
   }
   private previewSeek(offset: number): void {
@@ -252,6 +255,7 @@ struct Player {
     this.cancelGesture(); this.heldSpeed = this.speed; this.speed = 2; this.controller?.setSpeed(2); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
   }
   private pinch(scale: number): void {
+    if (!this.ui.zoom) { return; }
     if (!this.canGesture() || !Number.isFinite(scale) || scale <= 0) { return; }
     this.cancelGesture(); if (Math.abs(scale - 1) > 0.1) { this.zoomed = scale > 1; }
   }
@@ -274,7 +278,7 @@ struct Player {
             }.width(44).height(44).padding(0).borderRadius(14)
               .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
               .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
-              .onClick(() => { this.cancelGesture(); this.controlsLocked = !this.controlsLocked; if (this.controlsLocked) { this.options = false; } })
+              .onClick(() => { this.cancelGesture(); this.controlsLocked = !this.controlsLocked; this.system?.refreshAutoPiP(); if (this.controlsLocked) { this.options = false; } })
           }.padding(12).width('100%')
           Flex({ direction: this.viewportWidth > this.viewportHeight ? FlexDirection.Row : FlexDirection.Column,
             alignItems: ItemAlign.Stretch }) {

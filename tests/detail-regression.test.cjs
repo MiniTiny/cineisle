@@ -26,6 +26,7 @@ const context = { startAbility: async want => { abilities.push(want); }, filesDi
   }
 } };
 platform.set('@ohos.file.fs', fileApi);
+require('./sync-platform.cjs').files(fileApi);
 platform.set('@ohos.app.ability.common', {});
 const downloadTasks = [];
 platform.set('@ohos.request', { downloadFile: async (context, options) => {
@@ -299,7 +300,7 @@ for (const favorite of [true, false]) {
 test('offline mutations are disabled and double clicks cannot start parallel flag requests', async () => {
   const { p, client } = await detail(); let calls = 0; const request = deferred(); client.favorite = () => { calls++; return request.promise; };
   p.usingCache = true; await p.setFlag(true); assert.equal(calls, 0); p.usingCache = false;
-  const pending = p.setFlag(true); await p.setFlag(true); assert.equal(calls, 1); request.resolve(); await pending;
+  const pending = p.setFlag(true); await p.setFlag(true); await new Promise(setImmediate); assert.equal(calls, 1); request.resolve(); await pending;
 });
 test('late mutation response cannot update another account or a hidden page', async () => {
   const { p, client } = await detail(); const request = deferred(); client.favorite = () => request.promise; const pending = p.setFlag(true); p.onPageHide(); activate('b'); request.resolve(); await pending; assert.equal(p.item.UserData, undefined);

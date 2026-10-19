@@ -23,6 +23,7 @@ import { firstEpisode } from '../utils/DetailPresentation';
 import { PlaybackPreferenceStore } from './PlaybackPreferenceStore';
 import { ServerProfile, sessionKey, addresses } from '../utils/Accounts';
 import { ExperienceStore } from './ExperienceStore';
+import { PendingSync, SyncOwner } from './PendingSync';
 import { ExperienceState, PendingEdit, PendingPosition, applyPending, connectionFailure, uniqueWorks } from '../utils/Experience';
 
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
@@ -38,7 +39,7 @@ export class AppService {
   static closePlayback: (() => Promise<void>) | undefined = undefined;
   private static async accountOperation(operation: () => Promise<void>): Promise<void> {
     if (AppService.accountBusy) { throw new Error('account_switching'); }
-    if (AppService.syncing || AppService.tasks.size || AppService.mutations.size || AppService.downloads.some((r: DownloadRecord) => ['downloading', 'queued'].includes(r.state))) { throw new Error('tasks_active'); }
+    if (PendingSync.busy || AppService.syncing || AppService.tasks.size || AppService.mutations.size || AppService.downloads.some((r: DownloadRecord) => ['downloading', 'queued'].includes(r.state))) { throw new Error('tasks_active'); }
     if (!AppLock.permit()) { throw new Error('lock_pin_wrong'); }
     AppService.accountBusy = true; try { await operation(); } finally { AppService.accountBusy = false; }
   }
@@ -71,10 +72,13 @@ export class AppService {
     AppService.context = context; initializeStrings(context.resourceManager);
     if (AppService.initialized) { return; }
     try { await AppService.playbackPreferences.load(context); } catch (e) { /* Settings errors do not prevent login/browsing. */ }
-    await AppLock.initialize();
+    await AppLock.ensureInitialized();
+    PendingSync.configure(context, (): SyncOwner | undefined => AppService.client && AppService.local && AppService.experience ?
+      { client: AppService.client, local: AppService.local, store: AppService.experience } : undefined);
     const session = await SessionStore.load();
     if (session) { AppService.useClient(new JellyfinClient(session)); await AppService.restoreDownloads(); await AppService.pumpDownloads(); }
     AppService.initialized = true;
+    PendingSync.wake();
   }
 
   private static prepareClient(client: JellyfinClient): PreparedAccount {
@@ -98,14 +102,19 @@ export class AppService {
 
   private static useClient(client: JellyfinClient, prepared?: PreparedAccount): void {
     const data = prepared ?? AppService.prepareClient(client);
+    if (AppService.experience) { AppService.experience.changed = undefined; }
     AppService.local = data.local; AppService.snapshot = data.snapshot; AppService.downloads = data.records; AppService.experience = data.experience;
     AppService.client = client; AppService.cacheRecovered = data.local.recovered;
+    data.experience.changed = () => PendingSync.wake();
     client.onEndpointChange((address: string) => { if (AppService.client === client) { SessionStore.rememberAddress(client.session.serverId, address).catch(() => {}); } });
     AppService.notifyAccount();
+    PendingSync.wake();
   }
   private static clearClient(): void {
+    if (AppService.experience) { AppService.experience.changed = undefined; }
     AppService.client = undefined; AppService.local = undefined; AppService.experience = undefined; AppService.snapshot = new LibrarySnapshot();
     AppService.downloads = []; AppService.cacheRecovered = false; AppService.notifyAccount();
+    PendingSync.wake();
   }
   private static async acceptClient(client: JellyfinClient, allowed: () => boolean = () => true): Promise<void> {
     if (!allowed() || !AppLock.permit()) { throw new Error('login_cancelled'); }
@@ -534,13 +543,16 @@ export class AppService {
     const copy = applyPending([JSON.parse(JSON.stringify(item)) as MediaItem], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0]; copy.UserData = copy.UserData ?? {};
     if (favorite) { copy.UserData.IsFavorite = value; } else { copy.UserData.Played = value; }
     // Intent is durable before an HTTP write. Unknown outcomes remain replayable after process death.
-    store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); next.pending.push({ id: item.Id, field: field, value: value, revision: revision, item: copy }); });
+    store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); next.pending.push({ id: item.Id, field: field, value: value, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
     let queued = offline;
     if (!offline) {
       try {
         await AppService.mutation(key, async () => {
-          if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
-          if (favorite) { await client.favorite(item.Id, value); } else { await client.played(item.Id, value); }
+          await local!.transfer(async () => {
+            if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+            if (!store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) { return; }
+            if (favorite) { await client.favorite(item.Id, value); } else { await client.played(item.Id, value); }
+          });
         });
       } catch (e) {
         if (!connectionFailure(e as Error)) {
@@ -568,29 +580,26 @@ export class AppService {
     copy.UserData = copy.UserData ?? {}; const ticks = completed ? 0 : Math.round(position * 10000); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
     copy.UserData.PlaybackPositionTicks = ticks; copy.UserData.LastPlayedDate = new Date().toISOString();
     const revision = AppService.editRevision = Math.max(Date.now(), AppService.editRevision + 1);
-    store.update((next: ExperienceState) => { next.positions = next.positions.filter((p: PendingPosition) => p.id !== item.Id); next.positions.push({ id: item.Id, ticks: ticks, revision: revision, item: copy }); });
+    store.update((next: ExperienceState) => { next.positions = next.positions.filter((p: PendingPosition) => p.id !== item.Id); next.positions.push({ id: item.Id, ticks: ticks, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
     AppService.snapshot.items = [copy, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== item.Id)];
     AppService.snapshot.actors = rankActors(AppService.snapshot.items); local.saveSnapshot(AppService.snapshot);
     AppService.downloads.forEach((r: DownloadRecord) => { if (r.id === item.Id) { r.item = copy; } }); local.saveDownloads(AppService.downloads);
   }
   static async flushPending(): Promise<void> {
-    const client = AppService.requireClient(); const store = AppService.experience; if (!store) { return; }
-    for (const position of store.snapshot().positions) {
-      try { await client.offlinePosition(position.id, position.ticks); }
-      catch (e) { if (connectionFailure(e as Error)) { return; } throw e as Error; }
-      if (client !== AppService.client || store !== AppService.experience) { throw new Error('login_required'); }
-      store.update((next: ExperienceState) => { next.positions = next.positions.filter((p: PendingPosition) => p.id !== position.id || p.revision !== position.revision); });
-    }
-    for (const edit of store.snapshot().pending) {
+    const client = AppService.requireClient(); const store = AppService.experience; const local = AppService.local;
+    if (!store || !local) { return; }
+    if (store.snapshot().offline) { throw new Error('offline_mode_enabled'); }
+    if (!AppLock.permit()) { throw new Error('lock_pin_wrong'); }
+    store.update((next: ExperienceState) => { next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
+    await AppService.mutation('sync/' + sessionKey(client.session), async () => {
       try {
-        await AppService.mutation(AppService.mutationKey(client, edit.id, edit.field), async () => {
-          if (client !== AppService.client || store !== AppService.experience) { throw new Error('login_required'); }
-          if (edit.field === 'favorite') { await client.favorite(edit.id, edit.value); } else { await client.played(edit.id, edit.value); }
+        await local.transfer(async () => {
+          await PendingSync.flush(client, store, async (): Promise<boolean> => client === AppService.client && store === AppService.experience &&
+            !store.snapshot().offline && AppLock.permit());
         });
-      } catch (e) { if (connectionFailure(e as Error)) { return; } throw e as Error; }
-      if (client !== AppService.client || store !== AppService.experience) { throw new Error('login_required'); }
-      store.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== edit.id || p.field !== edit.field || p.revision !== edit.revision || p.value !== edit.value); });
-    }
+      } catch (e) { if (!connectionFailure(e as Error)) { throw e as Error; } }
+    });
+    PendingSync.wake();
   }
 
   static async deleteMedia(item: MediaItem): Promise<void> {

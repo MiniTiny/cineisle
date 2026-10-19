@@ -6,6 +6,7 @@ import { BrandButton } from '../components/BrandButton';
 import { BrandHeading } from '../components/BrandHeading';
 import { BrandHeader } from '../components/BrandHeader';
 import { PinGate } from '../components/PinGate';
+import { PublicUserPicker } from '../components/PublicUserPicker';
 import { AppService } from '../service/AppService';
 import { SessionStore } from '../service/SessionStore';
 import { JellyfinClient } from '../service/JellyfinClient';
@@ -139,10 +140,12 @@ struct Accounts {
         BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), primary: true, available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
         BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), available: !this.busy, onSelect: () => { this.quickEntry = false; this.message = ''; this.top(); } })
       } else {
+          PublicUserPicker({ server: this.server, available: !this.busy && !this.locked,
+            onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('account-login-password'); } })
         this.fieldCaption($r('app.string.username'))
         TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.username = v; })
         this.fieldCaption($r('app.string.password'))
-        TextInput({ text: this.password, placeholder: $r('app.string.password') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.password = v; })
+          TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('account-login-password').height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.password = v; })
         BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
         BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
         BrandButton({ label: $r('app.string.save_server_only'), icon: $r('app.media.menu_server'), available: !this.busy && !!this.server.trim(), onSelect: () => this.saveServer() })

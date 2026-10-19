@@ -16,14 +16,14 @@ node tests/accounts-regression.test.cjs
 
 ## 分层与覆盖
 
-- `api/generated`：29操作、90模型/枚举/内联定义及25请求类型，共115定义。保留required、optional、nullable；参数名和路由来自规范，数组按form/explode生成重复查询键。
+- `api/generated`：30操作、90模型/枚举/内联定义及25请求类型，共115定义。保留required、optional、nullable；参数名和路由来自规范，数组按form/explode生成重复查询键。
 - `api/NativeHttpTransport.ets`：原生HTTP、MediaBrowser头、超时、状态/JSON/HTML校验、资源释放及已配置地址的故障切换。无体POST/DELETE省略extraData。
 - `api/DomainMapping.ets`：协议DTO转为页面/缓存模型，校验使用到的媒体身份、分页和元数据，归一化null；官方IsTextSubtitleStream映射到领域IsTextSubtitle。
-- `service/JellyfinClient.ets`：稳定的登录、当前用户、媒体、字幕、上报等业务入口；版本查询共用并发请求。公开信息不发送令牌；恢复账户先匹配服务器ID，切换校验当前用户ID。
+- `service/JellyfinClient.ets`：稳定的登录、当前用户、媒体、字幕、上报等业务入口；版本查询共用并发请求。公开系统信息与公开用户不发送令牌；恢复账户先匹配服务器ID，切换校验当前用户ID。
 - `service/SessionStore.ets`：账户/服务器集合及令牌由分块Asset保存，普通JSON不保存凭据。
 - `service/QuickConnectLogin.ets`：代码、授权检查、取消与超时；Secret只在内存，授权后交换令牌并经统一账户入口保存。
 
-当前选用公开系统信息、密码认证、Views/Items/详情/Resume/Latest/NextUp/推荐/Seasons/Episodes、收藏/观看、DeleteItem、PlaybackInfo、SRT、图片/视频URL、开始/进度/停止上报，以及Quick Connect启用/初始化/状态/兑换和当前用户。完整清单见生成的manifest。
+当前选用公开系统信息、公开用户、密码认证、Views/Items/详情/Resume/Latest/NextUp/推荐/Seasons/Episodes、收藏/观看、DeleteItem、PlaybackInfo、SRT、图片/视频URL、开始/进度/停止上报，以及Quick Connect启用/初始化/状态/兑换和当前用户。完整清单见生成的manifest。
 
 ## 版本兼容
 

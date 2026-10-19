@@ -50,6 +50,14 @@
       {
         "name": "ohos.permission.PRIVACY_WINDOW"
       }
+    ],
+    "extensionAbilities": [
+      {
+        "name": "PendingSyncAbility",
+        "srcEntry": "./ets/entryability/PendingSyncAbility.ets",
+        "type": "workScheduler",
+        "exported": false
+      }
     ]
   }
 }
