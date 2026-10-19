@@ -1,13 +1,17 @@
 import { NodeController, BuilderNode, FrameNode } from '@ohos.arkui.node';
 import { UIContext } from '@ohos.arkui.UIContext';
+import { SystemCaptions } from '../service/SystemCaptions';
+import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
+import { captionShadows } from '../utils/CaptionUI';
 
 export class PiPSubtitleParams {
   text: string;
   fontSize: number;
   maxLines: number;
   bottom: number;
-  constructor(text: string, fontSize: number, maxLines: number, bottom: number) {
-    this.text = text; this.fontSize = fontSize; this.maxLines = maxLines; this.bottom = bottom;
+  style: CaptionRenderStyle;
+  constructor(text: string, fontSize: number, maxLines: number, bottom: number, style: CaptionRenderStyle) {
+    this.text = text; this.fontSize = fontSize; this.maxLines = maxLines; this.bottom = bottom; this.style = style;
   }
 }
 
@@ -15,10 +19,12 @@ export class PiPSubtitleParams {
 function pipSubtitleBuilder(params: PiPSubtitleParams) {
   Stack({ alignContent: Alignment.Bottom }) {
     if (params.text) {
-      Text(params.text).fontColor('#FFFFFF').fontSize(params.fontSize).textAlign(TextAlign.Center)
-        .maxLines(params.maxLines).textOverflow({ overflow: TextOverflow.Ellipsis })
-        .backgroundColor('#AA000000').borderRadius(4).padding({ left: 6, right: 6, top: 3, bottom: 3 })
-        .margin({ bottom: params.bottom }).width('94%')
+      Column() {
+        Text(params.text).fontColor(params.style.foreground).fontSize(params.style.system ? `${params.fontSize}vp` : params.fontSize).textAlign(TextAlign.Center)
+          .fontFamily(params.style.family).textShadow(captionShadows(params.style.edge))
+          .maxLines(params.maxLines).textOverflow({ overflow: TextOverflow.Ellipsis })
+          .backgroundColor(params.style.background).borderRadius(4).padding({ left: 6, right: 6, top: 3, bottom: 3 }).width('100%')
+      }.padding(2).backgroundColor(params.style.window).margin({ bottom: params.bottom }).width('94%')
     }
   }.width('100%').height('100%').hitTestBehavior(HitTestMode.None)
 }
@@ -33,12 +39,19 @@ export class PiPSubtitleController extends NodeController {
   private bottom: number = 8;
   private closed: boolean = false;
   private failed: boolean = false;
+  private stopCaptions: (() => void) | undefined = undefined;
+  private style: CaptionRenderStyle = captionRenderStyle(SystemCaptions.snapshot().config, '#AA000000');
+  private height: number = 0;
   private failure: () => void;
 
   constructor(failure: () => void) { super(); this.failure = failure; }
   get isReleased(): boolean { return this.node === undefined; }
 
-  private params(): PiPSubtitleParams { return new PiPSubtitleParams(this.value, this.fontSize, this.maxLines, this.bottom); }
+  private params(): PiPSubtitleParams {
+    const size = this.fontSize * this.style.scale;
+    const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(this.height * 0.45 / (size * 1.4)))) : this.maxLines;
+    return new PiPSubtitleParams(this.value, size, lines, this.bottom, this.style);
+  }
   private reportFailure(): void { if (!this.failed) { this.failed = true; this.failure(); } }
 
   makeNode(context: UIContext): FrameNode | null {
@@ -51,6 +64,7 @@ export class PiPSubtitleController extends NodeController {
       this.node.build(wrapBuilder(pipSubtitleBuilder), this.params());
       const frame = this.node.getFrameNode();
       if (!frame) { throw new Error('subtitle_node_unavailable'); }
+      this.stopCaptions = SystemCaptions.observe((state) => { if (!this.closed && this.node) { const style = captionRenderStyle(state.config, '#AA000000'); if (JSON.stringify(style) !== JSON.stringify(this.style)) { this.style = style; this.update(); } } });
       this.failed = false; return frame;
     } catch (e) { this.reportFailure(); this.releaseNode(); return null; }
   }
@@ -62,10 +76,11 @@ export class PiPSubtitleController extends NodeController {
 
   aboutToResize(size: Size): void {
     if (this.closed || !Number.isFinite(size.width) || !Number.isFinite(size.height) || size.width <= 0 || size.height <= 0) { return; }
+    const previousHeight = this.height; this.height = size.height;
     const fontSize = Math.max(10, Math.min(18, Math.round(size.width * 0.05)));
     const maxLines = Math.max(1, Math.min(4, Math.floor(size.height * 0.45 / (fontSize * 1.4))));
     const bottom = Math.max(6, Math.min(12, Math.round(size.height * 0.05)));
-    if (fontSize === this.fontSize && maxLines === this.maxLines && bottom === this.bottom) { return; }
+    if (fontSize === this.fontSize && maxLines === this.maxLines && bottom === this.bottom && previousHeight === size.height) { return; }
     this.fontSize = fontSize; this.maxLines = maxLines; this.bottom = bottom; this.update();
   }
 
@@ -79,6 +94,7 @@ export class PiPSubtitleController extends NodeController {
   aboutToDisappear(): void { this.releaseNode(); }
 
   private releaseNode(): boolean {
+    this.stopCaptions?.(); this.stopCaptions = undefined;
     try { this.node?.dispose(); this.node = undefined; this.context = undefined; return true; }
     catch (e) { this.reportFailure(); return false; }
   }

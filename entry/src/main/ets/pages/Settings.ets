@@ -453,6 +453,7 @@ struct Settings {
               this.deviceSettings()
               this.apiNetworkSettings()
               this.posterSettings()
+              BrandButton({ label: $r('app.string.caption_settings_title'), icon: $r('app.media.player_subtitle'), onSelect: () => { router.pushUrl({ url: 'pages/CaptionSettings' }); } })
               this.playerSettings()
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })

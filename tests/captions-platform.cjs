@@ -1,0 +1,10 @@
+// Explicit native caption-manager fixture. It does not prove OS sharing or rendered glyphs.
+exports.install=platform=>{
+ if(platform.has('@ohos.accessibility'))return platform.get('@ohos.accessibility').fixture;
+ const defaults=()=>({fontFamily:'default',fontScale:100,fontColor:'#FFFFFFFF',fontEdgeType:'none',backgroundColor:'#99000000',windowColor:'#00000000'}),clone=v=>JSON.parse(JSON.stringify(v));
+ const f={enabled:false,style:defaults(),calls:[],hooks:new Map(),failGet:0,failRead:0,failOn:0,failOff:0,failStyle:0,failStyleAfter:0,failEnabled:0,readStyles:[],afterStyle:undefined,afterEnabled:undefined};
+ const emit=event=>{for(const cb of [...(f.hooks.get(event)||[])])cb(event==='styleChange'?clone(f.style):f.enabled)};
+ const manager={get enabled(){if(f.failRead-->0)throw Error('read');return f.enabled},set enabled(v){f.calls.push(['enabled',v]);if(f.failEnabled-->0)throw Error('write');f.enabled=v;emit('enableChange');f.afterEnabled?.();},get style(){if(f.failRead-->0)throw Error('read');return clone(f.readStyles.length?f.readStyles.shift():f.style)},set style(v){f.calls.push(['style',clone(v)]);if(f.failStyle-->0)throw Error('write');f.style=clone(v);emit('styleChange');f.afterStyle?.();if(f.failStyleAfter-->0)throw Error('write_after');},on(event,cb){f.calls.push(['on',event,cb.name]);if(f.failOn-->0)throw Error('on');const set=f.hooks.get(event)||new Set();set.add(cb);f.hooks.set(event,set)},off(event,cb){f.calls.push(['off',event,cb.name]);if(f.failOff-->0)throw Error('off');f.hooks.get(event)?.delete(cb)}};
+ Object.assign(f,{emit,external(enabled,style){f.enabled=enabled;f.style=clone(style);emit('styleChange');emit('enableChange')},reset(){f.enabled=false;f.style=defaults();f.calls.length=0;f.hooks.clear();f.failGet=f.failRead=f.failOn=f.failOff=f.failStyle=f.failStyleAfter=f.failEnabled=0;f.readStyles=[];f.afterStyle=f.afterEnabled=undefined;},manager});
+ platform.set('@ohos.accessibility',{fixture:f,getCaptionsManager(){f.calls.push(['get']);if(f.failGet-->0)throw Error('get');return manager}});return f;
+};

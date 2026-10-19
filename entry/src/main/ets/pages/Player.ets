@@ -18,6 +18,9 @@ import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
 import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController, PlaybackStatus } from '../service/PlaybackController';
+import { SystemCaptions } from '../service/SystemCaptions';
+import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
+import { captionShadows } from '../utils/CaptionUI';
 import { PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
@@ -104,6 +107,8 @@ struct Player {
   private controller: PlaybackController | undefined = undefined;
   private system: SystemPlayback | undefined = undefined;
   private alive: boolean = false;
+  @State captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
+  private stopCaptions: (() => void) | undefined = undefined;
   private visible: boolean = true;
   private loadRevision: number = 0;
   private finished: boolean = false;
@@ -112,6 +117,7 @@ struct Player {
     this.route = router.getParams() as PlaybackRoute;
     if (!this.route?.url || !this.route.item?.Id) { router.back(); return; }
     this.alive = true;
+    this.watchCaptions();
     this.ownerClient = AppService.client; this.immersive = true;
     this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.introEnabled = this.ui.introSkipper ?? true; this.trickplayEnabled = this.ui.trickplay ?? true; this.zoomed = this.ui.startMaximized;
     this.dimOpacity = this.ui.dimOpacity ?? 0.6;
@@ -294,9 +300,10 @@ struct Player {
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
   onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }
-  aboutToDisappear(): void { this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
-  onPageHide(): void { this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
-  onPageShow(): void { this.visible = true; this.introEnabled = playerOptions(AppService.experience?.snapshot().playerUi).introSkipper ?? true; this.trickplayEnabled = playerOptions(AppService.experience?.snapshot().playerUi).trickplay ?? true; if (!this.intro && !this.introTicket) { this.restoreIntro(); this.restoreTrickplay(); } this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
+  private watchCaptions(): void { this.stopCaptions?.(); this.stopCaptions = undefined; if (!this.alive || !this.visible) { return; } this.stopCaptions = SystemCaptions.observe((state) => { if (this.alive && this.visible) { this.captionStyle = captionRenderStyle(state.config); } }); }
+  aboutToDisappear(): void { this.stopCaptions?.(); this.stopCaptions = undefined; this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
+  onPageHide(): void { this.stopCaptions?.(); this.stopCaptions = undefined; this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
+  onPageShow(): void { this.visible = true; this.watchCaptions(); this.introEnabled = playerOptions(AppService.experience?.snapshot().playerUi).introSkipper ?? true; this.trickplayEnabled = playerOptions(AppService.experience?.snapshot().playerUi).trickplay ?? true; if (!this.intro && !this.introTicket) { this.restoreIntro(); this.restoreTrickplay(); } this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
 
   private async completed(): Promise<void> {
     if (this.finished || !this.alive) { return; }
@@ -471,8 +478,11 @@ struct Player {
             if (!this.frameReady) { Column() {}.id('playbackFrameCover').width('100%').height('100%').backgroundColor('#000000').hitTestBehavior(HitTestMode.None) }
             if (this.subtitle) {
               Column() {
-                Text(this.subtitle).fontSize(20).fontColor('#FFFFFF').textAlign(TextAlign.Center)
-                  .backgroundColor('#99000000').padding(8).width('94%')
+                Column() {
+                  Text(this.subtitle).fontSize(this.captionStyle.system ? `${20 * this.captionStyle.scale}vp` : 20).fontColor(this.captionStyle.foreground).textAlign(TextAlign.Center)
+                    .fontFamily(this.captionStyle.family).textShadow(captionShadows(this.captionStyle.edge))
+                    .backgroundColor(this.captionStyle.background).padding(8).width('100%')
+                }.width('94%').padding(4).backgroundColor(this.captionStyle.window)
               }.width('100%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Center)
                 .padding({ bottom: 16 }).hitTestBehavior(HitTestMode.None)
             }

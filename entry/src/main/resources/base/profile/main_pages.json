@@ -8,6 +8,7 @@
     "pages/Downloads",
     "pages/Actor",
     "pages/Settings",
-    "pages/Accounts"
+    "pages/Accounts",
+    "pages/CaptionSettings"
   ]
 }
