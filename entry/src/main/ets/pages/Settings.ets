@@ -2,7 +2,7 @@ import { UiPalette } from '../utils/UiPalette';
 import { AppearancePreferences } from '../service/AppearancePreferences';
 import { AppearanceOptions } from '../utils/Appearance';
 import { LanguagePreferences } from '../service/LanguagePreferences';
-import { UiLanguage } from '../utils/UiLanguage';
+import { UiLanguage, UI_LANGUAGES, uiLanguageCaption } from '../utils/UiLanguage';
 import common from '@ohos.app.ability.common';
 import { BrandState } from '../components/BrandState';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -296,11 +296,11 @@ struct Settings {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.ui_language_group'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.ui_language_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
-      Select([{ value: text('ui_language_system') }, { value: '简体中文' }, { value: 'English' }])
-        .selected(['system', 'zh-CN', 'en-US'].indexOf(this.languageDraft))
-        .value(this.languageDraft === 'system' ? text('ui_language_system') : this.languageDraft === 'zh-CN' ? '简体中文' : 'English').fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+      Select(UI_LANGUAGES.map((choice: UiLanguage): SelectOption => ({ value: uiLanguageCaption(choice, text('ui_language_system')) })))
+        .selected(UI_LANGUAGES.indexOf(this.languageDraft))
+        .value(uiLanguageCaption(this.languageDraft, text('ui_language_system'))).fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : this.palette.surface))
         .height(UiLayout.buttonHeight(this.fontScale)).width('100%').accessibilityText($r('app.string.ui_language_group')).enabled(!this.languageBusy)
-        .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index <= 2 && Number.isInteger(index)) { this.languageDraft = ['system', 'zh-CN', 'en-US'][index] as UiLanguage; } })
+        .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index < UI_LANGUAGES.length && Number.isInteger(index)) { this.languageDraft = UI_LANGUAGES[index]; } })
       BrandButton({ label: $r('app.string.ui_language_save'), icon: $r('app.media.menu_save'), primary: true,
         available: !this.languageBusy && this.languageDraft !== this.languageSaved, onSelect: () => this.saveLanguage() })
       if (this.languageBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
