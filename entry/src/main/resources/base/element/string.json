@@ -1929,6 +1929,22 @@
     {
       "name": "poster_cache_clear_failed",
       "value": "图片缓存清理未完成，请确认剩余占用后重试。"
+    },
+    {
+      "name": "player_trickplay",
+      "value": "拖动进度缩略图"
+    },
+    {
+      "name": "player_trickplay_hint",
+      "value": "需要服务器提供 Jellyscrub BIF 缩略图。已缓存的预览可离线使用；缓存最多 32 MiB、16 个文件，较旧预览可能被清理。"
+    },
+    {
+      "name": "player_trickplay_frame",
+      "value": "目标时间预览画面"
+    },
+    {
+      "name": "player_trickplay_save_failed",
+      "value": "拖动进度缩略图设置保存失败"
     }
   ]
 }

@@ -176,6 +176,7 @@ struct Settings {
     else if (key === 'zoom') { next.zoom = enabled; }
     else if (key === 'maximized') { next.startMaximized = enabled; }
     else if (key === 'pip') { next.autoPiP = enabled; }
+    else if (key === 'trickplay') { next.trickplay = enabled; }
     else if (key === 'intro') { next.introSkipper = enabled; }
     else if (key === 'vertical') { next.vertical = enabled; }
     else if (key === 'brightness') { next.rememberBrightness = enabled; if (!enabled) { next.brightness = -1; } }
@@ -331,6 +332,12 @@ struct Settings {
           .accessibilityText($r('app.string.player_intro_skipper')).onChange((value: boolean) => this.savePlayer('intro', value))
       }.width('100%')
       Text($r('app.string.player_intro_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      Row({ space: 8 }) {
+        Text($r('app.string.player_trickplay')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.trickplay ?? true).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_trickplay')).onChange((enabled: boolean) => this.savePlayer('trickplay', enabled))
+      }.width('100%')
+      Text($r('app.string.player_trickplay_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
       Text($r('app.string.player_ui_preferences_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
     }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
   }

@@ -104,7 +104,7 @@ function reset() {
   for (const entry of fs.readdirSync(directory)) fs.rmSync(path.join(directory, entry), { recursive: true, force: true });
   AppService.client = undefined; AppService.local = undefined; AppService.snapshot = new LibrarySnapshot();
   AppService.downloads = []; AppService.tasks.clear(); AppService.pumping = false; AppService.polling = false; AppService.syncing = false;
-  AppService.cacheRecovered = false; AppService.initialized = false; AppService.intros = undefined; AppService.context = context;
+  AppService.cacheRecovered = false; AppService.initialized = false; AppService.intros = undefined; AppService.trickplays = undefined; AppService.context = context;
   queue.length = 0; requests.length = 0; assetValue = undefined; assets.clear(); AppService.accountBusy = false; AppService.accountListener = undefined; AppService.closePlayback = undefined; routeParams = {};
 }
 const tests = [];
@@ -192,7 +192,7 @@ test('F3 sync persists library membership and a cold offline session can navigat
   client.items = async params => ({ Items: valueOf(params, 'ParentId') === 'films' ? [movie] : [show, season, episode], TotalRecordCount: valueOf(params, 'ParentId') === 'films' ? 1 : 3 });
   await AppService.sync(() => {});
   assert.equal(AppService.local.snapshot().memberships.length, 2);
-  await SessionStore.save(session('a')); AppService.client = undefined; AppService.initialized = false; AppService.intros = undefined;
+  await SessionStore.save(session('a')); AppService.client = undefined; AppService.initialized = false; AppService.intros = undefined; AppService.trickplays = undefined;
   await AppService.initialize(context); queue.push(new Error('offline'));
   const p = page({ tab: 2 }); await p.load();
   assert.deepEqual(ids(p.libraries), ['films', 'shows']); assert.equal(p.mode, ''); assert.equal(p.usingCache, true);

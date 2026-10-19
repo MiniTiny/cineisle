@@ -1,3 +1,6 @@
+import { TrickplayRepository } from './TrickplayRepository';
+import { TrickplayNetwork } from './TrickplayNetwork';
+import { BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
 import util from '@ohos.util';
 import { downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
@@ -35,6 +38,7 @@ import { ExperienceState, PendingEdit, PendingPosition, applyPending, connection
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
   static posters: PosterCache | undefined;
+  static trickplays: TrickplayRepository | undefined;
   static intros: IntroRepository | undefined;
   private static accountBusy: boolean = false;
   private static accountListener: (() => void) | undefined = undefined;
@@ -77,7 +81,7 @@ export class AppService {
   private static tasks: Map<string, request.DownloadTask> = new Map();
 
   static async initialize(context: common.UIAbilityContext): Promise<void> {
-    AppService.context = context; AppService.intros = AppService.intros ?? new IntroRepository(); initializeStrings(context.resourceManager);
+    AppService.context = context; AppService.trickplays = AppService.trickplays ?? new TrickplayRepository(); AppService.intros = AppService.intros ?? new IntroRepository(); initializeStrings(context.resourceManager);
     if (AppService.initialized) { return; }
     if (!AppService.posters) { AppService.posters = new PosterCache(context); }
     await AppService.posters.initialize();
@@ -360,6 +364,17 @@ export class AppService {
     return result;
   }
 
+  static trickplay(id: string, offline: boolean, allowed: () => boolean): BifTicket | undefined {
+    const client = AppService.client; const local = AppService.local;
+    if (!client) { return undefined; }
+    const owned = (): boolean => client === AppService.client && local === AppService.local && allowed();
+    return AppService.trickplays?.load(client, local, id, offline, owned, (work: () => Promise<void>) => AppService.mutation('download-admission', async () => {
+      if (!local || !owned()) { return; }
+      await DownloadSpace.checkOptional(local.directory, 16 * 1048576, AppService.downloads);
+      if (owned()) { await work(); }
+    }));
+  }
+
   static async download(item: MediaItem, sourceId: string = '', network?: DownloadNetwork): Promise<void> {
     const client = AppService.requireClient(); const local = AppService.local!; let record: DownloadRecord | undefined;
     await AppService.mutation('download-admission', async () => {
@@ -369,7 +384,9 @@ export class AppService {
     if (record) {
       const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record!);
       const intro = ['Episode', 'Movie'].includes(item.Type) ? AppService.intros?.load(client, local, item.Id, AppService.experience?.snapshot().offline ?? false, owned) : undefined;
-      await Promise.all([AppService.cacheSubtitles(record, client, local), intro?.result ?? Promise.resolve(undefined)]);
+      const previewOwner = (): boolean => owned() && TrickplayNetwork.allowed(record!.network ?? downloadNetwork());
+      const preview = ['Episode', 'Movie'].includes(item.Type) ? AppService.trickplay(item.Id, AppService.experience?.snapshot().offline ?? false, previewOwner) : undefined;
+      await Promise.all([AppService.cacheSubtitles(record, client, local), intro?.result ?? Promise.resolve(undefined), preview?.result.then(() => {}) ?? Promise.resolve()]);
     }
   }
 
