@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 function install(platform, directory) {
   require('./security-platform.cjs').install(platform);
+  require('./captions-platform.cjs').install(platform);
   if (!platform.has('@ohos.resourceschedule.backgroundTaskManager')) { platform.set('@ohos.resourceschedule.backgroundTaskManager', { BackgroundMode: { DATA_TRANSFER: 1, AUDIO_PLAYBACK: 2 } }); }
   if (!platform.has('@ohos.app.ability.wantAgent')) { platform.set('@ohos.app.ability.wantAgent', {}); }
   const state = { calls: [], instances: new Map(), failOpen: false, failGet: false, failPut: 0, failFlush: 0, flushWait: undefined };
