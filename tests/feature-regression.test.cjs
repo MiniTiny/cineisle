@@ -14,7 +14,7 @@ process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }))
 const modules = new Map(), platform = new Map(), queue = [], requests = [];
 const assets = new Map();
 let assetValue, routeParams = {}, replacedRoute;
-const fileApi = { accessSync: fs.existsSync, mkdirSync: fs.mkdirSync, readTextSync: p => fs.readFileSync(p, 'utf8'),
+const fileApi = { accessSync: fs.existsSync, mkdirSync: fs.mkdirSync, readTextSync: p => fs.readFileSync(p, 'utf8'), statSync: fs.statSync,
   openSync: (p, flags) => ({ fd: fs.openSync(p, flags) }), writeSync: fs.writeSync, fsyncSync: fs.fsyncSync,
   closeSync: file => fs.closeSync(file.fd), renameSync: fs.renameSync, unlinkSync: fs.unlinkSync,
   OpenMode: { CREATE: fs.constants.O_CREAT, WRITE_ONLY: fs.constants.O_WRONLY, TRUNC: fs.constants.O_TRUNC } };

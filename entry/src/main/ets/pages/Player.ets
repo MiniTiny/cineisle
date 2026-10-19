@@ -39,7 +39,10 @@ struct Player {
   @State audioKey: string = '';
   @State subtitleKey: string = '';
   @State options: boolean = false;
-  @State autoNext: boolean = true;
+  @State autoNext: boolean = false;
+  @State autoNextReady: boolean = false;
+  @State autoNextMode: string = 'server';
+  private autoNextRevision: number = 0;
   @State busy: boolean = false;
   @State systemReady: boolean = false;
   @State backgroundEnabled: boolean = false;
@@ -65,6 +68,7 @@ struct Player {
     this.route = router.getParams() as PlaybackRoute;
     if (!this.route?.url || !this.route.item?.Id) { router.back(); return; }
     this.alive = true;
+    if (this.route.item.Type === 'Episode') { this.restoreAutoNext(); }
     this.showPreferences(AppService.playbackPreferences.snapshot());
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
     this.controller = new PlaybackController(AppService.client, {
@@ -85,6 +89,26 @@ struct Player {
 
   private showPreferences(value: PlaybackPreferences): void {
     this.audioLanguage = value.audioLanguage; this.subtitleLanguage = value.subtitleLanguage; this.subtitlesOff = value.subtitlesOff;
+  }
+
+  private async restoreAutoNext(): Promise<void> {
+    const revision = ++this.autoNextRevision; const client = AppService.client;
+    this.autoNextReady = false; this.autoNextMode = AppService.experience?.snapshot().autoNextMode ?? 'server';
+    try {
+      const enabled = await AppService.loadAutoNext(this.route.offline);
+      if (this.alive && revision === this.autoNextRevision && client === AppService.client) { this.autoNext = enabled; this.autoNextReady = true; }
+    } catch (e) {
+      if (this.alive && revision === this.autoNextRevision && client === AppService.client) { this.autoNext = false; this.autoNextReady = true; this.settingsMessage = text('auto_next_load_failed'); }
+    }
+  }
+
+  private changeAutoNext(mode: string): void {
+    if (!this.alive) { return; }
+    try {
+      AppService.saveAutoNext(mode); this.settingsMessage = ''; ++this.autoNextRevision; this.autoNextMode = mode;
+      if (mode === 'server') { this.restoreAutoNext(); }
+      else { this.autoNext = mode === 'on'; this.autoNextReady = true; }
+    } catch (e) { this.settingsMessage = text('auto_next_save_failed'); }
   }
 
   private async savePreferences(reset: boolean = false): Promise<void> {
@@ -140,7 +164,7 @@ struct Player {
     if (this.finished || !this.alive) { return; }
     this.finished = true; this.saveOffline(true);
     if (this.route.offline) { try { await AppService.edit(this.route.item, false, true, true); } catch (e) { this.reportMessage = text('progress_not_saved'); } }
-    if (this.autoNext && (this.visible || this.system?.canContinue) && this.route.item.Type === 'Episode') { await this.next(true); }
+    if (this.autoNextReady && this.autoNext && (this.visible || this.system?.canContinue) && this.route.item.Type === 'Episode') { await this.next(true); }
     else { await this.system?.queueEnded(); }
   }
 
@@ -149,7 +173,7 @@ struct Player {
     this.busy = true; this.message = ''; const transition = ++this.loadRevision;
     try {
       const route = await AppService.nextPlayback(this.route);
-      if (!this.alive || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && !this.autoNext)) {
+      if (!this.alive || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && (!this.autoNextReady || !this.autoNext))) {
         if (automatic) { await this.system?.queueEnded(); } return;
       }
       if (!route) { this.message = text('queue_finished'); await this.system?.queueEnded(); return; }
@@ -377,8 +401,11 @@ struct Player {
           Text($r('app.string.auto_next')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
           Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).selectedColor($r('app.color.brand_action'))
             .switchPointColor($r('app.color.brand_accent')).accessibilityText($r('app.string.auto_next'))
-            .onChange((value: boolean) => { this.autoNext = value; })
+            .enabled(this.autoNextReady).onChange((value: boolean) => { this.changeAutoNext(value ? 'on' : 'off'); })
         }.width('100%')
+        Text(this.autoNextMode === 'server' ? $r('app.string.auto_next_server') : $r('app.string.auto_next_local')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        BrandButton({ label: $r('app.string.auto_next_follow'), icon: $r('app.media.menu_sync'), available: !this.busy,
+          onSelect: () => this.changeAutoNext('server') })
         BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
           available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
       }

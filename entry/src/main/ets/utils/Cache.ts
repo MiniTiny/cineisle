@@ -1,4 +1,4 @@
-import { ActorSummary, DownloadRecord, LibrarySnapshot, MediaItem, MediaLink, MediaSource, MediaStream, Person } from '../model/Models';
+import { ActorSummary, DownloadRecord, DownloadSubtitle, LibrarySnapshot, MediaItem, MediaLink, MediaSource, MediaStream, Person } from '../model/Models';
 
 function validPerson(person: Person): boolean {
   return !!person && typeof person === 'object' && typeof person.Id === 'string' &&
@@ -29,6 +29,8 @@ export function validMediaItem(item: MediaItem): boolean {
   // Optional Jellyfin fields can be absent or null; consumers already use nullish fallbacks.
   if (item.People != undefined && (!Array.isArray(item.People) || !item.People.every(validPerson))) { return false; }
   if (item.CommunityRating != undefined && !Number.isFinite(item.CommunityRating)) { return false; }
+  if (item.CriticRating != undefined && !Number.isFinite(item.CriticRating)) { return false; }
+  if (item.SortName != undefined && typeof item.SortName !== 'string') { return false; }
   if (item.RunTimeTicks != undefined && !Number.isFinite(item.RunTimeTicks)) { return false; }
   if (item.CollectionType != undefined && typeof item.CollectionType !== 'string') { return false; }
   if (item.SeriesId != undefined && typeof item.SeriesId !== 'string') { return false; }
@@ -82,6 +84,17 @@ export function validDownloads(records: DownloadRecord[], directory: string): bo
       !Number.isFinite(record.progress) || record.progress < 0 || record.progress > 1) { return false; }
     if (record.agentId !== undefined && (typeof record.agentId !== 'string' || !/^[0-9]+$/.test(record.agentId))) { return false; }
     if (record.failure !== undefined && typeof record.failure !== 'string') { return false; }
+    if (record.subtitleState !== undefined && !['pending', 'ready', 'failed'].includes(record.subtitleState)) { return false; }
+    if (record.subtitles !== undefined) {
+      if (!Array.isArray(record.subtitles)) { return false; }
+      const seen = new Set<number>();
+      if (!record.subtitles.every((subtitle: DownloadSubtitle) => {
+        if (!subtitle || !Number.isSafeInteger(subtitle.index) || subtitle.index < 0 || seen.has(subtitle.index) ||
+          typeof subtitle.title !== 'string' || typeof subtitle.language !== 'string' || !['pending', 'ready', 'failed'].includes(subtitle.state) ||
+          subtitle.path !== `${directory}/${record.id}.subtitle-${subtitle.index}.srt`) { return false; }
+        seen.add(subtitle.index); return true;
+      })) { return false; }
+    }
     if ([record.taskId, record.received, record.total].some((n: number | undefined) => n !== undefined && (!Number.isSafeInteger(n) || n < 0))) { return false; }
     const prefix = `${directory}/${record.id}.`;
     return record.path.startsWith(prefix) && /^[a-zA-Z0-9]+$/.test(record.path.slice(prefix.length));

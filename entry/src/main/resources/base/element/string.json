@@ -1359,6 +1359,86 @@
     {
       "name": "no_episodes",
       "value": "尚无单集"
+    },
+    {
+      "name": "library_sort",
+      "value": "排序依据"
+    },
+    {
+      "name": "library_order",
+      "value": "排列方向"
+    },
+    {
+      "name": "sort_name",
+      "value": "名称"
+    },
+    {
+      "name": "sort_rating",
+      "value": "社区评分"
+    },
+    {
+      "name": "sort_critic",
+      "value": "影评人评分"
+    },
+    {
+      "name": "sort_added",
+      "value": "入库时间"
+    },
+    {
+      "name": "sort_played",
+      "value": "观看时间"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "发行时间"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "升序"
+    },
+    {
+      "name": "sort_descending",
+      "value": "降序"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "离线字幕 · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "外挂字幕未能缓存，请联网重试"
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "视频已下载，外挂字幕尚未缓存完成"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "外挂字幕尚未缓存或部分失败，视频仍可播放"
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "缓存或重试外挂字幕"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "自动连播跟随服务器账户设置"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "已为当前账户保存本机连播偏好"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "恢复跟随服务器"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "无法读取连播偏好，自动连播暂未开启，可重试跟随服务器"
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "连播偏好保存失败，请重试"
     }
   ]
 }

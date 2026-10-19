@@ -92,6 +92,20 @@ export class JellyfinClient {
     this.session.userName = user.Name ?? this.session.userName;
   }
 
+  async autoNextEnabled(): Promise<boolean> {
+    await this.ready(); const user = await this.api.getCurrentUser();
+    if (user?.Id !== this.session.userId) { throw new Error('login_response_invalid'); }
+    if (user.Configuration != null && (typeof user.Configuration !== 'object' || Array.isArray(user.Configuration))) { throw new Error('api_response_invalid'); }
+    const enabled = user.Configuration?.EnableNextEpisodeAutoPlay;
+    if (enabled !== undefined && typeof enabled !== 'boolean') { throw new Error('api_response_invalid'); }
+    return enabled !== false;
+  }
+
+  async discoveryCandidates(): Promise<MediaItem[]> {
+    return (await this.items([{ key: 'IncludeItemTypes', value: 'Movie,Series' }, { key: 'Filters', value: 'IsUnplayed' },
+      { key: 'Limit', value: '200' }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
+  }
+
   async libraries(): Promise<MediaItem[]> {
     await this.ready();
     const result = await this.api.getUserViews({ userId: this.session.userId });
@@ -100,7 +114,7 @@ export class JellyfinClient {
 
   async items(params: QueryParam[] = []): Promise<ItemsResult> {
     const options = getItemsFromQuery([
-      { key: 'Fields', value: 'Overview,People,Genres,MediaSources' },
+      { key: 'Fields', value: 'Overview,People,Genres,MediaSources,SortName,DateCreated' },
       { key: 'Recursive', value: 'true' },
       { key: 'EnableUserData', value: 'true' }, ...params
     ]);

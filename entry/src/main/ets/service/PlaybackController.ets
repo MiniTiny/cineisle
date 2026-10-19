@@ -5,6 +5,7 @@ import { PlaybackRoute } from '../model/Models';
 import { parseSubtitles, subtitleAt, SubtitleCue, textSubtitle, TrackChoice } from '../utils/Playback';
 import { text } from '../utils/Strings';
 import { JellyfinClient } from './JellyfinClient';
+import { OfflineSubtitles } from './OfflineSubtitles';
 import { PlaybackPreferences, preferredTrack } from '../utils/PlaybackPreferences';
 
 export interface PlayerView {
@@ -172,7 +173,15 @@ export class PlaybackController {
         if (type === media.MediaType.MEDIA_TYPE_AUD) { this.audio.push(track); if (selected.includes(index)) { this.audioKey = track.key; } }
         else { this.subtitles.push(track); if (selected.includes(index)) { this.subtitleKey = track.key; } }
       }
-      if (!this.route.offline) {
+      if (this.route.offline) {
+        for (const subtitle of this.route.subtitles ?? []) {
+          if (subtitle.state === 'ready') {
+            this.subtitles.push({ key: `local:${subtitle.index}`, index: subtitle.index, type: media.MediaType.MEDIA_TYPE_SUBTITLE,
+              label: text('offline_subtitle', subtitle.title || subtitle.language || subtitle.index.toString()), remote: false,
+              language: subtitle.language, path: subtitle.path });
+          }
+        }
+      } else {
         const source = this.route.sources.find((source) => source.Id === this.route.mediaSourceId);
         for (const stream of source?.MediaStreams ?? []) {
           if (textSubtitle(stream)) {
@@ -196,7 +205,7 @@ export class PlaybackController {
   private emitTracks(): void { this.view.tracks(this.audio.slice(), this.subtitles.slice(), this.audioKey, this.subtitleKey); }
   private renderSubtitle(): void {
     if (this.subtitleEnded || !this.player) { this.view.subtitle(''); return; }
-    this.view.subtitle(this.subtitleKey.startsWith('server:') ? subtitleAt(this.cues, this.position) :
+    this.view.subtitle((this.subtitleKey.startsWith('server:') || this.subtitleKey.startsWith('local:')) ? subtitleAt(this.cues, this.position) :
       this.subtitleKey.startsWith('native:') && this.position >= this.subtitleStart && this.position < this.subtitleEnd ? this.nativeSubtitle : '');
   }
 
@@ -237,13 +246,17 @@ export class PlaybackController {
     if (!player || (key && !track)) { return; }
     try {
       let cues: SubtitleCue[] = [];
-      if (track?.remote) {
+      if (track?.key.startsWith('local:')) {
+        const subtitle = this.route.subtitles.find((s) => s.index === track.index && s.path === track.path && s.state === 'ready');
+        if (!this.route.offline || !subtitle) { throw new Error('offline_subtitle_failed'); }
+        cues = OfflineSubtitles.read(subtitle);
+      } else if (track?.remote) {
         if (!this.client) { throw new Error('login_required'); }
         cues = parseSubtitles(await this.client.subtitle(this.route.item.Id, this.route.mediaSourceId, track.index));
         if (!cues.length) { throw new Error('subtitle_failed'); }
       }
       if (!this.active(player, generation) || revision !== this.selection) { return; }
-      if (track && !track.remote) {
+      if (track?.key.startsWith('native:')) {
         const selected = await player.getSelectedTracks();
         if (!this.active(player, generation) || revision !== this.selection) { return; }
         if (!selected.includes(track.index)) { await player.selectTrack(track.index); this.nativeSubtitle = ''; }

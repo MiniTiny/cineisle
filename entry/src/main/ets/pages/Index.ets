@@ -15,7 +15,7 @@ import { MediaCard } from '../components/MediaCard';
 import { HomeShelf } from '../components/HomeShelf';
 import { cachedHome } from '../service/HomeFeed';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { browseParams, cachedItems } from '../utils/Browse';
+import { browseParams, cachedItems, librarySortFields } from '../utils/Browse';
 
 import { ProgressiveHome, HomeFailure, HomeUpdate } from '../service/ProgressiveHome';
 import { ActorProfile, ActorTag, Discovery, ExperienceState, actorProfiles, sortActors, discovery, applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
@@ -70,6 +70,8 @@ struct Index {
   @State syncing: boolean = false;
   @State cacheMessage: string = '';
   @State usingCache: boolean = false;
+  @State librarySort: string = 'SortName';
+  @State libraryDescending: boolean = false;
   private generation: number = 0;
   private sessionClient: JellyfinClient | undefined = undefined;
   private accountChanged: () => void = () => { if (this.ready) { this.resetAccountState(); if (this.signedIn) { this.load(); } } };
@@ -107,7 +109,17 @@ struct Index {
   }
 
   private params(): QueryParam[] {
-    return browseParams(this.mode, this.search, this.parentId, this.personId);
+    return browseParams(this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending);
+  }
+
+  private async changeLibrarySort(index: number, order: boolean = false): Promise<void> {
+    if (this.busy || !Number.isInteger(index) || index < 0 || index >= (order ? 2 : librarySortFields.length)) { return; }
+    const sort = order ? this.librarySort : librarySortFields[index]; const descending = order ? index === 1 : this.libraryDescending;
+    try {
+      if (!AppService.experience) { throw new Error('cache_write_failed'); }
+      AppService.experience.update((state: ExperienceState) => { state.librarySort = sort; state.libraryDescending = descending; });
+      this.librarySort = sort; this.libraryDescending = descending; await this.load();
+    } catch (e) { this.message = errorText(e as Error); }
   }
 
   private resetAccountState(): void {
@@ -115,6 +127,7 @@ struct Index {
     this.profiles = []; this.discoveries = []; this.homeFailures = []; this.actorQuery = ''; this.actorTag = ''; this.password = '';
     this.generation++; this.sessionClient = AppService.client; this.signedIn = this.sessionClient !== undefined;
     const state = AppService.experience?.snapshot();
+    this.librarySort = state?.librarySort ?? 'SortName'; this.libraryDescending = state?.libraryDescending ?? false;
     this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
     this.mode = ''; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
@@ -139,10 +152,10 @@ struct Index {
       else {
         this.mode = 'offline-library';
         this.sectionTitle = getContext(this).resourceManager.getStringSync($r('app.string.cached_media').id);
-        this.items = cachedItems(AppService.snapshot, this.mode, '', '', ''); this.total = this.items.length;
+        this.items = cachedItems(AppService.snapshot, this.mode, '', '', '', this.librarySort, this.libraryDescending); this.total = this.items.length;
       }
     } else {
-      this.items = cachedItems(AppService.snapshot, this.mode, this.search, this.parentId, this.personId);
+      this.items = cachedItems(AppService.snapshot, this.mode, this.search, this.parentId, this.personId, this.librarySort, this.libraryDescending);
       this.total = this.items.length;
     }
     this.resume = [];
@@ -179,7 +192,7 @@ struct Index {
           this.items = more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
         }
       } else if (this.tab === 0) {
-        const candidates = this.discover ? (await client.items([{ key: 'IncludeItemTypes', value: 'Movie,Series' }, { key: 'Limit', value: '200' }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items ?? [] : await client.recommend();
+        const candidates = this.discover ? await client.discoveryCandidates() : await client.recommend();
         this.discoveries = discovery(applyPending(candidates, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []), AppService.snapshot.items, AppService.experience?.snapshot().follows ?? []);
         const items = this.discover ? this.discoveries.map((d: Discovery) => d.item) : candidates;
         if (this.current(version, client)) { this.items = items; this.total = items.length; }
@@ -369,8 +382,23 @@ struct Index {
   }
 
   @Builder
+  private libraryFilters() {
+    Column({ space: 12 }) {
+      BrandChoice({ label: $r('app.string.library_sort'), icon: $r('app.media.menu_sync'), available: !this.busy,
+        choices: [{ value: text('sort_name') }, { value: text('sort_rating') }, { value: text('sort_critic') }, { value: text('sort_added') }, { value: text('sort_played') }, { value: text('sort_premiere') }],
+        selected: Math.max(0, librarySortFields.indexOf(this.librarySort)), onSelect: (index: number) => this.changeLibrarySort(index) })
+      BrandChoice({ label: $r('app.string.library_order'), icon: $r('app.media.menu_sync'), available: !this.busy,
+        choices: [{ value: text('sort_ascending') }, { value: text('sort_descending') }], selected: this.libraryDescending ? 1 : 0,
+        onSelect: (index: number) => this.changeLibrarySort(index, true) })
+    }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+  }
+
+  @Builder
     mediaGrid() {
     Grid() {
+      if (this.mode === 'library' || this.mode === 'offline-library') {
+        GridItem() { this.libraryFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
+      }
       if (this.busy || this.message || this.cacheMessage) { GridItem() { this.statusPanel() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1) }
       if (!this.mode && this.tab === 0) {
         GridItem() { this.recommendFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)

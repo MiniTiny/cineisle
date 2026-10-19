@@ -46,6 +46,7 @@ const server = http.createServer((req, res) => {
   routes.push({ method: req.method, path: p }); // No headers, query strings, login body or credentials.
   let result;
   if (p === '/System/Info/Public') result = { Id: id(20), ServerName: 'CineIsle Visual Fixture', Version: '10.10.0' };
+  else if (p === '/Users/Me') result = { Id: userId, Name: 'UI 测试', Configuration: { EnableNextEpisodeAutoPlay: process.env.CINEISLE_VISUAL_AUTONEXT === '1' } };
   else if (p === '/QuickConnect/Enabled') result = true;
   else if (p === '/QuickConnect/Initiate' || p === '/QuickConnect/Connect') result = { Code: '246810', Secret: 'local-layout-quick-secret', Authenticated: false };
   else if (p === '/Users/AuthenticateByName') result = { User: { Id: userId, Name: 'UI 测试', Policy: { EnableContentDeletion: true } }, AccessToken: 'local-fixture-token' };
@@ -63,9 +64,16 @@ const server = http.createServer((req, res) => {
     let items = q.get('parentid') === showsId ? [show, season, episode] : q.get('parentid') === moviesId ? [movie, extraMovie] : catalog;
     if (q.get('personids')) items = items.filter(x => x.People.some(p => p.Id === q.get('personids')));
     if (q.get('filters') === 'IsFavorite') items = items.filter(x => x.UserData.IsFavorite);
+    if (q.get('filters') === 'IsUnplayed') items = items.filter(x => !x.UserData.Played);
     if (q.get('searchterm')) items = items.filter(x => x.Name.includes(q.get('searchterm')));
     if (q.get('includeitemtypes')) items = items.filter(x => q.get('includeitemtypes').split(',').includes(x.Type));
     if (process.env.CINEISLE_VISUAL_EMPTY_CATALOG === '1') items = [];
+    const sort = q.get('sortby'); const direction = q.get('sortorder') === 'Descending' ? -1 : 1;
+    if (sort) items = [...items].sort((a,b) => {
+      const value = item => sort === 'DatePlayed' ? item.UserData.LastPlayedDate : sort === 'SortName' ? item.SortName ?? item.Name : item[sort];
+      const left = value(a), right = value(b);
+      return direction * (typeof left === 'number' && typeof right === 'number' ? left-right : String(left ?? '').localeCompare(String(right ?? '')));
+    });
     const start = Number(q.get('startindex') || 0), limit = Number(q.get('limit') || items.length); result = { Items: items.slice(start, start + limit), TotalRecordCount: items.length, StartIndex: start };
   } else if (/\/Images\//.test(p)) { res.writeHead(404); res.end(); return; }
   else if (/\/Subtitles\/\d+\/Stream\.srt$/.test(p) && videoFile) {

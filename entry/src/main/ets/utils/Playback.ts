@@ -1,7 +1,7 @@
 import { MediaItem, MediaStream } from '../model/Models';
 
 export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number }
-export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string }
+export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string }
 
 // Unknown season numbers in old caches only allow continuation within the known season.
 export function followingEpisode(current: MediaItem, items: MediaItem[]): MediaItem | undefined {

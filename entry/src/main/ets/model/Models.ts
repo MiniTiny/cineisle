@@ -33,6 +33,7 @@ export interface MediaItem {
   DateCreated?: string;
   CollectionType?: string;
   OriginalTitle?: string;
+  SortName?: string;
   OfficialRating?: string;
   Genres?: string[];
   PremiereDate?: string;
@@ -45,6 +46,7 @@ export interface MediaItem {
   MediaStreams?: MediaStream[];
   ProductionYear?: number;
   CommunityRating?: number;
+  CriticRating?: number;
   RunTimeTicks?: number;
   SeriesId?: string;
   SeriesName?: string;
@@ -68,8 +70,12 @@ export class PlaybackRoute {
   offline: boolean = false;
   filePath: string = '';
   sources: MediaSource[] = [];
+  subtitles: DownloadSubtitle[] = [];
 }
+export interface DownloadSubtitle { index: number; title: string; language: string; path: string; state: string }
 export class DownloadRecord {
+  subtitles?: DownloadSubtitle[];
+  subtitleState?: string;
   mediaSourceId?: string;
   id: string = '';
   item: MediaItem = { Id: '', Name: '', Type: '' };

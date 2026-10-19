@@ -9,6 +9,7 @@ import { rankActors, safeItemId, uniqueItems } from '../utils/Protocol';
 import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
 import { PersistentDownload } from './PersistentDownload';
+import { OfflineSubtitles } from './OfflineSubtitles';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
 import { initializeStrings, text } from '../utils/Strings';
@@ -158,6 +159,29 @@ export class AppService {
     return AppService.client;
   }
 
+  static async loadAutoNext(offline: boolean = false): Promise<boolean> {
+    const client = AppService.requireClient(); const store = AppService.experience;
+    const state = store?.snapshot();
+    if (state?.autoNextMode === 'on' || state?.autoNextMode === 'off') { return state.autoNextMode === 'on'; }
+    if (offline || state?.offline) { return state?.serverAutoNext ?? true; }
+    try {
+      const enabled = await client.autoNextEnabled();
+      if (client !== AppService.client || store !== AppService.experience) { throw new Error('login_required'); }
+      store?.update((next: ExperienceState) => { next.serverAutoNext = enabled; });
+      const latest = store?.snapshot();
+      return latest?.autoNextMode === 'on' ? true : latest?.autoNextMode === 'off' ? false : enabled;
+    } catch (e) {
+      if (client !== AppService.client || store !== AppService.experience || !connectionFailure(e as Error)) { throw e as Error; }
+      return store?.snapshot().serverAutoNext ?? true;
+    }
+  }
+
+  static saveAutoNext(mode: string): void {
+    AppService.requireClient();
+    if (!['server', 'on', 'off'].includes(mode) || !AppService.experience) { throw new Error('auto_next_save_failed'); }
+    AppService.experience.update((next: ExperienceState) => { next.autoNextMode = mode; });
+  }
+
   static async sync(progress: (message: string) => void): Promise<void> {
     if (AppService.experience?.snapshot().offline) { throw new Error('offline_mode_enabled'); }
     if (AppService.syncing) { throw new Error('sync_active'); }
@@ -221,7 +245,8 @@ export class AppService {
     const route = new PlaybackRoute(); route.item = item;
     const record = AppService.downloads.find((record: DownloadRecord) => record.id === item.Id && record.state === 'complete');
     if (!sourceId && record && fs.accessSync(record.path)) {
-      route.url = fileUri.getUriFromPath(record.path); route.filePath = record.path; route.offline = true; return route;
+      route.url = fileUri.getUriFromPath(record.path); route.filePath = record.path; route.offline = true;
+      route.mediaSourceId = record.mediaSourceId ?? ''; route.subtitles = record.subtitles ?? []; return route;
     }
     if (offlineOnly) { throw new Error('next_not_downloaded'); }
     const client = AppService.requireClient();
@@ -305,6 +330,7 @@ export class AppService {
     const record = new DownloadRecord(); record.id = item.Id; record.item = item; record.mediaSourceId = source.Id;
     const extension = /^[a-zA-Z0-9]+$/.test(source.Container ?? '') ? source.Container : 'media';
     record.path = `${local.directory}/${safeItemId(item.Id)}.${extension}`;
+    record.subtitles = OfflineSubtitles.plan(record, source, local.directory); record.subtitleState = record.subtitles.length ? 'pending' : 'ready';
     if (PersistentDownload.available()) {
       const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record);
       AppService.downloads.push(record);
@@ -312,6 +338,7 @@ export class AppService {
       try { await PersistentDownload.create(AppService.context, record, client.stream(item.Id, source.Id), owned, save); }
       catch (e) { AppService.downloads = AppService.downloads.filter((r: DownloadRecord) => r !== record); if (client === AppService.client) { local.saveDownloads(AppService.downloads); } throw e as Error; }
       if (preference?.rememberDownloadSource) { AppService.experience?.update((next: ExperienceState) => { next.sourcePreference = source.Name || source.Container || ''; }); }
+      await AppService.cacheSubtitles(record, client, local);
       return;
     }
     const task = await request.downloadFile(AppService.context, { url: client.stream(item.Id, source.Id),
@@ -344,6 +371,28 @@ export class AppService {
       local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); AppService.pumpDownloads();
     });
     AppService.downloadListener?.();
+    await AppService.cacheSubtitles(record, client, local);
+  }
+
+  private static async cacheSubtitles(record: DownloadRecord, client: JellyfinClient, local: LocalStore): Promise<void> {
+    const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record);
+    await AppService.mutation(`subtitles:${record.id}`, async () => {
+      await OfflineSubtitles.fetch(record, client, owned, () => { if (owned()) { local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); } });
+    });
+  }
+
+  static async retrySubtitles(record: DownloadRecord): Promise<void> {
+    const client = AppService.requireClient(); const local = AppService.local;
+    if (!local || !AppService.downloads.includes(record) || record.state !== 'complete') { throw new Error('offline_subtitle_failed'); }
+    if (AppService.experience?.snapshot().offline) { throw new Error('offline_mode_enabled'); }
+    const info = await client.playbackInfo(record.id);
+    if (client !== AppService.client || local !== AppService.local || !AppService.downloads.includes(record)) { throw new Error('login_required'); }
+    const source = info.MediaSources.find((s: MediaSource) => s.Id === record.mediaSourceId);
+    if (!source) { throw new Error('no_media_source'); }
+    const plan = OfflineSubtitles.plan(record, source, local.directory);
+    record.subtitles = plan.map((subtitle) => record.subtitles?.find((old) => old.index === subtitle.index && old.state === 'ready') ?? subtitle);
+    record.subtitleState = 'pending'; local.saveDownloads(AppService.downloads);
+    await AppService.cacheSubtitles(record, client, local);
   }
 
   static async retryDownload(record: DownloadRecord): Promise<void> {
@@ -548,6 +597,7 @@ export class AppService {
       AppService.tasks.delete(record.id);
     }
     AppService.downloads = AppService.downloads.filter((item: DownloadRecord) => item.id !== record.id);
+    OfflineSubtitles.remove(record);
     if (fs.accessSync(record.path)) { fs.unlinkSync(record.path); }
     AppService.local?.saveDownloads(AppService.downloads);
     AppService.downloadListener?.();
