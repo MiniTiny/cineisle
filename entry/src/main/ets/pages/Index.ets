@@ -9,6 +9,7 @@ import { PinGate } from '../components/PinGate';
 import { PublicUserPicker } from '../components/PublicUserPicker';
 import { ServerDiscoveryPicker } from '../components/ServerDiscoveryPicker';
 import { DiscoveredServer } from '../utils/ServerDiscovery';
+import { NetworkPolicy } from '../utils/NetworkOptions';
 import common from '@ohos.app.ability.common';
 import router from '@ohos.router';
 import { errorText, text } from '../utils/Strings';
@@ -233,7 +234,7 @@ struct Index {
         if (this.current(version, client)) { this.items = items; this.total = items.length; }
       } else {
         const stored = AppService.local?.home() ?? [];
-        const preview = stored.length ? stored : cachedHome(AppService.snapshot);
+        const preview = NetworkPolicy.cacheAllowed() ? (stored.length ? stored : cachedHome(AppService.snapshot)) : [];
         this.homeLoader = new ProgressiveHome(client, (value: HomeUpdate) => {
           if (!this.current(version, client)) { return; }
             this.homeSections = value.sections.map((section: HomeSection): HomeSection => ({ id: section.id, kind: section.kind, name: section.name, libraryId: section.libraryId, collectionType: section.collectionType, items: applyPending(section.items, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []) }));
@@ -250,7 +251,7 @@ struct Index {
       this.message = errorText(e as Error);
       // A failed append must retain its list and offset so the same page can be retried.
       if (more) { return; }
-      if (!connectionFailure(e as Error)) { this.homeSections = []; return; }
+      if (!NetworkPolicy.cacheAllowed(this.offline) || !connectionFailure(e as Error)) { this.homeSections = []; return; }
       try { this.useCache(); }
       catch (cacheError) { this.message += ' · ' + errorText(cacheError as Error); this.items = []; this.total = 0; }
     } finally { if (version === this.generation && AppService.client === client) { this.busy = false; } }

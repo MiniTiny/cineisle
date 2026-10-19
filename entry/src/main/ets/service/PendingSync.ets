@@ -3,6 +3,7 @@ import workScheduler from '@ohos.resourceschedule.workScheduler';
 import connection from '@ohos.net.connection';
 import { BusinessError } from '@ohos.base';
 import { AppLock } from './AppLock';
+import { NetworkPreferences } from './NetworkPreferences';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
 import { ExperienceStore } from './ExperienceStore';
@@ -77,6 +78,7 @@ export class PendingSync {
   }
   private static async drainAccounts(): Promise<void> {
     const context = PendingSync.context; if (!context || !AppLock.permit()) { return; }
+    try { await NetworkPreferences.load(context); } catch (e) { /* Retain bounded defaults/last committed policy. */ }
     const generation = PendingSync.generation; const deadline = Date.now() + 80000;
     let retryAt = Number.MAX_SAFE_INTEGER;
     for (const account of await SessionStore.list()) {

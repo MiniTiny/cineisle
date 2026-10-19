@@ -1787,6 +1787,66 @@
     {
       "name": "discovery_verify_failed",
       "value": "无法确认服务器，请重试或手动填写地址。"
+    },
+    {
+      "name": "api_network_group",
+      "value": "API 连接与缓存"
+    },
+    {
+      "name": "api_network_hint",
+      "value": "全应用共用，每项填 1–120 秒，保存后用于新发起的 API 请求。单次 HTTP 总时限包含连接与读取；读取超时使用鸿蒙原生语义。视频、图片、系统下载和局域网发现有独立传输策略。"
+    },
+    {
+      "name": "network_request_seconds",
+      "value": "单次 HTTP 总时限（秒）"
+    },
+    {
+      "name": "network_connect_seconds",
+      "value": "连接超时（秒）"
+    },
+    {
+      "name": "network_read_seconds",
+      "value": "读取超时（秒）"
+    },
+    {
+      "name": "network_auto_cache",
+      "value": "连接失败时自动使用账户缓存"
+    },
+    {
+      "name": "network_cache_hint",
+      "value": "关闭后不自动退回缓存。手动离线、已下载媒体和待回传修改继续保留；需要保存后生效。"
+    },
+    {
+      "name": "network_options_save",
+      "value": "保存网络设置"
+    },
+    {
+      "name": "network_options_reset",
+      "value": "恢复网络默认值"
+    },
+    {
+      "name": "network_options_invalid",
+      "value": "网络设置无效：超时请填写 1–120 的整数秒。"
+    },
+    {
+      "name": "network_options_load_failed",
+      "value": "无法读取网络设置，暂时使用默认值或最近已保存值。"
+    },
+    {
+      "name": "network_options_save_failed",
+      "value": "网络设置保存失败，保留原有设置及当前输入。"
+    },
+    {
+      "name": "network_options_restore_failed",
+      "value": "网络设置回滚失败，请重新打开页面并确认设置。"
+    },
+    {
+      "name": "network_options_cancelled",
+      "value": "网络设置操作已取消。"
+    },
+    {
+      "name": "network_options_saved",
+      "value": "网络设置已保存，新请求生效。"
     }
   ]
 }
