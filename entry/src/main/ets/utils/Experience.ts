@@ -1,7 +1,7 @@
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
 
-export interface PendingEdit { id: string; field: string; value: boolean; revision: number; item?: MediaItem }
+export interface PendingEdit { id: string; field: string; value: boolean; revision: number; item?: MediaItem; localOnly?: boolean }
 export interface PendingPosition { id: string; ticks: number; revision: number; item: MediaItem }
 export interface Follow { id: string; acknowledged: string[] }
 export class ExperienceState {
@@ -185,5 +185,5 @@ export function validExperience(value: ExperienceState): boolean {
     typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && ['', 'Movie', 'Series', 'Episode'].includes(value.favoriteCategory) && ['name', 'nameDesc', 'continue'].includes(value.favoriteOrder) &&
     Array.isArray(value.follows) && value.follows.every((f: Follow) => !!f && typeof f.id === 'string' && Array.isArray(f.acknowledged) && f.acknowledged.every((id: string) => typeof id === 'string')) &&
     Array.isArray(value.positions) && value.positions.every((p: PendingPosition) => !!p && typeof p.id === 'string' && Number.isSafeInteger(p.ticks) && p.ticks >= 0 && Number.isSafeInteger(p.revision) && !!p.item && p.item.Id === p.id) &&
-    Array.isArray(value.pending) && value.pending.every((e: PendingEdit) => !!e && typeof e.id === 'string' && ['favorite', 'played'].includes(e.field) && typeof e.value === 'boolean' && Number.isSafeInteger(e.revision) && (e.item === undefined || (!!e.item && e.item.Id === e.id && typeof e.item.Name === 'string' && typeof e.item.Type === 'string')));
+    Array.isArray(value.pending) && value.pending.every((e: PendingEdit) => !!e && typeof e.id === 'string' && ['favorite', 'played'].includes(e.field) && typeof e.value === 'boolean' && (e.localOnly === undefined || typeof e.localOnly === 'boolean') && Number.isSafeInteger(e.revision) && (e.item === undefined || (!!e.item && e.item.Id === e.id && typeof e.item.Name === 'string' && typeof e.item.Type === 'string')));
 }

@@ -89,7 +89,7 @@ export class PendingSync {
       const local = active && sessionKey(active.client.session) === account.key ? active.local : new LocalStore(context, session);
       const store = active && local === active.local ? active.store : new ExperienceStore(local);
       const state = store.snapshot();
-      const stamp = PendingSync.stamp(state);
+      let stamp = PendingSync.stamp(state);
       if (state.offline || (!state.pending.length && !state.positions.length)) { continue; }
       if (state.syncBlocked || (state.syncAttempts ?? 0) >= 5) { PendingSync.state(state.syncBlocked ? 'sync_auth_required' : 'sync_retry_exhausted'); continue; }
       if ((state.syncNextAt ?? 0) > Date.now()) { retryAt = Math.min(retryAt, state.syncNextAt!); continue; }
@@ -102,6 +102,9 @@ export class PendingSync {
       try {
         await local.transfer(async () => {
           if (!await allowed()) { return; }
+            store.settleLocalEdits();
+            stamp = PendingSync.stamp(store.snapshot());
+            if (!store.snapshot().pending.length && !store.snapshot().positions.length) { return; }
           await client.validateAccount();
           await PendingSync.flush(client, store, allowed);
         });
@@ -128,10 +131,12 @@ export class PendingSync {
     }
   }
   private static stamp(state: ExperienceState): string {
-    return state.pending.map((p: PendingEdit) => `${p.id}/${p.field}/${p.revision}`).join('|') + ':' +
+    return state.pending.map((p: PendingEdit) => `${p.id}/${p.field}/${p.revision}/${p.value}/${p.localOnly ?? false}`).join('|') + ':' +
       state.positions.map((p: PendingPosition) => `${p.id}/${p.revision}`).join('|');
   }
   static async flush(client: JellyfinClient, store: ExperienceStore, allowed: () => Promise<boolean>): Promise<void> {
+    if (!await allowed()) { return; }
+    store.settleLocalEdits();
     const initial = store.snapshot();
     const ids = Array.from(new Set<string>([...initial.positions.map((p: PendingPosition) => p.id), ...initial.pending.map((p: PendingEdit) => p.id)]));
     for (const id of ids) {
@@ -140,7 +145,7 @@ export class PendingSync {
       let stale = false;
       // Frozen Android sync applies played, favorite, then position. Marking unplayed resets the server position.
       for (const edit of [intent.played, intent.favorite]) {
-        if (!edit) { continue; }
+        if (!edit || edit.localOnly === true) { continue; }
         if (!await allowed()) { return; }
         if (!PendingSync.sameIntent(store.snapshot(), intent)) { stale = true; break; }
         if (edit.field === 'played') { await client.played(id, edit.value); } else { await client.favorite(id, edit.value); }
@@ -167,6 +172,7 @@ export class PendingSync {
     const latest = PendingSync.itemIntent(state, intent.id);
     return latest.position?.revision === intent.position?.revision && latest.position?.ticks === intent.position?.ticks &&
       latest.played?.revision === intent.played?.revision && latest.played?.value === intent.played?.value &&
-      latest.favorite?.revision === intent.favorite?.revision && latest.favorite?.value === intent.favorite?.value;
+      latest.played?.localOnly === intent.played?.localOnly && latest.favorite?.revision === intent.favorite?.revision &&
+      latest.favorite?.value === intent.favorite?.value && latest.favorite?.localOnly === intent.favorite?.localOnly;
   }
 }
