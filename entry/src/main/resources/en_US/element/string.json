@@ -406,7 +406,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Embedded tracks depend on device decoding support. Server and cached external text subtitles use SRT without ASS styling; image subtitles are not supported yet. Offline playback offers embedded device tracks and cached external text subtitles."
+      "value": "Embedded tracks depend on device decoding support. Server and cached text subtitles use SRT without ASS styling; image subtitles are not supported yet. Downloads try to cache convertible embedded and external text tracks; existing downloads can fetch them online. Offline playback offers native tracks and cached text subtitles."
     },
     {
       "name": "track_switch_failed",
@@ -1434,19 +1434,19 @@
     },
     {
       "name": "offline_subtitle_failed",
-      "value": "Could not cache external subtitles. Connect and retry."
+      "value": "Could not cache text subtitles. Connect and retry."
     },
     {
       "name": "offline_subtitles_pending",
-      "value": "Video downloaded; external subtitles are still being cached"
+      "value": "Video downloaded; text subtitles are still being cached"
     },
     {
       "name": "offline_subtitles_incomplete",
-      "value": "External subtitles are missing or partly failed. The video can still play."
+      "value": "Text subtitles are missing or partly failed. The video can still play."
     },
     {
       "name": "retry_subtitles",
-      "value": "Cache or retry external subtitles"
+      "value": "Cache or retry text subtitles"
     },
     {
       "name": "auto_next_server",

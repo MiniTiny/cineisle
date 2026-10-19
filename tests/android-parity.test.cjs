@@ -92,18 +92,18 @@ test('domain mapping preserves sort-name/critic/date metadata and rejects invali
   const result = await client.items(); assert.equal(result.Items[0].SortName, 'sort'); assert.equal(result.Items[0].CriticRating, 72);
   h.queue.push(h.response({ Items: [film('a', { CriticRating: 'bad' })], TotalRecordCount: 1 })); await assert.rejects(client.items(), /api_response_invalid/);
 });
-test('video download caches external text subtitles only, persists safe metadata, and restores for offline playback', async () => {
+test('video download caches external and embedded text subtitles, persists safe metadata, and restores offline playback', async () => {
   const client = h.activate(); const transport = transfer(client); const fetched = []; client.subtitle = async (...args) => { fetched.push(args); return srt; };
   await AppService.download(film('movie', { CanDownload: true })); const record = AppService.downloads[0]; transport.callbacks.complete();
-  assert.deepEqual(fetched.map(a => a[2]), [7, 8]); assert.equal(record.subtitleState, 'ready');
-  const restored = AppService.local.downloads()[0]; assert.equal(restored.subtitles.length, 2); assert.equal(validDownloads([restored], AppService.local.directory), true);
+  assert.deepEqual(fetched.map(a => a[2]), [7, 8, 9]); assert.equal(record.subtitleState, 'ready');
+  const restored = AppService.local.downloads()[0]; assert.equal(restored.subtitles.length, 3); assert.equal(validDownloads([restored], AppService.local.directory), true);
   assert.ok(!/token|https|api_key/i.test(JSON.stringify(restored))); assert.equal(fs.readFileSync(restored.subtitles[0].path, 'utf8'), srt);
-  const route = await AppService.playback(record.item, '', true); assert.equal(route.subtitles.length, 2); assert.equal(route.mediaSourceId, 'source'); assert.equal(route.offline, true);
+  const route = await AppService.playback(record.item, '', true); assert.equal(route.subtitles.length, 3); assert.equal(route.mediaSourceId, 'source'); assert.equal(route.offline, true);
 });
 test('subtitle partial failure is visible, video remains playable and retry avoids redownloading video or good subtitles', async () => {
   const client = h.activate(), t = transfer(client); client.subtitle = async (_item, _source, index) => { if (index === 8) throw Error('http_403'); return srt; };
   await AppService.download(film('movie', { CanDownload: true })); const record = AppService.downloads[0]; t.callbacks.complete();
-  assert.equal(record.state, 'complete'); assert.equal(record.subtitleState, 'failed'); assert.deepEqual(record.subtitles.map(s => s.state), ['ready','failed']);
+  assert.equal(record.state, 'complete'); assert.equal(record.subtitleState, 'failed'); assert.deepEqual(record.subtitles.map(s => s.state), ['ready','failed','ready']);
   const fetched = []; client.subtitle = async (_i,_s,index) => { fetched.push(index); return srt; }; await AppService.retrySubtitles(record);
   assert.equal(t.created(), 1); assert.deepEqual(fetched, [8]); assert.equal(record.subtitleState, 'ready');
 });
