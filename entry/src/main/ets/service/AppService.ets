@@ -124,10 +124,11 @@ export class AppService {
     if (!allowed() || !AppLock.permit()) { throw new Error('login_cancelled'); }
     await SessionStore.save(client.session); AppService.useClient(client, data);
   }
-  static async login(server: string, name: string, password: string, allowed: () => boolean = () => true): Promise<void> {
+  static async login(server: string, name: string, password: string, allowed: () => boolean = () => true, expectedServerId: string = ''): Promise<void> {
     await AppService.accountOperation(async () => {
       const target = (await SessionStore.servers()).find((s: ServerProfile) => s.addresses.includes(server.trim().replace(/\/+$/, '')));
-      await AppService.acceptClient(await JellyfinClient.login(server, name, password, target?.id ?? '', target?.addresses ?? []), allowed);
+      if (expectedServerId && target && expectedServerId !== target.id) { throw new Error('server_identity_mismatch'); }
+      await AppService.acceptClient(await JellyfinClient.login(server, name, password, expectedServerId || target?.id || '', target?.addresses ?? [], allowed), allowed);
     });
     await AppService.restoreDownloads(); await AppService.pumpDownloads();
   }

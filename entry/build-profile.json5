@@ -1,6 +1,10 @@
 {
   "apiType": "stageMode",
-  "buildOption": {},
+  "buildOption": {
+    "sourceOption": {
+      "workers": ["./src/main/ets/workers/ServerDiscoveryWorker.ets"]
+    }
+  },
   "targets": [
     {
       "name": "default"
