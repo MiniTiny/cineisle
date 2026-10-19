@@ -354,6 +354,12 @@ export interface DeleteItemRequest {
   itemId: string;
 }
 
+export interface DeviceOptionsDto {
+  Id?: number;
+  DeviceId?: string | null;
+  CustomName?: string | null;
+}
+
 export interface DeviceProfile {
   Name?: string | null;
   Id?: string | null;
@@ -465,6 +471,10 @@ export enum GeneralCommandType {
   Play = "Play",
   SetMaxStreamingBitrate = "SetMaxStreamingBitrate",
   SetPlaybackOrder = "SetPlaybackOrder"
+}
+
+export interface GetDeviceOptionsRequest {
+  id: string;
 }
 
 export interface GetEpisodesRequest {
@@ -1572,6 +1582,11 @@ export enum UnratedItem {
   LiveTvProgram = "LiveTvProgram",
   ChannelContent = "ChannelContent",
   Other = "Other"
+}
+
+export interface UpdateDeviceOptionsRequest {
+  id: string;
+  body: DeviceOptionsDto;
 }
 
 export interface UserConfiguration {

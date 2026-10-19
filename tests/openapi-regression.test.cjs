@@ -318,6 +318,22 @@ test('Quick Connect and saved-account validation use all new generated operation
 test('10.8 Quick Connect initiation uses pinned GET method and operation aliases', async () => {
   const api = new JellyfinApi(new NativeHttpTransport(session())); api.setServerVersion('10.8.13'); queue.push(response({ Code: '123456' })); await api.initiateQuickConnect(); assert.equal(last().options.method, 'GET'); assert.equal(url().pathname, '/jellyfin/QuickConnect/Initiate');
 });
+for (const version of ['10.8.13', '10.10.0']) {
+  test(version + ' reads the current device options with its stable query identity', async () => {
+    const client = new JellyfinClient(session(), version);
+    queue.push(response({ Id: 4, DeviceId: 'fixture-device', CustomName: 'Cinema' }));
+    assert.equal(await client.deviceName(() => true), 'Cinema'); route('GetDeviceOptions', '/Devices/Options');
+    assert.equal(param('id'), 'fixture-device'); assert.equal(client.session.deviceId, 'fixture-device');
+  });
+  test(version + ' updates only JSON customName and keeps Authorization device identity', async () => {
+    const client = new JellyfinClient(session(), version);
+    queue.push(response('', 204)); await client.updateDeviceName(' Cinema "One" \\ Room ', () => true);
+    route('UpdateDeviceOptions', '/Devices/Options', 'POST'); assert.equal(param('id'), 'fixture-device');
+    assert.deepEqual(JSON.parse(last().options.extraData), { CustomName: 'Cinema "One" \\ Room' });
+    assert.ok(last().options.header.Authorization.includes('Device="HarmonyOS Phone"'));
+    assert.ok(last().options.header.Authorization.includes('DeviceId="fixture-device"')); assert.equal(client.session.deviceId, 'fixture-device');
+  });
+}
 test('selected operation routes/methods and schema hash match the vendored official specification', () => {
   assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'openapi', config.schema))).digest('hex'), config.schemaSha256);
   assert.equal(spec.info.version, '10.10.0');

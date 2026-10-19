@@ -9,6 +9,7 @@ suites.unshift({ name: 'other-parity-ui', command: process.execPath, file: 'test
 suites.unshift(...['remaining-parity','auto-pip','remaining-parity-ui'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` })));
 suites.unshift(...['immersive-player','immersive-player-ui'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` })));
 suites.unshift(...['search-sections','search-sections-ui'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` })));
+suites.unshift(...['device-name','device-name-ui'].map(name => ({ name, command: process.execPath, file: `tests/${name}.test.cjs` })));
 const results = [];
 for (const suite of suites) {
   const started = Date.now(), result = spawnSync(suite.command, [suite.file], { cwd: root, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });

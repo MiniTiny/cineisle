@@ -9,7 +9,8 @@ import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
 import { ExperienceState } from '../utils/Experience';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { errorText } from '../utils/Strings';
+import { errorText, text } from '../utils/Strings';
+import { deviceNameValue } from '../utils/DeviceOptions';
 import { PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
 @Entry
 @Component
@@ -17,7 +18,7 @@ struct Settings {
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
   @State viewportHeight: number = 800;
-  @StorageLink('cineIsleLocked') locked: boolean = true;
+  @StorageLink('cineIsleLocked') @Watch('deviceLockChanged') locked: boolean = true;
   @State offline: boolean = false;
   @State remember: boolean = true;
   @State preference: string = '';
@@ -32,13 +33,63 @@ struct Settings {
   @State protected: boolean = false;
   @State message: string = '';
   @State busy: boolean = false;
+  @State deviceDraft: string = '';
+  @State deviceSaved: string = '';
+  @State deviceLoaded: boolean = false;
+  @State deviceBusy: boolean = false;
+  @State deviceMessage: string = '';
+  private deviceRevision: number = 0;
+  private deviceVisible: boolean = false;
   private owner: string = '';
   private ownerClient: JellyfinClient | undefined;
   aboutToAppear(): void { this.ownerClient = AppService.client; const state = AppService.experience?.snapshot(); this.downloadMobile = state?.downloadMobile ?? false; this.downloadRoaming = this.downloadMobile && (state?.downloadRoaming ?? false); this.offline = state?.offline ?? false; this.remember = state?.rememberDownloadSource ?? true; this.preference = state?.sourcePreference ?? ''; this.protected = AppLock.enabled; this.owner = AppService.client?.session.userId ?? ''; }
   onPageShow(): void {
-    if (this.ownerClient !== AppService.client) { router.back(); return; }
+    if (this.ownerClient !== AppService.client) { this.onPageHide(); router.back(); return; }
+    this.deviceVisible = true;
     this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
+    this.loadDeviceName();
+  }
+  onPageHide(): void { this.deviceVisible = false; this.invalidateDevice(); }
+  aboutToDisappear(): void { this.onPageHide(); }
+  private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
+  private deviceLockChanged(): void { if (this.locked) { this.invalidateDevice(); } }
+  private deviceCurrent(client: JellyfinClient, revision: number, id: string): boolean {
+    return this.deviceVisible && revision === this.deviceRevision && client === this.ownerClient && client === AppService.client && client.session.deviceId === id;
+  }
+  private devicePermit(client: JellyfinClient, revision: number, id: string): boolean {
+    return this.deviceCurrent(client, revision, id) && !this.locked && AppLock.permit() && !this.offline && !(AppService.experience?.snapshot().offline ?? false);
+  }
+  private async loadDeviceName(): Promise<void> {
+    const client = this.ownerClient;
+    if (!client || this.deviceBusy || !this.devicePermit(client, this.deviceRevision, client.session.deviceId)) { return; }
+    const id = client.session.deviceId; const revision = ++this.deviceRevision;
+    this.deviceBusy = true; this.deviceLoaded = false; this.deviceMessage = '';
+    try {
+      const name = await client.deviceName(() => this.devicePermit(client, revision, id));
+      if (!this.devicePermit(client, revision, id)) { return; }
+      this.deviceSaved = name; this.deviceDraft = name; this.deviceLoaded = true;
+    } catch (e) { if (this.deviceCurrent(client, revision, id)) { this.deviceMessage = errorText(e as Error); } }
+    finally { if (this.deviceCurrent(client, revision, id)) { this.deviceBusy = false; } }
+  }
+  private async saveDeviceName(): Promise<void> {
+    const client = this.ownerClient;
+    if (!client || this.deviceBusy || !this.deviceLoaded || !this.devicePermit(client, this.deviceRevision, client.session.deviceId)) { return; }
+    let name: string;
+    try { name = deviceNameValue(this.deviceDraft); }
+    catch (e) { this.deviceMessage = errorText(e as Error); return; }
+    const id = client.session.deviceId; const revision = ++this.deviceRevision;
+    this.deviceBusy = true; this.deviceLoaded = false; this.deviceMessage = '';
+    try {
+      await client.updateDeviceName(name, () => this.devicePermit(client, revision, id));
+      if (!this.devicePermit(client, revision, id)) { return; }
+      const confirmed = await client.deviceName(() => this.devicePermit(client, revision, id));
+      if (!this.devicePermit(client, revision, id)) { return; }
+      if (confirmed !== name) { throw new Error('device_name_not_confirmed'); }
+      this.deviceSaved = confirmed; this.deviceDraft = confirmed; this.deviceLoaded = true; this.deviceMessage = text('device_name_saved');
+    } catch (e) {
+      if (this.deviceCurrent(client, revision, id)) { this.deviceMessage = text('device_name_save_failed') + ' · ' + errorText(e as Error); }
+    } finally { if (this.deviceCurrent(client, revision, id)) { this.deviceBusy = false; } }
   }
   private savePlayer(key: string = '', enabled: boolean = false): void {
     if (this.ownerClient !== AppService.client || !AppService.experience) { return; }
@@ -78,6 +129,27 @@ struct Settings {
   @Builder
   private fieldCaption(label: Resource) {
     Text(label).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+  }
+
+  @Builder
+  private deviceSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.device_name_group'), icon: $r('app.media.menu_accounts') })
+      Text($r('app.string.device_name_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      if (this.deviceLoaded) { Text($r('app.string.device_name_current', this.deviceSaved || text('device_name_default'))).fontSize(14).fontColor('#F2F3FA').width('100%') }
+      else { Text($r('app.string.device_name_unknown')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+      this.fieldCaption($r('app.string.device_name_label'))
+      TextInput({ text: this.deviceDraft, placeholder: $r('app.string.device_name_default') }).type(InputType.Normal).maxLength(64)
+        .height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12)
+        .enabled(this.deviceLoaded && !this.deviceBusy && !this.offline).accessibilityText($r('app.string.device_name_label'))
+        .onChange((value: string) => { if (this.deviceLoaded && !this.deviceBusy && !this.offline && !this.locked && AppLock.permit()) { this.deviceDraft = value; this.deviceMessage = ''; } })
+      BrandButton({ label: $r('app.string.device_name_refresh'), icon: $r('app.media.menu_sync'), available: !this.deviceBusy && !this.offline, onSelect: () => this.loadDeviceName() })
+      BrandButton({ label: $r('app.string.device_name_save'), icon: $r('app.media.menu_save'), primary: true,
+        available: this.deviceLoaded && !this.deviceBusy && !this.offline && this.deviceDraft !== this.deviceSaved, onSelect: () => this.saveDeviceName() })
+      if (this.deviceBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.offline) { Text($r('app.string.device_name_online_required')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+      if (this.deviceMessage) { Text(this.deviceMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+    }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
   }
 
   @Builder
@@ -138,13 +210,14 @@ struct Settings {
           BrandHeader({ label: $r('app.string.settings'), onBack: () => router.back() })
           Scroll() {
             Column({ space: 18 }) {
+                this.deviceSettings()
               this.playerSettings()
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.offline_group'), icon: $r('app.media.menu_offline') })
                 Row({ space: 12 }) {
                   Text($r('app.string.offline_mode')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
                   Checkbox().select(this.offline).selectedColor($r('app.color.brand_action')).flexShrink(0)
-                    .accessibilityText($r('app.string.offline_mode')).onChange((value: boolean) => { this.offline = value; this.save(); })
+                      .accessibilityText($r('app.string.offline_mode')).onChange((value: boolean) => { this.offline = value; this.save(); if (value) { this.invalidateDevice(); } })
                 }.width('100%')
               }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
               Column({ space: 12 }) {

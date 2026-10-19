@@ -40,6 +40,7 @@ const episodes = process.env.CINEISLE_VISUAL_EPISODES === '2' ? [episode, { ...e
 const catalog = [movie, show, extraMovie, season, ...episodes];
 const searchCount = Math.max(0, Math.min(180, Number(process.env.CINEISLE_VISUAL_SEARCH_ITEMS) || 0));
 const searchCatalog = Array.from({ length: searchCount }, (_, n) => item(id(1000 + n), `Island ${String(n).padStart(3, '0')}`, ['Movie', 'Series', 'Episode'][n % 3]));
+const deviceNames = new Map();
 const boxId=id(70), boxesId=id(71), box=item(boxId,'光影与潮汐 · 合集回归','BoxSet');
 if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')libraries.push(item(boxesId,'合集 · UI 测试','CollectionFolder',{CollectionType:'boxsets'}));
 const data = new Map([...catalog, ...searchCatalog, person, ...libraries].map(x => [x.Id, x]));
@@ -52,6 +53,24 @@ const server = http.createServer((req, res) => {
   routes.push({ method: req.method, path: p }); // No headers, query strings, login body or credentials.
   let result;
   if (p === '/System/Info/Public') result = { Id: id(20), ServerName: 'CineIsle Visual Fixture', Version: '10.10.0' };
+  else if (p === '/Devices/Options' && process.env.CINEISLE_VISUAL_DEVICE_OPTIONS === '1') {
+    if (process.env.CINEISLE_VISUAL_DEVICE_DENIED === '1') { res.writeHead(403); res.end(); return; }
+    const deviceId = q.get('id');
+    if (!deviceId) { res.writeHead(400); res.end(); return; }
+    if (req.method === 'GET') result = { Id: 0, DeviceId: deviceId, CustomName: deviceNames.get(deviceId) ?? 'Fixture room' };
+    else if (req.method === 'POST') {
+      let body = ''; req.on('data', chunk => { body += chunk.toString(); if (body.length > 4096) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const value = JSON.parse(body);
+          if (typeof value?.CustomName !== 'string' || Object.keys(value).some(key => key !== 'CustomName')) throw new Error('invalid fixture DTO');
+          deviceNames.set(deviceId, value.CustomName);
+          // Deliberately mutate then fail to verify an unknown write outcome is never replayed.
+          res.writeHead(process.env.CINEISLE_VISUAL_DEVICE_FAIL_AFTER_WRITE === '1' ? 503 : 204); res.end();
+        } catch (e) { res.writeHead(400); res.end(); }
+      }); return;
+    }
+  }
   else if (p === '/Users/Me') result = { Id: userId, Name: 'UI 测试', Configuration: { EnableNextEpisodeAutoPlay: process.env.CINEISLE_VISUAL_AUTONEXT === '1' } };
   else if (p === '/Users/Public') result = [{ Id: userId, Name: 'UI 测试', ServerId: id(20) }, { Id: id(90), Name: '公开用户 · 合成测试', ServerId: id(20) }];
   else if (p === '/QuickConnect/Enabled') result = true;
