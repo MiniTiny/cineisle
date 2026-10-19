@@ -117,7 +117,7 @@ test('items translate legacy facade filters using generated parameter names/type
   assert.equal(param('userId'), 'account-a'); assert.equal(param('searchTerm'), '电影 & /?#');
   assert.equal(param('recursive'), 'false'); assert.equal(param('startIndex'), '0'); assert.equal(param('limit'), '60');
   assert.deepEqual(url().searchParams.getAll('includeItemTypes'), ['Movie', 'Series', 'Episode']);
-  assert.deepEqual(url().searchParams.getAll('fields'), ['Overview', 'People', 'Genres', 'MediaSources']);
+  assert.deepEqual(url().searchParams.getAll('fields'), ['Overview', 'People', 'Genres', 'MediaSources', 'SortName', 'DateCreated']);
   assert.deepEqual(url().searchParams.getAll('personIds'), ['person-a', 'person-b']);
   assert.equal(param('filters'), 'IsFavorite'); assert.equal(param('parentId'), 'library');
 });

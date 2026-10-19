@@ -12,9 +12,10 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-regression-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
 const modules = new Map(), platform = new Map(), queue = [], requests = [];
-const assets = new Map();
+require('./download-platform.cjs').install(platform);
+const assets = new Map(), capabilities = new Set();
 let assetValue, routeParams = {}, replacedRoute;
-const fileApi = { accessSync: fs.existsSync, mkdirSync: fs.mkdirSync, readTextSync: p => fs.readFileSync(p, 'utf8'),
+const fileApi = { accessSync: fs.existsSync, mkdirSync: fs.mkdirSync, readTextSync: p => fs.readFileSync(p, 'utf8'), statSync: fs.statSync,
   openSync: (p, flags) => ({ fd: fs.openSync(p, flags) }), writeSync: fs.writeSync, fsyncSync: fs.fsyncSync,
   closeSync: file => fs.closeSync(file.fd), renameSync: fs.renameSync, unlinkSync: fs.unlinkSync,
   OpenMode: { CREATE: fs.constants.O_CREAT, WRITE_ONLY: fs.constants.O_WRONLY, TRUNC: fs.constants.O_TRUNC } };
@@ -64,7 +65,7 @@ function load(relative) {
     return load(fs.existsSync(base + '.ts') ? base + '.ts' : base + '.ets');
   };
   vm.runInThisContext('(function(require,module,exports,getContext,$r,canIUse){' + js + '\n})', { filename: file })
-    (localRequire, module, module.exports, () => context, id => ({ id }), () => false);
+    (localRequire, module, module.exports, () => context, id => ({ id }), value => capabilities.has(value));
   return module.exports;
 }
 const { AppService } = load('service/AppService.ets');
@@ -96,6 +97,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 function reset() {
+  capabilities.clear();
   const { AppLock } = load('service/AppLock.ets'); AppLock.initialized = true; AppLock.locked = false; AppLock.enabled = false; AppLock.fault = false;
   for (const entry of fs.readdirSync(directory)) fs.rmSync(path.join(directory, entry), { recursive: true, force: true });
   AppService.client = undefined; AppService.local = undefined; AppService.snapshot = new LibrarySnapshot();
@@ -420,7 +422,7 @@ test('a failed shelf retains successful home sections and reports independent fa
   const p = page(); await p.load(); assert.ok(p.homeFailures.some(f => f.message === 'latest-failed')); assert.ok(p.homeSections.some(s => s.id === 'resume')); assert.ok(p.homeSections.some(s => s.id === 'nextup')); assert.equal(p.busy, false);
 });
 
-module.exports = { assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
+module.exports = { capabilities, assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
 if (require.main === module) (async () => {
   try {
     for (const [name, fn] of tests) { reset(); await fn(); console.log('PASS ' + name); }

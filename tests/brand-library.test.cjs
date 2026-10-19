@@ -24,4 +24,18 @@ test('library content retains its search toggle alongside the combined header',(
 test('short landscape library cards reduce vertical padding while retaining the full native target',()=>{const f=render('Index',{signedIn:true,ready:true,tab:2,landscape:true,viewportWidth:760,viewportHeight:280,libraries:[{Id:'a',Name:'Library',CollectionType:'movies'}]},2),b=flat(f.roots).find(n=>n.type==='Button'&&n.attrs.accessibilityText?.[0]==='Library'),row=b.children[0];assert.equal(row.attrs.padding[0].top,8);assert.equal(row.attrs.padding[0].bottom,8);assert.equal(row.attrs.padding[0].left,16);assert.equal(b.attrs.width[0],'100%')});
 test('library directory back returns to More and keeps search/refresh available',()=>{const f=render('Index',{signedIn:true,ready:true,tab:2,libraries:[],load:()=>{}});assert.equal(button(f,'back').attrs.width[0],44);button(f,'search_hint').attrs.onClick[0]();assert.equal(f.view.searchExpanded,true);assert.ok(button(f,'refresh'));button(f,'back').attrs.onClick[0]();assert.equal(f.view.tab,4);assert.equal(f.view.mode,'');assert.equal(f.view.searchExpanded,false);assert.equal(f.settings.tab,4)});
 test('native Back follows library content to directory to More without intercepting other pages or PIN',()=>{const f=render('Index',{signedIn:true,ready:true,tab:2,mode:'library',sectionTitle:'Library',parentId:'a',load:()=>{}});assert.equal(f.view.onBackPress(),true);assert.equal(f.view.tab,2);assert.equal(f.view.mode,'');assert.equal(f.view.parentId,'');assert.equal(f.view.onBackPress(),true);assert.equal(f.view.tab,4);assert.equal(f.view.onBackPress(),false);f.view.tab=2;f.view.locked=true;assert.equal(f.view.onBackPress(),false)});
+
+test('library sorting is scrollable, account-persisted and busy selects are disabled',async()=>{
+ const f=render('Index',{signedIn:true,ready:true,tab:2,mode:'library',parentId:'lib',viewportWidth:760,viewportHeight:280,landscape:true,load:()=>{}},2);
+ const selects=flat(f.roots).filter(n=>n.type==='Select');assert.equal(selects.length,2);assert.equal(selects[0].args[0].length,6);
+ selects[0].attrs.onSelect[0](3);selects[1].attrs.onSelect[0](1);assert.equal(f.settings.librarySort,'DateCreated');assert.equal(f.settings.libraryDescending,true);
+ const busy=render('Index',{signedIn:true,tab:2,mode:'library',busy:true});assert.ok(flat(busy.roots).filter(n=>n.type==='Select').every(n=>n.attrs.enabled[0]===false));
+ assert.ok(flat(f.roots).find(n=>n.type==='GridItem'&&flat(n.children).some(c=>c.type==='Select')));
+});
+test('completed download exposes partial subtitle status and a subtitle-only retry',async()=>{
+ const r={...record('complete'),subtitleState:'failed'};const f=render('Downloads',{records:[r],category:'complete'});f.view.client=f.AppService.client;
+ assert.ok(flat(f.roots).some(n=>n.type==='Text'&&n.args[0]==='app.string.offline_subtitles_incomplete'));assert.ok(button(f,'play'));
+ await button(f,'retry_subtitles').attrs.onClick[0]();assert.deepEqual(f.events.find(e=>e[0]==='retrySubtitles'),['retrySubtitles','complete']);
+});
+
 (async()=>{for(const [n,fn]of tests){await fn();console.log('PASS '+n)}console.log(`${tests.length} brand library regressions passed. SDK callbacks do not prove native geometry or media decoding.`)})().catch(e=>{console.error(e);process.exitCode=1});

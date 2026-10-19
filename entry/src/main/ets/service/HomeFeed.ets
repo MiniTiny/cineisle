@@ -16,7 +16,7 @@ export async function loadHome(client: JellyfinClient): Promise<HomeSection[]> {
   if (resume[0].length) { sections.push({ id: 'resume', kind: 'resume', name: '', libraryId: '', items: resume[0] }); }
   if (resume[1].length) { sections.push({ id: 'nextup', kind: 'nextup', name: '', libraryId: '', items: resume[1] }); }
   libraries.forEach((library: MediaItem, index: number) => {
-    if (latest[index].length) { sections.push({ id: 'library-' + library.Id, kind: 'latest', name: library.Name, libraryId: library.Id, items: latest[index] }); }
+    if (latest[index].length) { sections.push({ id: 'library-' + library.Id, kind: 'latest', name: library.Name, libraryId: library.Id, collectionType: library.CollectionType, items: latest[index] }); }
   });
   return sections;
 }
@@ -31,7 +31,7 @@ export function cachedHome(snapshot: LibrarySnapshot): HomeSection[] {
   const sections: HomeSection[] = [];
   snapshot.libraries.filter(supported).forEach((library: MediaItem) => {
     const items = cachedItems(snapshot, 'library', '', library.Id, '');
-    if (items.length) { sections.push({ id: 'library-' + library.Id, kind: 'cached', name: library.Name, libraryId: library.Id, items: items }); }
+    if (items.length) { sections.push({ id: 'library-' + library.Id, kind: 'cached', name: library.Name, libraryId: library.Id, collectionType: library.CollectionType, items: items }); }
   });
   return sections;
 }

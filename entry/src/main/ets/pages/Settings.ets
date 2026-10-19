@@ -8,6 +8,7 @@ import router from '@ohos.router';
 import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
 import { ExperienceState } from '../utils/Experience';
+import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText } from '../utils/Strings';
 @Entry
 @Component
@@ -19,6 +20,8 @@ struct Settings {
   @State offline: boolean = false;
   @State remember: boolean = true;
   @State preference: string = '';
+  @State downloadMobile: boolean = false;
+  @State downloadRoaming: boolean = false;
   @State currentPin: string = '';
   @State nextPin: string = '';
   @State confirmation: string = '';
@@ -26,11 +29,19 @@ struct Settings {
   @State message: string = '';
   @State busy: boolean = false;
   private owner: string = '';
-  aboutToAppear(): void { const state = AppService.experience?.snapshot(); this.offline = state?.offline ?? false; this.remember = state?.rememberDownloadSource ?? true; this.preference = state?.sourcePreference ?? ''; this.protected = AppLock.enabled; this.owner = AppService.client?.session.userId ?? ''; }
-  onPageShow(): void { if (this.owner !== (AppService.client?.session.userId ?? '')) { router.back(); } }
+  private ownerClient: JellyfinClient | undefined;
+  aboutToAppear(): void { this.ownerClient = AppService.client; const state = AppService.experience?.snapshot(); this.downloadMobile = state?.downloadMobile ?? false; this.downloadRoaming = this.downloadMobile && (state?.downloadRoaming ?? false); this.offline = state?.offline ?? false; this.remember = state?.rememberDownloadSource ?? true; this.preference = state?.sourcePreference ?? ''; this.protected = AppLock.enabled; this.owner = AppService.client?.session.userId ?? ''; }
+  onPageShow(): void { if (this.ownerClient !== AppService.client) { router.back(); } }
   private save(): void {
     try { AppService.experience?.update((state: ExperienceState) => { state.offline = this.offline; state.rememberDownloadSource = this.remember; state.sourcePreference = this.preference; }); }
     catch (e) { this.message = errorText(e as Error); }
+  }
+  private saveNetwork(mobile: boolean, roaming: boolean): void {
+    if (this.ownerClient !== AppService.client || !AppService.experience) { return; }
+    try {
+      AppService.experience.update((state: ExperienceState) => { state.downloadMobile = mobile; state.downloadRoaming = mobile && roaming; });
+      this.downloadMobile = mobile; this.downloadRoaming = mobile && roaming; this.message = '';
+    } catch (e) { this.message = errorText(e as Error); }
   }
   private async changeLock(disable: boolean = false): Promise<void> {
     if (this.busy) { return; }
@@ -63,6 +74,17 @@ struct Settings {
               }.width('100%').padding(16).backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20)
               Column({ space: 12 }) {
                 BrandHeading({ label: $r('app.string.download_preferences'), icon: $r('app.media.detail_download') })
+                Row({ space: 12 }) {
+                  Text($r('app.string.download_mobile')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+                  Checkbox().select(this.downloadMobile).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                    .accessibilityText($r('app.string.download_mobile')).onChange((value: boolean) => this.saveNetwork(value, this.downloadRoaming))
+                }.width('100%')
+                Row({ space: 12 }) {
+                  Text($r('app.string.download_roaming')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+                  Checkbox().select(this.downloadRoaming).enabled(this.downloadMobile).selectedColor($r('app.color.brand_action')).flexShrink(0)
+                    .accessibilityText($r('app.string.download_roaming')).onChange((value: boolean) => this.saveNetwork(this.downloadMobile, value))
+                }.width('100%')
+                Text($r('app.string.download_network_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
                 Row({ space: 12 }) {
                   Text($r('app.string.remember_source')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
                   Checkbox().select(this.remember).selectedColor($r('app.color.brand_action')).flexShrink(0)

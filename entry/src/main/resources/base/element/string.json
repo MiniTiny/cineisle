@@ -922,7 +922,7 @@
     },
     {
       "name": "download_location_hint",
-      "value": "保存在当前账户的应用私有目录；仅 Wi-Fi 下载，卸载应用会清除文件"
+      "value": "保存在当前账户的应用私有目录，卸载应用会清除文件"
     },
     {
       "name": "follow",
@@ -1359,6 +1359,142 @@
     {
       "name": "no_episodes",
       "value": "尚无单集"
+    },
+    {
+      "name": "library_sort",
+      "value": "排序依据"
+    },
+    {
+      "name": "library_order",
+      "value": "排列方向"
+    },
+    {
+      "name": "sort_name",
+      "value": "名称"
+    },
+    {
+      "name": "sort_rating",
+      "value": "社区评分"
+    },
+    {
+      "name": "sort_critic",
+      "value": "影评人评分"
+    },
+    {
+      "name": "sort_added",
+      "value": "入库时间"
+    },
+    {
+      "name": "sort_played",
+      "value": "观看时间"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "发行时间"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "升序"
+    },
+    {
+      "name": "sort_descending",
+      "value": "降序"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "离线字幕 · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "外挂字幕未能缓存，请联网重试"
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "视频已下载，外挂字幕尚未缓存完成"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "外挂字幕尚未缓存或部分失败，视频仍可播放"
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "缓存或重试外挂字幕"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "自动连播跟随服务器账户设置"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "已为当前账户保存本机连播偏好"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "恢复跟随服务器"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "无法读取连播偏好，自动连播暂未开启，可重试跟随服务器"
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "连播偏好保存失败，请重试"
+    },
+    {
+      "name": "media_collection",
+      "value": "合集"
+    },
+    {
+      "name": "collection_empty",
+      "value": "合集中暂无影片"
+    },
+    {
+      "name": "collection_online_required",
+      "value": "合集成员尚未离线缓存，请联网查看"
+    },
+    {
+      "name": "collection_cancelled",
+      "value": "已取消合集加载"
+    },
+    {
+      "name": "download_mobile",
+      "value": "允许蜂窝与计费网络下载"
+    },
+    {
+      "name": "download_roaming",
+      "value": "允许漫游下载"
+    },
+    {
+      "name": "download_network_hint",
+      "value": "默认仅限 Wi-Fi 且禁止计费与漫游。偏好适用于新建视频、批量队列及字幕补缓存；修改不改变已建立的任务。"
+    },
+    {
+      "name": "download_network_restricted",
+      "value": "当前网络不符合下载偏好，请连接 Wi-Fi 或调整设置"
+    },
+    {
+      "name": "download_space_check_failed",
+      "value": "无法检查下载目录的剩余空间，请稍后重试"
+    },
+    {
+      "name": "download_space_insufficient",
+      "value": "下载及已运行任务预计需要 %d MB，可用 %d MB，请先释放空间"
+    },
+    {
+      "name": "download_size_unknown",
+      "value": "媒体大小未知，空间预检无法保证完整下载所需容量"
+    },
+    {
+      "name": "gesture_seek_preview",
+      "value": "松手跳转至 %s"
+    },
+    {
+      "name": "gesture_speed_hold",
+      "value": "临时 2× · 松手恢复"
+    },
+    {
+      "name": "gesture_hint",
+      "value": "视频区域：左右双击快退5秒/快进15秒，中间双击暂停；横滑预览进度，长按临时2倍速，双指缩放切换填充。"
     }
   ]
 }

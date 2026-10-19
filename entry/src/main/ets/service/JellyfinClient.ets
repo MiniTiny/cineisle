@@ -3,7 +3,7 @@ import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../mo
 import { addresses } from '../utils/Accounts';
 import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
-import { JellyfinApi, getItemsFromQuery } from '../api/generated/JellyfinApi';
+import { ApiTransport, JellyfinApi, getItemsFromQuery } from '../api/generated/JellyfinApi';
 import { BaseItemKind, ImageType, ItemFields, MediaType, PlayMethod, RecommendationDto, AuthenticationResult, PublicSystemInfo, QuickConnectResult } from '../api/generated/Models';
 import { itemPage, listItems, mediaItem, mediaItems, playbackInfo } from '../api/DomainMapping';
 
@@ -92,6 +92,20 @@ export class JellyfinClient {
     this.session.userName = user.Name ?? this.session.userName;
   }
 
+  async autoNextEnabled(): Promise<boolean> {
+    await this.ready(); const user = await this.api.getCurrentUser();
+    if (user?.Id !== this.session.userId) { throw new Error('login_response_invalid'); }
+    if (user.Configuration != null && (typeof user.Configuration !== 'object' || Array.isArray(user.Configuration))) { throw new Error('api_response_invalid'); }
+    const enabled = user.Configuration?.EnableNextEpisodeAutoPlay;
+    if (enabled !== undefined && typeof enabled !== 'boolean') { throw new Error('api_response_invalid'); }
+    return enabled !== false;
+  }
+
+  async discoveryCandidates(): Promise<MediaItem[]> {
+    return (await this.items([{ key: 'IncludeItemTypes', value: 'Movie,Series' }, { key: 'Filters', value: 'IsUnplayed' },
+      { key: 'Limit', value: '200' }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
+  }
+
   async libraries(): Promise<MediaItem[]> {
     await this.ready();
     const result = await this.api.getUserViews({ userId: this.session.userId });
@@ -100,7 +114,7 @@ export class JellyfinClient {
 
   async items(params: QueryParam[] = []): Promise<ItemsResult> {
     const options = getItemsFromQuery([
-      { key: 'Fields', value: 'Overview,People,Genres,MediaSources' },
+      { key: 'Fields', value: 'Overview,People,Genres,MediaSources,SortName,DateCreated' },
       { key: 'Recursive', value: 'true' },
       { key: 'EnableUserData', value: 'true' }, ...params
     ]);
@@ -189,11 +203,14 @@ export class JellyfinClient {
     return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: 200 }));
   }
 
-  async subtitle(id: string, sourceId: string, index: number): Promise<string> {
+  async subtitle(id: string, sourceId: string, index: number, transfer?: ApiTransport): Promise<string> {
     if (!Number.isSafeInteger(index) || index < 0) { throw new Error('subtitle_failed'); }
     await this.ready();
-    return this.api.getSubtitle({ routeItemId: id, routeMediaSourceId: sourceId, routeIndex: index, routeFormat: 'srt', startPositionTicks: 0 });
+    const api = transfer ? new JellyfinApi(transfer) : this.api;
+    return api.getSubtitle({ routeItemId: id, routeMediaSourceId: sourceId, routeIndex: index, routeFormat: 'srt', startPositionTicks: 0 });
   }
+
+  subtitleTransport(): ApiTransport { return this.transport; }
 
   stream(id: string, sourceId: string): string {
     return this.api.getVideoStreamUrl({ itemId: id, static: true, mediaSourceId: sourceId, deviceId: this.session.deviceId });

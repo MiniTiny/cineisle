@@ -23,6 +23,7 @@ export struct MediaCard {
       case 'Series': return $r('app.string.media_series');
       case 'Episode': return $r('app.string.media_episode');
       case 'Season': return $r('app.string.media_season');
+      case 'BoxSet': return $r('app.string.media_collection');
       default: return $r('app.string.media_video');
     }
   }

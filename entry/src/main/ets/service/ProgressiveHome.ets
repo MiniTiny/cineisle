@@ -4,7 +4,7 @@ import { authorizationFailure } from '../utils/Experience';
 
 export interface HomeFailure { id: string; name: string; message: string }
 export interface HomeUpdate { sections: HomeSection[]; failures: HomeFailure[]; busy: boolean; cached: boolean }
-interface HomeRequest { id: string; kind: string; name: string; libraryId: string; fetch: () => Promise<MediaItem[]> }
+interface HomeRequest { collectionType?: string; id: string; kind: string; name: string; libraryId: string; fetch: () => Promise<MediaItem[]> }
 
 // One account/page owns this loader. Four shared slots include independent retries.
 export class ProgressiveHome {
@@ -36,7 +36,7 @@ export class ProgressiveHome {
     ];
     preview.forEach((section: HomeSection) => this.sections.set(section.id, section));
     // Cached latest shelves keep their position until the current views response establishes order.
-    preview.filter((s: HomeSection) => s.libraryId).forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: s.libraryId, fetch: () => this.client.latest(s.libraryId) }));
+    preview.filter((s: HomeSection) => s.libraryId).forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: s.libraryId, collectionType: s.collectionType, fetch: () => this.client.latest(s.libraryId) }));
     preview.filter((s: HomeSection) => s.id === 'cached').forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: '', fetch: async () => [] }));
     this.cached = preview.length > 0; this.emit();
     this.requests.slice(0, 3).forEach((r: HomeRequest) => this.enqueue(r));
@@ -58,16 +58,16 @@ export class ProgressiveHome {
     try {
       const items = await request.fetch(); if (!this.alive) { return; }
       if (request.id === 'libraries') {
-        const libraries = items.filter((i: MediaItem) => !i.CollectionType || ['movies', 'tvshows'].includes(i.CollectionType));
+        const libraries = items.filter((i: MediaItem) => !i.CollectionType || ['movies', 'tvshows', 'boxsets'].includes(i.CollectionType));
         const ids = new Set(libraries.map((i: MediaItem) => 'library-' + i.Id));
         this.sections.forEach((s: HomeSection, id: string) => { if (s.libraryId && !ids.has(id)) { this.sections.delete(id); } });
         this.requests = this.requests.slice(0, 3);
         libraries.forEach((i: MediaItem) => {
-          const next: HomeRequest = { id: 'library-' + i.Id, kind: 'latest', name: i.Name, libraryId: i.Id, fetch: () => this.client.latest(i.Id) };
+          const next: HomeRequest = { id: 'library-' + i.Id, kind: 'latest', name: i.Name, libraryId: i.Id, collectionType: i.CollectionType, fetch: () => this.client.latest(i.Id) };
           this.requests.push(next); this.enqueue(next);
         });
       } else if (items.length) {
-        this.sections.set(request.id, { id: request.id, kind: request.kind, name: request.name, libraryId: request.libraryId, items: items });
+        this.sections.set(request.id, { id: request.id, kind: request.kind, name: request.name, libraryId: request.libraryId, collectionType: request.collectionType, items: items });
       } else { this.sections.delete(request.id); }
       this.errors.delete(request.id);
     } catch (e) {

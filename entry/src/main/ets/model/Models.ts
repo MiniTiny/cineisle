@@ -1,3 +1,4 @@
+import { DownloadNetwork } from '../utils/Downloads';
 // UI/cache domain models. Jellyfin wire DTOs are generated under api/generated.
 export class Session {
   server: string = '';
@@ -33,6 +34,7 @@ export interface MediaItem {
   DateCreated?: string;
   CollectionType?: string;
   OriginalTitle?: string;
+  SortName?: string;
   OfficialRating?: string;
   Genres?: string[];
   PremiereDate?: string;
@@ -45,6 +47,7 @@ export interface MediaItem {
   MediaStreams?: MediaStream[];
   ProductionYear?: number;
   CommunityRating?: number;
+  CriticRating?: number;
   RunTimeTicks?: number;
   SeriesId?: string;
   SeriesName?: string;
@@ -68,8 +71,14 @@ export class PlaybackRoute {
   offline: boolean = false;
   filePath: string = '';
   sources: MediaSource[] = [];
+  subtitles: DownloadSubtitle[] = [];
 }
+export interface DownloadSubtitle { index: number; title: string; language: string; path: string; state: string }
 export class DownloadRecord {
+  network?: DownloadNetwork;
+  expectedSize?: number;
+  subtitles?: DownloadSubtitle[];
+  subtitleState?: string;
   mediaSourceId?: string;
   id: string = '';
   item: MediaItem = { Id: '', Name: '', Type: '' };
@@ -97,6 +106,6 @@ export class LibrarySnapshot {
 
 export interface LibraryMembership { libraryId: string; itemIds: string[] }
 
-export interface HomeSection { id: string; kind: string; name: string; libraryId: string; items: MediaItem[] }
+export interface HomeSection { id: string; kind: string; name: string; libraryId: string; items: MediaItem[]; collectionType?: string }
 
 export interface MediaLink { Name?: string; Url?: string }

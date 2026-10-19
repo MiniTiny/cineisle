@@ -9,9 +9,10 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-player-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
 const cache = new Map(), platform = new Map(), nativePlayers = [], nativeQueue = [], httpQueue = [], requests = [];
+require('./download-platform.cjs').install(platform);
 let routeParams = {}, closes = 0;
 const fileApi = { accessSync: fs.existsSync, openSync: p => ({ fd: fs.openSync(p, 'r') }),
-  closeSync: file => { closes++; fs.closeSync(file.fd); }, statSync: fs.statSync, OpenMode: { READ_ONLY: 0 } };
+  closeSync: file => { closes++; fs.closeSync(file.fd); }, statSync: fs.statSync, readTextSync: p => fs.readFileSync(p, 'utf8'), OpenMode: { READ_ONLY: 0 } };
 platform.set('@ohos.file.fs', fileApi);
 platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 for (const id of ['@ohos.app.ability.common', '@ohos.request', '@ohos.resourceManager', '@ohos.security.asset']) platform.set(id, {});
@@ -88,6 +89,7 @@ function rig(overrides = {}) {
 const tests = [];
 function test(name, fn) { tests.push([name, fn]); }
 function reset() {
+  AppService.loadAutoNext = async () => true;
   const { AppLock } = load('service/AppLock.ets'); AppLock.initialized = true; AppLock.locked = false; AppLock.enabled = false; AppLock.fault = false; systemPlatform.reset(); nativePlayers.length = 0; nativeQueue.length = 0; httpQueue.length = 0; requests.length = 0; AppService.client = client(); AppService.downloads = []; AppService.snapshot = new LibrarySnapshot(); routeParams = {}; }
 
 test('queue sorts numerically, crosses seasons and ignores unrelated series and duplicates of current episode', () => {
@@ -223,11 +225,11 @@ test('actual page auto-advances once from completion with next episode at zero a
 });
 test('actual page next failure stops and manual retry loads the same immediate next episode', async () => {
   const original = AppService.nextPlayback; let calls = 0; AppService.nextPlayback = async () => { if (++calls === 1) throw new Error('offline'); return route(episode('e2', 1, 2)); };
-  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); p.surfaceId = 's'; await p.completed(); assert.equal(p.busy, false); assert.equal(p.route.item.Id, 'e1'); assert.equal(p.message, 'next_episode_failed'); await p.system.next(); assert.equal(p.route.item.Id, 'e2'); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
+  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); await settle(); p.surfaceId = 's'; await p.completed(); assert.equal(p.busy, false); assert.equal(p.route.item.Id, 'e1'); assert.equal(p.message, 'next_episode_failed'); await p.system.next(); assert.equal(p.route.item.Id, 'e2'); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
 });
 test('page hidden/exited while fetching next episode never starts it', async () => {
   const original = AppService.nextPlayback, pending = deferred(); AppService.nextPlayback = () => pending.promise;
-  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); const finishing = p.completed(); p.onPageHide(); pending.resolve(route(episode('e2', 1, 2))); await finishing; assert.equal(p.route.item.Id, 'e1'); assert.equal(nativePlayers.length, 0); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
+  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); await settle(); const finishing = p.completed(); p.onPageHide(); pending.resolve(route(episode('e2', 1, 2))); await finishing; assert.equal(p.route.item.Id, 'e1'); assert.equal(nativePlayers.length, 0); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
 });
 test('actual page source switch preserves position and pause, fails without losing prior route', async () => {
   const original = AppService.playback;
@@ -261,12 +263,12 @@ test('episode total changing between pages is rejected instead of declaring end 
 test('completed movie and terminal episode do not loop', async () => {
   const original = AppService.nextPlayback; let calls = 0; AppService.nextPlayback = async () => { calls++; return undefined; };
   try { routeParams = route({ Id: 'film', Name: 'film', Type: 'Movie' }); const movie = new Player(); movie.aboutToAppear(); await movie.completed(); assert.equal(calls, 0); movie.aboutToDisappear();
-    routeParams = route(); const p = new Player(); p.aboutToAppear(); await p.completed(); await p.completed(); assert.equal(calls, 1); assert.equal(p.message, 'queue_finished'); p.aboutToDisappear();
+    routeParams = route(); const p = new Player(); p.aboutToAppear(); p.surfaceId = 's'; await p.controller.open(p.route, 's'); await settle(); await p.completed(); await p.completed(); assert.equal(calls, 1); assert.equal(p.message, 'queue_finished'); p.aboutToDisappear();
   } finally { AppService.nextPlayback = original; }
 });
 test('disabling autoplay during next request leaves the completed episode in place', async () => {
   const original = AppService.nextPlayback, pending = deferred(); AppService.nextPlayback = () => pending.promise;
-  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); const finishing = p.completed(); p.autoNext = false; pending.resolve(route(episode('e2', 1, 2))); await finishing; assert.equal(p.route.item.Id, 'e1'); assert.equal(nativePlayers.length, 0); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
+  try { routeParams = route(); const p = new Player(); p.aboutToAppear(); await settle(); const finishing = p.completed(); p.autoNext = false; pending.resolve(route(episode('e2', 1, 2))); await finishing; assert.equal(p.route.item.Id, 'e1'); assert.equal(nativePlayers.length, 0); p.aboutToDisappear(); } finally { AppService.nextPlayback = original; }
 });
 test('exiting during source request cannot restore a route or create a new player', async () => {
   const original = AppService.playback, pending = deferred(); AppService.playback = () => pending.promise;

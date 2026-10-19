@@ -9,13 +9,13 @@ export function mediaItem(dto: BaseItemDto): MediaItem {
     (dto.UserData != undefined && (typeof dto.UserData !== 'object' || Array.isArray(dto.UserData)))) { throw new Error('api_response_invalid'); }
   const result: MediaItem = {
     Id: dto.Id, Name: dto.Name, Type: dto.Type, CollectionType: dto.CollectionType ?? undefined,
-    OriginalTitle: dto.OriginalTitle ?? undefined, OfficialRating: dto.OfficialRating ?? undefined,
+    OriginalTitle: dto.OriginalTitle ?? undefined, SortName: dto.SortName ?? undefined, OfficialRating: dto.OfficialRating ?? undefined,
     Genres: dto.Genres ?? undefined, PremiereDate: dto.PremiereDate ?? undefined, EndDate: dto.EndDate ?? undefined,
     Status: dto.Status ?? undefined, CanDownload: dto.CanDownload ?? undefined, CanDelete: dto.CanDelete ?? undefined,
     PlayAccess: dto.PlayAccess ?? undefined, RemoteTrailers: dto.RemoteTrailers ? links(dto.RemoteTrailers) : undefined,
     MediaStreams: dto.MediaStreams ? streams(dto.MediaStreams) : undefined,
     Overview: dto.Overview ?? undefined, DateCreated: dto.DateCreated ?? undefined, ProductionYear: dto.ProductionYear ?? undefined,
-    CommunityRating: dto.CommunityRating ?? undefined, RunTimeTicks: dto.RunTimeTicks ?? undefined,
+    CommunityRating: dto.CommunityRating ?? undefined, CriticRating: dto.CriticRating ?? undefined, RunTimeTicks: dto.RunTimeTicks ?? undefined,
     SeriesId: dto.SeriesId ?? undefined, SeriesName: dto.SeriesName ?? undefined, SeasonId: dto.SeasonId ?? undefined,
     IndexNumber: dto.IndexNumber ?? undefined, ParentIndexNumber: dto.ParentIndexNumber ?? undefined,
     ImageTags: dto.ImageTags ? { Primary: dto.ImageTags['Primary'] ?? undefined } : undefined,
