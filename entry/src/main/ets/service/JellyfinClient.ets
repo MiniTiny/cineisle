@@ -30,9 +30,9 @@ export class JellyfinClient {
   }
 
   onEndpointChange(listener: (address: string) => void): void { this.transport.endpointChanged = listener; }
-  static async inspectServer(server: string): Promise<PublicSystemInfo> {
+  static async inspectServer(server: string, transport?: ApiTransport): Promise<PublicSystemInfo> {
     const session = new Session(); session.server = normalizeServer(server); session.deviceId = util.generateRandomUUID();
-    const info = await new JellyfinClient(session).api.getPublicSystemInfo();
+    const info = transport ? await new JellyfinApi(transport).getPublicSystemInfo() : await new JellyfinClient(session).api.getPublicSystemInfo();
     if (typeof info?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(info.Id) || typeof info.Version !== 'string' || (info.ServerName != null && typeof info.ServerName !== 'string')) { throw new Error('login_response_invalid'); }
     return info;
   }
@@ -72,7 +72,7 @@ export class JellyfinClient {
     return this.transport.request<T>(path, method, params, body);
   }
 
-  static async login(server: string, name: string, password: string, expectedServerId: string = '', candidates: string[] = []): Promise<JellyfinClient> {
+  static async login(server: string, name: string, password: string, expectedServerId: string = '', candidates: string[] = [], allowed: () => boolean = () => true): Promise<JellyfinClient> {
     const session = new Session();
     session.server = normalizeServer(server); session.serverId = expectedServerId; session.addresses = addresses(Array.from(new Set([session.server, ...candidates])));
     session.deviceId = util.generateRandomUUID();
@@ -80,6 +80,7 @@ export class JellyfinClient {
     const info = await client.api.getPublicSystemInfo();
     client.useServerVersion(info?.Version ?? '');
     if (expectedServerId && info?.Id !== expectedServerId) { throw new Error('server_identity_mismatch'); }
+    if (!allowed()) { throw new Error('account_cancelled'); }
     const result = await client.api.authenticateUserByName({ body: { Username: name.trim(), Pw: password } });
     client.acceptAuthentication(info, result);
     return client;

@@ -7,6 +7,8 @@ import { BrandHeading } from '../components/BrandHeading';
 import { BrandHeader } from '../components/BrandHeader';
 import { PinGate } from '../components/PinGate';
 import { PublicUserPicker } from '../components/PublicUserPicker';
+import { ServerDiscoveryPicker } from '../components/ServerDiscoveryPicker';
+import { DiscoveredServer } from '../utils/ServerDiscovery';
 import { AppService } from '../service/AppService';
 import { SessionStore } from '../service/SessionStore';
 import { JellyfinClient } from '../service/JellyfinClient';
@@ -14,7 +16,7 @@ import { QuickConnectLogin } from '../service/QuickConnectLogin';
 import { connectionFailure } from '../utils/Experience';
 import { AccountSummary, ServerProfile } from '../utils/Accounts';
 import { text, errorText } from '../utils/Strings';
-interface AccountsRoute { server?: string; quick?: boolean }
+interface AccountsRoute { server?: string; quick?: boolean; expectedServerId?: string }
 @Entry
 @Component
 struct Accounts {
@@ -42,10 +44,11 @@ struct Accounts {
   private quick: QuickConnectLogin = new QuickConnectLogin();
   private timer: number = -1;
   private revision: number = 0;
-  private visible: boolean = false;
+  @State visible: boolean = false;
+  private discoveredId: string = '';
   aboutToAppear(): void {
     const route = router.getParams() as AccountsRoute;
-    this.server = route?.server ?? ''; this.adding = !!route?.quick; this.quickEntry = !!route?.quick; this.reload();
+    this.server = route?.server ?? ''; this.discoveredId = route?.expectedServerId ?? ''; this.adding = !!route?.quick; this.quickEntry = !!route?.quick; this.reload();
   }
   onPageShow(): void { this.visible = true; this.reload(); }
   onPageHide(): void { this.visible = false; this.cancelQuick(); this.password = ''; ++this.revision; }
@@ -59,13 +62,13 @@ struct Accounts {
   private async openHome(): Promise<void> { await router.replaceUrl({ url: 'pages/Index' }); router.clear(); }
   private async login(): Promise<void> {
     if (this.busy || this.quickCode) { return; } this.busy = true; this.message = ''; const revision = this.revision;
-    try { await AppService.login(this.server, this.username, this.password, () => this.visible && revision === this.revision && !this.locked); if (revision === this.revision && this.visible) { await this.openHome(); } }
+    try { await AppService.login(this.server, this.username, this.password, () => this.visible && revision === this.revision && !this.locked, this.discoveredId); if (revision === this.revision && this.visible) { await this.openHome(); } }
     catch (e) { if (revision === this.revision) { this.message = errorText(e as Error); } }
     finally { this.password = ''; if (revision === this.revision) { this.busy = false; } }
   }
   private async startQuick(): Promise<void> {
     if (this.busy) { return; } this.cancelQuick(); this.busy = true; this.message = ''; this.password = ''; const revision = this.revision;
-    try { const profile = this.servers.find((s: ServerProfile) => s.addresses.includes(this.server.trim().replace(/\/+$/, ''))); const code = await this.quick.begin(this.server, profile?.id ?? '', profile?.addresses ?? []); if (revision !== this.revision || !this.visible) { this.quick.cancel(); return; } this.quickCode = code; this.top(); this.schedule(); }
+    try { const profile = this.servers.find((s: ServerProfile) => s.addresses.includes(this.server.trim().replace(/\/+$/, ''))); if (this.discoveredId && profile && this.discoveredId !== profile.id) { throw new Error('server_identity_mismatch'); } const code = await this.quick.begin(this.server, this.discoveredId || profile?.id || '', profile?.addresses ?? []); if (revision !== this.revision || !this.visible) { this.quick.cancel(); return; } this.quickCode = code; this.top(); this.schedule(); }
     catch (e) { if (revision === this.revision && (e as Error).message !== 'quick_connect_cancelled') { this.message = errorText(e as Error); } }
     finally { if (revision === this.revision) { this.busy = false; } }
   }
@@ -85,7 +88,7 @@ struct Accounts {
   private async select(account: AccountSummary): Promise<void> {
     if (this.busy) { return; } this.busy = true; this.message = ''; const revision = this.revision;
     try { await AppService.switchAccount(account.key); if (revision === this.revision && this.visible) { await this.openHome(); } }
-    catch (e) { if (revision === this.revision) { this.message = errorText(e as Error); if (['login_expired', 'permission_denied'].includes((e as Error).message)) { this.adding = true; this.server = account.address; this.username = account.userName; this.top(); } } }
+    catch (e) { if (revision === this.revision) { this.message = errorText(e as Error); if (['login_expired', 'permission_denied'].includes((e as Error).message)) { this.adding = true; this.discoveredId = ''; this.password = ''; this.serverName = ''; this.server = account.address; this.username = account.userName; this.top(); } } }
     finally { if (revision === this.revision) { this.busy = false; } }
   }
   private remove(account: AccountSummary): void {
@@ -101,9 +104,18 @@ struct Accounts {
     try {
       const inputs = this.addressText.split(/\r?\n/).map((v: string) => v.trim()).filter((v: string) => !!v);
       if (this.editingId) { await AppService.saveServer(this.editingId, this.serverName, inputs); }
-      else { const info = await JellyfinClient.inspectServer(this.server); await AppService.saveServer(info.Id!, this.serverName || info.ServerName || '', [this.server]); }
+      else { const revision = this.revision; const expected = this.discoveredId; const address = this.server; const info = await JellyfinClient.inspectServer(address); if (revision !== this.revision || !this.visible || this.locked) { return; } if (expected && info.Id !== expected) { throw new Error('server_identity_mismatch'); } await AppService.saveServer(info.Id!, this.serverName || info.ServerName || '', [address]); }
       this.endEditing(); await this.reload();
     } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
+  }
+  private selectDiscovered(server: DiscoveredServer): void {
+    if (!this.visible || this.busy || this.locked || this.quickCode || !this.adding) { return; }
+    ++this.revision; this.cancelQuick(); this.server = server.address; this.discoveredId = server.id;
+    this.username = ''; this.password = ''; this.serverName = server.name; this.message = '';
+  }
+  private changeServer(value: string): void {
+    if (value !== this.server) { ++this.revision; this.discoveredId = ''; this.username = ''; this.password = ''; this.serverName = ''; }
+    this.server = value;
   }
   private removeServer(): void {
     const id = this.editingId; const revision = this.revision;
@@ -129,7 +141,9 @@ struct Accounts {
     Column({ space: 12 }) {
       BrandHeading({ label: this.quickEntry || !!this.quickCode ? $r('app.string.quick_connect_login') : $r('app.string.add_account_server'), icon: this.quickEntry || !!this.quickCode ? $r('app.media.menu_quick') : $r('app.media.menu_add') })
       this.fieldCaption($r('app.string.server_address_label'))
-      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => { this.server = v; })
+      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => this.changeServer(v))
+      ServerDiscoveryPicker({ address: this.server, active: this.visible && this.adding && !this.quickCode,
+        available: !this.busy && !this.locked, onSelect: (server: DiscoveredServer) => this.selectDiscovered(server) })
       if (this.quickCode) {
         Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor($r('app.color.brand_accent')).letterSpacing(6 / this.fontScale)
         Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
@@ -209,7 +223,7 @@ struct Accounts {
         }.width('100%')
         Text(server.addresses.join('\n')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
         Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-          Column() { BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy, onSelect: () => { this.server = server.preferred; this.username = ''; this.adding = true; this.top(); } }) }
+          Column() { BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy, onSelect: () => { this.changeServer(server.preferred); this.discoveredId = server.id; this.username = ''; this.adding = true; this.top(); } }) }
             .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
           Column() { BrandButton({ label: $r('app.string.manage_addresses'), icon: $r('app.media.menu_settings'), available: !this.busy, onSelect: () => this.editServer(server) }) }
             .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })

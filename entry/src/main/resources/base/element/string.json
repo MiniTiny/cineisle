@@ -1739,6 +1739,54 @@
     {
       "name": "device_name_save_failed",
       "value": "保存失败或结果未确认，请先重新读取服务器名称再修改。"
+    },
+    {
+      "name": "server_discovery_hint",
+      "value": "自动搜索同一局域网约 8 秒。选择服务器后会匿名验证并填入地址，仍需登录账号。"
+    },
+    {
+      "name": "discovery_scanning",
+      "value": "正在搜索局域网服务器…"
+    },
+    {
+      "name": "discovery_verifying",
+      "value": "正在验证服务器身份…"
+    },
+    {
+      "name": "discovery_start",
+      "value": "重新搜索局域网"
+    },
+    {
+      "name": "discovery_stop",
+      "value": "停止搜索或验证"
+    },
+    {
+      "name": "discovery_empty",
+      "value": "没有发现服务器。请确认设备处于同一网络，或手动填写地址。"
+    },
+    {
+      "name": "discovery_stopped",
+      "value": "已停止，可以手动填写地址或重新搜索。"
+    },
+    {
+      "name": "discovery_limit_reached",
+      "value": "本轮搜索已达上限，可选择候选或重新搜索。"
+    },
+    {
+      "name": "discovery_failed",
+      "value": "局域网搜索失败，请检查网络后重试，或手动填写地址。"
+    },
+    {
+      "name": "discovery_cancelled",
+      "value": "搜索或验证已取消。"
+    },
+    {
+      "name": "discovery_verify_timeout",
+      "value": "验证超时，请检查服务器是否可访问后重试。"
+    },
+    {
+      "name": "discovery_verify_failed",
+      "value": "无法确认服务器，请重试或手动填写地址。"
     }
   ]
 }

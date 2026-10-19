@@ -7,6 +7,8 @@ import { BrandButton } from '../components/BrandButton';
 import { UiLayout } from '../utils/UiLayout';
 import { PinGate } from '../components/PinGate';
 import { PublicUserPicker } from '../components/PublicUserPicker';
+import { ServerDiscoveryPicker } from '../components/ServerDiscoveryPicker';
+import { DiscoveredServer } from '../utils/ServerDiscovery';
 import common from '@ohos.app.ability.common';
 import router from '@ohos.router';
 import { errorText, text } from '../utils/Strings';
@@ -36,6 +38,9 @@ struct Index {
   @State server: string = '';
   @State username: string = '';
   @State password: string = '';
+  @State discoveryVisible: boolean = false;
+  private discoveredId: string = '';
+  private loginRevision: number = 0;
   @State busy: boolean = false;
   @State message: string = '';
   @State tab: number = 1;
@@ -95,9 +100,10 @@ struct Index {
     } catch (e) { this.message = errorText(e as Error); this.ready = true; }
   }
 
-  onPageHide(): void { if (this.mode === 'search') { ++this.generation; this.busy = false; } this.homeLoader?.cancel(); AppService.unsubscribeDownloads(this.downloadChanged); AppService.unsubscribeAccount(this.accountChanged); }
+  onPageHide(): void { this.discoveryVisible = false; ++this.loginRevision; if (this.mode === 'search') { ++this.generation; this.busy = false; } this.homeLoader?.cancel(); AppService.unsubscribeDownloads(this.downloadChanged); AppService.unsubscribeAccount(this.accountChanged); }
 
   onPageShow(): void {
+    this.discoveryVisible = true;
     AppService.subscribeDownloads(this.downloadChanged); AppService.subscribeAccount(this.accountChanged);
     if (this.sessionClient !== AppService.client) { this.resetAccountState(); }
     if (this.ready && this.signedIn && !this.busy) { this.load(); }
@@ -107,10 +113,26 @@ struct Index {
     if (this.busy || !this.server.trim() || !this.username.trim()) { return; }
     this.busy = true; this.message = '';
     try {
-      await AppService.login(this.server, this.username, this.password);
+      const revision = this.loginRevision;
+      if (this.discoveredId) { await AppService.login(this.server, this.username, this.password, () => this.discoveryVisible && !this.locked && revision === this.loginRevision, this.discoveredId); }
+      else { await AppService.login(this.server, this.username, this.password); }
       this.password = ''; this.resetAccountState();
       await this.load();
     } catch (e) { this.message = errorText(e as Error); this.busy = false; }
+  }
+
+  private selectDiscovered(server: DiscoveredServer): void {
+    if (!this.discoveryVisible || !this.ready || this.busy || this.locked || this.signedIn) { return; }
+    ++this.loginRevision; this.server = server.address; this.discoveredId = server.id;
+    this.username = ''; this.password = ''; this.message = '';
+  }
+  private changeServer(value: string): void {
+    if (value !== this.server) { ++this.loginRevision; this.discoveredId = ''; this.username = ''; this.password = ''; }
+    this.server = value;
+  }
+  private openQuick(): void {
+    if (this.discoveredId) { router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true, expectedServerId: this.discoveredId } }); }
+    else { router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true } }); }
   }
 
   private params(): QueryParam[] {
@@ -134,6 +156,7 @@ struct Index {
   }
 
   private resetAccountState(): void {
+    this.discoveredId = ''; ++this.loginRevision;
     this.homeLoader?.cancel(); this.homeLoader = undefined;
     this.profiles = []; this.discoveries = []; this.homeFailures = []; this.actorQuery = ''; this.actorTag = ''; this.password = '';
     this.generation++; this.sessionClient = AppService.client; this.signedIn = this.sessionClient !== undefined;
@@ -297,8 +320,10 @@ struct Index {
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_credentials'), icon: $r('app.media.menu_login') })
           Text($r('app.string.server_address_label')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-          TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.server = value; })
+          TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => this.changeServer(value))
             .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface')).borderRadius(12).enabled(!this.busy)
+          ServerDiscoveryPicker({ address: this.server, active: this.discoveryVisible && !this.signedIn,
+            available: this.ready && !this.busy && !this.locked, onSelect: (server: DiscoveredServer) => this.selectDiscovered(server) })
           Text($r('app.string.username')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
             PublicUserPicker({ server: this.server, available: this.ready && !this.busy && !this.locked,
               onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('index-login-password'); } })
@@ -316,7 +341,7 @@ struct Index {
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_connections'), icon: $r('app.media.menu_accounts') })
           BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: this.ready && !this.busy,
-            onSelect: () => router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true } }) })
+            onSelect: () => this.openQuick() })
           BrandButton({ label: $r('app.string.accounts_servers'), icon: $r('app.media.menu_accounts'), available: this.ready && !this.busy,
             onSelect: () => router.pushUrl({ url: 'pages/Accounts' }) })
         }.width('100%').padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
