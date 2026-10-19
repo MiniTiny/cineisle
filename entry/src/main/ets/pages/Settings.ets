@@ -287,7 +287,8 @@ struct Settings {
       BrandHeading({ label: $r('app.string.ui_language_group'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.ui_language_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
       Select([{ value: text('ui_language_system') }, { value: '简体中文' }, { value: 'English' }])
-        .selected(['system', 'zh-CN', 'en-US'].indexOf(this.languageDraft)).fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
+        .selected(['system', 'zh-CN', 'en-US'].indexOf(this.languageDraft))
+        .value(this.languageDraft === 'system' ? text('ui_language_system') : this.languageDraft === 'zh-CN' ? '简体中文' : 'English').fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
         .height(UiLayout.buttonHeight(this.fontScale)).width('100%').accessibilityText($r('app.string.ui_language_group')).enabled(!this.languageBusy)
         .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index <= 2 && Number.isInteger(index)) { this.languageDraft = ['system', 'zh-CN', 'en-US'][index] as UiLanguage; } })
       BrandButton({ label: $r('app.string.ui_language_save'), icon: $r('app.media.menu_save'), primary: true,
