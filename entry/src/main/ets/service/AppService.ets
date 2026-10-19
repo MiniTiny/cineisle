@@ -17,7 +17,7 @@ import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
 import { initializeStrings, text } from '../utils/Strings';
 import { validMediaItem } from '../utils/Cache';
-import { followingEpisode } from '../utils/Playback';
+import { followingEpisode, precedingEpisode } from '../utils/Playback';
 import { firstEpisode } from '../utils/DetailPresentation';
 
 import { PlaybackPreferenceStore } from './PlaybackPreferenceStore';
@@ -316,15 +316,18 @@ export class AppService {
     return result;
   }
 
-  static async nextPlayback(route: PlaybackRoute): Promise<PlaybackRoute | undefined> {
+  static async nextPlayback(route: PlaybackRoute): Promise<PlaybackRoute | undefined> { return AppService.adjacentPlayback(route, false); }
+  static async previousPlayback(route: PlaybackRoute): Promise<PlaybackRoute | undefined> { return AppService.adjacentPlayback(route, true); }
+  private static async adjacentPlayback(route: PlaybackRoute, previous: boolean): Promise<PlaybackRoute | undefined> {
     const item = route.item;
     if (item.Type !== 'Episode' || !item.SeriesId) { return undefined; }
     const client = AppService.client;
     const episodes = route.offline ? AppService.snapshot.items : await AppService.seriesEpisodes(item.SeriesId);
-    const next = followingEpisode(item, episodes);
+    if (client !== AppService.client) { throw new Error('login_required'); }
+    const next = previous ? precedingEpisode(item, episodes) : followingEpisode(item, episodes);
     if (!next) { return undefined; }
     const result = await AppService.playback(next, '', route.offline);
-    if (!route.offline && client !== AppService.client) { throw new Error('login_required'); }
+    if (client !== AppService.client) { throw new Error('login_required'); }
     return result;
   }
 

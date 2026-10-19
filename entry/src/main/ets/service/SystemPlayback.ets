@@ -16,6 +16,8 @@ export interface SystemPlayerView {
   changed: (state: SystemPlayerState) => void;
   error: (message: string) => void;
   next: () => Promise<void>;
+  previous?: () => Promise<void>;
+  canNavigate?: () => boolean;
   stopped: () => void;
 }
 
@@ -107,7 +109,10 @@ export class SystemPlayback {
         if (![0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed)) { this.view.error(text('speed_failed')); return; }
         this.controller.setSpeed(speed); this.sync(true);
       });
-      if (this.latest.route.item.Type === 'Episode') { session.on('playNext', () => { this.next(); }); }
+      if (this.latest.route.item.Type === 'Episode') {
+        session.on('playNext', () => { this.next(); });
+        if (this.view.previous) { session.on('playPrevious', () => { this.previous(); }); }
+      }
       await session.setLaunchAbility(this.agent);
       await session.setAVMetadata(this.metadata(this.latest));
       await session.setAVPlaybackState(this.playbackState(this.latest));
@@ -251,15 +256,20 @@ export class SystemPlayback {
     if (!this.disposed && Number.isFinite(amount)) { this.controller.seek(this.controller.snapshot().position + amount); this.sync(true); }
   }
 
-  async next(): Promise<void> {
-    if (this.disposed) { return; }
+  async next(): Promise<void> { await this.navigate(false); }
+  async previous(): Promise<void> { await this.navigate(true); }
+  private async navigate(previous: boolean): Promise<void> {
+    if (this.disposed || !AppLock.permit() || this.view.canNavigate?.() === false || (previous && !this.view.previous)) { return; }
     const revision = this.commandRevision;
     await this.initialize();
     if (this.disposed || revision !== this.commandRevision) { return; }
     if (this.hidden && !this.canContinue) {
       if ((!this.backgroundEnabled && !this.pipActive) || !await this.setTask(true)) { return; }
     }
-    if (!this.disposed && revision === this.commandRevision) { this.playIntent = true; await this.view.next(); }
+    if (this.hidden && !await this.controller.hide(this.canContinue)) { return; }
+    if (!this.disposed && revision === this.commandRevision && AppLock.permit() && this.view.canNavigate?.() !== false) {
+      this.playIntent = true; if (previous) { await this.view.previous?.(); } else { await this.view.next(); }
+    }
   }
 
   private wantsAutoPiP(): boolean {
@@ -349,12 +359,13 @@ export class SystemPlayback {
       if (this.disposed) { return; }
       if (event === 'playbackStateChanged') { if (status === PiPWindow.PiPControlStatus.PLAY) { this.play(); } else { this.pause(); } }
       else if (event === 'nextVideo') { this.next(); }
+      else if (event === 'previousVideo') { this.previous(); }
       else if (event === 'fastForward') { this.skip(15000); }
       else if (event === 'fastBackward') { this.skip(-15000); }
     });
     if (status.route.item.Type === 'Episode') {
       pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_NEXT, true);
-      pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_PREVIOUS, false);
+      pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_PREVIOUS, !!this.view.previous);
     }
   }
   startPiP(automatic: boolean = false): Promise<void> {

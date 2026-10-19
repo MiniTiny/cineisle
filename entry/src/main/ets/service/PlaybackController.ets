@@ -51,6 +51,7 @@ export class PlaybackController {
   private lastReport: number = 0;
   private speed: media.PlaybackSpeed = media.PlaybackSpeed.SPEED_FORWARD_1_00_X;
   private rate: number = 1;
+  private volume: number = 1;
   private reports: Promise<void> = Promise.resolve();
   private pendingProgress: Map<number, PendingReport> = new Map();
   private client: JellyfinClient | undefined;
@@ -195,6 +196,7 @@ export class PlaybackController {
       if (!this.active(player, generation)) { return; }
       if (Number.isFinite(resume) && resume > 0 && resume < player.duration) { player.seek(resume, media.SeekMode.SEEK_CLOSEST); this.position = resume; }
       player.setSpeed(this.speed);
+      if (this.volume !== 1) { player.setVolume(this.volume); }
       if (!this.paused && !this.hidden) {
         const permitted = this.view.beforePlay ? await this.view.beforePlay() : true;
         if (permitted && this.active(player, generation) && !this.paused && !this.hidden) { await player.play(); }
@@ -202,6 +204,14 @@ export class PlaybackController {
     } catch (e) { if (this.active(player, generation)) { this.view.error(text('play_error')); } }
   }
 
+  get relativeVolume(): number { return this.volume; }
+  setVolume(value: number): boolean {
+    if (!Number.isFinite(value) || value < 0 || value > 1) { return false; }
+    try {
+      if (this.player && ['prepared', 'playing', 'paused'].includes(this.player.state)) { this.player.setVolume(value); }
+      this.volume = value; return true;
+    } catch (e) { this.view.error(text('volume_failed')); return false; }
+  }
   private emitTracks(): void { this.view.tracks(this.audio.slice(), this.subtitles.slice(), this.audioKey, this.subtitleKey); }
   private renderSubtitle(): void {
     if (this.subtitleEnded || !this.player) { this.view.subtitle(''); return; }

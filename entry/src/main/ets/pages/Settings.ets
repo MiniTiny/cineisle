@@ -48,6 +48,8 @@ struct Settings {
     else if (key === 'zoom') { next.zoom = enabled; }
     else if (key === 'maximized') { next.startMaximized = enabled; }
     else if (key === 'pip') { next.autoPiP = enabled; }
+    else if (key === 'vertical') { next.vertical = enabled; }
+    else if (key === 'brightness') { next.rememberBrightness = enabled; if (!enabled) { next.brightness = -1; } }
     else { next.back = Number(this.seekBack) * 1000; next.forward = Number(this.seekForward) * 1000; }
     if (!validPlayerOptions(next)) { this.message = getContext(this).resourceManager.getStringSync($r('app.string.player_steps_invalid').id); return; }
     try {
@@ -101,6 +103,16 @@ struct Settings {
         Text($r('app.string.player_start_maximized')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
         Checkbox().select(this.playerUi.startMaximized).selectedColor($r('app.color.brand_action'))
           .accessibilityText($r('app.string.player_start_maximized')).onChange((value: boolean) => this.savePlayer('maximized', value))
+      }.width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_vertical_gesture')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.vertical ?? true).enabled(this.playerUi.gestures).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_vertical_gesture')).onChange((value: boolean) => this.savePlayer('vertical', value))
+      }.width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_remember_brightness')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Checkbox().select(this.playerUi.rememberBrightness ?? false).selectedColor($r('app.color.brand_action'))
+          .accessibilityText($r('app.string.player_remember_brightness')).onChange((value: boolean) => this.savePlayer('brightness', value))
       }.width('100%')
       this.fieldCaption($r('app.string.player_back_seconds'))
       TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA')

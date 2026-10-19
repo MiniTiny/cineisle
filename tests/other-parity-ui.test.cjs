@@ -18,8 +18,8 @@ test('network settings native controls enforce roaming dependency and persist bo
 });
 function player(){const calls=[];const f=render('Player',{alive:true,visible:true,route:{item:{Id:'a',Name:'Film',Type:'Movie'},sources:[]},state:'playing',duration:60000,playbackPosition:20000,controller:{seek:v=>calls.push(['seek',v]),setSpeed:v=>calls.push(['speed',v])},system:{sync:()=>{},refreshAutoPiP:()=>{}}});return {...f,calls};}
 test('SDK registers exclusive one-finger pan and commits only on release',()=>{
- const f=player(),pan=f.gestures.find(g=>g.type==='PanGesture');assert.equal(pan.args[0].fingers,1);pan.callbacks.onActionStart({fingerList:[{localX:130,localY:100}],offsetX:30});pan.callbacks.onActionUpdate({offsetX:60});assert.equal(f.calls.length,0);pan.callbacks.onActionEnd();assert.deepEqual(f.calls,[['seek',35000]]);
- const cancelled=player(),p=cancelled.gestures.find(g=>g.type==='PanGesture');p.callbacks.onActionStart({fingerList:[{localX:130,localY:100}],offsetX:30});p.callbacks.onActionCancel();p.callbacks.onActionEnd();assert.equal(cancelled.calls.length,0);
+ const f=player(),pan=f.gestures.find(g=>g.type==='PanGesture');assert.equal(pan.args[0].fingers,1);pan.callbacks.onActionStart({fingerList:[{localX:130,localY:100}],offsetX:30,offsetY:0});pan.callbacks.onActionUpdate({offsetX:60,offsetY:0});assert.equal(f.calls.length,0);pan.callbacks.onActionEnd();assert.deepEqual(f.calls,[['seek',35000]]);
+ const cancelled=player(),p=cancelled.gestures.find(g=>g.type==='PanGesture');p.callbacks.onActionStart({fingerList:[{localX:130,localY:100}],offsetX:30,offsetY:0});p.callbacks.onActionCancel();p.callbacks.onActionEnd();assert.equal(cancelled.calls.length,0);
 });
 test('SDK long-press cancellation and lock restore speed; double-tap and pinch reach actual methods',()=>{
  const f=player(),hold=f.gestures.find(g=>g.type==='LongPressGesture');hold.callbacks.onAction({fingerList:[{localX:100,localY:100}]});assert.equal(f.view.speed,2);hold.callbacks.onActionCancel();assert.equal(f.view.speed,1);

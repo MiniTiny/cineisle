@@ -47,7 +47,7 @@ def contrast(first, second):
 class OriginalIconsTest(unittest.TestCase):
     def test_complete_family_matches_current_resource_files(self):
         expected = set(icons.outputs())
-        self.assertEqual(len(expected), 46)
+        self.assertEqual(len(expected), 49)
         actual = {p.name for p in MEDIA.glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_', 'player_'))}
         self.assertEqual(actual, expected)
 

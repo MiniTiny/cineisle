@@ -51,6 +51,9 @@ MENU = {
 
 # Original playback symbols share the existing round strokes and optical margins.
 PLAYER = {
+    'previous': '<path d="M18.9 4.9L8.8 12L18.9 19.1Z"/><path d="M5.2 5V19"/>',
+    'fullscreen': '<path d="M4 9V4H9M15 4H20V9M20 15V20H15M9 20H4V15"/>',
+    'exit_fullscreen': '<path d="M4 9H9V4M15 4V9H20M20 15H15V20M9 20V15H4"/>',
     'pause': '<rect x="6" y="4.4" width="3.6" height="15.2" rx="1.2"/><rect x="14.4" y="4.4" width="3.6" height="15.2" rx="1.2"/>',
     'next': '<path d="M5.1 4.9L15.2 12L5.1 19.1Z"/><path d="M18.8 5V19"/>',
     'pip': '<rect x="3.4" y="4.8" width="17.2" height="14.4" rx="2.6"/><rect x="11.4" y="11.4" width="6.2" height="4.8" rx="1"/>',

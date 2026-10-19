@@ -1494,7 +1494,7 @@
     },
     {
       "name": "gesture_hint",
-      "value": "视频区域：左右双击快退5秒/快进15秒，中间双击暂停；横滑预览进度，长按临时2倍速，双指缩放切换填充。"
+      "value": "双击快退/快进 · 横滑跳转 · 长按临时倍速 · 双指缩放；左侧纵滑调亮度，右侧调播放器音量。"
     },
     {
       "name": "public_users_load",
@@ -1571,6 +1571,90 @@
     {
       "name": "sync_auth_required",
       "value": "自动回传已暂停，请检查账户权限或重新登录后手动回传。"
+    },
+    {
+      "name": "player_fullscreen",
+      "value": "进入沉浸全屏"
+    },
+    {
+      "name": "player_exit_fullscreen",
+      "value": "退出全屏"
+    },
+    {
+      "name": "previous_episode",
+      "value": "上一集"
+    },
+    {
+      "name": "queue_first_episode",
+      "value": "已经是第一集。"
+    },
+    {
+      "name": "previous_episode_failed",
+      "value": "暂时无法播放上一集；请检查连接或本机下载。"
+    },
+    {
+      "name": "window_unavailable",
+      "value": "无法调整播放器窗口，请退出全屏后重试。"
+    },
+    {
+      "name": "screen_on_failed",
+      "value": "无法保持屏幕常亮，请检查系统设置。"
+    },
+    {
+      "name": "brightness_failed",
+      "value": "窗口亮度调整失败。"
+    },
+    {
+      "name": "volume_failed",
+      "value": "播放器音量调整失败。"
+    },
+    {
+      "name": "player_display_save_failed",
+      "value": "显示偏好保存失败，本次调整仍然有效。"
+    },
+    {
+      "name": "player_display_group",
+      "value": "亮度与夜间模式"
+    },
+    {
+      "name": "player_window_brightness",
+      "value": "窗口亮度"
+    },
+    {
+      "name": "player_brightness_value",
+      "value": "窗口亮度：%d%"
+    },
+    {
+      "name": "player_relative_volume",
+      "value": "播放器相对音量"
+    },
+    {
+      "name": "player_volume_value",
+      "value": "播放器音量：%d%"
+    },
+    {
+      "name": "player_relative_volume_hint",
+      "value": "仅调整当前播放器的相对音量；系统静音或媒体音量较低时，请使用设备音量键。"
+    },
+    {
+      "name": "player_night_mode",
+      "value": "夜间遮罩"
+    },
+    {
+      "name": "player_dim_opacity",
+      "value": "夜间遮罩暗度"
+    },
+    {
+      "name": "player_dim_value",
+      "value": "遮罩暗度：%d%"
+    },
+    {
+      "name": "player_vertical_gesture",
+      "value": "纵滑调节亮度和播放器音量"
+    },
+    {
+      "name": "player_remember_brightness",
+      "value": "记住此账户的窗口亮度"
     }
   ]
 }

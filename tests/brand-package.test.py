@@ -45,7 +45,7 @@ class BrandPackageTest(unittest.TestCase):
 
     def test_all_original_navigation_and_detail_icons_are_packaged_exactly(self):
         files = [p for p in (ROOT / 'entry/src/main/resources/base/media').glob('*.svg') if p.name.startswith(('nav_', 'detail_', 'menu_', 'player_'))]
-        self.assertEqual(len(files), 46)
+        self.assertEqual(len(files), 49)
         for file in files:
             with self.subTest(icon=file.name):
                 self.assertEqual(self.archive.read('resources/base/media/' + file.name), file.read_bytes())

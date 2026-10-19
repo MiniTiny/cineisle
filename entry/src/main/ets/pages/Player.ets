@@ -15,6 +15,9 @@ import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController } from '../service/PlaybackController';
 import { PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
+import { PlaybackWindow } from '../service/PlaybackWindow';
+import { JellyfinClient } from '../service/JellyfinClient';
+import { ExperienceState } from '../utils/Experience';
 
 @Entry
 @Component
@@ -26,7 +29,7 @@ struct Player {
   @State surfaceWidth: number = 360;
   @State surfaceHeight: number = 200;
   @State videoAspect: number = 16 / 9;
-  @StorageLink('cineIsleLocked') locked: boolean = true;
+  @StorageLink('cineIsleLocked') @Watch('windowStateChanged') locked: boolean = true;
   @State route: PlaybackRoute = new PlaybackRoute();
   @State message: string = '';
   @State reportMessage: string = '';
@@ -51,6 +54,21 @@ struct Player {
   @State pipActive: boolean = false;
   @State controlsLocked: boolean = false;
   @State zoomed: boolean = false;
+  @State immersive: boolean = false;
+  @State controlsVisible: boolean = true;
+  @State night: boolean = false;
+  @State dimOpacity: number = 0.6;
+  @State windowBrightness: number = 0.5;
+  @State volume: number = 1;
+  private window: PlaybackWindow | undefined;
+  private ownerClient: JellyfinClient | undefined;
+  private hideTimer: number = -1;
+  private panMode: string = '';
+  private panX: number = -1;
+  private panY: number = -1;
+  private displayAnchor: number = 0;
+  private brightnessTarget: number = 0.5;
+  private brightnessRevision: number = 0;
   private ui: PlayerOptions = new PlayerOptions();
   @State seekPreview: number = -1;
   @State gestureHint: string = '';
@@ -75,18 +93,23 @@ struct Player {
     this.route = router.getParams() as PlaybackRoute;
     if (!this.route?.url || !this.route.item?.Id) { router.back(); return; }
     this.alive = true;
+    this.ownerClient = AppService.client; this.immersive = true;
     this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.zoomed = this.ui.startMaximized;
+    this.dimOpacity = this.ui.dimOpacity ?? 0.6;
+    this.window = new PlaybackWindow(getContext(this) as common.UIAbilityContext, (code: string) => { if (this.alive) { this.message = text(code); this.showControls(); } });
+    if (this.ui.rememberBrightness && (this.ui.brightness ?? -1) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
+    this.syncWindow();
     if (this.route.item.Type === 'Episode') { this.restoreAutoNext(); }
     this.showPreferences(AppService.playbackPreferences.snapshot());
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
     this.controller = new PlaybackController(AppService.client, {
-      state: (state: string) => { if (this.alive) { this.state = state; if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); } },
+      state: (state: string) => { if (this.alive) { this.state = state; if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
       time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
       subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.system?.updateSubtitle(value); } },
-      error: (message: string) => { if (this.alive) { this.message = message; } },
+      error: (message: string) => { if (this.alive) { this.message = message; this.showControls(); } },
       reportError: (failed: boolean) => { if (this.alive) { this.reportMessage = failed ? text('progress_not_saved') : ''; } },
       complete: () => { this.completed(); },
       beforePlay: async () => { if (!AppLock.permit()) { return false; } return this.system ? this.system.permitPlay() : this.visible; },
@@ -143,9 +166,11 @@ struct Player {
   private connectSystem(): void {
     if (!this.controller) { return; }
     this.system = new SystemPlayback(getContext(this) as common.UIAbilityContext, this.controller, this.surface, this.route, {
-      changed: (state: SystemPlayerState) => { if (this.alive) { this.systemReady = state.ready; this.backgroundEnabled = state.backgroundEnabled; this.pipSupported = state.pipSupported; this.pipActive = state.pipActive; } },
+      changed: (state: SystemPlayerState) => { if (this.alive) { this.systemReady = state.ready; this.backgroundEnabled = state.backgroundEnabled; this.pipSupported = state.pipSupported; this.pipActive = state.pipActive; this.syncWindow(); } },
       error: (message: string) => { if (this.alive) { this.message = message; } },
       next: async () => { await this.next(); },
+      previous: async () => { await this.next(false, true); },
+      canNavigate: () => this.alive && !this.locked && !this.controlsLocked && !this.busy && this.ownerClient === AppService.client,
       stopped: () => { if (this.alive) { ++this.loadRevision; this.busy = false; this.state = 'released'; this.system = undefined; } }
     }, () => this.alive && !this.locked && !this.controlsLocked && !this.busy && this.ui.autoPiP);
     this.system.initialize();
@@ -163,10 +188,10 @@ struct Player {
     try { AppService.recordOfflinePosition(this.route.item, this.playbackPosition, completed); this.lastOfflineSave = Date.now(); }
     catch (e) { this.reportMessage = text('progress_not_saved'); }
   }
-  onBackPress(): boolean { return this.controlsLocked; }
-  aboutToDisappear(): void { this.cancelGesture(); this.saveOffline(); this.alive = false; ++this.loadRevision; if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
-  onPageHide(): void { this.cancelGesture(); this.saveOffline(); this.visible = false; if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
-  onPageShow(): void { this.visible = true; if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
+  onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }
+  aboutToDisappear(): void { this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
+  onPageHide(): void { this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
+  onPageShow(): void { this.visible = true; this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
 
   private async completed(): Promise<void> {
     if (this.finished || !this.alive) { return; }
@@ -176,19 +201,19 @@ struct Player {
     else { await this.system?.queueEnded(); }
   }
 
-  private async next(automatic: boolean = false): Promise<void> {
-    if (this.busy || !this.alive) { return; }
-    this.cancelGesture(); this.busy = true; this.message = ''; const transition = ++this.loadRevision;
+  private async next(automatic: boolean = false, previous: boolean = false): Promise<void> {
+    if (this.busy || !this.alive || this.controlsLocked || this.locked || !AppLock.permit()) { return; }
+    this.cancelGesture(); this.saveOffline(); this.busy = true; this.message = ''; this.showControls(); const transition = ++this.loadRevision; const client = AppService.client;
     try {
-      const route = await AppService.nextPlayback(this.route);
-      if (!this.alive || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && (!this.autoNextReady || !this.autoNext))) {
+      const route = previous ? await AppService.previousPlayback(this.route) : await AppService.nextPlayback(this.route);
+      if (!this.alive || this.locked || !AppLock.permit() || this.controlsLocked || client !== AppService.client || transition !== this.loadRevision || !this.system?.canAutoAdvance || (!this.visible && !this.system?.canContinue) || (automatic && (!this.autoNextReady || !this.autoNext))) {
         if (automatic) { await this.system?.queueEnded(); } return;
       }
-      if (!route) { this.message = text('queue_finished'); await this.system?.queueEnded(); return; }
+      if (!route) { this.message = text(previous ? 'queue_first_episode' : 'queue_finished'); if (automatic) { await this.system?.queueEnded(); } return; }
       this.route = route; this.finished = false; this.reportMessage = '';
       await this.controller?.open(route, this.surfaceId, 0);
-    } catch (e) { if (this.alive && transition === this.loadRevision) { this.message = text('next_episode_failed'); await this.system?.queueEnded(); } }
-    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; } }
+    } catch (e) { if (this.alive && client === AppService.client && transition === this.loadRevision) { this.message = text(previous ? 'previous_episode_failed' : 'next_episode_failed'); if (automatic) { await this.system?.queueEnded(); } } }
+    finally { if (this.alive && transition === this.loadRevision) { this.busy = false; this.showControls(); } }
   }
 
   private async source(index: number): Promise<void> {
@@ -218,14 +243,14 @@ struct Player {
   }
 
   private canGesture(): boolean {
-    return this.ui.gestures && this.alive && this.visible && !this.locked && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.pipActive &&
+    return this.ui.gestures && this.alive && this.visible && !this.locked && AppLock.permit() && !this.controlsLocked && !this.busy && !this.settingsBusy && !this.pipActive &&
       ['prepared', 'playing', 'paused', 'completed'].includes(this.state);
   }
   private insideGesture(x: number, y: number): boolean {
     return Number.isFinite(x) && Number.isFinite(y) && x >= 24 && x <= this.surfaceWidth - 24 && y >= 24 && y <= this.surfaceHeight - 24;
   }
   private cancelGesture(): void {
-    const previous = this.heldSpeed; this.heldSpeed = 0; this.seekAnchor = -1; this.seekPreview = -1; this.gestureHint = '';
+    const previous = this.heldSpeed; this.heldSpeed = 0; this.seekAnchor = -1; this.seekPreview = -1; this.gestureHint = ''; this.panMode = ''; this.panX = -1; this.panY = -1; ++this.brightnessRevision;
     if (previous > 0) { this.speed = previous; this.controller?.setSpeed(previous); this.system?.sync(true); }
   }
   private changeSpeed(speed: number): void { this.cancelGesture(); this.speed = speed; this.controller?.setSpeed(speed); this.system?.sync(true); }
@@ -260,26 +285,76 @@ struct Player {
     this.cancelGesture(); if (Math.abs(scale - 1) > 0.1) { this.zoomed = scale > 1; }
   }
 
+  private syncWindow(): void { this.window?.update({ visible: this.visible && this.alive, playing: this.state === 'playing', immersive: this.immersive, locked: this.locked || !AppLock.permit(), pip: this.pipActive }); }
+  private windowStateChanged(): void { if (this.locked) { this.cancelGesture(); this.clearHide(); this.controlsVisible = true; } this.syncWindow(); }
+  private clearHide(): void { if (this.hideTimer >= 0) { clearTimeout(this.hideTimer); this.hideTimer = -1; } }
+  private showControls(): void {
+    this.clearHide(); this.controlsVisible = true;
+    if (this.alive && this.visible && this.immersive && !this.controlsLocked && !this.locked && !this.options && !this.busy && !this.message && this.state === 'playing') {
+      this.hideTimer = setTimeout(() => { this.hideTimer = -1; if (this.alive && this.visible && this.immersive && !this.locked && !this.busy && !this.message && !this.options && !this.controlsLocked && this.state === 'playing') { this.controlsVisible = false; } }, 3000);
+    }
+  }
+  private singleTap(): void {
+    if (!this.alive || !this.visible || this.locked || this.pipActive || !this.immersive) { return; }
+    if (this.controlsVisible && !this.controlsLocked && this.state === 'playing' && !this.options) { this.clearHide(); this.controlsVisible = false; }
+    else { this.showControls(); }
+  }
+  private toggleImmersive(): void { if (this.controlsLocked || this.locked) { return; } this.cancelGesture(); this.immersive = !this.immersive; this.options = false; this.syncWindow(); this.showControls(); }
+  private lockControls(): void { this.cancelGesture(); this.controlsLocked = !this.controlsLocked; this.options = false; this.system?.refreshAutoPiP(); this.showControls(); }
+  private goBack(): void { if (!this.onBackPress()) { router.back(); } }
+  private beginPan(x: number, y: number): void { this.cancelGesture(); if (this.canGesture() && this.insideGesture(x, y)) { this.panX = x; this.panY = y; this.clearHide(); } }
+  private updatePan(dx: number, dy: number): void {
+    if (!this.canGesture() || this.panX < 0 || !Number.isFinite(dx) || !Number.isFinite(dy)) { return; }
+    if (!this.panMode) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 12) { return; }
+      const x = this.panX; const y = this.panY;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        this.panMode = this.ui.vertical === false ? 'ignored' : x < this.surfaceWidth * 0.4 ? 'brightness' : x > this.surfaceWidth * 0.6 ? 'volume' : 'ignored';
+        this.displayAnchor = this.panMode === 'brightness' ? this.window?.brightness ?? this.windowBrightness : this.volume;
+      } else {
+        this.beginSeek(x, y); this.panMode = 'seek'; this.panX = x; this.panY = y;
+      }
+    }
+    if (this.panMode === 'seek') { this.previewSeek(dx); }
+    else if (this.panMode === 'brightness') { this.changeBrightness(Math.max(0.05, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
+    else if (this.panMode === 'volume') { this.changeVolume(Math.max(0, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
+  }
+  private endPan(): void {
+    const mode = this.panMode; const value = this.brightnessTarget;
+    if (mode === 'seek') { this.endSeek(); }
+    else { this.cancelGesture(); if (mode === 'brightness' && this.canGesture()) { this.changeBrightness(value, true); } }
+    this.showControls();
+  }
+  private saveDisplay(brightness: boolean, value: number): void {
+    if (!this.alive || this.locked || !AppLock.permit() || this.ownerClient !== AppService.client || !AppService.experience) { return; }
+    try {
+      const options = playerOptions(AppService.experience.snapshot().playerUi);
+      if (brightness) { if (!options.rememberBrightness) { return; } options.brightness = value; }
+      else { options.dimOpacity = value; }
+      AppService.experience.update((state: ExperienceState) => { state.playerUi = options; }); this.ui = options;
+    } catch (e) { this.message = text('player_display_save_failed'); this.showControls(); }
+  }
+  private async changeBrightness(value: number, remember: boolean = false): Promise<void> {
+    if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.controlsLocked || this.pipActive || !Number.isFinite(value)) { return; }
+    value = Math.max(0.05, Math.min(1, value)); this.brightnessTarget = value; const revision = ++this.brightnessRevision;
+    if (!await this.window?.setBrightness(value) || !this.alive || this.locked || this.ownerClient !== AppService.client || revision !== this.brightnessRevision) { return; }
+    this.windowBrightness = value;
+    if (this.panMode === 'brightness') { this.gestureHint = text('player_brightness_value', Math.round(value * 100)); }
+    if (remember) { this.saveDisplay(true, value); }
+  }
+  private changeVolume(value: number): void {
+    if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.controlsLocked || this.pipActive || !Number.isFinite(value)) { return; }
+    value = Math.max(0, Math.min(1, value));
+    if (this.controller?.setVolume(value)) { this.volume = value; if (this.panMode === 'volume') { this.gestureHint = text('player_volume_value', Math.round(value * 100)); } }
+  }
+  private changeDim(value: number): void { if (!this.locked && !this.controlsLocked && Number.isFinite(value)) { this.dimOpacity = Math.max(0.1, Math.min(0.9, value)); this.saveDisplay(false, this.dimOpacity); } }
+
   build() {
     Column() {
       if (this.locked) { PinGate() }
       else {
         Column({ space: 8 }) {
-          Row({ space: 12 }) {
-            Button({ type: ButtonType.Normal }) {
-              Image($r('app.media.menu_back')).width(24).height(24).accessibilityLevel('no')
-            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface'))
-              .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => router.back())
-            Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
-              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
-            Button({ type: ButtonType.Normal }) {
-              Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock'))
-                .width(24).height(24).accessibilityLevel('no')
-            }.width(44).height(44).padding(0).borderRadius(14)
-              .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
-              .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
-              .onClick(() => { this.cancelGesture(); this.controlsLocked = !this.controlsLocked; this.system?.refreshAutoPiP(); if (this.controlsLocked) { this.options = false; } })
-          }.padding(12).width('100%')
+          if (!this.immersive) { this.playerHeader() }
           Flex({ direction: this.viewportWidth > this.viewportHeight ? FlexDirection.Row : FlexDirection.Column,
             alignItems: ItemAlign.Stretch }) {
           Stack({ alignContent: Alignment.Center }) {
@@ -294,72 +369,111 @@ struct Player {
               }.width('100%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Center)
                 .padding({ bottom: 16 }).hitTestBehavior(HitTestMode.None)
             }
+            if (this.night && !this.pipActive) { Column() {}.width('100%').height('100%').backgroundColor('#000000').opacity(this.dimOpacity).hitTestBehavior(HitTestMode.None) }
             if (this.gestureHint) { Text(this.gestureHint).fontSize(16).fontColor('#FFFFFF').backgroundColor('#BB0D1924').padding(12).borderRadius(12).hitTestBehavior(HitTestMode.None) }
-          }.layoutWeight(1).backgroundColor('#000000')
-            .clip(true)
+            Column() {}.width('100%').height('100%')
             .gesture(GestureGroup(GestureMode.Exclusive,
               PinchGesture({ fingers: 2 }).onActionStart(() => this.cancelGesture()).onActionUpdate((event: GestureEvent) => this.pinch(event.scale)),
               LongPressGesture({ fingers: 1, duration: 500 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
                 .onActionEnd(() => this.cancelGesture()).onActionCancel(() => this.cancelGesture()),
-              PanGesture({ fingers: 1, direction: PanDirection.Horizontal, distance: 12 })
-                .onActionStart((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.beginSeek(finger.localX - event.offsetX, finger.localY); this.previewSeek(event.offsetX); } })
-                .onActionUpdate((event: GestureEvent) => this.previewSeek(event.offsetX)).onActionEnd(() => this.endSeek()).onActionCancel(() => this.cancelGesture()),
-              TapGesture({ count: 2, fingers: 1 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.doubleTap(finger.localX, finger.localY); } })
+              PanGesture({ fingers: 1, direction: PanDirection.All, distance: 12 })
+                .onActionStart((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.beginPan(finger.localX - event.offsetX, finger.localY - event.offsetY); this.updatePan(event.offsetX, event.offsetY); } })
+                .onActionUpdate((event: GestureEvent) => this.updatePan(event.offsetX, event.offsetY)).onActionEnd(() => this.endPan()).onActionCancel(() => this.cancelGesture()),
+              TapGesture({ count: 2, fingers: 1 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.doubleTap(finger.localX, finger.localY); } }),
+              TapGesture({ count: 1, fingers: 1 }).onAction(() => this.singleTap())
             ))
-            .margin({ right: this.viewportWidth > this.viewportHeight ? 12 : 0, bottom: this.viewportWidth > this.viewportHeight ? 0 : 8 })
+            if (this.immersive && this.controlsVisible && !this.pipActive) {
+              Column() {
+                this.playerHeader()
+                Blank().layoutWeight(1).hitTestBehavior(HitTestMode.None)
+                this.playbackControls()
+              }.width('100%').height('100%').justifyContent(FlexAlign.SpaceBetween).hitTestBehavior(HitTestMode.Transparent)
+            }
+          }.layoutWeight(1).backgroundColor('#000000')
+            .clip(true)
+            .margin({ right: !this.immersive && this.viewportWidth > this.viewportHeight ? 12 : 0, bottom: this.immersive || this.viewportWidth > this.viewportHeight ? 0 : 8 })
             .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
-          Scroll() {
-            Column({ space: 12 }) {
-              if (!this.controlsLocked) {
-                Column({ space: 12 }) {
-                  Row({ space: 8 }) {
-                    Text(this.clock(this.playbackPosition)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
-                    Slider({ value: this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
-                      .layoutWeight(1).selectedColor($r('app.color.brand_accent')).trackColor($r('app.color.brand_surface'))
-                      .blockColor($r('app.color.brand_accent')).enabled(!this.busy && this.duration > 0)
-                      .accessibilityText($r('app.string.player_seek'))
-                      .onChange((value: number, mode: SliderChangeMode) => {
-                        if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.controller?.seek(value); }
-                      })
-                    Text(this.clock(this.duration)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
-                  }.width('100%')
-                  Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-                    Column() {
-                      BrandButton({ label: this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play'),
-                        icon: this.state === 'playing' ? $r('app.media.player_pause') : $r('app.media.detail_play'), primary: true,
-                        available: !this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state),
-                        onSelect: () => { this.toggle(); } })
-                    }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
-                    Column() {
-                      BrandButton({ label: $r('app.string.playback_options'), icon: $r('app.media.menu_settings'), primary: this.options,
-                        onSelect: () => { this.options = !this.options; } })
-                    }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
-                  }.width('100%')
-                }.width('100%').padding(12).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
-                if (this.options) {
-                  this.systemOptions()
-                  this.mediaOptions()
-                  this.languageOptions()
-                  this.queueOptions()
-                }
-              } else {
-                Text($r('app.string.player_locked_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
-              }
-              if (this.busy) { BrandState({ label: $r('app.string.playback_loading'), loading: true }) }
-              if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
-              if (this.reportMessage) { Text(this.reportMessage).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
-              Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint'))
-                .fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-            }.padding({ left: 12, right: 12, bottom: 12 }).width('100%').alignItems(HorizontalAlign.Start)
-          }.width(this.viewportWidth > this.viewportHeight ? Math.min(320, this.viewportWidth * 0.45) : '100%')
-            .height(this.viewportWidth > this.viewportHeight ? '100%' : UiLayout.playerControls(this.viewportHeight, this.fontScale, this.options && !this.controlsLocked))
-            .align(Alignment.TopStart).onAreaChange((_old: Area, area: Area) => { this.controlWidth = Number.parseFloat(String(area.width)); })
+          if (!this.immersive) { this.playbackControls() }
           }.width('100%').layoutWeight(1)
         }.width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
       this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
     })
+  }
+
+  @Builder
+  private playerHeader() {
+    Row({ space: 12 }) {
+      Button({ type: ButtonType.Normal }) {
+        Image($r('app.media.menu_back')).width(24).height(24).accessibilityLevel('no')
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface'))
+        .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => this.goBack())
+      Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
+        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+      Button({ type: ButtonType.Normal }) {
+        Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock'))
+          .width(24).height(24).accessibilityLevel('no')
+      }.width(44).height(44).padding(0).borderRadius(14)
+        .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+        .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
+        .onClick(() => this.lockControls())
+      Button({ type: ButtonType.Normal }) {
+        Image(this.immersive ? $r('app.media.player_exit_fullscreen') : $r('app.media.player_fullscreen')).width(24).height(24).accessibilityLevel('no')
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface')).enabled(!this.controlsLocked)
+        .accessibilityText(this.immersive ? $r('app.string.player_exit_fullscreen') : $r('app.string.player_fullscreen')).onClick(() => this.toggleImmersive())
+    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : $r('app.color.brand_background'))
+  }
+
+  @Builder
+  private playbackControls() {
+    Scroll() {
+      Column({ space: 12 }) {
+        if (!this.controlsLocked) {
+          Column({ space: 12 }) {
+            Row({ space: 8 }) {
+              Text(this.clock(this.playbackPosition)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
+              Slider({ value: this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
+                .layoutWeight(1).selectedColor($r('app.color.brand_accent')).trackColor($r('app.color.brand_surface'))
+                .blockColor($r('app.color.brand_accent')).enabled(!this.busy && this.duration > 0)
+                .accessibilityText($r('app.string.player_seek'))
+                .onChange((value: number, mode: SliderChangeMode) => {
+                  if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.controller?.seek(value); }
+                })
+              Text(this.clock(this.duration)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
+            }.width('100%')
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
+              Column() {
+                BrandButton({ label: this.state === 'playing' ? $r('app.string.pause') : $r('app.string.play'),
+                  icon: this.state === 'playing' ? $r('app.media.player_pause') : $r('app.media.detail_play'), primary: true,
+                  available: !this.busy && ['prepared', 'playing', 'paused', 'completed', 'released'].includes(this.state),
+                  onSelect: () => { this.toggle(); } })
+              }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+              Column() {
+                BrandButton({ label: $r('app.string.playback_options'), icon: $r('app.media.menu_settings'), primary: this.options,
+                  onSelect: () => { this.options = !this.options; this.showControls(); } })
+              }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
+            }.width('100%')
+          }.width('100%').padding(12).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+          if (this.options) {
+            this.displayOptions()
+            this.systemOptions()
+            this.mediaOptions()
+            this.languageOptions()
+            this.queueOptions()
+          }
+        } else {
+          Text($r('app.string.player_locked_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        }
+        if (this.busy) { BrandState({ label: $r('app.string.playback_loading'), loading: true }) }
+        if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
+        if (this.reportMessage) { Text(this.reportMessage).fontColor($r('app.color.brand_danger')).fontSize(12).width('100%') }
+        Text(this.route.offline ? $r('app.string.offline_playback') : $r('app.string.direct_play_hint'))
+          .fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      }.padding({ left: 12, right: 12, bottom: 12 }).width('100%').alignItems(HorizontalAlign.Start)
+    }.width(this.immersive ? '100%' : this.viewportWidth > this.viewportHeight ? Math.min(320, this.viewportWidth * 0.45) : '100%')
+      .height(this.immersive ? Math.min(this.viewportHeight * 0.68, this.options ? this.viewportHeight * 0.68 : UiLayout.playerControls(this.viewportHeight, this.fontScale, false)) : this.viewportWidth > this.viewportHeight ? '100%' : UiLayout.playerControls(this.viewportHeight, this.fontScale, this.options && !this.controlsLocked))
+      .align(Alignment.TopStart).onTouch(() => this.showControls()).onAreaChange((_old: Area, area: Area) => { this.controlWidth = Number.parseFloat(String(area.width)); })
   }
 
   @Builder
@@ -445,6 +559,28 @@ struct Player {
   }
 
   @Builder
+  private displayOptions() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.player_display_group'), icon: $r('app.media.menu_settings') })
+      Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
+      Slider({ value: this.windowBrightness * 100, min: 5, max: 100, step: 1 }).width('100%').selectedColor($r('app.color.brand_accent'))
+        .accessibilityText($r('app.string.player_window_brightness')).onChange((value: number, mode: SliderChangeMode) => { this.changeBrightness(value / 100, mode === SliderChangeMode.End || mode === SliderChangeMode.Click); })
+      Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
+      Slider({ value: this.volume * 100, min: 0, max: 100, step: 1 }).width('100%').selectedColor($r('app.color.brand_accent'))
+        .accessibilityText($r('app.string.player_relative_volume')).onChange((value: number) => this.changeVolume(value / 100))
+      Text($r('app.string.player_relative_volume_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      Row({ space: 12 }) {
+        Text($r('app.string.player_night_mode')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Toggle({ type: ToggleType.Switch, isOn: this.night }).selectedColor($r('app.color.brand_action')).accessibilityText($r('app.string.player_night_mode'))
+          .onChange((value: boolean) => { this.night = value; this.showControls(); })
+      }.width('100%')
+      Text($r('app.string.player_dim_value', Math.round(this.dimOpacity * 100))).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      Slider({ value: this.dimOpacity * 100, min: 10, max: 90, step: 1 }).width('100%').selectedColor($r('app.color.brand_accent'))
+        .accessibilityText($r('app.string.player_dim_opacity')).onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.changeDim(value / 100); } })
+    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
   queueOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_queue_group'), icon: $r('app.media.player_speed') })
@@ -469,6 +605,8 @@ struct Player {
         Text(this.autoNextMode === 'server' ? $r('app.string.auto_next_server') : $r('app.string.auto_next_local')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
         BrandButton({ label: $r('app.string.auto_next_follow'), icon: $r('app.media.menu_sync'), available: !this.busy,
           onSelect: () => this.changeAutoNext('server') })
+          BrandButton({ label: $r('app.string.previous_episode'), icon: $r('app.media.player_previous'),
+            available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.previous(); } })
         BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
           available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
       }
