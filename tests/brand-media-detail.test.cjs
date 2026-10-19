@@ -6,7 +6,7 @@ const movie={Id:'movie',Name:'光影之岛 · 一段非常长的电影名称',Ty
 const episode={...movie,Id:'episode',Type:'Episode',CanDelete:false};
 const series={...movie,Id:'series',Type:'Series',MediaSources:[],CanDelete:false};
 const season={...series,Id:'season',Type:'Season'};
-const page=(props={},scale=1)=>render('Detail',{item:clone(movie),loaded:true,busy:false,...props},scale);
+const page=(props={},scale=1)=>render('Detail',{extraInfo:true,item:clone(movie),loaded:true,busy:false,...props},scale);
 const images=b=>flat(b.children).filter(n=>n.type==='Image');
 for(const [w,h,scale] of [[320,640,1],[360,740,2],[760,280,1],[760,280,2]]){
  test(`detail targets wrap and remain inside the scroll at ${w}/${scale}x`,()=>{const f=page({viewportWidth:w,viewportHeight:h},scale),ns=flat(f.roots),scroll=ns.find(n=>n.type==='Scroll');for(const key of ['continue_play','start_over','trailer','mark_unplayed','unfavorite','download','server_delete']){const b=button(f,key);assert.ok(b,key);assert.ok(flat(scroll.children).includes(b));assert.equal(images(b).length,1);assert.equal(b.attrs.constraintSize[0].minHeight,scale===2?80:52)}assert.equal(f.view.actionWidth(),w<400||scale>1.2?'100%':'48%');for(const key of ['back','refresh'])assert.equal(button(f,key).attrs.width[0],44);});

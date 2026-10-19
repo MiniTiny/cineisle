@@ -1956,6 +1956,18 @@
     {"name": "ui_language_save_failed", "value": "界面语言未能保存，已恢复原设置，请重试"},
     {"name": "ui_language_restore_failed", "value": "界面语言恢复失败，当前设置未确认，请重启后重新保存"},
     {"name": "ui_language_cancelled", "value": "界面语言操作已取消"},
-    {"name": "ui_language_apply_failed", "value": "未能更新界面语言，请重开设置页后重试"}
+    {"name": "ui_language_apply_failed", "value": "未能更新界面语言，请重开设置页后重试"},
+    {"name": "appearance_group", "value": "外观与详情"},
+    {"name": "appearance_amoled", "value": "AMOLED 纯黑背景"},
+    {"name": "appearance_amoled_hint", "value": "将页面、卡片、输入框和系统栏背景改为纯黑；关闭后恢复映屿深色配色。全应用共用，立即生效并保留到重启。"},
+    {"name": "appearance_extra_info", "value": "显示额外媒体信息"},
+    {"name": "appearance_extra_hint", "value": "在电影和单集详情中显示文件大小及完整视频、音频、字幕规格；关闭后仍保留简介、基本标签与演职人员。"},
+    {"name": "appearance_saved", "value": "外观设置已保存并应用"},
+    {"name": "appearance_invalid", "value": "保存的外观设置无效，请重新选择设置"},
+    {"name": "appearance_load_failed", "value": "无法读取外观设置，请重新打开设置页重试"},
+    {"name": "appearance_unavailable", "value": "窗口外观暂不可用，请重新打开设置页重试"},
+    {"name": "appearance_cancelled", "value": "外观设置操作已取消"},
+    {"name": "appearance_save_failed", "value": "外观设置未能保存，已尝试恢复原设置，请重试"},
+    {"name": "appearance_restore_failed", "value": "外观设置恢复未确认，请重开设置页确认后重试"}
   ]
 }

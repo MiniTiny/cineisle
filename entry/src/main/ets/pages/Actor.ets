@@ -18,6 +18,7 @@ interface ActorRoute { personId: string; personName: string }
 @Entry
 @Component
 struct Actor {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
@@ -112,7 +113,7 @@ struct Actor {
       Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
       if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
       if (this.busy && !this.biographyLoading) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
   }
   @Builder
   credits() {
@@ -137,7 +138,7 @@ struct Actor {
     Column({ space: 10 }) {
       BrandHeader({ label: this.person.Name, onBack: () => router.back() })
       this.credits()
-    }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

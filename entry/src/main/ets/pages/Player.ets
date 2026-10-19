@@ -26,6 +26,7 @@ import { ExperienceState } from '../utils/Experience';
 @Entry
 @Component
 struct Player {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
   @State viewportHeight: number = 800;
@@ -483,7 +484,7 @@ struct Player {
             .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
           if (!this.immersive) { this.playbackControls() }
           }.width('100%').layoutWeight(1)
-        }.width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+        }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
       this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
@@ -495,7 +496,7 @@ struct Player {
     Row({ space: 12 }) {
       Button({ type: ButtonType.Normal }) {
         Image($r('app.media.menu_back')).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface'))
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
         .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => this.goBack())
       Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
@@ -503,14 +504,14 @@ struct Player {
         Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock'))
           .width(24).height(24).accessibilityLevel('no')
       }.width(44).height(44).padding(0).borderRadius(14)
-        .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+        .backgroundColor(this.controlsLocked ? $r('app.color.brand_action') : (this.amoled ? '#000000' : $r('app.color.brand_surface')))
         .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
         .onClick(() => this.lockControls())
       Button({ type: ButtonType.Normal }) {
         Image(this.immersive ? $r('app.media.player_exit_fullscreen') : $r('app.media.player_fullscreen')).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor($r('app.color.brand_surface')).enabled(!this.controlsLocked)
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).enabled(!this.controlsLocked)
         .accessibilityText(this.immersive ? $r('app.string.player_exit_fullscreen') : $r('app.string.player_fullscreen')).onClick(() => this.toggleImmersive())
-    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : $r('app.color.brand_background'))
+    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : (this.amoled ? '#000000' : $r('app.color.brand_background')))
   }
 
   @Builder
@@ -523,7 +524,7 @@ struct Player {
             Row({ space: 8 }) {
               Text(this.clock(this.playbackPosition)).fontColor($r('app.color.brand_muted')).fontSize(12).flexShrink(0)
               Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
-                .layoutWeight(1).selectedColor($r('app.color.brand_accent')).trackColor($r('app.color.brand_surface'))
+                .layoutWeight(1).selectedColor($r('app.color.brand_accent')).trackColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
                 .blockColor($r('app.color.brand_accent')).enabled(!this.busy && this.duration > 0)
                 .accessibilityText($r('app.string.player_seek'))
                 .onChange((value: number, mode: SliderChangeMode) => this.sliderSeek(value, mode))
@@ -541,7 +542,7 @@ struct Player {
                   onSelect: () => { this.options = !this.options; this.showControls(); } })
               }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
             }.width('100%')
-          }.width('100%').padding(12).borderRadius(20).backgroundColor($r('app.color.brand_surface_raised'))
+          }.width('100%').padding(12).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
           if (this.options) {
             this.displayOptions()
             this.systemOptions()
@@ -579,7 +580,7 @@ struct Player {
           .accessibilityText($r('app.string.background_playback')).onChange((value: boolean) => { this.system?.setBackground(value); })
       }.width('100%')
       Text($r('app.string.background_playback_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -618,7 +619,7 @@ struct Player {
         selected: this.subtitles.findIndex((track: TrackChoice) => track.key === this.subtitleKey) + 1,
         available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(index === 0 ? '' : this.subtitles[index - 1].key, false); } })
       Text($r('app.string.subtitle_format_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -628,12 +629,12 @@ struct Player {
       Text($r('app.string.preferred_audio_language')).fontColor($r('app.color.brand_muted')).fontSize(14)
       TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })
         .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface'))
+        .placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
         .enabled(!this.settingsBusy && !this.busy).onChange((value: string) => { this.audioLanguage = value; })
       Text($r('app.string.preferred_subtitle_language')).fontColor($r('app.color.brand_muted')).fontSize(14)
       TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })
         .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor($r('app.color.brand_muted')).backgroundColor($r('app.color.brand_surface'))
+        .placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
         .enabled(!this.settingsBusy && !this.busy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
       Row({ space: 12 }) {
         Text($r('app.string.preferred_subtitles_off')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
@@ -654,7 +655,7 @@ struct Player {
       Text($r('app.string.playback_preferences_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
       if (this.settingsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.settingsMessage) { Text(this.settingsMessage).fontColor($r('app.color.brand_warm')).fontSize(12).width('100%') }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -676,7 +677,7 @@ struct Player {
       Text($r('app.string.player_dim_value', Math.round(this.dimOpacity * 100))).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
       Slider({ value: this.dimOpacity * 100, min: 10, max: 90, step: 1 }).width('100%').selectedColor($r('app.color.brand_accent'))
         .accessibilityText($r('app.string.player_dim_opacity')).onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.changeDim(value / 100); } })
-    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -689,7 +690,7 @@ struct Player {
           Column() {
             Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
               .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)
-              .backgroundColor(this.speed === speed ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+              .backgroundColor(this.speed === speed ? $r('app.color.brand_action') : (this.amoled ? '#000000' : $r('app.color.brand_surface')))
               .accessibilityText(`${speed}×`).onClick(() => this.changeSpeed(speed))
           }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '31%' : '48%').margin({ bottom: 8 })
         })
@@ -709,6 +710,6 @@ struct Player {
         BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
           available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
       }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor($r('app.color.brand_surface_raised')).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
   }
 }

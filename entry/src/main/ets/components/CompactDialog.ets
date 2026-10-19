@@ -19,6 +19,7 @@ export interface CompactDialogData {
 }
 @Component
 export struct CompactDialog {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @Prop data: CompactDialogData;
   aboutToDisappear(): void { this.data.release(); }
   @Builder
@@ -50,7 +51,7 @@ export struct CompactDialog {
         }.width('100%').layoutWeight(1).align(Alignment.TopStart)
       }
     }.width(Math.min(720, this.data.width - 32)).height(this.data.height * 0.9).padding(16)
-      .backgroundColor($r('app.color.brand_surface_raised')).borderRadius(20).id('CineIsleCompactDialog')
+      .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20).id('CineIsleCompactDialog')
   }
 }
 @Builder

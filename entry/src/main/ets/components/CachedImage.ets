@@ -7,6 +7,7 @@ import { PosterTicket, PosterTarget, PosterData } from '../utils/PosterOptions';
 
 @Component
 export struct CachedImage {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @Prop @Watch('reload') imageId: string = '';
   @Prop @Watch('reload') tag: string = '';
   @Prop @Watch('reload') backdrop: boolean = false;
@@ -54,7 +55,7 @@ export struct CachedImage {
   }
   build() {
     Image(this.source).alt(this.placeholder).width('100%').height('100%').objectFit(ImageFit.Cover).borderRadius(this.radius)
-      .backgroundColor($r('app.color.brand_surface')).accessibilityText(this.label).accessibilityLevel(this.label ? 'yes' : 'no')
+      .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).accessibilityText(this.label).accessibilityLevel(this.label ? 'yes' : 'no')
       .onComplete(() => this.releaseRetired()).onError(() => { this.reset(); this.releaseRetired(); })
       .onVisibleAreaChange([0], (visible: boolean) => this.visibleArea(visible))
   }

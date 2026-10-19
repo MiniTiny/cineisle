@@ -1,5 +1,6 @@
 @Component
 export struct BrandButton {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @Prop label: ResourceStr;
   @Prop icon: Resource;
@@ -20,7 +21,7 @@ export struct BrandButton {
       }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 })
         .padding({ left: this.compact ? 10 : 14, right: this.compact ? 10 : 14, top: 8, bottom: 8 }).hitTestBehavior(HitTestMode.None)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 }).padding(0).borderRadius(16)
-      .backgroundColor(this.primary ? $r('app.color.brand_action') : $r('app.color.brand_surface'))
+      .backgroundColor(this.primary ? $r('app.color.brand_action') : (this.amoled ? '#000000' : $r('app.color.brand_surface')))
       // API 12 declares separate string/Resource overloads; both are native accepted captions.
       .defaultFocus(this.focus).enabled(this.available).opacity(this.available ? 1 : 0.5).accessibilityText(this.label as Resource).onClick(this.onSelect)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 })

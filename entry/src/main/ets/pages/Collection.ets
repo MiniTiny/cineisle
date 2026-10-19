@@ -15,6 +15,7 @@ interface CollectionRoute { item: MediaItem }
 @Entry
 @Component
 struct Collection {
+  @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLocked') locked: boolean = true;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
@@ -85,7 +86,7 @@ struct Collection {
           }
         }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(20).width('100%').layoutWeight(1)
       }
-    }.padding(16).width('100%').height('100%').backgroundColor($r('app.color.brand_background'))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
       .onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); })
   }
 }
