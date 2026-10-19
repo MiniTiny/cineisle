@@ -1,0 +1,2088 @@
+{
+  "string": [
+    {
+      "name": "player_skip_intro",
+      "value": "跳過片頭"
+    },
+    {
+      "name": "player_intro_skipper",
+      "value": "片頭跳過提示"
+    },
+    {
+      "name": "player_intro_hint",
+      "value": "需要伺服器提供 Intro Skipper 時間段；只在有效時段提示，點選後跳過。離線可使用已快取的媒體時間段。"
+    },
+    {
+      "name": "player_intro_save_failed",
+      "value": "片頭跳過偏好儲存失敗，請重試"
+    },
+    {
+      "name": "download_legacy_version",
+      "value": "舊版下載（未記錄版本）"
+    },
+    {
+      "name": "offline_versions",
+      "value": "已下載的版本"
+    },
+    {
+      "name": "module_desc",
+      "value": "映嶼 · CineIsle 鴻蒙私人影視庫"
+    },
+    {
+      "name": "login_intro",
+      "value": "連線至你的 Jellyfin，隨時沉浸於好故事"
+    },
+    {
+      "name": "server_placeholder",
+      "value": "服務地址，例如 https://media.example.com/jellyfin"
+    },
+    {
+      "name": "username",
+      "value": "使用者名稱"
+    },
+    {
+      "name": "password",
+      "value": "密碼"
+    },
+    {
+      "name": "https_hint",
+      "value": "公網連線建議使用 HTTPS；登入認證資料儲存到系統安全儲存"
+    },
+    {
+      "name": "connecting",
+      "value": "正在連線…"
+    },
+    {
+      "name": "login",
+      "value": "連線並登入"
+    },
+    {
+      "name": "offline_cache",
+      "value": "正在展示上次同步的離線快取"
+    },
+    {
+      "name": "offline_detail_missing",
+      "value": "本帳號沒有目前媒體的離線資料，請連線上網同步後重試"
+    },
+    {
+      "name": "actors_sync_hint",
+      "value": "同步媒體庫後，按演員作品的總播放量瀏覽演員"
+    },
+    {
+      "name": "sync_library",
+      "value": "同步媒體庫"
+    },
+    {
+      "name": "actor_stats",
+      "value": "%d 部作品 · %d 次播放"
+    },
+    {
+      "name": "download_complete",
+      "value": "已下載，可離線播放"
+    },
+    {
+      "name": "download_progress",
+      "value": "下載中 %d%%"
+    },
+    {
+      "name": "download_interrupted",
+      "value": "下載未完成，請移除後重新下載"
+    },
+    {
+      "name": "play",
+      "value": "播放"
+    },
+    {
+      "name": "remove_download",
+      "value": "移除下載"
+    },
+    {
+      "name": "remove_download_confirm",
+      "value": "將刪除本機視訊檔案並取消正在進行的任務。"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "remove",
+      "value": "移除"
+    },
+    {
+      "name": "no_downloads",
+      "value": "暫無下載，可在電影或單集詳細資料中下載"
+    },
+    {
+      "name": "favorites",
+      "value": "我的收藏"
+    },
+    {
+      "name": "downloads",
+      "value": "離線下載"
+    },
+    {
+      "name": "syncing",
+      "value": "同步中…"
+    },
+    {
+      "name": "last_sync",
+      "value": "最近同步：%s"
+    },
+    {
+      "name": "not_synced",
+      "value": "尚未同步媒體庫"
+    },
+    {
+      "name": "change_account",
+      "value": "登出目前帳號"
+    },
+    {
+      "name": "logout_confirm",
+      "value": "將移除目前帳號的本機登入認證資料，其他已儲存帳號仍保留。快取和下載檔案不會刪除。"
+    },
+    {
+      "name": "logout",
+      "value": "登出"
+    },
+    {
+      "name": "version",
+      "value": "映嶼 · CineIsle · 0.2.0"
+    },
+    {
+      "name": "refresh",
+      "value": "重新整理"
+    },
+    {
+      "name": "search_hint",
+      "value": "搜尋電影、劇集或單集"
+    },
+    {
+      "name": "back",
+      "value": "返回"
+    },
+    {
+      "name": "search_results",
+      "value": "搜尋結果"
+    },
+    {
+      "name": "continue_watching",
+      "value": "繼續觀看"
+    },
+    {
+      "name": "recommend_hint",
+      "value": "重溫已觀看的好片"
+    },
+    {
+      "name": "latest",
+      "value": "最近新增"
+    },
+    {
+      "name": "no_items",
+      "value": "暫無媒體"
+    },
+    {
+      "name": "load_more",
+      "value": "載入更多"
+    },
+    {
+      "name": "tab_recommend",
+      "value": "推薦"
+    },
+    {
+      "name": "tab_home",
+      "value": "首頁"
+    },
+    {
+      "name": "tab_library",
+      "value": "媒體庫"
+    },
+    {
+      "name": "tab_actors",
+      "value": "演員"
+    },
+    {
+      "name": "tab_more",
+      "value": "更多"
+    },
+    {
+      "name": "download_wifi",
+      "value": "透過 Wi-Fi 下載"
+    },
+    {
+      "name": "download_confirm",
+      "value": "將下載原始視訊檔案，可能佔用較多儲存空間。僅使用非計費網路。"
+    },
+    {
+      "name": "download",
+      "value": "下載"
+    },
+    {
+      "name": "unfavorite",
+      "value": "取消收藏"
+    },
+    {
+      "name": "favorite",
+      "value": "收藏"
+    },
+    {
+      "name": "mark_unplayed",
+      "value": "標示為未觀看"
+    },
+    {
+      "name": "mark_played",
+      "value": "標示為已觀看"
+    },
+    {
+      "name": "cast",
+      "value": "演職員"
+    },
+    {
+      "name": "progress_not_saved",
+      "value": "播放進度暫未儲存到伺服器，請檢查網路"
+    },
+    {
+      "name": "play_error",
+      "value": "播放失敗。請檢查網路及裝置對該視訊編碼的支援；目前版本只支援直接播放。"
+    },
+    {
+      "name": "offline_playback",
+      "value": "正在播放本機下載檔案"
+    },
+    {
+      "name": "direct_play_hint",
+      "value": "直接播放 · 解碼能力取決於裝置"
+    },
+    {
+      "name": "invalid_server",
+      "value": "請輸入完整的 http:// 或 https:// 服務地址，不要包含密碼、查詢參數或片段"
+    },
+    {
+      "name": "invalid_account",
+      "value": "伺服器回傳的帳號識別碼無效"
+    },
+    {
+      "name": "invalid_item",
+      "value": "媒體識別碼無效"
+    },
+    {
+      "name": "session_read_failed",
+      "value": "無法讀取安全登入認證資料，請解鎖裝置後重試"
+    },
+    {
+      "name": "session_clear_failed",
+      "value": "無法清除安全登入認證資料"
+    },
+    {
+      "name": "login_expired",
+      "value": "登入失效或使用者名稱密碼錯誤，請重新登入"
+    },
+    {
+      "name": "permission_denied",
+      "value": "目前使用者沒有執行此操作的權限"
+    },
+    {
+      "name": "http_failed",
+      "value": "服務請求失敗（HTTP %d）"
+    },
+    {
+      "name": "html_response",
+      "value": "服務地址返回了網頁，請檢查 Jellyfin 地址和反向代理路徑"
+    },
+    {
+      "name": "login_response_invalid",
+      "value": "伺服器登入回應不完整"
+    },
+    {
+      "name": "tasks_active",
+      "value": "請等待同步或下載完成，或先取消下載"
+    },
+    {
+      "name": "login_required",
+      "value": "請先登入伺服器"
+    },
+    {
+      "name": "sync_active",
+      "value": "媒體同步正在進行"
+    },
+    {
+      "name": "sync_progress",
+      "value": "已同步 %d / %d 項"
+    },
+    {
+      "name": "sync_complete",
+      "value": "同步完成：%d 項媒體，%d 位演員"
+    },
+    {
+      "name": "no_media_source",
+      "value": "伺服器沒有返回可播放的視訊來源"
+    },
+    {
+      "name": "download_exists",
+      "value": "已有下載記錄，請先移除舊記錄後重試"
+    },
+    {
+      "name": "no_download_source",
+      "value": "沒有可下載的媒體來源"
+    },
+    {
+      "name": "cancel_download_failed",
+      "value": "下載任務未能取消，請稍後重試"
+    },
+    {
+      "name": "cached_media",
+      "value": "離線媒體匯總（重新同步可還原媒體庫目錄）"
+    },
+    {
+      "name": "cache_library_unavailable",
+      "value": "這份舊快取沒有媒體庫歸屬，請返回查看離線媒體匯總，連線上網後重新同步"
+    },
+    {
+      "name": "cache_recovered",
+      "value": "本機快取已重建，損壞的記錄和已有視訊檔案均已保留。請重新同步媒體庫"
+    },
+    {
+      "name": "cache_recovery_failed",
+      "value": "無法保留損壞的本機快取，請檢查儲存空間和檔案權限後重試"
+    },
+    {
+      "name": "sync_incomplete",
+      "value": "媒體庫在同步期間發生變化或分頁不完整，舊快取已保留，請重新同步"
+    },
+    {
+      "name": "sync_library_progress",
+      "value": "%s：已同步 %d / %d 項"
+    },
+    {
+      "name": "pause",
+      "value": "暫停"
+    },
+    {
+      "name": "playback_options",
+      "value": "播放選項"
+    },
+    {
+      "name": "next_episode",
+      "value": "下一集"
+    },
+    {
+      "name": "media_source",
+      "value": "媒體來源"
+    },
+    {
+      "name": "audio_track",
+      "value": "音軌"
+    },
+    {
+      "name": "subtitle_track",
+      "value": "字幕"
+    },
+    {
+      "name": "subtitles_off",
+      "value": "關閉字幕"
+    },
+    {
+      "name": "no_audio_tracks",
+      "value": "裝置尚未識別可選擇的音軌"
+    },
+    {
+      "name": "auto_next",
+      "value": "自動播放下一集"
+    },
+    {
+      "name": "playback_loading",
+      "value": "正在載入播放選項…"
+    },
+    {
+      "name": "audio_track_number",
+      "value": "音軌 %d"
+    },
+    {
+      "name": "subtitle_track_number",
+      "value": "字幕軌道 %d"
+    },
+    {
+      "name": "server_subtitle",
+      "value": "伺服器文字字幕 · %s"
+    },
+    {
+      "name": "subtitle_format_hint",
+      "value": "裝置內嵌軌道取決於解碼支援。伺服器及已快取的外掛文字字幕按 SRT 顯示，不保留 ASS 樣式；圖片字幕暫不支援。離線可選裝置軌道與已快取的外掛文字字幕。"
+    },
+    {
+      "name": "track_switch_failed",
+      "value": "音軌切換失敗，請檢查裝置對該音訊編碼的支援"
+    },
+    {
+      "name": "subtitle_failed",
+      "value": "字幕載入或切換失敗，請檢查網路和字幕格式，可重試或關閉字幕"
+    },
+    {
+      "name": "source_switch_failed",
+      "value": "媒體來源切換失敗，請檢查網路後重試"
+    },
+    {
+      "name": "next_episode_failed",
+      "value": "下一集未能載入。請檢查網路或下載檔案，點選“下一集”重試"
+    },
+    {
+      "name": "queue_finished",
+      "value": "已到達可播放清單末尾"
+    },
+    {
+      "name": "episode_order_unknown",
+      "value": "單集順序不完整，暫不能自動連播"
+    },
+    {
+      "name": "episode_queue_failed",
+      "value": "單集清單不完整，請重試"
+    },
+    {
+      "name": "next_not_downloaded",
+      "value": "下一集尚未下載，離線連播已停止"
+    },
+    {
+      "name": "speed_failed",
+      "value": "目前裝置無法套用此播放速度"
+    },
+    {
+      "name": "player_release_failed",
+      "value": "播放器資源釋放失敗，請離開播放頁後重試"
+    },
+    {
+      "name": "pip_enter",
+      "value": "子母畫面"
+    },
+    {
+      "name": "pip_exit",
+      "value": "離開子母畫面"
+    },
+    {
+      "name": "pip_unavailable",
+      "value": "目前裝置不支援子母畫面"
+    },
+    {
+      "name": "pip_failed",
+      "value": "子母畫面操作失敗，請重試"
+    },
+    {
+      "name": "background_playback",
+      "value": "背景播放"
+    },
+    {
+      "name": "background_playback_hint",
+      "value": "開啟後可背景聽音訊並使用鎖定畫面控制；在背景關閉子母畫面或離開播放頁會停止播放。"
+    },
+    {
+      "name": "background_unavailable",
+      "value": "未能獲得背景播放授權，播放將留在前景"
+    },
+    {
+      "name": "background_stop_failed",
+      "value": "背景播放任務未能結束，請結束應用程式後重試"
+    },
+    {
+      "name": "session_unavailable",
+      "value": "系統媒體會話不可用，暫不能使用鎖定畫面、背景及子母畫面控制"
+    },
+    {
+      "name": "session_update_failed",
+      "value": "系統播放狀態更新失敗，請重試"
+    },
+    {
+      "name": "system_playback_cleanup_failed",
+      "value": "系統播放資源釋放失敗，請結束應用程式後重試"
+    },
+    {
+      "name": "pip_subtitle_failed",
+      "value": "子母畫面字幕更新失敗，請離開子母畫面後重試"
+    },
+    {
+      "name": "playback_language_preferences",
+      "value": "音軌與字幕語言偏好"
+    },
+    {
+      "name": "preferred_audio_language",
+      "value": "優先音軌語言"
+    },
+    {
+      "name": "preferred_subtitle_language",
+      "value": "優先字幕語言"
+    },
+    {
+      "name": "playback_language_placeholder",
+      "value": "留空使用預設；如 zh、en、ja、zh-Hant"
+    },
+    {
+      "name": "preferred_subtitles_off",
+      "value": "預設始終關閉字幕"
+    },
+    {
+      "name": "save_playback_preferences",
+      "value": "儲存並套用"
+    },
+    {
+      "name": "reset_playback_preferences",
+      "value": "還原預設偏好"
+    },
+    {
+      "name": "playback_preferences_hint",
+      "value": "應用程式層級設定，結束及重新啟動後保留。支援兩/三字母語言碼及腳本/地區標籤；沒有符合項目時保留預設軌道。手動選軌僅對本次播放有效，切換來源或下一集重新使用偏好。還原預設不改回目前手動軌道。"
+    },
+    {
+      "name": "playback_preferences_saved",
+      "value": "語言偏好已儲存，已嘗試套用至目前播放"
+    },
+    {
+      "name": "playback_language_invalid",
+      "value": "請輸入有效語言代碼，如 zh、eng 或 zh-Hant；留空使用預設"
+    },
+    {
+      "name": "playback_preferences_invalid",
+      "value": "儲存的語言偏好無效，暫用預設；請重新儲存設定"
+    },
+    {
+      "name": "playback_preferences_load_failed",
+      "value": "語言偏好讀取失敗，暫用預設；儲存時將重試"
+    },
+    {
+      "name": "playback_preferences_save_failed",
+      "value": "語言偏好儲存失敗，仍使用原設定，請重試"
+    },
+    {
+      "name": "playback_preferences_restore_failed",
+      "value": "語言偏好儲存及還原失敗，未確認寫入；請重新儲存設定"
+    },
+    {
+      "name": "api_response_invalid",
+      "value": "Jellyfin 返回的資料不完整或格式無效"
+    },
+    {
+      "name": "api_parameter_invalid",
+      "value": "請求參數無效，請重試"
+    },
+    {
+      "name": "api_numeric_range",
+      "value": "媒體資料超出目前用戶端支援的整數範圍"
+    },
+    {
+      "name": "api_session_invalid",
+      "value": "登入會話無效，請重新登入"
+    },
+    {
+      "name": "next_up",
+      "value": "下一集"
+    },
+    {
+      "name": "latest_library",
+      "value": "最近新增 · %s"
+    },
+    {
+      "name": "view_all",
+      "value": "查看全部"
+    },
+    {
+      "name": "media_movie",
+      "value": "電影"
+    },
+    {
+      "name": "media_series",
+      "value": "劇集"
+    },
+    {
+      "name": "media_episode",
+      "value": "單集"
+    },
+    {
+      "name": "media_season",
+      "value": "季"
+    },
+    {
+      "name": "media_video",
+      "value": "視訊"
+    },
+    {
+      "name": "episode_label",
+      "value": "第 %d 季 · 第 %d 集 · %s"
+    },
+    {
+      "name": "poster_unavailable",
+      "value": "暫無海報"
+    },
+    {
+      "name": "watched_indicator",
+      "value": "已觀看"
+    },
+    {
+      "name": "present_year",
+      "value": "至今"
+    },
+    {
+      "name": "channel_count",
+      "value": "%d 聲道"
+    },
+    {
+      "name": "subtitle_chip",
+      "value": "CC"
+    },
+    {
+      "name": "detail_size",
+      "value": "檔案大小"
+    },
+    {
+      "name": "detail_video",
+      "value": "視訊"
+    },
+    {
+      "name": "detail_audio",
+      "value": "音訊"
+    },
+    {
+      "name": "detail_subtitles",
+      "value": "字幕"
+    },
+    {
+      "name": "detail_genres",
+      "value": "類型"
+    },
+    {
+      "name": "detail_directors",
+      "value": "導演"
+    },
+    {
+      "name": "detail_writers",
+      "value": "編劇"
+    },
+    {
+      "name": "bit_depth",
+      "value": "%d 位"
+    },
+    {
+      "name": "runtime_minutes",
+      "value": "%d 分鐘"
+    },
+    {
+      "name": "community_score",
+      "value": "評分 %s"
+    },
+    {
+      "name": "play_not_allowed",
+      "value": "目前使用者沒有播放此媒體的權限"
+    },
+    {
+      "name": "download_not_allowed",
+      "value": "目前使用者沒有下載此媒體的權限"
+    },
+    {
+      "name": "delete_not_allowed",
+      "value": "目前使用者沒有刪除此媒體的權限"
+    },
+    {
+      "name": "media_deleted_cache_failed",
+      "value": "伺服器媒體已刪除，但本機快取儲存失敗。請返回重新同步媒體庫，本機下載檔案已保留"
+    },
+    {
+      "name": "no_playable_episode",
+      "value": "沒有可播放的單集"
+    },
+    {
+      "name": "continue_play",
+      "value": "繼續播放"
+    },
+    {
+      "name": "start_over",
+      "value": "從頭播放"
+    },
+    {
+      "name": "play_next_episode",
+      "value": "播放下一集"
+    },
+    {
+      "name": "media_versions",
+      "value": "媒體版本（用於播放和下載）"
+    },
+    {
+      "name": "source_number",
+      "value": "版本 %d"
+    },
+    {
+      "name": "server_delete",
+      "value": "刪除伺服器媒體"
+    },
+    {
+      "name": "server_delete_confirm",
+      "value": "將永久刪除 Jellyfin 伺服器上的電影及其媒體檔案，所有使用者都會受影響。本機下載檔案會保留。是否繼續？"
+    },
+    {
+      "name": "trailer",
+      "value": "預告片"
+    },
+    {
+      "name": "trailer_failed",
+      "value": "無法開啟預告片，請檢查連結或安裝支援此連結的應用程式"
+    },
+    {
+      "name": "seasons",
+      "value": "季"
+    },
+    {
+      "name": "episodes",
+      "value": "單集"
+    },
+    {
+      "name": "actor_search",
+      "value": "搜尋演員姓名"
+    },
+    {
+      "name": "actor_order_play",
+      "value": "播放次數"
+    },
+    {
+      "name": "actor_order_watched",
+      "value": "已看作品"
+    },
+    {
+      "name": "actor_order_unplayed",
+      "value": "未看作品"
+    },
+    {
+      "name": "actor_order_works",
+      "value": "作品數量"
+    },
+    {
+      "name": "actor_order_recent",
+      "value": "最近觀看"
+    },
+    {
+      "name": "actor_order_name",
+      "value": "姓名"
+    },
+    {
+      "name": "actor_order_recommended",
+      "value": "推薦演員"
+    },
+    {
+      "name": "followed_only",
+      "value": "僅關注"
+    },
+    {
+      "name": "show_actor_tags",
+      "value": "顯示風格標籤"
+    },
+    {
+      "name": "clear_filters",
+      "value": "清除篩選"
+    },
+    {
+      "name": "actor_counts",
+      "value": "%d 部作品 · 已看 %d · 未看 %d"
+    },
+    {
+      "name": "actor_new_count",
+      "value": "已關注 · %d 部新作品"
+    },
+    {
+      "name": "no_filter_matches",
+      "value": "沒有符合篩選的演員"
+    },
+    {
+      "name": "home_section_failed",
+      "value": "分欄載入失敗"
+    },
+    {
+      "name": "retry",
+      "value": "重試"
+    },
+    {
+      "name": "settings",
+      "value": "設定"
+    },
+    {
+      "name": "cancel_sync",
+      "value": "取消同步"
+    },
+    {
+      "name": "sync_cancelled",
+      "value": "同步已取消，原目錄和下載檔案已保留"
+    },
+    {
+      "name": "pending_changes",
+      "value": "待回傳修改：%d"
+    },
+    {
+      "name": "flush_changes",
+      "value": "回傳離線修改"
+    },
+    {
+      "name": "network_failed",
+      "value": "網路連線失敗，請稍後重試"
+    },
+    {
+      "name": "discover",
+      "value": "發現新片"
+    },
+    {
+      "name": "rewatch",
+      "value": "重溫佳作"
+    },
+    {
+      "name": "discovery_hint",
+      "value": "結合關注演員與收藏類型推薦；長按查看推薦原因"
+    },
+    {
+      "name": "discovery_reason",
+      "value": "推薦原因"
+    },
+    {
+      "name": "discovery_recent",
+      "value": "最近加入的未看作品"
+    },
+    {
+      "name": "ok",
+      "value": "知道了"
+    },
+    {
+      "name": "all",
+      "value": "全部"
+    },
+    {
+      "name": "all_genres",
+      "value": "全部類型"
+    },
+    {
+      "name": "favorite_search",
+      "value": "搜尋名稱、原名或劇集名"
+    },
+    {
+      "name": "unwatched_only",
+      "value": "僅未看"
+    },
+    {
+      "name": "name_ascending",
+      "value": "名稱升序"
+    },
+    {
+      "name": "name_descending",
+      "value": "名稱降序"
+    },
+    {
+      "name": "continue_first",
+      "value": "繼續觀看優先"
+    },
+    {
+      "name": "favorites_loaded",
+      "value": "已載入：符合 %d / %d"
+    },
+    {
+      "name": "favorites_count",
+      "value": "符合 %d / 共 %d"
+    },
+    {
+      "name": "select_items",
+      "value": "多選"
+    },
+    {
+      "name": "select_all",
+      "value": "全選"
+    },
+    {
+      "name": "batch_unfavorite",
+      "value": "取消所選收藏"
+    },
+    {
+      "name": "batch_unfavorite_confirm",
+      "value": "取消這 %d 項收藏？"
+    },
+    {
+      "name": "confirm",
+      "value": "確認"
+    },
+    {
+      "name": "batch_result",
+      "value": "成功 %d 項，失敗 %d 項"
+    },
+    {
+      "name": "undo",
+      "value": "復原"
+    },
+    {
+      "name": "no_matches",
+      "value": "沒有符合篩選的收藏"
+    },
+    {
+      "name": "no_favorites",
+      "value": "暫無收藏"
+    },
+    {
+      "name": "download_active",
+      "value": "進行中"
+    },
+    {
+      "name": "download_completed",
+      "value": "已完成"
+    },
+    {
+      "name": "download_failed",
+      "value": "需處理"
+    },
+    {
+      "name": "stop_download",
+      "value": "停止下載"
+    },
+    {
+      "name": "download_failure_reason",
+      "value": "系統下載失敗（%d），可重試"
+    },
+    {
+      "name": "download_preferences",
+      "value": "下載偏好"
+    },
+    {
+      "name": "remember_source",
+      "value": "記住下載版本偏好"
+    },
+    {
+      "name": "source_default",
+      "value": "按媒體預設版本下載"
+    },
+    {
+      "name": "clear_source_preference",
+      "value": "清除版本偏好"
+    },
+    {
+      "name": "download_location_hint",
+      "value": "儲存在目前帳號的應用程式私有目錄，解除安裝應用程式會清除檔案"
+    },
+    {
+      "name": "follow",
+      "value": "關注"
+    },
+    {
+      "name": "unfollow",
+      "value": "取消關注"
+    },
+    {
+      "name": "biography_loading",
+      "value": "簡介載入中，作品可先瀏覽"
+    },
+    {
+      "name": "all_tags",
+      "value": "全部風格"
+    },
+    {
+      "name": "tag_evidence",
+      "value": "以下 %d 部作品支援此標籤"
+    },
+    {
+      "name": "actor_tag_boundary",
+      "value": "標籤僅概括庫內作品類型和題材；角色採用伺服器提供的演職員資訊"
+    },
+    {
+      "name": "credit_role",
+      "value": "飾演：%s"
+    },
+    {
+      "name": "theme_investigation",
+      "value": "探案"
+    },
+    {
+      "name": "theme_revenge",
+      "value": "復仇"
+    },
+    {
+      "name": "theme_time_travel",
+      "value": "時空穿越"
+    },
+    {
+      "name": "theme_growth",
+      "value": "成長"
+    },
+    {
+      "name": "change_queued",
+      "value": "修改已儲存在本機，連線上網後回傳"
+    },
+    {
+      "name": "batch_download",
+      "value": "批次下載本季"
+    },
+    {
+      "name": "batch_download_confirm",
+      "value": "在 Wi-Fi 下下載所選 %d 集？已存在的任務將跳過"
+    },
+    {
+      "name": "app_lock",
+      "value": "應用程式鎖"
+    },
+    {
+      "name": "lock_unlock",
+      "value": "解鎖映嶼"
+    },
+    {
+      "name": "lock_pin",
+      "value": "輸入 PIN"
+    },
+    {
+      "name": "lock_pin_wrong",
+      "value": "PIN 不正確或嘗試過於頻繁，請稍後重試"
+    },
+    {
+      "name": "lock_pin_format",
+      "value": "PIN 必須為 6–12 位數字"
+    },
+    {
+      "name": "lock_storage_failed",
+      "value": "安全儲存不可用，保持鎖定；請還原系統安全儲存後重新啟動應用程式"
+    },
+    {
+      "name": "lock_pin_mismatch",
+      "value": "兩次輸入的 PIN 不一致"
+    },
+    {
+      "name": "lock_policy",
+      "value": "設定 6–12 位數字 PIN；冷啟動及進入背景超過 15 分鐘後鎖定，鎖定時暫停播放並隱藏內容"
+    },
+    {
+      "name": "lock_current_pin",
+      "value": "目前 PIN"
+    },
+    {
+      "name": "lock_new_pin",
+      "value": "新 PIN（6–12 位數字）"
+    },
+    {
+      "name": "lock_confirm_pin",
+      "value": "再次輸入新 PIN"
+    },
+    {
+      "name": "lock_save",
+      "value": "儲存 PIN"
+    },
+    {
+      "name": "lock_now",
+      "value": "立即鎖定"
+    },
+    {
+      "name": "lock_disable",
+      "value": "關閉應用程式鎖"
+    },
+    {
+      "name": "offline_mode",
+      "value": "離線模式（僅本帳號快取與已下載媒體）"
+    },
+    {
+      "name": "offline_mode_enabled",
+      "value": "請先關閉離線模式再同步"
+    },
+    {
+      "name": "download_create_failed",
+      "value": "建立系統下載任務失敗，可重試"
+    },
+    {
+      "name": "controls_lock",
+      "value": "鎖定控制"
+    },
+    {
+      "name": "controls_unlock",
+      "value": "解除控制鎖定"
+    },
+    {
+      "name": "download_queued",
+      "value": "等待下載（最多四個同時任務）"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "帳號與伺服器"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "已儲存帳號"
+    },
+    {
+      "name": "saved_servers",
+      "value": "已儲存伺服器"
+    },
+    {
+      "name": "add_account_server",
+      "value": "新增帳號或伺服器"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "還沒有已儲存帳號"
+    },
+    {
+      "name": "active_account",
+      "value": "目前帳號"
+    },
+    {
+      "name": "switch_account",
+      "value": "切換"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "移除帳號"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "僅移除本機登入認證資料；該帳號的快取、離線修改和下載檔案保留，不刪除伺服器內容。"
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "移除伺服器"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "將移除此伺服器及其全部本機登入認證資料；快取與下載檔案保留，不刪除伺服器內容。"
+    },
+    {
+      "name": "save_server_only",
+      "value": "僅儲存伺服器"
+    },
+    {
+      "name": "server_display_name",
+      "value": "伺服器顯示名稱"
+    },
+    {
+      "name": "server_addresses",
+      "value": "伺服器名稱與地址"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "管理地址"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "每行一個完整地址，最多8個，保留 /jellyfin 等路徑。發生連線故障時按順序驗證同一伺服器後切換。"
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Quick Connect 登入"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "在已登入的 Jellyfin 用戶端中開啟“設定 → Quick Connect”，輸入此代碼授權。每5秒檢查；5分鐘未完成請重新獲取代碼。"
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "我已授權，檢查登入"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "伺服器未啟用 Quick Connect，請使用帳號密碼登入"
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "Quick Connect 代碼已失效，請重新獲取"
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "已取消 Quick Connect"
+    },
+    {
+      "name": "account_switching",
+      "value": "帳號切換正在進行，請稍候"
+    },
+    {
+      "name": "account_not_found",
+      "value": "此帳號已被移除，請重新登入"
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "地址指向其他伺服器，未傳送帳號權杖"
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "此地址已屬於另一個已儲存伺服器"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "已儲存地址均不可用，請檢查網路或管理伺服器地址"
+    },
+    {
+      "name": "account_store_full",
+      "value": "帳號儲存空間已滿，請先移除不再使用的帳號"
+    },
+    {
+      "name": "session_save_failed",
+      "value": "無法儲存帳號認證資料，原帳號仍保留"
+    },
+    {
+      "name": "save",
+      "value": "儲存"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "已取消登入，請重新連線"
+    },
+    {
+      "name": "account_unnamed",
+      "value": "未命名帳號"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "重置帳號儲存"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "將移除本裝置所有已儲存伺服器和登入認證資料，可用於修復損壞的帳號儲存。快取、離線修改、下載檔案和 PIN 保留；不會刪除伺服器內容。"
+    },
+    {
+      "name": "menu_collection",
+      "value": "我的影庫"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "帳號與偏好"
+    },
+    {
+      "name": "menu_data",
+      "value": "資料與同步"
+    },
+    {
+      "name": "server_address_label",
+      "value": "伺服器地址"
+    },
+    {
+      "name": "credentials_group",
+      "value": "本機認證資料"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "僅管理本機儲存的登入認證資料；快取和下載檔案保留。"
+    },
+    {
+      "name": "offline_group",
+      "value": "瀏覽與離線"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "收藏篩選"
+    },
+    {
+      "name": "download_status",
+      "value": "下載狀態"
+    },
+    {
+      "name": "selected_count",
+      "value": "已選擇 %d 項"
+    },
+    {
+      "name": "player_seek",
+      "value": "播放進度"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "控制已鎖定，點按右上角解鎖"
+    },
+    {
+      "name": "player_system_group",
+      "value": "系統播放"
+    },
+    {
+      "name": "player_media_group",
+      "value": "媒體與字幕"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "倍速與連播"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "未選擇"
+    },
+    {
+      "name": "recommend_group",
+      "value": "光影發現"
+    },
+    {
+      "name": "actor_filters",
+      "value": "演員篩選"
+    },
+    {
+      "name": "actor_sort",
+      "value": "排序方式"
+    },
+    {
+      "name": "actor_profile",
+      "value": "人物與關注"
+    },
+    {
+      "name": "actor_credits",
+      "value": "作品與標籤"
+    },
+    {
+      "name": "actor_tags",
+      "value": "作品標籤"
+    },
+    {
+      "name": "media_detail",
+      "value": "影片詳細資料"
+    },
+    {
+      "name": "detail_actions",
+      "value": "播放與管理"
+    },
+    {
+      "name": "detail_story",
+      "value": "故事與資料"
+    },
+    {
+      "name": "detail_technical",
+      "value": "版本與規格"
+    },
+    {
+      "name": "login_credentials",
+      "value": "連線影庫"
+    },
+    {
+      "name": "login_connections",
+      "value": "更多連線方式"
+    },
+    {
+      "name": "search_group",
+      "value": "搜尋影庫"
+    },
+    {
+      "name": "search_action",
+      "value": "搜尋"
+    },
+    {
+      "name": "close_search",
+      "value": "關閉搜尋"
+    },
+    {
+      "name": "search_history",
+      "value": "最近搜尋"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "填寫伺服器地址，獲取配對代碼後，在已登入的 Jellyfin 用戶端中授權。"
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "配對登入"
+    },
+    {
+      "name": "loading",
+      "value": "正在載入…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "媒體類型"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "題材"
+    },
+    {
+      "name": "favorite_order",
+      "value": "排序"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "尚未儲存伺服器"
+    },
+    {
+      "name": "no_seasons",
+      "value": "尚無季資料"
+    },
+    {
+      "name": "no_episodes",
+      "value": "尚無單集"
+    },
+    {
+      "name": "library_sort",
+      "value": "排序依據"
+    },
+    {
+      "name": "library_order",
+      "value": "排列方向"
+    },
+    {
+      "name": "sort_name",
+      "value": "名稱"
+    },
+    {
+      "name": "sort_rating",
+      "value": "社群評分"
+    },
+    {
+      "name": "sort_critic",
+      "value": "影評人評分"
+    },
+    {
+      "name": "sort_added",
+      "value": "入庫時間"
+    },
+    {
+      "name": "sort_played",
+      "value": "觀看時間"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "發行時間"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "升序"
+    },
+    {
+      "name": "sort_descending",
+      "value": "降序"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "離線字幕 · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "外掛字幕未能快取，請連線上網重試"
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "視訊已下載，外掛字幕尚未快取完成"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "外掛字幕尚未快取或部分失敗，視訊仍可播放"
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "快取或重試外掛字幕"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "自動連播跟隨伺服器帳號設定"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "已為目前帳號儲存本機連播偏好"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "還原跟隨伺服器"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "無法讀取連播偏好，自動連播暫未開啟，可重試跟隨伺服器"
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "連播偏好儲存失敗，請重試"
+    },
+    {
+      "name": "media_collection",
+      "value": "合集"
+    },
+    {
+      "name": "collection_empty",
+      "value": "合集中暫無影片"
+    },
+    {
+      "name": "collection_online_required",
+      "value": "合集成員尚未離線快取，請連線上網查看"
+    },
+    {
+      "name": "collection_cancelled",
+      "value": "已取消合集載入"
+    },
+    {
+      "name": "download_mobile",
+      "value": "允許行動與計費網路下載"
+    },
+    {
+      "name": "download_roaming",
+      "value": "允許漫遊下載"
+    },
+    {
+      "name": "download_network_hint",
+      "value": "預設僅限 Wi-Fi 且禁止計費與漫遊。偏好適用於新建視訊、批次佇列及字幕補快取；修改不改變已建立的任務。"
+    },
+    {
+      "name": "download_network_restricted",
+      "value": "目前網路不符合下載偏好，請連線 Wi-Fi 或調整設定"
+    },
+    {
+      "name": "download_space_check_failed",
+      "value": "無法檢查下載目錄的剩餘空間，請稍後重試"
+    },
+    {
+      "name": "download_space_insufficient",
+      "value": "下載及已執行任務預計需要 %d MB，可用 %d MB，請先釋放空間"
+    },
+    {
+      "name": "download_size_unknown",
+      "value": "媒體大小未知，空間預檢無法保證完整下載所需容量"
+    },
+    {
+      "name": "gesture_seek_preview",
+      "value": "鬆手跳轉至 %s"
+    },
+    {
+      "name": "gesture_speed_hold",
+      "value": "臨時 2× · 鬆手還原"
+    },
+    {
+      "name": "gesture_hint",
+      "value": "雙擊快退/快進 · 橫滑跳轉 · 長按臨時倍速 · 雙指縮放；左側縱滑調亮度，右側調播放器音量。"
+    },
+    {
+      "name": "public_users_load",
+      "value": "選擇伺服器公開使用者"
+    },
+    {
+      "name": "public_users_empty",
+      "value": "伺服器沒有公開使用者，可繼續輸入使用者名稱登入。"
+    },
+    {
+      "name": "public_users_invalid",
+      "value": "公開使用者資料無效，請重試或手動輸入使用者名稱。"
+    },
+    {
+      "name": "player_gesture_preferences",
+      "value": "播放手勢與子母畫面"
+    },
+    {
+      "name": "player_gestures_enabled",
+      "value": "啟用播放手勢"
+    },
+    {
+      "name": "player_seek_gesture",
+      "value": "橫滑跳轉進度"
+    },
+    {
+      "name": "player_zoom_gesture",
+      "value": "雙指縮放畫面"
+    },
+    {
+      "name": "player_start_maximized",
+      "value": "預設裁剪填充畫面"
+    },
+    {
+      "name": "player_back_seconds",
+      "value": "雙擊快退秒數（1–300）"
+    },
+    {
+      "name": "player_forward_seconds",
+      "value": "雙擊快進秒數（1–300）"
+    },
+    {
+      "name": "player_save_steps",
+      "value": "儲存跳轉秒數"
+    },
+    {
+      "name": "player_steps_invalid",
+      "value": "請輸入 1–300 的整數秒數。"
+    },
+    {
+      "name": "player_auto_pip",
+      "value": "進入背景時自動開啟子母畫面"
+    },
+    {
+      "name": "player_ui_preferences_hint",
+      "value": "按目前帳號儲存，下次進入播放器生效。自動子母畫面預設關閉，受系統支援、播放和鎖定狀態限制。PiP與鎖定畫面按鈕保留各自的跳轉秒數。"
+    },
+    {
+      "name": "auto_pip_failed",
+      "value": "自動子母畫面暫不可用，仍可嘗試手動進入。"
+    },
+    {
+      "name": "sync_schedule_unavailable",
+      "value": "背景調度暫不可用；待回傳修改已保留，可在更多中手動回傳。"
+    },
+    {
+      "name": "sync_retry_waiting",
+      "value": "回傳失敗，修改已保留，將自動重試。"
+    },
+    {
+      "name": "sync_retry_exhausted",
+      "value": "自動回傳重試已暫停，請檢查連線後手動回傳。"
+    },
+    {
+      "name": "sync_auth_required",
+      "value": "自動回傳已暫停，請檢查帳號權限或重新登入後手動回傳。"
+    },
+    {
+      "name": "player_fullscreen",
+      "value": "進入沉浸全螢幕"
+    },
+    {
+      "name": "player_exit_fullscreen",
+      "value": "離開全螢幕"
+    },
+    {
+      "name": "previous_episode",
+      "value": "上一集"
+    },
+    {
+      "name": "queue_first_episode",
+      "value": "已經是第一集。"
+    },
+    {
+      "name": "previous_episode_failed",
+      "value": "暫時無法播放上一集；請檢查連線或本機下載。"
+    },
+    {
+      "name": "window_unavailable",
+      "value": "無法調整播放器視窗，請離開全螢幕後重試。"
+    },
+    {
+      "name": "screen_on_failed",
+      "value": "無法保持螢幕常亮，請檢查系統設定。"
+    },
+    {
+      "name": "brightness_failed",
+      "value": "視窗亮度調整失敗。"
+    },
+    {
+      "name": "volume_failed",
+      "value": "播放器音量調整失敗。"
+    },
+    {
+      "name": "player_display_save_failed",
+      "value": "顯示偏好儲存失敗，本次調整仍然有效。"
+    },
+    {
+      "name": "player_display_group",
+      "value": "亮度與夜間模式"
+    },
+    {
+      "name": "player_window_brightness",
+      "value": "視窗亮度"
+    },
+    {
+      "name": "player_brightness_value",
+      "value": "視窗亮度：%d%"
+    },
+    {
+      "name": "player_relative_volume",
+      "value": "播放器相對音量"
+    },
+    {
+      "name": "player_volume_value",
+      "value": "播放器音量：%d%"
+    },
+    {
+      "name": "player_relative_volume_hint",
+      "value": "僅調整目前播放器的相對音量；系統靜音或媒體音量較低時，請使用裝置音量鍵。"
+    },
+    {
+      "name": "player_night_mode",
+      "value": "夜間遮罩"
+    },
+    {
+      "name": "player_dim_opacity",
+      "value": "夜間遮罩暗度"
+    },
+    {
+      "name": "player_dim_value",
+      "value": "遮罩暗度：%d%"
+    },
+    {
+      "name": "player_vertical_gesture",
+      "value": "縱滑調節亮度和播放器音量"
+    },
+    {
+      "name": "player_remember_brightness",
+      "value": "記住此帳號的視窗亮度"
+    },
+    {
+      "name": "search_type",
+      "value": "搜尋類型"
+    },
+    {
+      "name": "search_type_all",
+      "value": "全部類型"
+    },
+    {
+      "name": "search_results_for",
+      "value": "搜尋詞：%s"
+    },
+    {
+      "name": "search_loaded_count",
+      "value": "已載入 %d / %d 項"
+    },
+    {
+      "name": "search_cached_count",
+      "value": "目前帳號快取中找到 %d 項"
+    },
+    {
+      "name": "search_group_partial",
+      "value": "分組僅包含已載入的結果。繼續載入更多，或選擇類型搜尋該類型的全部結果。"
+    },
+    {
+      "name": "search_group_count",
+      "value": "%s · 已載入 %d 項"
+    },
+    {
+      "name": "device_name_group",
+      "value": "伺服器裝置名稱"
+    },
+    {
+      "name": "device_name_hint",
+      "value": "修改目前伺服器上此裝置的顯示名，最多64個字元；留空還原預設名稱。需要伺服器授權。"
+    },
+    {
+      "name": "device_name_current",
+      "value": "最近確認的名稱：%s"
+    },
+    {
+      "name": "device_name_unknown",
+      "value": "尚未讀取或需要重新確認伺服器名稱。"
+    },
+    {
+      "name": "device_name_label",
+      "value": "自訂裝置名稱"
+    },
+    {
+      "name": "device_name_default",
+      "value": "預設裝置名稱"
+    },
+    {
+      "name": "device_name_refresh",
+      "value": "讀取伺服器名稱"
+    },
+    {
+      "name": "device_name_save",
+      "value": "儲存裝置名稱"
+    },
+    {
+      "name": "device_name_online_required",
+      "value": "離線模式下不能讀取或修改伺服器裝置名稱。"
+    },
+    {
+      "name": "device_name_invalid",
+      "value": "名稱最多64個字元，不能包含換行或控制字元。"
+    },
+    {
+      "name": "device_name_cancelled",
+      "value": "操作已取消，請重新讀取裝置名稱。"
+    },
+    {
+      "name": "device_name_not_confirmed",
+      "value": "伺服器回傳的名稱與本次修改不一致。"
+    },
+    {
+      "name": "device_name_saved",
+      "value": "伺服器裝置名稱已確認儲存。"
+    },
+    {
+      "name": "device_name_save_failed",
+      "value": "儲存失敗或結果未確認，請先重新讀取伺服器名稱再修改。"
+    },
+    {
+      "name": "server_discovery_hint",
+      "value": "自動搜尋同一區域網路約 8 秒。選擇伺服器後會匿名驗證並填入地址，仍需登入帳號。"
+    },
+    {
+      "name": "discovery_scanning",
+      "value": "正在搜尋區域網路伺服器…"
+    },
+    {
+      "name": "discovery_verifying",
+      "value": "正在驗證伺服器身份…"
+    },
+    {
+      "name": "discovery_start",
+      "value": "重新搜尋區域網路"
+    },
+    {
+      "name": "discovery_stop",
+      "value": "停止搜尋或驗證"
+    },
+    {
+      "name": "discovery_empty",
+      "value": "沒有發現伺服器。請確認裝置處於同一網路，或手動填寫地址。"
+    },
+    {
+      "name": "discovery_stopped",
+      "value": "已停止，可以手動填寫地址或重新搜尋。"
+    },
+    {
+      "name": "discovery_limit_reached",
+      "value": "本輪搜尋已達上限，可選擇候選或重新搜尋。"
+    },
+    {
+      "name": "discovery_failed",
+      "value": "區域網路搜尋失敗，請檢查網路後重試，或手動填寫地址。"
+    },
+    {
+      "name": "discovery_cancelled",
+      "value": "搜尋或驗證已取消。"
+    },
+    {
+      "name": "discovery_verify_timeout",
+      "value": "驗證超時，請檢查伺服器是否可存取後重試。"
+    },
+    {
+      "name": "discovery_verify_failed",
+      "value": "無法確認伺服器，請重試或手動填寫地址。"
+    },
+    {
+      "name": "api_network_group",
+      "value": "API 連線與快取"
+    },
+    {
+      "name": "api_network_hint",
+      "value": "整個應用程式共用，每項填 1–120 秒，儲存後用於新發起的 API 請求。單次 HTTP 總時限包含連線與讀取；讀取超時使用鴻蒙原生語義。視訊、圖片、系統下載和區域網路發現有獨立傳輸策略。"
+    },
+    {
+      "name": "network_request_seconds",
+      "value": "單次 HTTP 總時限（秒）"
+    },
+    {
+      "name": "network_connect_seconds",
+      "value": "連線超時（秒）"
+    },
+    {
+      "name": "network_read_seconds",
+      "value": "讀取超時（秒）"
+    },
+    {
+      "name": "network_auto_cache",
+      "value": "連線失敗時自動使用帳號快取"
+    },
+    {
+      "name": "network_cache_hint",
+      "value": "關閉後不自動退回快取。手動離線、已下載媒體和待回傳修改繼續保留；需要儲存後生效。"
+    },
+    {
+      "name": "network_options_save",
+      "value": "儲存網路設定"
+    },
+    {
+      "name": "network_options_reset",
+      "value": "還原網路預設值"
+    },
+    {
+      "name": "network_options_invalid",
+      "value": "網路設定無效：超時請填寫 1–120 的整數秒。"
+    },
+    {
+      "name": "network_options_load_failed",
+      "value": "無法讀取網路設定，暫時使用預設值或最近已儲存值。"
+    },
+    {
+      "name": "network_options_save_failed",
+      "value": "網路設定儲存失敗，保留原有設定及目前輸入。"
+    },
+    {
+      "name": "network_options_restore_failed",
+      "value": "網路設定還原失敗，請重新開啟頁面並確認設定。"
+    },
+    {
+      "name": "network_options_cancelled",
+      "value": "網路設定操作已取消。"
+    },
+    {
+      "name": "network_options_saved",
+      "value": "網路設定已儲存，新請求生效。"
+    },
+    {
+      "name": "poster_cache_group",
+      "value": "海報與頭像快取"
+    },
+    {
+      "name": "poster_cache_hint",
+      "value": "預設20 MB，整個應用程式共用容量，最多512個圖片檔案，按帳號隔離。僅快取已瀏覽圖片；未快取的圖片離線顯示佔位。關閉後不讀寫磁碟，連線時仍可顯示，已有內容可單獨清理。系統可能回收快取。"
+    },
+    {
+      "name": "poster_cache_enabled",
+      "value": "使用圖片磁碟快取"
+    },
+    {
+      "name": "poster_cache_capacity",
+      "value": "容量上限（1–200 MB）"
+    },
+    {
+      "name": "poster_cache_usage",
+      "value": "圖片檔案佔用：%s MB · %d 個檔案"
+    },
+    {
+      "name": "poster_cache_unknown",
+      "value": "圖片快取佔用暫不可用"
+    },
+    {
+      "name": "poster_options_save",
+      "value": "儲存圖片快取設定"
+    },
+    {
+      "name": "poster_cache_clear",
+      "value": "清理圖片磁碟快取"
+    },
+    {
+      "name": "poster_cache_clear_confirm",
+      "value": "清理本機所有帳號的海報和頭像磁碟快取，不影響視訊、資料快取和待回傳修改。目前顯示的圖片可能仍保留在記憶體，離線時無法重新下載。"
+    },
+    {
+      "name": "poster_options_invalid",
+      "value": "容量請填寫1–200的整數MB。"
+    },
+    {
+      "name": "poster_options_saved",
+      "value": "圖片快取偏好已儲存。"
+    },
+    {
+      "name": "poster_options_load_failed",
+      "value": "無法讀取圖片快取偏好，暫時使用預設值。"
+    },
+    {
+      "name": "poster_options_save_failed",
+      "value": "圖片快取偏好未確認儲存，請保留輸入並重試。"
+    },
+    {
+      "name": "poster_options_restore_failed",
+      "value": "圖片快取偏好還原失敗，請重新啟動應用程式後確認。"
+    },
+    {
+      "name": "poster_cache_unavailable",
+      "value": "圖片快取讀寫或佔用統計失敗，圖片仍可嘗試連線時載入。"
+    },
+    {
+      "name": "poster_cache_trim_failed",
+      "value": "偏好已儲存，但快取裁剪未完成，請重試清理。"
+    },
+    {
+      "name": "poster_cache_cleared",
+      "value": "圖片磁碟快取已清理。"
+    },
+    {
+      "name": "poster_cache_clear_failed",
+      "value": "圖片快取清理未完成，請確認剩餘佔用後重試。"
+    },
+    {
+      "name": "player_trickplay",
+      "value": "拖動進度縮圖"
+    },
+    {
+      "name": "player_trickplay_hint",
+      "value": "需要伺服器提供 Jellyscrub BIF 縮圖。已快取的預覽可離線使用；快取最多 32 MiB、16 個檔案，較舊預覽可能被清理。"
+    },
+    {
+      "name": "player_trickplay_frame",
+      "value": "目標時間預覽畫面"
+    },
+    {
+      "name": "player_trickplay_save_failed",
+      "value": "拖動進度縮圖設定儲存失敗"
+    },
+    {
+      "name": "ui_language_group",
+      "value": "應用程式介面語言"
+    },
+    {
+      "name": "ui_language_hint",
+      "value": "支援簡體中文、繁體中文與 English；其他系統語言暫用英文。此設定由整個應用程式共用，僅影響介面，影片中繼資料與音軌／字幕偏好分別保留。"
+    },
+    {
+      "name": "ui_language_system",
+      "value": "跟隨系統"
+    },
+    {
+      "name": "ui_language_save",
+      "value": "儲存並套用介面語言"
+    },
+    {
+      "name": "ui_language_saved",
+      "value": "介面語言已儲存並套用"
+    },
+    {
+      "name": "ui_language_invalid",
+      "value": "介面語言設定無效，請重新選擇並儲存"
+    },
+    {
+      "name": "ui_language_load_failed",
+      "value": "無法讀取介面語言設定，請重開設定頁後重試"
+    },
+    {
+      "name": "ui_language_save_failed",
+      "value": "介面語言未能儲存，已還原原設定，請重試"
+    },
+    {
+      "name": "ui_language_restore_failed",
+      "value": "介面語言還原失敗，目前設定未確認，請重新啟動後重新儲存"
+    },
+    {
+      "name": "ui_language_cancelled",
+      "value": "介面語言操作已取消"
+    },
+    {
+      "name": "ui_language_apply_failed",
+      "value": "未能更新介面語言，請重開設定頁後重試"
+    },
+    {
+      "name": "appearance_group",
+      "value": "外觀與詳細資料"
+    },
+    {
+      "name": "appearance_amoled",
+      "value": "AMOLED 純黑背景"
+    },
+    {
+      "name": "appearance_amoled_hint",
+      "value": "將頁面、卡片、輸入框和系統列背景改為純黑；關閉後還原映嶼目前的深色配色。整個應用程式共用，立即生效並保留到重新啟動。"
+    },
+    {
+      "name": "appearance_extra_info",
+      "value": "顯示額外媒體資訊"
+    },
+    {
+      "name": "appearance_extra_hint",
+      "value": "在電影和單集詳細資料中顯示檔案大小及完整視訊、音訊、字幕規格；關閉後仍保留簡介、基本標籤與演職員。"
+    },
+    {
+      "name": "appearance_saved",
+      "value": "外觀設定已儲存並套用"
+    },
+    {
+      "name": "appearance_invalid",
+      "value": "儲存的外觀設定無效，請重新選擇設定"
+    },
+    {
+      "name": "appearance_load_failed",
+      "value": "無法讀取外觀設定，請重新開啟設定頁重試"
+    },
+    {
+      "name": "appearance_unavailable",
+      "value": "視窗外觀暫不可用，請重新開啟設定頁重試"
+    },
+    {
+      "name": "appearance_cancelled",
+      "value": "外觀設定操作已取消"
+    },
+    {
+      "name": "appearance_save_failed",
+      "value": "外觀設定未能儲存，已嘗試還原原設定，請重試"
+    },
+    {
+      "name": "appearance_restore_failed",
+      "value": "外觀設定還原未確認，請重開設定頁確認後重試"
+    },
+    {
+      "name": "dynamic_colors",
+      "value": "跟隨壁紙配色"
+    },
+    {
+      "name": "dynamic_colors_hint",
+      "value": "使用系統壁紙顏色生成映嶼深色配色，預設開啟。讀取失敗時使用原映嶼配色，返回前景會重試；AMOLED 模式仍保留純黑容器。"
+    },
+    {
+      "name": "dynamic_colors_loading",
+      "value": "正在確認壁紙配色…"
+    },
+    {
+      "name": "dynamic_colors_active",
+      "value": "已套用目前系統壁紙配色"
+    },
+    {
+      "name": "dynamic_colors_off",
+      "value": "使用原映嶼配色"
+    },
+    {
+      "name": "dynamic_colors_fallback",
+      "value": "暫未獲得可用壁紙顏色，使用原映嶼配色；返回前景將重試。"
+    },
+    {
+      "name": "dynamic_colors_update_failed",
+      "value": "配色視窗更新失敗，已嘗試還原上一配色；請重開設定頁確認。"
+    }
+  ]
+}

@@ -1947,7 +1947,7 @@
       "value": "拖动进度缩略图设置保存失败"
     },
     {"name": "ui_language_group", "value": "应用界面语言"},
-    {"name": "ui_language_hint", "value": "支持简体中文与 English；其他系统语言暂使用英文。此设置全应用共用，仅影响界面，影片元数据与音轨/字幕偏好分别保留。"},
+    {"name": "ui_language_hint", "value": "支持简体中文、繁體中文与 English；其他系统语言暂使用英文。此设置全应用共用，仅影响界面，影片元数据与音轨/字幕偏好分别保留。"},
     {"name": "ui_language_system", "value": "跟随系统"},
     {"name": "ui_language_save", "value": "保存并应用界面语言"},
     {"name": "ui_language_saved", "value": "界面语言已保存并应用"},

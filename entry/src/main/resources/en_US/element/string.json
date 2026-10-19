@@ -1970,7 +1970,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Supports Simplified Chinese and English. Other system languages currently use English. Shared across the app; media metadata and audio/subtitle preferences are managed separately."
+      "value": "Supports Simplified Chinese, Traditional Chinese and English. Other system languages use English. This app-wide setting changes the interface only; media metadata and audio/subtitle preferences remain separate."
     },
     {
       "name": "ui_language_system",
