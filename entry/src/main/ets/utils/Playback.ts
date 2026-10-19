@@ -5,6 +5,12 @@ export interface TrackChoice { key: string; index: number; type: number; label: 
 
 // Unknown season numbers in old caches only allow continuation within the known season.
 export function followingEpisode(current: MediaItem, items: MediaItem[]): MediaItem | undefined {
+  return adjacentEpisode(current, items, true);
+}
+export function precedingEpisode(current: MediaItem, items: MediaItem[]): MediaItem | undefined {
+  return adjacentEpisode(current, items, false);
+}
+function adjacentEpisode(current: MediaItem, items: MediaItem[], forward: boolean): MediaItem | undefined {
   if (current.Type !== 'Episode' || !current.SeriesId) { return undefined; }
   const episodes = items.filter((item: MediaItem) => item.Type === 'Episode' && item.SeriesId === current.SeriesId);
   const anchor = episodes.find((item: MediaItem) => item.Id === current.Id) ?? current;
@@ -12,10 +18,10 @@ export function followingEpisode(current: MediaItem, items: MediaItem[]): MediaI
   const numbered = Number.isSafeInteger(anchor.ParentIndexNumber) && anchor.ParentIndexNumber! >= 0;
   const candidates = episodes.filter((item: MediaItem) => item.Id !== current.Id && Number.isSafeInteger(item.IndexNumber) && item.IndexNumber! >= 0 &&
     (numbered ? Number.isSafeInteger(item.ParentIndexNumber) && item.ParentIndexNumber! >= 0 : !!anchor.SeasonId && item.SeasonId === anchor.SeasonId));
-  const ordered = candidates.filter((item: MediaItem) => numbered ?
-    item.ParentIndexNumber! > anchor.ParentIndexNumber! || (item.ParentIndexNumber === anchor.ParentIndexNumber && item.IndexNumber! > anchor.IndexNumber!) :
-    item.IndexNumber! > anchor.IndexNumber!).sort((a: MediaItem, b: MediaItem) =>
-    (numbered ? a.ParentIndexNumber! - b.ParentIndexNumber! : 0) || a.IndexNumber! - b.IndexNumber! || a.Id.localeCompare(b.Id));
+  const direction = forward ? 1 : -1;
+  const compare = (a: MediaItem, b: MediaItem): number => (numbered ? a.ParentIndexNumber! - b.ParentIndexNumber! : 0) || a.IndexNumber! - b.IndexNumber!;
+  const ordered = candidates.filter((item: MediaItem) => compare(item, anchor) * direction > 0)
+    .sort((a: MediaItem, b: MediaItem) => compare(a, b) * direction || a.Id.localeCompare(b.Id));
   return ordered[0];
 }
 

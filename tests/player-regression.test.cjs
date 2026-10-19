@@ -19,6 +19,7 @@ platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 for (const id of ['@ohos.app.ability.common', '@ohos.request', '@ohos.resourceManager', '@ohos.security.asset']) platform.set(id, {});
 const systemPlatform = require('./system-platform.cjs');
 systemPlatform.install(platform);
+const windowPlatform = require('./window-platform.cjs'); windowPlatform.install(platform);
 const preferencesPlatform = require('./preferences-platform.cjs').install(platform, directory);
 platform.set('@ohos.util', { generateRandomUUID: () => 'device', TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } }, TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 Object.assign(platform.get('@ohos.security.asset'), { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return' }, ReturnType: { ALL: 1 }, query: async () => [] });
@@ -42,6 +43,7 @@ class NativePlayer {
   async pause() { this.calls.push(['pause']); if (this.failPause) throw new Error('pause failed'); this.change('paused'); }
   seek(ms) { this.calls.push(['seek', ms]); this.emit('timeUpdate', ms); }
   setSpeed(speed) { this.calls.push(['speed', speed]); }
+  setVolume(value) { if (this.failVolume) throw new Error('native volume rejected'); this.calls.push(['volume', value]); this.volume = value; }
   async release() { this.calls.push(['release']); this.state = 'released'; if (this.releaseWait) await this.releaseWait; }
 }
 platform.set('@ohos.multimedia.media', {
@@ -57,7 +59,8 @@ function load(relative) {
   let source = fs.readFileSync(file, 'utf8');
   // Declarative builders are SDK-compiled, not rendered by this Node harness.
   if (file.endsWith('/components/PiPSubtitle.ets')) source = source.replace(/@Builder[\s\S]*?(?=export class PiPSubtitleController)/, 'function pipSubtitleBuilder(params) {}\n');
-  if (relative.includes('pages/')) source = (source.slice(0, source.indexOf('\n  build()')) + '\n}').replace(/@Entry\s+@Component\s+struct (\w+)/, 'export class $1').replace(/@State\s+/g, '').replace(/@StorageLink\([^)]*\)\s+/g, '');
+  // Node has no AppStorage; its explicit unlocked fixture matches the real SDK UI fixture.
+  if (relative.includes('pages/')) source = (source.slice(0, source.indexOf('\n  build()')) + '\n}').replace(/@Entry\s+@Component\s+struct (\w+)/, 'export class $1').replace(/@State\s+/g, '').replace(/@StorageLink\([^)]*\)\s+/g, '').replace(/@Watch\([^)]*\)\s+/g, '').replace('locked: boolean = true;', 'locked: boolean = false;');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2020 } }).outputText;
   const module = { exports: {} }; cache.set(file, module);
   const localRequire = id => { if (platform.has(id)) return platform.get(id); const base = path.resolve(path.dirname(file), id); return load(fs.existsSync(base + '.ts') ? base + '.ts' : base + '.ets'); };

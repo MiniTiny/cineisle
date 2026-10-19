@@ -36,7 +36,8 @@ const actorId = id(50); const person = item(actorId, '潮汐 · 演员测试', '
 const cast = [{ Id: actorId, Name: person.Name, Type: 'Actor', Role: '侦探' }];
 movie.People = cast; movie.Genres = ['犯罪', '悬疑']; show.People = cast; show.Genres = ['Crime'];
 const extraMovie = item(id(51), '岛屿谜案 · 新发现', 'Movie', { People: cast, Genres: ['Crime'], CanDownload: true, MediaSources: [source], UserData: { IsFavorite: true, Played: false } });
-const catalog = [movie, show, extraMovie, season, episode];
+const episodes = process.env.CINEISLE_VISUAL_EPISODES === '2' ? [episode, { ...episode, Id: id(73), Name: '潮汐的回响 · 第二集', IndexNumber: 2 }] : [episode];
+const catalog = [movie, show, extraMovie, season, ...episodes];
 const boxId=id(70), boxesId=id(71), box=item(boxId,'光影与潮汐 · 合集回归','BoxSet');
 if(process.env.CINEISLE_VISUAL_COLLECTIONS==='1')libraries.push(item(boxesId,'合集 · UI 测试','CollectionFolder',{CollectionType:'boxsets'}));
 const data = new Map([...catalog, person, ...libraries].map(x => [x.Id, x]));
@@ -57,7 +58,7 @@ const server = http.createServer((req, res) => {
   else if (p.endsWith('/Views') || p === '/UserViews') result = page(libraries);
   else if (p === '/Shows/NextUp') result = page([episode]);
   else if (p.endsWith('/Seasons')) result = page([season]);
-  else if (p.endsWith('/Episodes')) result = page([episode]);
+  else if (p.endsWith('/Episodes')) { const start=Number(q.get('startindex')||0),limit=Number(q.get('limit')||episodes.length); result={Items:episodes.slice(start,start+limit),TotalRecordCount:episodes.length,StartIndex:start}; }
   else if (p.endsWith('/Items/Resume') || p === '/UserItems/Resume') result = page([movie]);
   else if (p.endsWith('/Items/Latest')) result = q.get('parentid') === boxesId ? [box] : q.get('parentid') === showsId ? [show] : q.get('parentid') === moviesId ? [movie] : [movie, show];
   else if (p === '/Movies/Recommendations') result = process.env.CINEISLE_VISUAL_EMPTY_CATALOG === '1' ? [] : [{ Items: [movie] }];
