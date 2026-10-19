@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
@@ -31,6 +32,7 @@ interface PersonRoute { personId?: string; personName?: string }
 @Entry
 @Component
 struct Index {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -319,36 +321,36 @@ struct Index {
         Column({ space: 12 }) {
           Image($r('app.media.app_icon')).width(76).height(76).borderRadius(20).accessibilityLevel('no')
           Text($r('app.string.app_name')).fontSize(28).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
-          Text($r('app.string.login_intro')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+          Text($r('app.string.login_intro')).fontSize(14).fontColor(this.palette.muted).width('100%')
         }.width('100%').alignItems(HorizontalAlign.Start)
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_credentials'), icon: $r('app.media.menu_login') })
-          Text($r('app.string.server_address_label')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          Text($r('app.string.server_address_label')).fontSize(12).fontColor(this.palette.muted).width('100%')
           TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => this.changeServer(value))
-            .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy)
+            .fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
           ServerDiscoveryPicker({ address: this.server, active: this.discoveryVisible && !this.signedIn,
             available: this.ready && !this.busy && !this.locked, onSelect: (server: DiscoveredServer) => this.selectDiscovered(server) })
-          Text($r('app.string.username')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          Text($r('app.string.username')).fontSize(12).fontColor(this.palette.muted).width('100%')
             PublicUserPicker({ server: this.server, available: this.ready && !this.busy && !this.locked,
               onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('index-login-password'); } })
           TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.username = value; })
-            .fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy)
-          Text($r('app.string.password')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+            .fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
+          Text($r('app.string.password')).fontSize(12).fontColor(this.palette.muted).width('100%')
             TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('index-login-password').height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).type(InputType.Password)
-            .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy)
-          Text($r('app.string.https_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-          if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%') }
+            .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
+          Text($r('app.string.https_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+          if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(13).width('100%') }
           if (this.busy || !this.ready) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           BrandButton({ label: this.busy ? $r('app.string.connecting') : $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true,
             available: this.ready && !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_connections'), icon: $r('app.media.menu_accounts') })
           BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: this.ready && !this.busy,
             onSelect: () => this.openQuick() })
           BrandButton({ label: $r('app.string.accounts_servers'), icon: $r('app.media.menu_accounts'), available: this.ready && !this.busy,
             onSelect: () => router.pushUrl({ url: 'pages/Accounts' }) })
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
       }.padding(20).width('100%').alignItems(HorizontalAlign.Start)
     }.width('100%').height('100%').align(Alignment.TopStart)
   }
@@ -357,8 +359,8 @@ struct Index {
   private statusPanel() {
     Column({ space: 8 }) {
       if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      if (this.message) { Text(this.message).fontSize(13).fontColor($r('app.color.brand_danger')).width('100%') }
-      if (this.cacheMessage) { Text(this.cacheMessage).fontSize(13).fontColor($r('app.color.brand_warm')).width('100%') }
+      if (this.message) { Text(this.message).fontSize(13).fontColor(this.palette.danger).width('100%') }
+      if (this.cacheMessage) { Text(this.cacheMessage).fontSize(13).fontColor(this.palette.warm).width('100%') }
     }.width('100%')
   }
 
@@ -368,9 +370,9 @@ struct Index {
       GridItem() {
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.search_group'), icon: $r('app.media.nav_search_active') })
-          Text($r('app.string.search_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+          Text($r('app.string.search_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
           TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor('#F2F3FA')
-            .placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12)
+            .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12)
             .enterKeyType(EnterKeyType.Search).onFocus(() => { this.searchFocused = true; }).onBlur(() => { this.searchFocused = false; })
             .onChange((value: string) => { this.search = value; }).onSubmit(() => this.performSearch())
           BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
@@ -379,9 +381,9 @@ struct Index {
             choices: [{ value: text('search_type_all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
             selected: Math.max(0, searchTypes.indexOf(this.searchType)), onSelect: (index: number) => this.changeSearchType(index) })
           if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-          if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_danger')).width('100%') }
-          if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+          if (this.message) { Text(this.message).fontSize(12).fontColor(this.palette.danger).width('100%') }
+          if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
       }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       if (this.recentSearches.length > 0) {
         GridItem() {
@@ -393,7 +395,7 @@ struct Index {
                   .width(this.viewportWidth < 400 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
               }, (value: string) => value)
             }.width('100%')
-          }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+          }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
         }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
       if (this.mode === 'search') {
@@ -403,8 +405,8 @@ struct Index {
             Text($r('app.string.search_results_for', this.searchQuery || this.search)).fontSize(14).fontColor('#F2F3FA').width('100%')
             if (this.items.length > 0 || this.usingCache || (!this.busy && !this.message)) {
               Text(this.usingCache ? $r('app.string.search_cached_count', this.items.length) : $r('app.string.search_loaded_count', this.items.length, this.total))
-                .fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-              if (!this.usingCache && this.items.length < this.total) { Text($r('app.string.search_group_partial')).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+                .fontSize(12).fontColor(this.palette.muted).width('100%')
+              if (!this.usingCache && this.items.length < this.total) { Text($r('app.string.search_group_partial')).fontSize(12).fontColor(this.palette.warm).width('100%') }
             }
           }.width('100%')
         }
@@ -442,8 +444,8 @@ struct Index {
         Column() { BrandButton({ label: $r('app.string.rewatch'), icon: $r('app.media.menu_sync'), primary: !this.discover, onSelect: () => { this.discover = false; this.load(); } }) }
           .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
       }.width('100%')
-      Text(this.discover ? $r('app.string.discovery_hint') : $r('app.string.recommend_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+      Text(this.discover ? $r('app.string.discovery_hint') : $r('app.string.recommend_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
   }
 
   @Builder
@@ -455,7 +457,7 @@ struct Index {
       BrandChoice({ label: $r('app.string.library_order'), icon: $r('app.media.menu_sync'), available: !this.busy,
         choices: [{ value: text('sort_ascending') }, { value: text('sort_descending') }], selected: this.libraryDescending ? 1 : 0,
         onSelect: (index: number) => this.changeLibrarySort(index, true) })
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
   }
 
   @Builder
@@ -493,15 +495,15 @@ struct Index {
           Button({ type: ButtonType.Normal }) {
             Row({ space: 14 }) {
               Row() {
-                Image(library.CollectionType === 'movies' ? $r('app.media.detail_film') : $r('app.media.nav_library_active')).width(28).height(28).accessibilityLevel('no')
-              }.width(52).height(52).flexShrink(0).borderRadius(16).justifyContent(FlexAlign.Center).backgroundColor($r('app.color.brand_selected'))
+                Image(library.CollectionType === 'movies' ? $r('app.media.detail_film') : $r('app.media.nav_library_active')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(28).height(28).accessibilityLevel('no')
+              }.width(52).height(52).flexShrink(0).borderRadius(16).justifyContent(FlexAlign.Center).backgroundColor(this.palette.selected)
               Column({ space: 4 }) {
                 Text(library.Name).fontSize(18).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').width('100%')
-                Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : library.CollectionType === 'boxsets' ? $r('app.string.media_collection') : $r('app.string.tab_library')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+                Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : library.CollectionType === 'boxsets' ? $r('app.string.media_collection') : $r('app.string.tab_library')).fontSize(12).fontColor(this.palette.muted).width('100%')
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-              Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no')
+              Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no')
             }.width('100%').padding({ left: 16, right: 16, top: this.landscape && this.viewportHeight < 440 ? 8 : 16, bottom: this.landscape && this.viewportHeight < 440 ? 8 : 16 }).hitTestBehavior(HitTestMode.None)
-          }.padding(0).width('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+          }.padding(0).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
             .accessibilityText(library.Name).onClick(() => { this.collectionType = library.CollectionType ?? ''; this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
         }
       }, (library: MediaItem) => `${library.Id}|${library.Name}|${library.CollectionType}`)
@@ -534,36 +536,36 @@ struct Index {
   private reason(item: MediaItem): void {
     const value = this.discoveries.find((d: Discovery) => d.item.Id === item.Id);
     if (!value) { return; }
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: $r('app.color.brand_accent'), action: () => {} } }, this.viewportWidth, this.viewportHeight);
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: this.palette.accent, action: () => {} } }, this.viewportWidth, this.viewportHeight);
   }
 
   @Builder
   private actorFilters() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.actor_filters'), icon: $r('app.media.menu_settings') })
-      Text($r('app.string.actor_search')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
-      TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(14).width('100%')
+      Text($r('app.string.actor_search')).fontSize(14).fontColor(this.palette.muted).width('100%')
+      TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(14).width('100%')
         .onChange((value: string) => { this.actorQuery = value; this.refreshActors(); })
       BrandChoice({ label: $r('app.string.actor_sort'), icon: $r('app.media.menu_settings'),
         choices: [{ value: text('actor_order_play') }, { value: text('actor_order_watched') }, { value: text('actor_order_unplayed') }, { value: text('actor_order_works') }, { value: text('actor_order_recent') }, { value: text('actor_order_name') }, { value: text('actor_order_recommended') }],
         selected: Math.max(0, ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder)),
         onSelect: (index: number) => { this.actorOrder = ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'][index]; this.actorSettings(); } })
       Row({ space: 8 }) {
-        Checkbox().select(this.followedOnly).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
+        Checkbox().select(this.followedOnly).selectedColor(this.palette.action).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
         Text($r('app.string.followed_only')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
       }.width('100%')
       Row({ space: 8 }) {
-        Checkbox().select(this.showTags).selectedColor($r('app.color.brand_action')).onChange((value: boolean) => { this.showTags = value; this.actorSettings(); })
+        Checkbox().select(this.showTags).selectedColor(this.palette.action).onChange((value: boolean) => { this.showTags = value; this.actorSettings(); })
         Text($r('app.string.show_actor_tags')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
       }.width('100%')
       if (this.actorTag || this.actorQuery || this.followedOnly) {
         BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.actorTag = ''; this.actorQuery = ''; this.followedOnly = false; this.actorSettings(); } })
       }
       if (!AppService.snapshot.syncedAt) {
-        Text($r('app.string.actors_sync_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        Text($r('app.string.actors_sync_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
         BrandButton({ label: $r('app.string.sync_library'), icon: $r('app.media.menu_sync'), primary: true, available: !this.syncing, onSelect: () => this.sync() })
       }
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
   }
 
   @Builder
@@ -581,11 +583,11 @@ struct Index {
               Column({ space: 6 }) {
                 Text(actor.person.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
               }.alignItems(HorizontalAlign.Start).layoutWeight(1)
-              Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no')
+              Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no')
             }.width('100%').hitTestBehavior(HitTestMode.None)
             }.width('100%').padding(0).backgroundColor(Color.Transparent).borderRadius(14).accessibilityText(actor.person.Name).onClick(() => router.pushUrl({ url: 'pages/Actor', params: { personId: actor.person.Id, personName: actor.person.Name } }))
-            Text($r('app.string.actor_counts', actor.works.length, actor.watched, actor.unplayed)).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
-            if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor($r('app.color.brand_accent')).fontSize(12).width('100%') }
+            Text($r('app.string.actor_counts', actor.works.length, actor.watched, actor.unplayed)).fontColor(this.palette.muted).fontSize(12).width('100%')
+            if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor(this.palette.accent).fontSize(12).width('100%') }
             if (this.showTags) {
               Flex({ wrap: FlexWrap.Wrap }) {
                 ForEach(actor.tags.slice(0, 3), (tag: ActorTag) => {
@@ -594,7 +596,7 @@ struct Index {
                 }, (tag: ActorTag) => tag.key)
               }
             }
-          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
         }
       }, (actor: ActorProfile) => `${actor.person.Id}|${actor.watched}:${actor.unplayed}:${actor.playCount}:${actor.followed}:${actor.newCount}:${JSON.stringify(actor.tags)}`)
       if (this.profiles.length === 0 && !this.busy && AppService.snapshot.syncedAt) { ListItem() { BrandState({ label: $r('app.string.no_filter_matches'), icon: $r('app.media.nav_user_active') }) } }
@@ -610,23 +612,23 @@ struct Index {
         ListItem() {
           Column({ space: 10 }) {
             Text(record.item.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
-            Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor($r('app.color.brand_muted')).fontSize(13).width('100%')
+            Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor(this.palette.muted).fontSize(13).width('100%')
             Text(record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
               $r('app.string.download_progress', Math.floor(record.progress * 100)) : $r('app.string.download_interrupted'))
-              .fontSize(12).fontColor($r('app.color.brand_muted'))
+              .fontSize(12).fontColor(this.palette.muted)
             Flex({ wrap: FlexWrap.Wrap }) {
               Column() { BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: record.state === 'complete' && !this.busy, onSelect: async () => {
                 try { router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
               Column() { BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => {
-                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-                  buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.remove'), fontColor: $r('app.color.brand_danger'), action: async () => {
+                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+                  buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
                     try { await AppService.removeDownload(record); this.downloads = [...AppService.downloads]; } catch (e) { this.message = errorText(e as Error); }
                   } }]
                 }, this.viewportWidth, this.viewportHeight);
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
             }
-          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(14)
+          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(14)
         }
       }, (record: DownloadRecord) => record.path)
       if (this.downloads.length === 0) { ListItem() { BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') }) } }
@@ -638,22 +640,22 @@ struct Index {
     Button({ type: ButtonType.Normal }) {
       Row({ space: 10 }) {
         Row() {
-          Image(icon).width(22).height(22).accessibilityLevel('no')
+          Image(icon).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(22).height(22).accessibilityLevel('no')
         }.width(compact ? 32 : 36).height(compact ? 32 : 36).justifyContent(FlexAlign.Center).borderRadius(12)
-          .backgroundColor($r('app.color.brand_selected')).flexShrink(0)
+          .backgroundColor(this.palette.selected).flexShrink(0)
         Text(label).fontSize(16).fontWeight(FontWeight.Medium)
-          .fontColor(departure ? $r('app.color.brand_warm') : '#F2F3FA')
+          .fontColor(departure ? this.palette.warm : '#F2F3FA')
           .layoutWeight(1).textAlign(TextAlign.Start).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-        if (!compact) { Image($r('app.media.menu_chevron')).width(16).height(16).flexShrink(0).accessibilityLevel('no') }
+        if (!compact) { Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no') }
       }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) })
         .padding({ left: compact ? 12 : 16, right: compact ? 12 : 16, top: 8, bottom: 8 }).hitTestBehavior(HitTestMode.None)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 }).padding(0).borderRadius(18)
-      .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).enabled(enabled && (!departure || !this.syncing)).accessibilityText(label).onClick(activate)
+      .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(enabled && (!departure || !this.syncing)).accessibilityText(label).onClick(activate)
   }
 
   @Builder
   private menuHeading(label: Resource) {
-    Text(label).fontSize(12).fontWeight(FontWeight.Medium).fontColor($r('app.color.brand_muted'))
+    Text(label).fontSize(12).fontWeight(FontWeight.Medium).fontColor(this.palette.muted)
       .width('100%').padding({ left: 4, top: 4, bottom: 2 })
   }
 
@@ -667,10 +669,10 @@ struct Index {
           Column({ space: 4 }) {
             Text(AppService.client?.session.userName ?? '').fontSize(22).fontWeight(FontWeight.Medium)
               .fontColor('#F2F3FA').width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-            Text(AppService.client?.session.server ?? '').fontSize(12).fontColor($r('app.color.brand_muted'))
+            Text(AppService.client?.session.server ?? '').fontSize(12).fontColor(this.palette.muted)
               .width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
           }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-        }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
         Column({ space: 8 }) {
           this.menuHeading($r('app.string.menu_collection'))
           this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }))
@@ -691,18 +693,18 @@ struct Index {
           }
           if (this.syncing) { this.menuAction($r('app.string.cancel_sync'), $r('app.media.menu_cancel'), () => AppService.cancelSync()) }
           this.menuAction($r('app.string.flush_changes'), $r('app.media.menu_upload'), async () => { try { await AppService.flushPending(); this.pendingCount = (AppService.experience?.snapshot().pending.length ?? 0) + (AppService.experience?.snapshot().positions.length ?? 0); this.syncMessage = getContext(this).resourceManager.getStringSync($r('app.string.pending_changes').id, this.pendingCount); } catch (e) { this.syncMessage = errorText(e as Error); } })
-          if (this.syncIssue) { Text(text(this.syncIssue)).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
-                Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
+          if (this.syncIssue) { Text(text(this.syncIssue)).fontSize(12).fontColor(this.palette.warm).width('100%') }
+                Text($r('app.string.pending_changes', this.pendingCount)).fontSize(12).fontColor(this.palette.muted).width('100%').padding({ left: 4 })
           Text(this.lastSyncedAt ? $r('app.string.last_sync', new Date(this.lastSyncedAt).toLocaleString()) : $r('app.string.not_synced'))
-            .fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').padding({ left: 4 })
-          if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor($r('app.color.brand_muted')).width('100%') }
+            .fontSize(12).fontColor(this.palette.muted).width('100%').padding({ left: 4 })
+          if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor(this.palette.muted).width('100%') }
         }.width('100%')
         this.menuAction($r('app.string.change_account'), $r('app.media.menu_logout'), () => {
-          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
-            buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: $r('app.string.logout'), fontColor: $r('app.color.brand_danger'), action: async () => { await this.logout(); } }]
+          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
+            buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.logout'), fontColor: this.palette.danger, action: async () => { await this.logout(); } }]
           }, this.viewportWidth, this.viewportHeight);
         }, true, true)
-        Text($r('app.string.version')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%').textAlign(TextAlign.Center)
+        Text($r('app.string.version')).fontSize(12).fontColor(this.palette.muted).width('100%').textAlign(TextAlign.Center)
       }.width('100%').padding({ top: 8, bottom: 18 })
     }.width('100%').layoutWeight(1).align(Alignment.TopStart)
   }
@@ -718,10 +720,10 @@ struct Index {
       Column() { this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: 'pages/Downloads' }), true, false, true) }
         .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
     }.width('100%').padding({ left: 20, right: 20 })
-    if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor($r('app.color.brand_muted')) }
+    if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor(this.palette.muted) }
     ForEach(this.homeFailures, (failure: HomeFailure) => {
       Column({ space: 8 }) {
-        Text(failure.name || $r('app.string.home_section_failed')).width('100%').fontSize(12).fontColor($r('app.color.brand_danger'))
+        Text(failure.name || $r('app.string.home_section_failed')).width('100%').fontSize(12).fontColor(this.palette.danger)
         BrandButton({ label: $r('app.string.retry'), icon: $r('app.media.menu_sync'), onSelect: () => this.homeLoader?.retry(failure.id) })
       }.width('100%').padding({ left: 20, right: 20 })
     }, (failure: HomeFailure) => failure.id)
@@ -744,10 +746,10 @@ struct Index {
     Button({ type: ButtonType.Normal }) {
       Column({ space: 4 }) {
         Stack() {
-          Image((this.tab === index || (index === 4 && this.tab === 2)) ? active : muted).width(24).height(24)
-        }.width(56).height(30).borderRadius(15).backgroundColor((this.tab === index || (index === 4 && this.tab === 2)) ? $r('app.color.brand_selected') : Color.Transparent)
+          Image((this.tab === index || (index === 4 && this.tab === 2)) ? active : muted).colorFilter(this.palette.filter(this.palette.dynamic ? ((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.accent : this.palette.muted) : undefined)).width(24).height(24)
+        }.width(56).height(30).borderRadius(15).backgroundColor((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.selected : Color.Transparent)
         Text(label).fontSize(12).fontWeight((this.tab === index || (index === 4 && this.tab === 2)) ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor((this.tab === index || (index === 4 && this.tab === 2)) ? $r('app.color.brand_accent') : $r('app.color.brand_muted')).maxLines(1)
+          .fontColor((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.accent : this.palette.muted).maxLines(1)
       }.width('100%')
     }.layoutWeight(1).height(34 + 16 * this.fontScale).padding(0).backgroundColor(Color.Transparent)
       .accessibilityText(label).onClick(() => this.switchTab(index))
@@ -770,12 +772,12 @@ struct Index {
           Text(this.tabTitle()).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).fontSize(22).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').layoutWeight(1)
           if (this.tab !== 4 && this.mode !== 'downloads') {
             Button({ type: ButtonType.Normal }) {
-              Image(this.searchExpanded ? $r('app.media.nav_search_active') : $r('app.media.nav_search_muted')).width(24).height(24).accessibilityLevel('no')
-            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).accessibilityText($r('app.string.search_hint'))
+              Image(this.searchExpanded ? $r('app.media.nav_search_active') : $r('app.media.nav_search_muted')).colorFilter(this.palette.filter(this.palette.dynamic ? (this.searchExpanded ? this.palette.accent : this.palette.muted) : undefined)).width(24).height(24).accessibilityLevel('no')
+            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).accessibilityText($r('app.string.search_hint'))
               .onClick(() => { this.searchExpanded = !this.searchExpanded; })
           }
-          Button({ type: ButtonType.Normal }) { Image($r('app.media.menu_sync')).width(24).height(24).accessibilityLevel('no') }
-            .width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).enabled(!this.busy).accessibilityText($r('app.string.refresh')).onClick(() => this.load())
+          Button({ type: ButtonType.Normal }) { Image($r('app.media.menu_sync')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no') }
+            .width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(!this.busy).accessibilityText($r('app.string.refresh')).onClick(() => this.load())
         }.height(UiLayout.primaryHeaderHeight(this.viewportHeight, this.fontScale, this.landscape)).width('100%').padding({ left: 20, right: 12 })
           }
         }
@@ -805,9 +807,9 @@ struct Index {
           if (!this.offline) { this.navItem(0, $r('app.string.tab_recommend'), $r('app.media.nav_star_active'), $r('app.media.nav_star_muted')) }
           this.navItem(3, $r('app.string.tab_actors'), $r('app.media.nav_user_active'), $r('app.media.nav_user_muted'))
           this.navItem(4, $r('app.string.tab_more'), $r('app.media.nav_more_active'), $r('app.media.nav_more_muted'))
-        }.width('100%').height(UiLayout.navHeight(this.fontScale)).padding({ left: 4, right: 4 }).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+        }.width('100%').height(UiLayout.navHeight(this.fontScale)).padding({ left: 4, right: 4 }).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
       }
-    }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+    }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

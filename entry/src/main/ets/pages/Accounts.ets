@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
 import { UiLayout } from '../utils/UiLayout';
@@ -20,6 +21,7 @@ interface AccountsRoute { server?: string; quick?: boolean; expectedServerId?: s
 @Entry
 @Component
 struct Accounts {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @State viewportWidth: number = 360;
@@ -94,7 +96,7 @@ struct Accounts {
   }
   private remove(account: AccountSummary): void {
     const revision = this.revision;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_account'), message: text('remove_account_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_account'), message: text('remove_account_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.removeAccount(account.key); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
     } }] }, this.viewportWidth, this.viewportHeight);
@@ -120,21 +122,21 @@ struct Accounts {
   }
   private removeServer(): void {
     const id = this.editingId; const revision = this.revision;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_server'), message: text('remove_server_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('remove_saved_server'), message: text('remove_server_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.removeServer(id); this.endEditing(); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
     } }] }, this.viewportWidth, this.viewportHeight);
   }
   private resetAccounts(): void {
     const revision = this.revision;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : $r('app.color.brand_surface_raised')), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('reset_saved_accounts'), message: text('reset_accounts_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: $r('app.color.brand_accent'), action: () => {} }, { value: text('confirm'), fontColor: $r('app.color.brand_danger'), action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('reset_saved_accounts'), message: text('reset_accounts_confirm'), buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: async () => {
       if (this.busy || revision !== this.revision || !this.visible) { return; } this.busy = true;
       try { await AppService.resetAccounts(); this.message = ''; this.endEditing(); await this.reload(); } catch (e) { this.message = errorText(e as Error); } finally { this.busy = false; }
     } }] }, this.viewportWidth, this.viewportHeight);
   }
   @Builder
   private fieldCaption(label: Resource) {
-    Text(label).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+    Text(label).fontSize(12).fontColor(this.palette.muted).width('100%')
   }
 
   @Builder
@@ -142,31 +144,31 @@ struct Accounts {
     Column({ space: 12 }) {
       BrandHeading({ label: this.quickEntry || !!this.quickCode ? $r('app.string.quick_connect_login') : $r('app.string.add_account_server'), icon: this.quickEntry || !!this.quickCode ? $r('app.media.menu_quick') : $r('app.media.menu_add') })
       this.fieldCaption($r('app.string.server_address_label'))
-      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => this.changeServer(v))
+      TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy && !this.quickCode).onChange((v: string) => this.changeServer(v))
       ServerDiscoveryPicker({ address: this.server, active: this.visible && this.adding && !this.quickCode,
         available: !this.busy && !this.locked, onSelect: (server: DiscoveredServer) => this.selectDiscovered(server) })
       if (this.quickCode) {
-        Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor($r('app.color.brand_accent')).letterSpacing(6 / this.fontScale)
-        Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        Text(this.quickCode).fontSize(38).minFontSize(16).maxFontSize(38).maxLines(1).width('100%').textAlign(TextAlign.Center).fontWeight(FontWeight.Bold).fontColor(this.palette.accent).letterSpacing(6 / this.fontScale)
+        Text($r('app.string.quick_connect_instructions')).fontSize(14).fontColor(this.palette.muted).width('100%')
         BrandButton({ label: $r('app.string.quick_connect_check'), icon: $r('app.media.menu_sync'), primary: true, available: !this.busy, onSelect: () => this.checkQuick() })
         BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.cancelQuick(); this.message = ''; this.top(); } })
       } else if (this.quickEntry) {
-        Text($r('app.string.quick_connect_start_hint')).fontSize(14).fontColor($r('app.color.brand_muted')).width('100%')
+        Text($r('app.string.quick_connect_start_hint')).fontSize(14).fontColor(this.palette.muted).width('100%')
         BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), primary: true, available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
         BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), available: !this.busy, onSelect: () => { this.quickEntry = false; this.message = ''; this.top(); } })
       } else {
           PublicUserPicker({ server: this.server, available: !this.busy && !this.locked,
             onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('account-login-password'); } })
         this.fieldCaption($r('app.string.username'))
-        TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.username = v; })
+        TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.username = v; })
         this.fieldCaption($r('app.string.password'))
-          TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('account-login-password').height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.password = v; })
+          TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('account-login-password').height(UiLayout.buttonHeight(this.fontScale)).type(InputType.Password).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.password = v; })
         BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
         BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: !this.busy && !!this.server.trim(), onSelect: () => this.startQuick() })
         BrandButton({ label: $r('app.string.save_server_only'), icon: $r('app.media.menu_server'), available: !this.busy && !!this.server.trim(), onSelect: () => this.saveServer() })
-        Text($r('app.string.https_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        Text($r('app.string.https_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       }
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
 
   @Builder
@@ -174,14 +176,14 @@ struct Accounts {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.server_addresses'), icon: $r('app.media.menu_server') })
       this.fieldCaption($r('app.string.server_display_name'))
-      TextInput({ text: this.serverName, placeholder: $r('app.string.server_display_name') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.serverName = v; })
+      TextInput({ text: this.serverName, placeholder: $r('app.string.server_display_name') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.serverName = v; })
       this.fieldCaption($r('app.string.server_address_label'))
-      TextArea({ text: this.addressText, placeholder: $r('app.string.addresses_hint') }).fontColor('#F2F3FA').placeholderColor($r('app.color.brand_muted')).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface'))).borderRadius(12).height(Math.min(160 * this.fontScale, Math.max(80, this.viewportHeight * 0.4))).enabled(!this.busy).onChange((v: string) => { this.addressText = v; })
-      Text($r('app.string.addresses_hint')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+      TextArea({ text: this.addressText, placeholder: $r('app.string.addresses_hint') }).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).height(Math.min(160 * this.fontScale, Math.max(80, this.viewportHeight * 0.4))).enabled(!this.busy).onChange((v: string) => { this.addressText = v; })
+      Text($r('app.string.addresses_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       BrandButton({ label: $r('app.string.save'), icon: $r('app.media.menu_save'), primary: true, available: !this.busy, onSelect: () => this.saveServer() })
       BrandButton({ label: $r('app.string.remove_saved_server'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.removeServer() })
       BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => this.endEditing() })
-    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+    }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
   }
 
   @Builder
@@ -191,15 +193,15 @@ struct Accounts {
     ForEach(this.accounts, (account: AccountSummary) => {
       Column({ space: 12 }) {
         Row({ space: 12 }) {
-          Row() { Image($r('app.media.nav_user_active')).width(22).height(22).accessibilityLevel('no') }
-            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor($r('app.color.brand_selected')).borderRadius(12)
+          Row() { Image($r('app.media.nav_user_active')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(22).height(22).accessibilityLevel('no') }
+            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor(this.palette.selected).borderRadius(12)
           Column({ space: 4 }) {
             Text(account.userName || $r('app.string.account_unnamed')).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium).width('100%')
-            Text(account.serverName || account.address).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+            Text(account.serverName || account.address).fontColor(this.palette.muted).fontSize(12).width('100%')
           }.layoutWeight(1)
         }.width('100%')
         if (account.active) {
-          Row({ space: 6 }) { Image($r('app.media.nav_check_active')).width(16).height(16).accessibilityLevel('no'); Text($r('app.string.active_account')).fontColor($r('app.color.brand_accent')).fontSize(12) }.width('100%')
+          Row({ space: 6 }) { Image($r('app.media.nav_check_active')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).accessibilityLevel('no'); Text($r('app.string.active_account')).fontColor(this.palette.accent).fontSize(12) }.width('100%')
         }
         Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
           Column() { BrandButton({ label: $r('app.string.switch_account'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy && !account.active, onSelect: () => this.select(account) }) }
@@ -207,7 +209,7 @@ struct Accounts {
           Column() { BrandButton({ label: $r('app.string.remove_saved_account'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => this.remove(account) }) }
             .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
         }.width('100%')
-      }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
     }, (account: AccountSummary) => JSON.stringify(account))
   }
 
@@ -218,18 +220,18 @@ struct Accounts {
     ForEach(this.servers, (server: ServerProfile) => {
       Column({ space: 12 }) {
         Row({ space: 12 }) {
-          Row() { Image($r('app.media.menu_server')).width(22).height(22).accessibilityLevel('no') }
-            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor($r('app.color.brand_selected')).borderRadius(12)
+          Row() { Image($r('app.media.menu_server')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(22).height(22).accessibilityLevel('no') }
+            .width(36).height(36).justifyContent(FlexAlign.Center).flexShrink(0).backgroundColor(this.palette.selected).borderRadius(12)
           Text(server.name || server.preferred).fontColor('#F2F3FA').fontSize(16).fontWeight(FontWeight.Medium).layoutWeight(1)
         }.width('100%')
-        Text(server.addresses.join('\n')).fontColor($r('app.color.brand_muted')).fontSize(12).width('100%')
+        Text(server.addresses.join('\n')).fontColor(this.palette.muted).fontSize(12).width('100%')
         Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
           Column() { BrandButton({ label: $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true, available: !this.busy, onSelect: () => { this.changeServer(server.preferred); this.discoveredId = server.id; this.username = ''; this.adding = true; this.top(); } }) }
             .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
           Column() { BrandButton({ label: $r('app.string.manage_addresses'), icon: $r('app.media.menu_settings'), available: !this.busy, onSelect: () => this.editServer(server) }) }
             .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
         }.width('100%')
-      }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+      }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
     }, (server: ServerProfile) => JSON.stringify(server))
   }
 
@@ -240,9 +242,9 @@ struct Accounts {
         Column({ space: 14 }) {
           BrandHeader({ label: this.quickEntry ? $r('app.string.quick_connect_title') : $r('app.string.accounts_servers'), onBack: () => router.back() })
           if (this.message) {
-            Scroll() { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(13).width('100%').padding(12) }
+            Scroll() { Text(this.message).fontColor(this.palette.danger).fontSize(13).width('100%').padding(12) }
               .width('100%').height(Math.min(64 * this.fontScale, this.viewportHeight * 0.2))
-              .backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(12).align(Alignment.TopStart)
+              .backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(12).align(Alignment.TopStart)
           }
           Scroll(this.scroller) {
             Column({ space: 18 }) {
@@ -261,13 +263,13 @@ struct Accounts {
               if (!this.quickCode && !this.quickEntry) {
                 Column({ space: 12 }) {
                   BrandHeading({ label: $r('app.string.credentials_group'), icon: $r('app.media.menu_lock') })
-                  Text($r('app.string.credentials_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+                  Text($r('app.string.credentials_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
                   BrandButton({ label: $r('app.string.reset_saved_accounts'), icon: $r('app.media.menu_reset'), destructive: true, available: !this.busy, onSelect: () => this.resetAccounts() })
-                }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).borderRadius(20)
+                }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
               }
             }.width('100%').alignItems(HorizontalAlign.Start).padding({ bottom: 12 })
           }.width('100%').layoutWeight(1).align(Alignment.TopStart)
-        }.padding(20).height('100%').width('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+        }.padding(20).height('100%').width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

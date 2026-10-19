@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
 import { BrandHeading } from '../components/BrandHeading';
@@ -18,6 +19,7 @@ interface ActorRoute { personId: string; personName: string }
 @Entry
 @Component
 struct Actor {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleLandscape') landscape: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -100,7 +102,7 @@ struct Actor {
       if (this.overview) { Text(this.overview).fontColor('#F2F3FA').fontSize(14).width('100%') }
       BrandHeading({ label: $r('app.string.actor_credits'), icon: $r('app.media.nav_library_active') })
       Row({ space: 8 }) {
-        Checkbox().select(this.unwatched).selectedColor($r('app.color.brand_action')).onChange((v: boolean) => { this.unwatched = v; })
+        Checkbox().select(this.unwatched).selectedColor(this.palette.action).onChange((v: boolean) => { this.unwatched = v; })
         Text($r('app.string.unwatched_only')).fontColor('#F2F3FA').layoutWeight(1)
       }.width('100%')
       BrandChoice({ label: $r('app.string.actor_tags'), icon: $r('app.media.nav_star_active'),
@@ -108,12 +110,12 @@ struct Actor {
         selected: (this.profile?.tags ?? []).findIndex((t: ActorTag) => t.key === this.tag) + 1,
         onSelect: (i: number) => { this.tag = i ? this.profile!.tags[i - 1].key : ''; } })
       if (this.tag) {
-        Text($r('app.string.tag_evidence', this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.length ?? 0)).fontColor($r('app.color.brand_muted')).fontSize(12)
+        Text($r('app.string.tag_evidence', this.profile?.tags.find((t: ActorTag) => t.key === this.tag)?.works.length ?? 0)).fontColor(this.palette.muted).fontSize(12)
       }
-      Text($r('app.string.actor_tag_boundary')).fontColor($r('app.color.brand_muted')).fontSize(11)
-      if (this.message) { Text(this.message).fontColor($r('app.color.brand_danger')).fontSize(12) }
+      Text($r('app.string.actor_tag_boundary')).fontColor(this.palette.muted).fontSize(11)
+      if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(12) }
       if (this.busy && !this.biographyLoading) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised')))
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
   }
   @Builder
   credits() {
@@ -125,7 +127,7 @@ struct Actor {
         ListItem() {
           Column({ space: 8 }) {
             MediaCard({ item: item, wide: true, onSelect: (selected: MediaItem) => router.pushUrl({ url: 'pages/Detail', params: { item: selected } }) })
-            if (this.role(item)) { Text($r('app.string.credit_role', this.role(item))).fontColor($r('app.color.brand_muted')).fontSize(13) }
+            if (this.role(item)) { Text($r('app.string.credit_role', this.role(item))).fontColor(this.palette.muted).fontSize(13) }
           }
         }
       }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
@@ -138,7 +140,7 @@ struct Actor {
     Column({ space: 10 }) {
       BrandHeader({ label: this.person.Name, onBack: () => router.back() })
       this.credits()
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_background')))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

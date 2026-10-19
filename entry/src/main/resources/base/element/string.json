@@ -1968,6 +1968,13 @@
     {"name": "appearance_unavailable", "value": "窗口外观暂不可用，请重新打开设置页重试"},
     {"name": "appearance_cancelled", "value": "外观设置操作已取消"},
     {"name": "appearance_save_failed", "value": "外观设置未能保存，已尝试恢复原设置，请重试"},
-    {"name": "appearance_restore_failed", "value": "外观设置恢复未确认，请重开设置页确认后重试"}
+    {"name": "appearance_restore_failed", "value": "外观设置恢复未确认，请重开设置页确认后重试"},
+    {"name": "dynamic_colors", "value": "跟随壁纸配色"},
+    {"name": "dynamic_colors_hint", "value": "使用系统壁纸颜色生成映屿深色配色，默认开启。读取失败时使用原映屿配色，返回前台会重试；AMOLED 模式仍保留纯黑容器。"},
+    {"name": "dynamic_colors_loading", "value": "正在确认壁纸配色…"},
+    {"name": "dynamic_colors_active", "value": "已应用当前系统壁纸配色"},
+    {"name": "dynamic_colors_off", "value": "使用原映屿配色"},
+    {"name": "dynamic_colors_fallback", "value": "暂未获得可用壁纸颜色，使用原映屿配色；返回前台将重试。"},
+    {"name": "dynamic_colors_update_failed", "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"}
   ]
 }

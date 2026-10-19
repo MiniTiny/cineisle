@@ -1,9 +1,11 @@
+import { UiPalette } from '../utils/UiPalette';
 import { BrandHeading } from './BrandHeading';
 import { MediaItem, Person } from '../model/Models';
 import { detailMetadata, DetailRow } from '../utils/DetailPresentation';
 import { CachedImage } from './CachedImage';
 @Component
 export struct DetailMetadataPanel {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @StorageLink('cineIsleExtraInfo') extraInfo: boolean = false;
   @StorageLink('cineIsleAmoled') amoled: boolean = false;
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
@@ -18,7 +20,7 @@ export struct DetailMetadataPanel {
   private metadataRows(technical: boolean) {
     ForEach(this.rows(technical), (row: DetailRow) => {
       Flex({ direction: this.stacked ? FlexDirection.Column : FlexDirection.Row, alignItems: ItemAlign.Start }) {
-        Text(row.label).fontSize(13).fontColor($r('app.color.brand_muted')).width(this.stacked ? '100%' : 88)
+        Text(row.label).fontSize(13).fontColor(this.palette.muted).width(this.stacked ? '100%' : 88)
           .margin(this.stacked ? { bottom: 6 } : { right: 14 })
         Text(row.value).fontSize(14).fontColor('#F2F3FA').lineHeight(22).width(this.stacked ? '100%' : undefined).layoutWeight(this.stacked ? 0 : 1)
       }.width('100%')
@@ -33,19 +35,19 @@ export struct DetailMetadataPanel {
             Text(this.item.Overview).fontColor('#F2F3FA').fontSize(15).lineHeight(24).width('100%')
           }
           this.metadataRows(false)
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
       if (detailMetadata(this.item, this.sourceId).chips.length || (this.extraInfo && this.rows(true).length)) {
         Column({ space: 14 }) {
           BrandHeading({ label: $r('app.string.detail_technical'), icon: $r('app.media.nav_library_active') })
           Flex({ wrap: FlexWrap.Wrap }) {
             ForEach(detailMetadata(this.item, this.sourceId).chips, (chip: string) => {
-              Text(chip).fontSize(12).fontColor($r('app.color.brand_accent')).padding({ left: 12, right: 12, top: 6, bottom: 6 })
-                .backgroundColor($r('app.color.brand_selected')).borderRadius(12).margin({ right: 8, bottom: 8 })
+              Text(chip).fontSize(12).fontColor(this.palette.accent).padding({ left: 12, right: 12, top: 6, bottom: 6 })
+                .backgroundColor(this.palette.selected).borderRadius(12).margin({ right: 8, bottom: 8 })
             }, (chip: string) => chip)
           }.width('100%')
           if (this.extraInfo) { this.metadataRows(true) }
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
       if (detailMetadata(this.item).actors.length) {
         Column({ space: 14 }) {
@@ -57,14 +59,14 @@ export struct DetailMetadataPanel {
                           .width(48).height(48).flexShrink(0)
                 Column({ space: 6 }) {
                   Text(person.Name).fontColor('#F2F3FA').fontSize(14).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
-                  if (person.Role) { Text(person.Role).fontColor($r('app.color.brand_muted')).fontSize(12).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%') }
+                  if (person.Role) { Text(person.Role).fontColor(this.palette.muted).fontSize(12).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%') }
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-                Image($r('app.media.menu_chevron')).width(20).height(20).flexShrink(0).accessibilityLevel('no')
+                Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(20).height(20).flexShrink(0).accessibilityLevel('no')
               }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(12).hitTestBehavior(HitTestMode.None)
-            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface')))
+            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
               .accessibilityText(person.Name).onClick(() => this.onPerson(person))
           }, (person: Person) => person.Id + ':' + person.Name + ':' + (person.Role ?? '') + ':' + (person.PrimaryImageTag ?? ''))
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : $r('app.color.brand_surface_raised'))).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }

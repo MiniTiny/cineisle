@@ -1,3 +1,6 @@
+import { WallpaperColors, PaletteTicket } from './WallpaperColors';
+import { DynamicPalette } from '../utils/DynamicPalette';
+import { uiPalette } from '../utils/UiPalette';
 import common from '@ohos.app.ability.common';
 import preferences from '@ohos.data.preferences';
 import window from '@ohos.window';
@@ -12,6 +15,16 @@ export class AppearancePreferences {
   private static writes: Promise<void> = Promise.resolve();
   private static raw: preferences.ValueType = '';
   private static value: AppearanceOptions = new AppearanceOptions();
+  private static colors: DynamicPalette | undefined;
+  private static source: WallpaperColors = new WallpaperColors();
+  private static ticket: PaletteTicket | undefined;
+  private static visible: boolean = true;
+  private static refreshing: boolean = false;
+  private static refreshAgain: boolean = false;
+  private static updateQueued: boolean = false;
+  private static pendingColors: DynamicPalette | undefined;
+  private static pendingMain: window.Window | undefined;
+  private static pendingEpoch: number = 0;
   static issue: string = '';
   static snapshot(): AppearanceOptions { return copyAppearance(AppearancePreferences.value); }
   static async attach(context: common.UIAbilityContext, main: window.Window): Promise<void> {
@@ -19,7 +32,47 @@ export class AppearancePreferences {
     AppearancePreferences.context = context; AppearancePreferences.main = main; ++AppearancePreferences.epoch;
     await AppearancePreferences.load(context);
   }
-  static detach(main?: window.Window): void { if (main === AppearancePreferences.main) { ++AppearancePreferences.epoch; AppearancePreferences.main = undefined; } }
+  static detach(main?: window.Window): void { if (main === AppearancePreferences.main) { ++AppearancePreferences.epoch; AppearancePreferences.main = undefined; AppearancePreferences.ticket?.cancel(); AppearancePreferences.source.stop(); } }
+  static background(): void { AppearancePreferences.visible = false; ++AppearancePreferences.epoch; AppearancePreferences.ticket?.cancel(); AppearancePreferences.source.stop(); }
+  static foreground(): void {
+    AppearancePreferences.visible = true;
+    if (!AppearancePreferences.main || !AppearancePreferences.context) { return; }
+    if (AppearancePreferences.refreshing) { AppearancePreferences.refreshAgain = true; return; }
+    AppearancePreferences.refreshing = true;
+    AppearancePreferences.load(AppearancePreferences.context).catch(() => {}).finally(() => { AppearancePreferences.refreshing = false; if (AppearancePreferences.refreshAgain) { AppearancePreferences.refreshAgain = false; if (AppearancePreferences.visible) { AppearancePreferences.foreground(); } } });
+  }
+  private static watch(value: AppearanceOptions): void {
+    if (!(value.dynamicColors ?? true) || !AppearancePreferences.visible) { AppearancePreferences.source.stop(); return; }
+    AppearancePreferences.source.start((colors?: DynamicPalette) => {
+      AppearancePreferences.pendingColors = colors; AppearancePreferences.pendingMain = AppearancePreferences.main; AppearancePreferences.pendingEpoch = AppearancePreferences.epoch;
+      if (AppearancePreferences.updateQueued) { return; } AppearancePreferences.updateQueued = true;
+      const update = AppearancePreferences.writes.then(async () => {
+        AppearancePreferences.updateQueued = false;
+        const main = AppearancePreferences.pendingMain; const epoch = AppearancePreferences.pendingEpoch; const colors = AppearancePreferences.pendingColors;
+        if (!main || main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch || !AppearancePreferences.visible || !(AppearancePreferences.value.dynamicColors ?? true)) { return; }
+        try { await AppearancePreferences.native(AppearancePreferences.value, main, epoch, () => true, colors); AppearancePreferences.colors = colors; AppearancePreferences.publish(AppearancePreferences.value, colors); AppearancePreferences.issue = ''; }
+        catch (e) { await AppearancePreferences.restoreColors(main, epoch); }
+      });
+      AppearancePreferences.writes = update.catch(() => {});
+    });
+  }
+  private static async resolve(value: AppearanceOptions, main: window.Window, epoch: number, allowed: () => boolean): Promise<DynamicPalette | undefined> {
+    AppearancePreferences.watch(value);
+    if (!(value.dynamicColors ?? true) || !AppearancePreferences.visible) { return undefined; }
+    AppearancePreferences.ticket?.cancel();
+    const ticket = AppearancePreferences.source.read(() => main === AppearancePreferences.main && epoch === AppearancePreferences.epoch && AppearancePreferences.visible && allowed()); AppearancePreferences.ticket = ticket;
+    try { return await ticket.result; } finally { if (AppearancePreferences.ticket === ticket) { AppearancePreferences.ticket = undefined; } }
+  }
+  private static async restoreColors(main: window.Window, epoch: number): Promise<void> {
+    if (main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch) { return; }
+    let issue = 'appearance_unavailable';
+    try { await AppearancePreferences.native(AppearancePreferences.value, main, epoch, () => true, AppearancePreferences.colors); }
+    catch (e) { issue = 'appearance_restore_failed'; }
+    if (main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch) { return; }
+    AppearancePreferences.issue = issue;
+    AppStorage.setOrCreate('cineIslePaletteStatus', 'dynamic_colors_update_failed');
+  }
+
   private static async read(context: common.UIAbilityContext): Promise<void> {
     try {
       const store = await preferences.getPreferences(context, { name: 'appearance_options' }); const raw = await store.get('settings_v1', ''); AppearancePreferences.raw = raw;
@@ -32,23 +85,25 @@ export class AppearancePreferences {
     const main = AppearancePreferences.main; const epoch = AppearancePreferences.epoch;
     if (!main || !context?.filesDir) { throw new Error('appearance_unavailable'); }
     const loading = AppearancePreferences.writes.then(async () => {
-      if (main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch) { throw new Error('appearance_cancelled'); }
+      if (main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch || !AppearancePreferences.visible) { throw new Error('appearance_cancelled'); }
       AppearancePreferences.context = context;
       if (!AppearancePreferences.store) { await AppearancePreferences.read(context); }
-      try { await AppearancePreferences.native(AppearancePreferences.value, main, epoch, () => true); }
-      catch (e) { AppearancePreferences.issue = (e as Error).message === 'appearance_cancelled' ? 'appearance_cancelled' : 'appearance_unavailable'; throw new Error(AppearancePreferences.issue); }
-      AppearancePreferences.publish(AppearancePreferences.value); AppearancePreferences.issue = '';
+      const colors = await AppearancePreferences.resolve(AppearancePreferences.value, main, epoch, () => true);
+      try { await AppearancePreferences.native(AppearancePreferences.value, main, epoch, () => true, colors); }
+      catch (e) { if ((e as Error).message === 'appearance_cancelled') { throw new Error('appearance_cancelled'); } await AppearancePreferences.restoreColors(main, epoch); throw new Error(AppearancePreferences.issue); }
+      AppearancePreferences.colors = colors; AppearancePreferences.publish(AppearancePreferences.value, colors); AppearancePreferences.issue = '';
     });
     AppearancePreferences.writes = loading.catch(() => {}); await loading;
   }
-  private static publish(value: AppearanceOptions): void {
+  private static publish(value: AppearanceOptions, colors?: DynamicPalette): void {
+    AppStorage.setOrCreate('cineIslePalette', uiPalette(colors)); AppStorage.setOrCreate('cineIslePaletteStatus', !(value.dynamicColors ?? true) ? 'dynamic_colors_off' : colors ? 'dynamic_colors_active' : 'dynamic_colors_fallback');
     AppStorage.setOrCreate('cineIsleAmoled', value.amoled); AppStorage.setOrCreate('cineIsleExtraInfo', value.extraInfo);
   }
-  private static async native(value: AppearanceOptions, main: window.Window, epoch: number, allowed: () => boolean): Promise<void> {
+  private static async native(value: AppearanceOptions, main: window.Window, epoch: number, allowed: () => boolean, colors?: DynamicPalette): Promise<void> {
     const current = (): boolean => main === AppearancePreferences.main && epoch === AppearancePreferences.epoch && allowed();
     if (!current()) { throw new Error('appearance_cancelled'); }
-    main.setWindowBackgroundColor(value.amoled ? '#000000' : '#13232E');
-    await main.setWindowSystemBarProperties({ statusBarColor: value.amoled ? '#000000' : '#0D1924', navigationBarColor: value.amoled ? '#000000' : '#13232E', statusBarContentColor: '#F2F3FA', navigationBarContentColor: '#F2F3FA' });
+    main.setWindowBackgroundColor(value.amoled ? '#000000' : colors?.raised ?? '#13232E');
+    await main.setWindowSystemBarProperties({ statusBarColor: value.amoled ? '#000000' : colors?.background ?? '#0D1924', navigationBarColor: value.amoled ? '#000000' : colors?.raised ?? '#13232E', statusBarContentColor: '#F2F3FA', navigationBarContentColor: '#F2F3FA' });
     if (!current()) { throw new Error('appearance_cancelled'); }
   }
   static async save(value: AppearanceOptions, allowed: () => boolean): Promise<AppearanceOptions> {
@@ -58,17 +113,18 @@ export class AppearancePreferences {
       if (!context || !main) { throw new Error('appearance_unavailable'); }
       if (!allowed()) { throw new Error('appearance_cancelled'); }
       if (!AppearancePreferences.store) { AppearancePreferences.store = await preferences.getPreferences(context, { name: 'appearance_options' }); }
-      const store = AppearancePreferences.store!; const previous = AppearancePreferences.raw; const old = AppearancePreferences.snapshot();
+      const store = AppearancePreferences.store!; const previous = AppearancePreferences.raw; const old = AppearancePreferences.snapshot(); const oldColors = AppearancePreferences.colors; let colors: DynamicPalette | undefined;
       if (!allowed()) { throw new Error('appearance_cancelled'); }
       try {
         await store.put('settings_v1', JSON.stringify(next)); await store.flush();
-        await AppearancePreferences.native(next, main, epoch, allowed);
+        colors = await AppearancePreferences.resolve(next, main, epoch, allowed);
+        await AppearancePreferences.native(next, main, epoch, allowed, colors);
       } catch (e) {
-        try { await store.put('settings_v1', previous); await store.flush(); if (main === AppearancePreferences.main && epoch === AppearancePreferences.epoch) { await AppearancePreferences.native(old, main, epoch, () => true); } AppearancePreferences.store = undefined; }
+        try { await store.put('settings_v1', previous); await store.flush(); if (main === AppearancePreferences.main && epoch === AppearancePreferences.epoch) { await AppearancePreferences.native(old, main, epoch, () => true, oldColors); } AppearancePreferences.store = undefined; }
         catch (restore) { AppearancePreferences.store = undefined; AppearancePreferences.issue = 'appearance_restore_failed'; throw new Error(AppearancePreferences.issue); }
-        AppearancePreferences.issue = (e as Error).message === 'appearance_cancelled' ? 'appearance_cancelled' : 'appearance_save_failed'; throw new Error(AppearancePreferences.issue);
+        AppearancePreferences.watch(old); AppearancePreferences.issue = (e as Error).message === 'appearance_cancelled' ? 'appearance_cancelled' : 'appearance_save_failed'; throw new Error(AppearancePreferences.issue);
       }
-      AppearancePreferences.value = next; AppearancePreferences.raw = JSON.stringify(next); AppearancePreferences.publish(next); AppearancePreferences.issue = '';
+      AppearancePreferences.value = next; AppearancePreferences.raw = JSON.stringify(next); AppearancePreferences.colors = colors; AppearancePreferences.publish(next, colors); AppearancePreferences.issue = '';
     });
     AppearancePreferences.writes = writing.catch(() => {}); await writing; return AppearancePreferences.snapshot();
   }

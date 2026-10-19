@@ -1,3 +1,4 @@
+import { UiPalette } from '../utils/UiPalette';
 import { BrandButton } from './BrandButton';
 import { BrandState } from './BrandState';
 import { ServerDiscovery } from '../service/ServerDiscovery';
@@ -9,6 +10,7 @@ import { errorText, text } from '../utils/Strings';
 
 @Component
 export struct ServerDiscoveryPicker {
+  @StorageLink('cineIslePalette') palette: UiPalette = new UiPalette();
   @Prop @Watch('availabilityChanged') available: boolean = true;
   @Prop @Watch('visibilityChanged') active: boolean = false;
   @Prop @Watch('addressChanged') address: string = '';
@@ -60,7 +62,7 @@ export struct ServerDiscoveryPicker {
   }
   build() {
     Column({ space: 8 }) {
-      Text($r('app.string.server_discovery_hint')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%')
+      Text($r('app.string.server_discovery_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       if (this.scanning || this.verifying) {
         BrandState({ label: this.verifying ? $r('app.string.discovery_verifying') : $r('app.string.discovery_scanning'), loading: true })
         BrandButton({ label: $r('app.string.discovery_stop'), icon: $r('app.media.menu_cancel'), onSelect: () => this.stop() })
@@ -68,8 +70,8 @@ export struct ServerDiscoveryPicker {
         BrandButton({ label: $r('app.string.discovery_start'), icon: $r('app.media.menu_server'), available: this.available && this.active && !this.locked,
           onSelect: () => this.start() })
       }
-      if (this.loaded && !this.servers.length && !this.message) { Text($r('app.string.discovery_empty')).fontSize(12).fontColor($r('app.color.brand_muted')).width('100%') }
-      if (this.message) { Text(this.message).fontSize(12).fontColor($r('app.color.brand_warm')).width('100%') }
+      if (this.loaded && !this.servers.length && !this.message) { Text($r('app.string.discovery_empty')).fontSize(12).fontColor(this.palette.muted).width('100%') }
+      if (this.message) { Text(this.message).fontSize(12).fontColor(this.palette.warm).width('100%') }
       ForEach(this.servers, (server: DiscoveredServer) => {
         BrandButton({ label: server.name + ' · ' + server.address, icon: $r('app.media.menu_server'), available: this.available && this.active && !this.verifying && !this.locked,
           onSelect: () => this.choose(server) })

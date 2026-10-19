@@ -64,7 +64,7 @@ function load(relative) {
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2020 } }).outputText;
   const module = { exports: {} }; cache.set(file, module);
   const localRequire = id => { if (platform.has(id)) return platform.get(id); const base = path.resolve(path.dirname(file), id); return load(fs.existsSync(base + '.ts') ? base + '.ts' : base + '.ets'); };
-  vm.runInThisContext('(function(require,module,exports,XComponentController,getContext,canIUse,wrapBuilder){' + js + '\n})', { filename: file })(localRequire, module, module.exports, class {}, () => systemPlatform.context, cap => systemPlatform.capabilities[cap] !== false, builder => ({ builder }));
+  vm.runInThisContext('(function(require,module,exports,XComponentController,getContext,canIUse,wrapBuilder,$r){' + js + '\n})', { filename: file })(localRequire, module, module.exports, class {}, () => systemPlatform.context, cap => systemPlatform.capabilities[cap] !== false, builder => ({ builder }), id => ({id}));
   return module.exports;
 }
 const { PlaybackRoute, LibrarySnapshot } = load('model/Models.ts');

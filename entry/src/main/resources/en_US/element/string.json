@@ -2019,6 +2019,13 @@
     {"name": "appearance_unavailable", "value": "Window appearance is unavailable. Reopen Settings and retry."},
     {"name": "appearance_cancelled", "value": "Appearance change cancelled"},
     {"name": "appearance_save_failed", "value": "Could not save appearance settings. Restoration was attempted. Please retry."},
-    {"name": "appearance_restore_failed", "value": "Appearance restoration is unconfirmed. Reopen Settings to verify and retry."}
+    {"name": "appearance_restore_failed", "value": "Appearance restoration is unconfirmed. Reopen Settings to verify and retry."},
+    {"name": "dynamic_colors", "value": "Wallpaper colors"},
+    {"name": "dynamic_colors_hint", "value": "Generate a CineIsle dark palette from system wallpaper colors; enabled by default. If colors cannot be read, use the original palette and retry on returning to the foreground. AMOLED containers stay black."},
+    {"name": "dynamic_colors_loading", "value": "Checking wallpaper colors…"},
+    {"name": "dynamic_colors_active", "value": "Current wallpaper colors applied"},
+    {"name": "dynamic_colors_off", "value": "Using the original CineIsle palette"},
+    {"name": "dynamic_colors_fallback", "value": "Wallpaper colors are unavailable. Using the original CineIsle palette; returning to the foreground will retry."},
+    {"name": "dynamic_colors_update_failed", "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."}
   ]
 }
