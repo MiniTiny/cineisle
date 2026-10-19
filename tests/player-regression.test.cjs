@@ -93,7 +93,7 @@ function rig(overrides = {}) {
 const tests = [];
 function test(name, fn) { tests.push([name, fn]); }
 function reset() {
-  AppService.intros = undefined; AppService.loadAutoNext = async () => true;
+  AppService.intros = undefined; AppService.trickplays = undefined; AppService.loadAutoNext = async () => true;
   const { AppLock } = load('service/AppLock.ets'); AppLock.initialized = true; AppLock.locked = false; AppLock.enabled = false; AppLock.fault = false; systemPlatform.reset(); nativePlayers.length = 0; nativeQueue.length = 0; httpQueue.length = 0; requests.length = 0; AppService.client = client(); AppService.downloads = []; AppService.snapshot = new LibrarySnapshot(); routeParams = {}; }
 
 test('queue sorts numerically, crosses seasons and ignores unrelated series and duplicates of current episode', () => {

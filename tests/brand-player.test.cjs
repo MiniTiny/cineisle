@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {render,flat,button}=require('./brand-forms.test.cjs');
 const tests=[],test=(name,fn)=>tests.push([name,fn]);
 const route={item:{Id:'a',Name:'光影之岛 · 播放器布局',Type:'Episode'},sources:[{Id:'a',Name:'原始版本 · 1080p'},{Id:'b',Name:'兼容版本 · 720p'}],mediaSourceId:'a',offline:false};
-const props={route,state:'playing',options:true,systemReady:true,pipSupported:true,audio:[{key:'a',label:'中文 · AAC · Stereo'},{key:'b',label:'English · AAC'}],subtitles:[{key:'sub',label:'English · SRT'}],audioKey:'a',subtitleKey:'sub',duration:60000,playbackPosition:25000};
+const props={route,alive:true,visible:true,state:'playing',options:true,systemReady:true,pipSupported:true,audio:[{key:'a',label:'中文 · AAC · Stereo'},{key:'b',label:'English · AAC'}],subtitles:[{key:'sub',label:'English · SRT'}],audioKey:'a',subtitleKey:'sub',duration:60000,playbackPosition:25000};
 const player=(overrides={},scale=1)=>render('Player',{...props,...overrides},scale);
 const nodes=f=>flat(f.roots),find=(f,type)=>nodes(f).filter(n=>n.type===type);
 test('primary pause has original geometry and an explicit CineIsle action color',()=>{const f=player(),b=button(f,'pause');assert.equal(b.attrs.backgroundColor[0],'app.color.brand_action');assert.equal(flat(b.children).find(n=>n.type==='Image').args[0],'app.media.player_pause');assert.equal(flat(b.children).find(n=>n.type==='Text').attrs.maxLines[0],2)});

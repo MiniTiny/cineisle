@@ -1,3 +1,5 @@
+import { TrickplayTransport } from '../api/TrickplayTransport';
+import { BifTransfer } from '../utils/Bif';
 import { IntroTransport } from '../api/IntroTransport';
 import { IntroTicket } from '../utils/Intro';
 import util from '@ohos.util';
@@ -128,6 +130,7 @@ export class JellyfinClient {
     this.session.userName = user.Name ?? this.session.userName;
   }
 
+  trickplay(id: string, allowed: () => boolean): BifTransfer { return new TrickplayTransport(this.session).fetch(id, allowed); }
   intro(id: string, allowed: () => boolean): IntroTicket { return new IntroTransport(this.session).fetch(id, allowed); }
 
   async autoNextEnabled(): Promise<boolean> {

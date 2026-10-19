@@ -109,7 +109,7 @@ function reset() {
   for (const entry of fs.readdirSync(directory)) fs.rmSync(path.join(directory, entry), { recursive: true, force: true });
   AppService.client = undefined; AppService.local = undefined; AppService.snapshot = new LibrarySnapshot();
   AppService.downloads = []; AppService.tasks.clear(); AppService.syncing = false;
-  AppService.cacheRecovered = false; AppService.initialized = false; AppService.intros = undefined; AppService.context = context;
+  AppService.cacheRecovered = false; AppService.initialized = false; AppService.intros = undefined; AppService.trickplays = undefined; AppService.context = context;
   queue.length = 0; requests.length = 0; assetValue = undefined; routeParams = {}; dialog = undefined; navigation.length = 0; abilities.length = 0; downloadTasks.length = 0;
 }
 const tests = [];
