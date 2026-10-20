@@ -1972,7 +1972,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Supports Simplified Chinese, Traditional Chinese and English. Other system languages use English. This app-wide setting changes the interface only; media metadata and audio/subtitle preferences remain separate."
+      "value": "Supports Simplified Chinese, Traditional Chinese, English and French. Other system languages use English. This app-wide setting changes the interface only; media metadata and audio/subtitle preferences remain separate."
     },
     {
       "name": "ui_language_system",
@@ -2031,7 +2031,7 @@
     {"name": "dynamic_colors_update_failed", "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."},
     {
       "name": "sync_cache_write_failed",
-      "value": "Upload completed, but the local cache could not be saved. Changes are retained; free storage space and retry."
+      "value": "The local cache could not be saved. Changes are retained; free storage space and retry."
     },
     {"name": "caption_settings_title", "value": "System caption style"},
     {"name": "caption_scope", "value": "These settings change the system caption configuration and affect other apps that support it. Going back discards the draft."},
