@@ -13,6 +13,7 @@ import common from '@ohos.app.ability.common';
 import { errorText, text } from '../utils/Strings';
 import { DownloadRecord, MediaItem, MediaSource, Person } from '../model/Models';
 import { AppService } from '../service/AppService';
+import { applyPending } from '../utils/Experience';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { loadDetail } from '../service/DetailData';
 import { detailMetadata, trailerUrl } from '../utils/DetailPresentation';
@@ -132,12 +133,13 @@ struct Detail {
     this.busy = true; this.message = '';
     try {
       const queued = await AppService.edit(original, favorite, enabled, this.usingCache);
-      if (queued && this.current(token, client)) { this.message = text('change_queued'); }
+      if (queued && this.current(token, client)) { this.message = text(AppService.experience?.snapshot().syncBlocked ? 'change_queued_blocked' : 'change_queued'); }
       if (!this.current(token, client)) { return; }
-      const item = JSON.parse(JSON.stringify(original)) as MediaItem;
-      if (!item.UserData) { item.UserData = {}; }
-      if (favorite) { item.UserData.IsFavorite = enabled; } else { item.UserData.Played = enabled; }
-      this.item = item;
+      const latest = AppService.snapshot.items.find((value: MediaItem) => value.Id === original.Id);
+      const item = JSON.parse(JSON.stringify(latest ?? original)) as MediaItem;
+      if (!latest) { item.UserData = item.UserData ?? {}; if (favorite) { item.UserData.IsFavorite = enabled; } else { item.UserData.Played = enabled; } }
+      const state = AppService.experience?.snapshot();
+      this.item = applyPending([item], state?.pending ?? [], state?.positions ?? [])[0];
     } catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
     finally { if (this.current(token, client)) { this.busy = false; } }
   }

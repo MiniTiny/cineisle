@@ -882,7 +882,7 @@
     },
     {
       "name": "batch_result",
-      "value": "成功 %d 项，失败 %d 项"
+      "value": "本机已处理 %d 项，处理失败 %d 项"
     },
     {
       "name": "undo",
@@ -982,7 +982,7 @@
     },
     {
       "name": "change_queued",
-      "value": "修改已保存在本机，联网后回传"
+      "value": "修改已保存在本机，尚未回传，可在主菜单中手动回传。"
     },
     {
       "name": "batch_download",
@@ -2019,6 +2019,8 @@
     {"name": "caption_edge_raised", "value": "凸起"},
     {"name": "caption_edge_depressed", "value": "凹陷"},
     {"name": "caption_edge_uniform", "value": "描边"},
-    {"name": "caption_edge_shadow", "value": "投影"}
+    {"name": "caption_edge_shadow", "value": "投影"},
+    {"name": "change_queued_blocked", "value": "修改已保存在本机，服务器尚未确认。自动回传已暂停，请检查服务器或账户后手动重试。"},
+    {"name": "batch_queued", "value": "其中 %d 项待回传"}
   ]
 }

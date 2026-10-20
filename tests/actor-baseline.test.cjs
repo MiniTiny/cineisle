@@ -82,10 +82,10 @@ test('favorites persists combined filters across cold store reconstruction and a
   const local = localAccount(); configure(s => { s.favoriteCategory = 'Series'; s.favoriteQuery = 'name'; s.favoriteUnwatched = true; s.favoriteOrder = 'continue'; });
   assert.equal(new ExperienceStore(local).snapshot().favoriteOrder, 'continue'); h.activate('b'); assert.equal(state().favoriteQuery, '');
 });
-test('batch unfavorite/undo only affects confirmed successes and leaves failed items', async () => {
+test('batch unfavorite/undo handles locally accepted intents including deferred server rejection', async () => {
   const client = h.activate(); client.favorite = async id => { if (id === 'b') throw Error('permission_denied'); };
   const p = new Favorites(); p.client = client; p.all = ['a', 'b'].map(id => film(id, { UserData: { IsFavorite: true } }));
-  await p.batch([...p.all], false); assert.deepEqual(p.all.map(i => i.Id), ['b']); assert.deepEqual(p.undoItems.map(i => i.Id), ['a']);
+  await p.batch([...p.all], false); assert.deepEqual(p.all.map(i => i.Id), []); assert.deepEqual(p.undoItems.map(i => i.Id), ['a', 'b']); assert.equal(state().syncBlocked, true); assert.match(p.message, /batch_queued/); assert.match(p.message, /change_queued_blocked/);
   await p.batch(p.undoItems, true); assert.deepEqual(p.all.map(i => i.Id).sort(), ['a', 'b']); assert.equal(p.undoItems.length, 0);
 });
 test('batch response after account change cannot update view or undo state', async () => {
@@ -134,7 +134,7 @@ test('recent search deduplicates case and bounds 20; saved navigation is account
 });
 test('offline edits survive cold reconstruction even if catalog save failed', async () => {
   localAccount(); const original = AppService.local.saveSnapshot; AppService.local.saveSnapshot = () => { throw Error('disk full'); };
-  await assert.rejects(AppService.edit(film('a'), true, true, true), /disk full/); AppService.local.saveSnapshot = original;
+  await assert.rejects(AppService.edit(film('a'), true, true, true), /sync_cache_write_failed/); AppService.local.saveSnapshot = original;
   h.activate(); assert.equal(state().pending.length, 1); assert.equal(AppService.snapshot.items[0].UserData.IsFavorite, true);
 });
 test('outbox stale acknowledgement cannot remove a newer revision, even with identical value', async () => {
@@ -146,9 +146,9 @@ test('outbox confirms successes and retains network failure plus subsequent edit
   const client = h.activate(); await AppService.edit(film('a'), true, true, true); await AppService.edit(film('b'), false, true, true); client.favorite = async () => {}; client.played = async () => { throw Error('network_failed'); };
   await AppService.flushPending(); assert.deepEqual(state().pending.map(p => p.id), ['b']);
 });
-for (const message of ['permission_denied', 'login_expired', 'api_response_invalid', 'cache_write_failed']) test('invalid/security error never becomes offline success: ' + message, async () => {
+for (const message of ['permission_denied', 'login_expired', 'api_response_invalid', 'cache_write_failed']) test('request rejection preserves intent while protected detail reads still reject: ' + message, async () => {
   const client = h.activate(); client.favorite = async () => { throw Error(message); }; client.detail = async () => { throw Error(message); }; AppService.snapshot.items = [film('a')];
-  assert.equal(connectionFailure(Error(message)), false); await assert.rejects(AppService.edit(film('a'), true, true), new RegExp(message)); await assert.rejects(loadDetail(client, 'a'), new RegExp(message)); assert.equal(state().pending.length, 0);
+  assert.equal(connectionFailure(Error(message)), false); assert.equal(await AppService.edit(film('a'), true, true), true); await assert.rejects(loadDetail(client, 'a'), new RegExp(message)); assert.equal(state().pending.length, 1); assert.equal(state().syncBlocked, true); assert.equal(state().pending[0].localOnly, undefined);
 });
 test('explicit offline mode makes no HTTP calls and only plays completed downloads', async () => {
   const client = h.activate(); configure(s => s.offline = true); AppService.snapshot = h.snapshot([film('a')]); client.detail = async () => { throw Error('must not access network'); }; client.favorite = client.detail;

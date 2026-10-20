@@ -900,7 +900,7 @@
     },
     {
       "name": "batch_result",
-      "value": "%d succeeded, %d failed"
+      "value": "Processed locally: %d; failed: %d"
     },
     {
       "name": "undo",
@@ -1000,7 +1000,7 @@
     },
     {
       "name": "change_queued",
-      "value": "Changes saved locally and will upload when online"
+      "value": "Changes are saved locally and waiting to upload. Upload them manually from the main menu."
     },
     {
       "name": "batch_download",
@@ -2070,6 +2070,8 @@
     {"name": "caption_edge_raised", "value": "Raised"},
     {"name": "caption_edge_depressed", "value": "Depressed"},
     {"name": "caption_edge_uniform", "value": "Outline"},
-    {"name": "caption_edge_shadow", "value": "Drop shadow"}
+    {"name": "caption_edge_shadow", "value": "Drop shadow"},
+    {"name": "change_queued_blocked", "value": "Changes are saved locally but not confirmed by the server. Automatic uploads are paused. Check the server or account, then retry manually."},
+    {"name": "batch_queued", "value": "%d waiting to upload"}
   ]
 }

@@ -325,12 +325,23 @@ for (const favorite of [true, false]) {
     client[favorite ? 'favorite' : 'played'] = async (id, value) => { called = [id, value]; }; await p.setFlag(favorite);
     assert.deepEqual(called, ['film', true]); assert.equal(p.item.UserData[favorite ? 'IsFavorite' : 'Played'], true); assert.equal(original.UserData[favorite ? 'IsFavorite' : 'Played'], false);
   });
-  test((favorite ? 'favorite' : 'watched') + ' failure leaves state intact and retry succeeds', async () => {
+  test((favorite ? 'favorite' : 'watched') + ' server rejection retains local intent and manual replay succeeds', async () => {
     const { p, client } = await detail(); client[favorite ? 'favorite' : 'played'] = async () => { throw new Error('permission_denied'); }; await p.setFlag(favorite);
-    assert.equal(p.item.UserData, undefined); assert.match(p.message, /权限/); assert.equal(p.busy, false);
-    client[favorite ? 'favorite' : 'played'] = async () => {}; await p.setFlag(favorite); assert.equal(p.message, '');
+    assert.equal(p.item.UserData[favorite ? 'IsFavorite' : 'Played'], true); assert.match(p.message, /自动回传已暂停/); assert.equal(p.busy, false); assert.equal(AppService.experience.snapshot().pending.length, 1);
+    client[favorite ? 'favorite' : 'played'] = async () => {}; await AppService.flushPending(); assert.equal(AppService.experience.snapshot().pending.length, 0); assert.equal(p.item.UserData[favorite ? 'IsFavorite' : 'Played'], true);
   });
 }
+for (const newerStop of [false, true]) test('late rejected flag preserves newer ' + (newerStop ? 'stop ownership' : 'progress'), async () => {
+  const { p, client } = await detail(); const request = deferred(); client.played = () => request.promise;
+  const op = p.setFlag(false); await new Promise(setImmediate);
+  if (newerStop) AppService.recordOfflineStop(p.item, 45000, 100000); else AppService.recordOfflinePosition(p.item, 45000);
+  request.reject(Error('permission_denied')); await op;
+  assert.equal(p.item.UserData.PlaybackPositionTicks, 450000000); assert.equal(p.item.UserData.Played, !newerStop);
+});
+test('transient rejected favorite displays pending status without claiming server confirmation', async () => {
+  const { p, client } = await detail(); client.favorite = async () => { throw Error('network_failed'); }; await p.setFlag(true);
+  assert.equal(p.item.UserData.IsFavorite, true); assert.match(p.message, /尚未回传/); assert.equal(AppService.experience.snapshot().syncBlocked, false);
+});
 test('offline mutations are disabled and double clicks cannot start parallel flag requests', async () => {
   const { p, client } = await detail(); let calls = 0; const request = deferred(); client.favorite = () => { calls++; return request.promise; };
   p.usingCache = true; await p.setFlag(true); assert.equal(calls, 0); p.usingCache = false;
