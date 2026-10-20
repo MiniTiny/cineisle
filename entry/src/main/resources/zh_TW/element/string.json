@@ -900,7 +900,7 @@
     },
     {
       "name": "batch_result",
-      "value": "成功 %d 項，失敗 %d 項"
+      "value": "本機已處理 %d 項，處理失敗 %d 項"
     },
     {
       "name": "undo",
@@ -1000,7 +1000,7 @@
     },
     {
       "name": "change_queued",
-      "value": "修改已儲存在本機，連線上網後回傳"
+      "value": "修改已儲存在本機，尚未回傳，可在主選單中手動回傳。"
     },
     {
       "name": "batch_download",
@@ -2127,6 +2127,8 @@
     {"name": "caption_edge_raised", "value": "凸起"},
     {"name": "caption_edge_depressed", "value": "凹陷"},
     {"name": "caption_edge_uniform", "value": "描邊"},
-    {"name": "caption_edge_shadow", "value": "投影"}
+    {"name": "caption_edge_shadow", "value": "投影"},
+    {"name": "change_queued_blocked", "value": "修改已儲存在本機，伺服器尚未確認。自動回傳已暫停，請檢查伺服器或帳號後手動重試。"},
+    {"name": "batch_queued", "value": "其中 %d 項待回傳"}
   ]
 }

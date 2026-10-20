@@ -628,29 +628,29 @@ export class AppService {
       if (AppService.latestEdits.get(key) !== revision) { queued = true; return; }
       store?.settleLocalEdits();
       const state = store?.snapshot();
-      const prior = state?.pending.find((p: PendingEdit) => p.id === item.Id && p.field === field);
       const latestItem = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item;
       const copy = applyPending([JSON.parse(JSON.stringify(latestItem)) as MediaItem], state?.pending ?? [], state?.positions ?? [])[0];
       copy.UserData = copy.UserData ?? {};
-      const previous = favorite ? copy.UserData.IsFavorite ?? false : copy.UserData.Played ?? false;
       if (favorite) { copy.UserData.IsFavorite = value; } else { copy.UserData.Played = value; }
       // The entire online operation serializes by field; later online intents capture the preceding resolved state.
       store?.update((next: ExperienceState) => { next.pending = next.pending.filter((p: PendingEdit) => p.id !== item.Id || p.field !== field); next.pending.push({ id: item.Id, field: field, value: value, revision: revision, item: copy }); next.syncAttempts = 0; next.syncNextAt = 0; next.syncBlocked = false; });
       if (!offline) {
-        try {
-          await local!.transfer(async () => {
-            if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
-            if (store?.snapshot().offline) { queued = true; return; }
-            if (!store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) { return; }
+        await local!.transfer(async () => {
+          if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
+          if (store?.snapshot().offline) { queued = true; return; }
+          if (!store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) { return; }
+          try {
             if (favorite) { await client.favorite(item.Id, value); } else { await client.played(item.Id, value); }
-          });
-        } catch (e) {
-          if (!connectionFailure(e as Error)) {
-            if (store === AppService.experience) { store?.reject(item.Id, field, revision, previous, prior); }
-            throw e as Error;
+          } catch (e) {
+            // Android retains the durable local intent for every request failure. Ownership/lease/storage failures still throw.
+            queued = true;
+            if (client === AppService.client && store === AppService.experience && store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) {
+              const transient = connectionFailure(e as Error);
+              store.update((next: ExperienceState) => { next.syncAttempts = 0; next.syncBlocked = !transient; next.syncNextAt = transient ? Date.now() + 30000 : 0; });
+              PendingSync.deferred(e as Error);
+            }
           }
-          queued = true;
-        }
+        });
       }
       if (client !== AppService.client || local !== AppService.local) { throw new Error('login_required'); }
       if (!queued) {
@@ -658,11 +658,7 @@ export class AppService {
         queued = AppService.latestEdits.get(key) !== revision; return;
       }
       if (AppService.latestEdits.get(key) !== revision) { return; }
-      const latest = AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? copy;
-      const merged = applyPending([latest], store?.snapshot().pending ?? [], store?.snapshot().positions ?? [])[0];
-      AppService.snapshot.items = [merged, ...AppService.snapshot.items.filter((i: MediaItem) => i.Id !== merged.Id)];
-      AppService.snapshot.actors = rankActors(AppService.snapshot.items); local?.saveSnapshot(AppService.snapshot);
-      if (local) { const sections = local.home(); sections.forEach((section) => { section.items = section.items.map((i: MediaItem) => i.Id === item.Id ? merged : i); }); local.saveHome(sections); }
+      store?.retain(item.Id, field, revision);
     };
     if (offline) { await operation(); } else { await AppService.mutation(key, operation); }
     return queued;

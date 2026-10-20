@@ -28,6 +28,7 @@ export class PendingSync {
   private static net: connection.NetConnection | undefined = undefined;
   private static jobs: Promise<void> = Promise.resolve();
   private static state(issue: string): void { PendingSync.issue = issue; AppStorage.setOrCreate('cineIsleSyncIssue', issue); }
+  static deferred(error: Error): void { PendingSync.state(connectionFailure(error) ? 'sync_retry_waiting' : 'sync_auth_required'); }
   static configure(context: common.Context, owner?: () => SyncOwner | undefined): void {
     PendingSync.context = context;
     if (owner) { PendingSync.owner = owner; PendingSync.interactive = true; }
@@ -95,7 +96,7 @@ export class PendingSync {
       if ((state.syncNextAt ?? 0) > Date.now()) { retryAt = Math.min(retryAt, state.syncNextAt!); continue; }
       const client = active && local === active.local ? active.client : new JellyfinClient(session);
       const allowed = async (): Promise<boolean> => {
-        if (generation !== PendingSync.generation || !AppLock.permit() || Date.now() >= deadline || store.snapshot().offline) { return false; }
+        if (generation !== PendingSync.generation || !AppLock.permit() || Date.now() >= deadline || store.snapshot().offline || store.snapshot().syncBlocked === true || (store.snapshot().syncNextAt ?? 0) > Date.now()) { return false; }
         try { const saved = await SessionStore.get(account.key); return saved.token === session.token && saved.deviceId === session.deviceId; }
         catch (e) { return false; }
       };

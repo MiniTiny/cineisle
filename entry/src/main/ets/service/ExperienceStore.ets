@@ -25,21 +25,9 @@ export class ExperienceStore {
         p.id === edit.id && p.field === edit.field && p.revision === edit.revision && p.value === edit.value && p.localOnly === true), edit.field);
     }
   }
-  reject(id: string, field: string, revision: number, value: boolean, prior?: PendingEdit): void {
-    const replacements: PendingEdit[] = [];
-    // Persist the rejection before repairing mirrors. A local-only correction must never be replayed to the server.
-    this.update((next: ExperienceState) => {
-      const current = next.pending.find((p: PendingEdit) => p.id === id && p.field === field && p.revision === revision);
-      if (!current) { return; }
-      const replacement: PendingEdit = prior ?? { id: id, field: field, revision: revision, value: value, item: current.item, localOnly: true };
-      replacements.push(replacement);
-      next.pending = [...next.pending.filter((p: PendingEdit) => p.id !== id || p.field !== field), replacement];
-      this.mergeIntentItems(next, id);
-    });
-    const restored = replacements[0];
-    if (!restored) { return; }
+  retain(id: string, field: string, revision: number): void {
     this.commitMirrors(id, (next: ExperienceState): boolean => next.pending.some((p: PendingEdit) =>
-      p.id === id && p.field === field && p.revision === restored.revision && p.value === restored.value && p.localOnly === restored.localOnly), restored.localOnly === true, field);
+      p.id === id && p.field === field && p.revision === revision), false, field);
   }
   private commitMirrors(id: string, matches: (state: ExperienceState) => boolean, acknowledge: boolean, field?: string): void {
     let pending: PendingEdit[] = []; let positions: PendingPosition[] = [];

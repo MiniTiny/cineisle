@@ -108,10 +108,10 @@ struct Favorites {
       } }] }, this.viewportWidth, this.viewportHeight);
   }
   private async batch(items: MediaItem[], restore: boolean): Promise<void> {
-    const revision = this.revision; this.busy = true; this.message = ''; const success: MediaItem[] = []; let failed = 0; let failure = '';
+    const revision = this.revision; this.busy = true; this.message = ''; const success: MediaItem[] = []; let failed = 0; let queued = 0; let failure = '';
     for (const item of items) {
       if (!this.current(revision)) { return; }
-      try { await AppService.edit(item, true, restore); if (!this.current(revision)) { return; } success.push(item); }
+      try { const deferred = await AppService.edit(item, true, restore); if (!this.current(revision)) { return; } if (deferred) { ++queued; } success.push(item); }
       catch (e) { ++failed; if (!failure) { failure = errorText(e as Error); } }
     }
     if (!this.current(revision)) { return; }
@@ -121,7 +121,7 @@ struct Favorites {
     } else {
       this.all = this.all.filter((i: MediaItem) => !success.some((v: MediaItem) => v.Id === i.Id)); this.undoItems = success;
     }
-    this.selected = []; this.selection = false; this.message = text('batch_result', success.length, failed) + (failure ? ` · ${failure}` : ''); this.busy = false; this.filter(false);
+    this.selected = []; this.selection = false; this.message = text('batch_result', success.length, failed) + (queued ? ` · ${text('batch_queued', queued)}` : '') + (queued && AppService.experience?.snapshot().syncBlocked ? ` · ${text('change_queued_blocked')}` : '') + (failure ? ` · ${failure}` : ''); this.busy = false; this.filter(false);
   }
   @Builder
   private filtersPanel() {
