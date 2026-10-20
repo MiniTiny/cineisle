@@ -9,6 +9,8 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-player-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
 const cache = new Map(), platform = new Map(), nativePlayers = [], nativeQueue = [], httpQueue = [], requests = [];
+platform.set('libcineisle_ass.so', { async create() { throw new Error('ASS requires an explicit native fixture'); } });
+platform.set('@ohos.font', {});
 require('./download-platform.cjs').install(platform);
 let routeParams = {}, closes = 0;
 const fileApi = { accessSync: fs.existsSync, openSync: p => ({ fd: fs.openSync(p, 'r') }),

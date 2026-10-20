@@ -2,14 +2,14 @@
 
 ## 可复现检查
 
-在配置 DevEco Studio SDK 与 Node.js/Python 3 后执行：
+在配置 DevEco Studio SDK 与 Node.js、Python 3.12+及主机gperf后执行：
 
 ```bash
 ./scripts/build.sh
 node tests/run-regression.cjs
 ```
 
-构建前检查 OpenAPI 与图标生成漂移，并编译 ArkTS、ArkUI 和资源。默认未配置签名，生成 unsigned HAP。全套回归包含协议、业务、播放器、系统播放、字幕、语言偏好、媒体与详情、品牌、SDK 网格及固定基准检查。
+构建前检查 OpenAPI 与图标生成漂移，校验并准备固定原生字幕依赖，再编译 ArkTS、ArkUI、原生库和资源。首次构建需下载公开源码；缓存、来源完整性及离线检查见[ASS字幕说明](ASS_SUBTITLES.md)。默认未配置签名，生成 unsigned HAP。全套回归包含协议、业务、播放器、系统播放、字幕、语言偏好、媒体与详情、品牌、SDK 网格及固定基准检查。
 
 标准入口按文件名排序发现`tests`目录中的`.test.cjs`及本地`.test.py`，新增套件无需再维护固定清单。需要截图/布局输入的`*-emulator.test.py`和`emulator-*.test.py`单列为独立原生验收，不计入本地通过项，仍按下文专项采集后执行。证据记录全部发现项、逐套件文件指纹/日志/数量、首次失败后未运行项；空清单、进程失败或零用例都不能通过门禁。`node tests/regression-runner.test.cjs`用合成子进程验证这些边界。
 
@@ -319,3 +319,21 @@ node tests/poster-cache-ui.test.cjs
 `node tests/intro-skipper.test.cjs`验证固定插件路由/认证与网络边界、秒到毫秒转换、畸形与超大数据、真实时长/提示窗口、超时/取消/迟到响应、账户缓存隔离/坏数据保留/512项淘汰、下载时预取及旧偏好兼容；执行实际播放器方法，验证暂停时只seek、PIN/控制锁/PiP/后台/忙碌和切源等门禁。`node tests/intro-skipper-ui.test.cjs`用SDK构建树检查窄屏、短横屏及1/2倍字体，覆盖滚动控件与自动隐藏后的独立入口、隐藏条件、实际回调和偏好保存失败。夹具不等于实际插件或原生seek验收。
 
 原生用独立QA包、同源码资源及本机合成视频/插件服务，记录请求头存在且URL无凭据的布尔结果；实际点击提示后核对原生播放时钟/解码状态，重启手动离线使用已下载文件和缓存时间段，偏好关闭及插件404时保持播放且没有跳过入口。诊断只准备合成账户/资料与路由；HTTP记录排除QA控制/回执并明确口径，不记录认证头或令牌。实体设备、真实插件版本、不同剪辑的时间轴及长期缓存仍需独立验收。
+
+## ASS/SSA 专项
+
+```bash
+python3 scripts/prepare-native-ass.py --check
+python3 tests/native-ass-build.test.py
+node tests/ass-font-config.test.cjs
+node tests/ass-subtitle.test.cjs
+node tests/ass-offline.test.cjs
+node tests/ass-player.test.cjs
+node tests/ass-ui.test.cjs
+```
+
+来源检查覆盖固定摘要、解包边界、源文件漂移、SDK选择、安装指纹与Meson参数；字体检查覆盖公开字体族映射、回退顺序、独立缓存和XML边界。异步服务检查最新请求、过期帧消费、clear后unchanged复用、关闭期间的位图处理及错误恢复。离线专项覆盖ASS原文、旧SRT兼容与升级、存储事务失败、临时空间预留和账户/删除所有权。播放专项执行实际控制器、页面与PiP节点，覆盖原生时钟、候选准备失败/迟到、切源、拖动确认、暂停、结束、隐藏听音频、PIN与关闭；UI专项执行SDK编译的真实构建树，检查完整显示/裁切的几何、裁剪与图层门禁。所有平台/HTTP/原生图像夹具均不能证明实际字幕像素。
+
+原生验收独立记录：使用隔离包和合成H.264视频，核对产品源码、资源、SO和依赖来源；确认主Player的字体、颜色、定位及动画，再捕获真正缩小的PiP窗口，不把主窗口截图当作PiP通过。拖动到对白、动画及空白时间段，暂停/恢复、切源、字幕关闭、结束、PIN及退出后检查旧帧清除。包含中文字形和有实际可读尺寸的阿拉伯文字形，使用缺字和错误回退字体负对照，不能只以非零像素判断字体匹配。
+
+进一步分别验收在线真实Jellyfin、内嵌提取、外置字幕、断网冷启动、旧缓存升级失败、物理API12设备、不同视频尺寸、裁切/PiP缩放、重复选择/关闭的GPU和内存寿命、长时播放及系统会话重建。短时间资源样本不证明长期无泄漏，系统会话失败不计为画中画通过。F12中其他引擎、编解码器、图片字幕及视频附件字体仍保留差距。

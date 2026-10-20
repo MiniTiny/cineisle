@@ -408,7 +408,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Embedded tracks depend on device decoding support. Server and cached text subtitles use SRT without ASS styling; image subtitles are not supported yet. Downloads try to cache convertible embedded and external text tracks; existing downloads can fetch them online. Offline playback offers native tracks and cached text subtitles."
+      "value": "ASS/SSA subtitles retain styles and animation; other text subtitles use SRT. Downloads can cache embedded and external text tracks, and existing caches can be updated online. Image subtitles and video attachment fonts are not supported yet; glyphs depend on available device fonts. Offline playback offers cached subtitles and tracks recognized by the device."
     },
     {
       "name": "track_switch_failed",

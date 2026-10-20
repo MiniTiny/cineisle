@@ -10,6 +10,7 @@ import { text } from '../utils/Strings';
 import { ProductIdentity } from '../utils/ProductIdentity';
 import { PlaybackController, PlaybackStatus } from './PlaybackController';
 import { PiPSubtitleController } from '../components/PiPSubtitle';
+import { StyledSubtitleFrame } from '../utils/StyledSubtitle';
 
 export interface SystemPlayerState { ready: boolean; backgroundEnabled: boolean; pipSupported: boolean; pipActive: boolean }
 export interface SystemPlayerView {
@@ -38,6 +39,7 @@ export class SystemPlayback {
   private pip: PiPWindow.PiPController | undefined = undefined;
   private captions: PiPSubtitleController | undefined = undefined;
   private subtitleText: string = '';
+  private styledFrame: StyledSubtitleFrame | undefined;
   private ready: boolean = false;
   private disposed: boolean = false;
   private hidden: boolean = false;
@@ -77,6 +79,11 @@ export class SystemPlayback {
   updateSubtitle(value: string): void {
     if (this.disposed) { return; }
     this.subtitleText = value; this.captions?.setText(value);
+  }
+
+  updateStyledSubtitle(frame: StyledSubtitleFrame | undefined): void {
+    if (this.disposed) { return; }
+    this.styledFrame = frame; this.captions?.setFrame(frame);
   }
 
   initialize(): Promise<void> {
@@ -325,6 +332,7 @@ export class SystemPlayback {
       }
     }
     if (!this.disposed && this.hidden && !await this.controller.hide(this.canContinue)) { await this.stop(); }
+    if (!this.disposed) { this.controller.setStyledSubtitleVisible(AppLock.permit() && this.pipActive); }
   }
   foreground(): void { if (!this.disposed) { this.hidden = false; this.autoWait?.(); this.controller.show(); this.refreshAutoPiP(); } }
 
@@ -336,6 +344,7 @@ export class SystemPlayback {
     this.captions?.dispose();
     this.captions = new PiPSubtitleController(() => { this.view.error(text('pip_subtitle_failed')); });
     this.captions.setText(this.subtitleText);
+    this.captions.setFrame(this.styledFrame);
     const pip = await PiPWindow.create({ context: this.context, componentController: this.surface,
       templateType: PiPWindow.PiPTemplateType.VIDEO_PLAY, contentWidth: Math.max(1, status.width), contentHeight: Math.max(1, status.height),
       customUIController: this.captions,
@@ -422,7 +431,7 @@ export class SystemPlayback {
     this.disposed = true; this.ready = false; this.backgroundEnabled = false; this.taskWanted = false; ++this.preferenceRevision; ++this.commandRevision;
     this.autoWait?.();
     this.controller.pausePlayback();
-    this.subtitleText = ''; this.captions?.dispose();
+    this.subtitleText = ''; this.styledFrame = undefined; this.captions?.dispose();
     this.emit(); this.closing = this.cleanup(); return this.closing;
   }
 

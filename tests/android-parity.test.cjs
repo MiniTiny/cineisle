@@ -15,6 +15,8 @@ const tests = [], test = (name, fn) => tests.push([name, fn]);
 const film = (id, extra = {}) => ({ ...h.film(id), ...extra });
 const ids = values => values.map(v => v.Id);
 const srt = '1\n00:00:01,000 --> 00:00:03,000\n离线字幕\n';
+const ass = '[Script Info]\nScriptType: v4.00+\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:03.00,Default,,0,0,0,,{\\b1}离线 ASS\n';
+const documentFor = index => index === 8 ? ass : srt;
 const source = () => ({ Id: 'source', Container: 'mp4', MediaStreams: [
   { Type: 'Subtitle', Index: 7, IsExternal: true, Codec: 'srt', Language: 'zho', DisplayTitle: '中文' },
   { Type: 'Subtitle', Index: 8, IsExternal: true, Codec: 'ass', Language: 'eng' },
@@ -28,7 +30,7 @@ function transfer(client) {
     return { on: (name, cb) => { callbacks[name] = cb; }, delete: async () => true };
   };
   client.playbackInfo = async () => ({ MediaSources: [source()] });
-  client.stream = () => 'https://example.invalid/synthetic'; client.subtitle = async () => srt;
+  client.stream = () => 'https://example.invalid/synthetic'; client.subtitle = async (_i, _s, index) => documentFor(index);
   return { callbacks, created: () => created };
 }
 function legacyRecord() {
@@ -93,7 +95,7 @@ test('domain mapping preserves sort-name/critic/date metadata and rejects invali
   h.queue.push(h.response({ Items: [film('a', { CriticRating: 'bad' })], TotalRecordCount: 1 })); await assert.rejects(client.items(), /api_response_invalid/);
 });
 test('video download caches external and embedded text subtitles, persists safe metadata, and restores offline playback', async () => {
-  const client = h.activate(); const transport = transfer(client); const fetched = []; client.subtitle = async (...args) => { fetched.push(args); return srt; };
+  const client = h.activate(); const transport = transfer(client); const fetched = []; client.subtitle = async (...args) => { fetched.push(args); return documentFor(args[2]); };
   await AppService.download(film('movie', { CanDownload: true })); const record = AppService.downloads[0]; transport.callbacks.complete();
   assert.deepEqual(fetched.map(a => a[2]), [7, 8, 9]); assert.equal(record.subtitleState, 'ready');
   const restored = AppService.local.downloads()[0]; assert.equal(restored.subtitles.length, 3); assert.equal(validDownloads([restored], AppService.local.directory), true);
@@ -101,10 +103,10 @@ test('video download caches external and embedded text subtitles, persists safe 
   const route = await AppService.playback(record.item, '', true); assert.equal(route.subtitles.length, 3); assert.equal(route.mediaSourceId, 'source'); assert.equal(route.offline, true);
 });
 test('subtitle partial failure is visible, video remains playable and retry avoids redownloading video or good subtitles', async () => {
-  const client = h.activate(), t = transfer(client); client.subtitle = async (_item, _source, index) => { if (index === 8) throw Error('http_403'); return srt; };
+  const client = h.activate(), t = transfer(client); client.subtitle = async (_item, _source, index) => { if (index === 8) throw Error('http_403'); return documentFor(index); };
   await AppService.download(film('movie', { CanDownload: true })); const record = AppService.downloads[0]; t.callbacks.complete();
   assert.equal(record.state, 'complete'); assert.equal(record.subtitleState, 'failed'); assert.deepEqual(record.subtitles.map(s => s.state), ['ready','failed','ready']);
-  const fetched = []; client.subtitle = async (_i,_s,index) => { fetched.push(index); return srt; }; await AppService.retrySubtitles(record);
+  const fetched = []; client.subtitle = async (_i,_s,index) => { fetched.push(index); return documentFor(index); }; await AppService.retrySubtitles(record);
   assert.equal(t.created(), 1); assert.deepEqual(fetched, [8]); assert.equal(record.subtitleState, 'ready');
 });
 test('legacy downloads can add subtitles without changing video or losing offline access', async () => {
@@ -119,7 +121,7 @@ test('missing subtitle file is fetched again; malformed SRT never becomes ready'
 });
 test('late subtitle response after download removal cannot recreate a file or record', async () => {
   const { client, record } = legacyRecord(); transfer(client); const gate = h.deferred(); client.subtitle = () => gate.promise;
-  const waiting = AppService.retrySubtitles(record); await new Promise(setImmediate); const target = record.subtitles[0].path;
+  const waiting = AppService.retrySubtitles(record); await new Promise(setImmediate); const target = OfflineSubtitles.plan(record, source(), AppService.local.directory)[0].path;
   await AppService.removeDownload(record); gate.resolve(srt); await waiting; assert.equal(AppService.downloads.length, 0); assert.equal(fs.existsSync(target), false);
 });
 test('subtitle files are removed with video and cache path traversal/duplicate indexes are rejected', async () => {
@@ -135,12 +137,12 @@ test('offline subtitle retry makes no network request and server source removal 
 });
 test('subtitle writes fail explicitly without leaving a partial file or changing video completion', async () => {
   const { client, record } = legacyRecord(); transfer(client);const api=h.platform.get('@ohos.file.fs'),open=api.openSync;
-  api.openSync=(filename,...args)=>{if(filename.endsWith('.srt.tmp'))throw Error('disk full');return open(filename,...args);};try{await AppService.retrySubtitles(record);}finally{api.openSync=open;}
+  api.openSync=(filename,...args)=>{if(/\.(srt|ass)\.tmp$/.test(filename))throw Error('disk full');return open(filename,...args);};try{await AppService.retrySubtitles(record);}finally{api.openSync=open;}
   assert.equal(record.state,'complete');assert.equal(record.subtitleState,'failed');for(const sub of record.subtitles){assert.equal(fs.existsSync(sub.path),false);assert.equal(fs.existsSync(sub.path+'.tmp'),false);}
 });
 test('late subtitle fetch cannot persist into a switched account', async () => {
   const { client, record }=legacyRecord();transfer(client);const gate=h.deferred();client.subtitle=()=>gate.promise;
-  const waiting=AppService.retrySubtitles(record);await new Promise(setImmediate);const target=record.subtitles[0].path;h.activate('b');gate.resolve(srt);await waiting;
+  const waiting=AppService.retrySubtitles(record);await new Promise(setImmediate);const target=OfflineSubtitles.plan(record,source(),AppService.local.directory)[0].path;h.activate('b');gate.resolve(srt);await waiting;
   assert.equal(AppService.downloads.length,0);assert.equal(fs.existsSync(target),false);assert.equal(AppService.local.downloads().length,0);
 });
 test('selected media source determines cached subtitle identities', async () => {

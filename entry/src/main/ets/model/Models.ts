@@ -73,7 +73,7 @@ export class PlaybackRoute {
   sources: MediaSource[] = [];
   subtitles: DownloadSubtitle[] = [];
 }
-export interface DownloadSubtitle { index: number; title: string; language: string; path: string; state: string }
+export interface DownloadSubtitle { index: number; title: string; language: string; path: string; state: string; format?: string }
 export class DownloadRecord {
   fileId?: string;
   sourceName?: string;

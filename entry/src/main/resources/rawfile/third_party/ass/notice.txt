@@ -1,0 +1,25 @@
+CineIsle native ASS subtitle renderer
+
+This software is based in part on the work of the FreeType Team.
+FreeType is used under the FreeType License (FTL), including the separately
+licensed BDF, PCF, hash and gzip components described by its upstream notices.
+
+Runtime source and license notices:
+- libass: libass.txt (ISC)
+- HarfBuzz: harfbuzz.txt (Old MIT)
+- FreeType: freetype.txt, freetype_licenses.txt, freetype_bdf.txt,
+  freetype_pcf.txt, freetype_zlib.txt (FTL and upstream component licenses)
+- FriBidi: fribidi.txt (LGPL-2.1-or-later)
+- Fontconfig: fontconfig.txt (upstream copyright and component notices)
+- Expat: expat.txt (MIT)
+
+Pinned source URLs, revisions and SHA256 fingerprints are recorded in
+docs/native-ass-sources.json. scripts/prepare-native-ass.py builds static
+PIC dependencies with the local OHOS SDK and retains the original source
+archives and build receipts in the ignored .local/native-ass directory.
+CineIsle is GPL-3.0-only. Preserve the upstream notices and provide complete
+corresponding source, including the dependency archives and build scripts,
+with binary redistributions under their applicable license terms.
+
+System font files are read from platform-declared directories at runtime;
+no system font files are bundled with CineIsle.

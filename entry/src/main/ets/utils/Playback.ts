@@ -1,7 +1,7 @@
 import { MediaItem, MediaStream } from '../model/Models';
 
 export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number }
-export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string }
+export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string; format?: string }
 
 // Unknown season numbers in old caches only allow continuation within the known season.
 export function followingEpisode(current: MediaItem, items: MediaItem[]): MediaItem | undefined {
@@ -28,6 +28,35 @@ function adjacentEpisode(current: MediaItem, items: MediaItem[], forward: boolea
 export function textSubtitle(stream: MediaStream): boolean {
   return stream.Type === 'Subtitle' && Number.isSafeInteger(stream.Index) && stream.Index >= 0 &&
     (stream.IsTextSubtitle === true || ['subrip', 'srt', 'webvtt', 'vtt', 'ass', 'ssa', 'mov_text', 'text'].includes((stream.Codec ?? '').toLowerCase()));
+}
+
+export function subtitleFormat(stream: MediaStream): string {
+  return ['ass', 'ssa'].includes((stream.Codec ?? '').toLowerCase()) ? 'ass' : 'srt';
+}
+
+// Check the stored document before committing its cache entry. Full ASS interpretation belongs to libass.
+export function validAssDocument(source: string): boolean {
+  if (!source || source.length > 1024 * 1024 || source.includes('\u0000')) { return false; }
+  let section = ''; let fields: string[] = []; let script = false;
+  for (const raw of source.replace(/^\uFEFF/, '').replace(/\r/g, '').split('\n')) {
+    const line = raw.trim();
+    if (/^\[.*\]$/.test(line)) { section = line.toLowerCase(); if (section === '[script info]') { script = true; } continue; }
+    if (section !== '[events]') { continue; }
+    if (/^format\s*:/i.test(line)) { fields = line.slice(line.indexOf(':') + 1).split(',').map((field: string) => field.trim().toLowerCase()); continue; }
+    if (!/^dialogue\s*:/i.test(line) || !script || fields.length < 3 || fields[fields.length - 1] !== 'text') { continue; }
+    const values = line.slice(line.indexOf(':') + 1).split(',');
+    const start = fields.indexOf('start'); const end = fields.indexOf('end');
+    if (start < 0 || end < 0 || values.length < fields.length) { continue; }
+    const begin = assTime(values[start]); const finish = assTime(values[end]);
+    if (begin >= 0 && finish > begin && values.slice(fields.length - 1).join(',').trim()) { return true; }
+  }
+  return false;
+}
+
+function assTime(value: string): number {
+  const match = /^(\d+):(\d{2}):(\d{2})\.(\d{2})$/.exec(value.trim());
+  return match && Number(match[2]) < 60 && Number(match[3]) < 60 ?
+    ((Number(match[1]) * 60 + Number(match[2])) * 60 + Number(match[3])) * 1000 + Number(match[4]) * 10 : -1;
 }
 
 function cueTime(value: string): number {
