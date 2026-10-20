@@ -1,0 +1,2260 @@
+{
+  "string": [
+    {
+      "name": "player_retry",
+      "value": "Réessayer la lecture"
+    },
+    {
+      "name": "player_failure_hint",
+      "value": "La lecture a été interrompue. Réessayez cette version ou choisissez-en une autre dans les options de lecture."
+    },
+    {
+      "name": "player_skip_intro",
+      "value": "Passer le générique"
+    },
+    {
+      "name": "player_intro_skipper",
+      "value": "Proposer de passer le générique"
+    },
+    {
+      "name": "player_intro_hint",
+      "value": "Nécessite les repères Intro Skipper du serveur. Touchez l’invite affichée pendant un segment valide pour le passer. Les repères en cache fonctionnent aussi hors ligne."
+    },
+    {
+      "name": "player_intro_save_failed",
+      "value": "Impossible d’enregistrer la préférence de générique. Réessayez."
+    },
+    {
+      "name": "download_legacy_version",
+      "value": "Ancien téléchargement (version inconnue)"
+    },
+    {
+      "name": "offline_versions",
+      "value": "Versions téléchargées"
+    },
+    {
+      "name": "module_desc",
+      "value": "CineIsle · Votre médiathèque privée sur HarmonyOS"
+    },
+    {
+      "name": "login_intro",
+      "value": "Connectez votre serveur Jellyfin et plongez dans une belle histoire"
+    },
+    {
+      "name": "server_placeholder",
+      "value": "Adresse du serveur, par ex. https://media.example.com/jellyfin"
+    },
+    {
+      "name": "username",
+      "value": "Nom d’utilisateur"
+    },
+    {
+      "name": "password",
+      "value": "Mot de passe"
+    },
+    {
+      "name": "https_hint",
+      "value": "Utilisez HTTPS pour les connexions publiques. Les identifiants sont conservés dans le stockage sécurisé du système."
+    },
+    {
+      "name": "connecting",
+      "value": "Connexion…"
+    },
+    {
+      "name": "login",
+      "value": "Se connecter"
+    },
+    {
+      "name": "offline_cache",
+      "value": "Affichage du dernier cache hors ligne synchronisé"
+    },
+    {
+      "name": "offline_detail_missing",
+      "value": "Ce compte ne possède pas de fiche hors ligne pour ce média. Connectez-vous et synchronisez la médiathèque."
+    },
+    {
+      "name": "actors_sync_hint",
+      "value": "Synchronisez la médiathèque pour parcourir les acteurs selon le nombre total de lectures"
+    },
+    {
+      "name": "sync_library",
+      "value": "Synchroniser la médiathèque"
+    },
+    {
+      "name": "actor_stats",
+      "value": "%d titres · %d lectures"
+    },
+    {
+      "name": "download_complete",
+      "value": "Téléchargé · Disponible hors ligne"
+    },
+    {
+      "name": "download_progress",
+      "value": "Téléchargement : %d%%"
+    },
+    {
+      "name": "download_interrupted",
+      "value": "Téléchargement incomplet. Supprimez-le et relancez-le."
+    },
+    {
+      "name": "play",
+      "value": "Lire"
+    },
+    {
+      "name": "remove_download",
+      "value": "Supprimer le téléchargement"
+    },
+    {
+      "name": "remove_download_confirm",
+      "value": "Supprimer le fichier vidéo local et annuler son téléchargement s’il est en cours ?"
+    },
+    {
+      "name": "cancel",
+      "value": "Annuler"
+    },
+    {
+      "name": "remove",
+      "value": "Supprimer"
+    },
+    {
+      "name": "no_downloads",
+      "value": "Aucun téléchargement. Téléchargez un film ou un épisode depuis sa fiche."
+    },
+    {
+      "name": "favorites",
+      "value": "Favoris"
+    },
+    {
+      "name": "downloads",
+      "value": "Téléchargements"
+    },
+    {
+      "name": "syncing",
+      "value": "Synchronisation…"
+    },
+    {
+      "name": "last_sync",
+      "value": "Dernière synchronisation : %s"
+    },
+    {
+      "name": "not_synced",
+      "value": "Médiathèque pas encore synchronisée"
+    },
+    {
+      "name": "change_account",
+      "value": "Déconnecter ce compte"
+    },
+    {
+      "name": "logout_confirm",
+      "value": "Supprimer les identifiants locaux de ce compte ? Les autres comptes enregistrés, les données en cache et les fichiers téléchargés seront conservés."
+    },
+    {
+      "name": "logout",
+      "value": "Se déconnecter"
+    },
+    {
+      "name": "version",
+      "value": "CineIsle · 0.2.0"
+    },
+    {
+      "name": "refresh",
+      "value": "Actualiser"
+    },
+    {
+      "name": "search_hint",
+      "value": "Rechercher des films, des séries ou des épisodes"
+    },
+    {
+      "name": "back",
+      "value": "Retour"
+    },
+    {
+      "name": "search_results",
+      "value": "Résultats de recherche"
+    },
+    {
+      "name": "continue_watching",
+      "value": "Reprendre la lecture"
+    },
+    {
+      "name": "recommend_hint",
+      "value": "Redécouvrez une histoire que vous avez aimée"
+    },
+    {
+      "name": "latest",
+      "value": "Ajouts récents"
+    },
+    {
+      "name": "no_items",
+      "value": "Aucun média pour le moment"
+    },
+    {
+      "name": "load_more",
+      "value": "Charger la suite"
+    },
+    {
+      "name": "tab_recommend",
+      "value": "Découvrir"
+    },
+    {
+      "name": "tab_home",
+      "value": "Accueil"
+    },
+    {
+      "name": "tab_library",
+      "value": "Médiathèque"
+    },
+    {
+      "name": "tab_actors",
+      "value": "Acteurs"
+    },
+    {
+      "name": "tab_more",
+      "value": "Plus"
+    },
+    {
+      "name": "download_wifi",
+      "value": "Télécharger en Wi-Fi"
+    },
+    {
+      "name": "download_confirm",
+      "value": "Télécharger la vidéo originale ? Elle peut occuper beaucoup d’espace. Seuls les réseaux non facturés au volume seront utilisés."
+    },
+    {
+      "name": "download",
+      "value": "Télécharger"
+    },
+    {
+      "name": "unfavorite",
+      "value": "Retirer des favoris"
+    },
+    {
+      "name": "favorite",
+      "value": "Ajouter aux favoris"
+    },
+    {
+      "name": "mark_unplayed",
+      "value": "Marquer comme non vu"
+    },
+    {
+      "name": "mark_played",
+      "value": "Marquer comme vu"
+    },
+    {
+      "name": "cast",
+      "value": "Distribution et équipe"
+    },
+    {
+      "name": "progress_not_saved",
+      "value": "La progression n’a pas été enregistrée sur le serveur. Vérifiez votre connexion."
+    },
+    {
+      "name": "play_error",
+      "value": "Échec de la lecture. Vérifiez la connexion et les codecs pris en charge par l’appareil. Cette version ne prend en charge que la lecture directe."
+    },
+    {
+      "name": "offline_playback",
+      "value": "Lecture d’un téléchargement local"
+    },
+    {
+      "name": "direct_play_hint",
+      "value": "Lecture directe · Les codecs disponibles dépendent de l’appareil"
+    },
+    {
+      "name": "invalid_server",
+      "value": "Saisissez une adresse complète commençant par http:// ou https://, sans mot de passe, paramètres de requête ni fragment"
+    },
+    {
+      "name": "invalid_account",
+      "value": "Le serveur a renvoyé un identifiant de compte invalide"
+    },
+    {
+      "name": "invalid_item",
+      "value": "Identifiant de média invalide"
+    },
+    {
+      "name": "session_read_failed",
+      "value": "Impossible de lire les identifiants sécurisés. Déverrouillez l’appareil et réessayez."
+    },
+    {
+      "name": "session_clear_failed",
+      "value": "Impossible d’effacer les identifiants sécurisés"
+    },
+    {
+      "name": "login_expired",
+      "value": "La session a expiré ou le nom d’utilisateur ou le mot de passe est incorrect. Reconnectez-vous."
+    },
+    {
+      "name": "permission_denied",
+      "value": "Ce compte n’a pas l’autorisation d’effectuer cette action"
+    },
+    {
+      "name": "http_failed",
+      "value": "Échec de la requête au serveur (HTTP %d)"
+    },
+    {
+      "name": "html_response",
+      "value": "L’adresse renvoie une page web. Vérifiez l’adresse Jellyfin et le chemin du proxy inverse."
+    },
+    {
+      "name": "login_response_invalid",
+      "value": "Le serveur a renvoyé une réponse de connexion incomplète"
+    },
+    {
+      "name": "tasks_active",
+      "value": "Attendez la fin de la synchronisation ou des téléchargements, ou annulez d’abord les téléchargements"
+    },
+    {
+      "name": "login_required",
+      "value": "Connectez-vous d’abord à un serveur"
+    },
+    {
+      "name": "sync_active",
+      "value": "La synchronisation de la médiathèque est déjà en cours"
+    },
+    {
+      "name": "sync_progress",
+      "value": "Synchronisation : %d / %d médias"
+    },
+    {
+      "name": "sync_complete",
+      "value": "Synchronisation terminée : %d médias, %d acteurs"
+    },
+    {
+      "name": "no_media_source",
+      "value": "Le serveur n’a renvoyé aucune source lisible"
+    },
+    {
+      "name": "download_exists",
+      "value": "Un téléchargement existe déjà. Supprimez l’ancien enregistrement avant de réessayer."
+    },
+    {
+      "name": "no_download_source",
+      "value": "Aucune source téléchargeable"
+    },
+    {
+      "name": "cancel_download_failed",
+      "value": "Impossible d’annuler le téléchargement. Réessayez plus tard."
+    },
+    {
+      "name": "cached_media",
+      "value": "Médias hors ligne (resynchronisez pour restaurer les dossiers)"
+    },
+    {
+      "name": "cache_library_unavailable",
+      "value": "Cet ancien cache ne connaît pas l’appartenance aux médiathèques. Revenez à tous les médias hors ligne et synchronisez une fois connecté."
+    },
+    {
+      "name": "cache_recovered",
+      "value": "Le cache local a été reconstruit. Les enregistrements endommagés et les vidéos existantes ont été conservés. Resynchronisez la médiathèque."
+    },
+    {
+      "name": "cache_recovery_failed",
+      "value": "Impossible de conserver le cache endommagé. Vérifiez l’espace libre et les droits d’accès aux fichiers, puis réessayez."
+    },
+    {
+      "name": "sync_incomplete",
+      "value": "La médiathèque a changé pendant la synchronisation ou la pagination est incomplète. L’ancien cache a été conservé. Resynchronisez."
+    },
+    {
+      "name": "sync_library_progress",
+      "value": "%s : %d / %d médias synchronisés"
+    },
+    {
+      "name": "pause",
+      "value": "Pause"
+    },
+    {
+      "name": "playback_options",
+      "value": "Options de lecture"
+    },
+    {
+      "name": "next_episode",
+      "value": "Épisode suivant"
+    },
+    {
+      "name": "media_source",
+      "value": "Source du média"
+    },
+    {
+      "name": "audio_track",
+      "value": "Piste audio"
+    },
+    {
+      "name": "subtitle_track",
+      "value": "Sous-titres"
+    },
+    {
+      "name": "subtitles_off",
+      "value": "Désactiver les sous-titres"
+    },
+    {
+      "name": "no_audio_tracks",
+      "value": "L’appareil n’a identifié aucune piste audio sélectionnable"
+    },
+    {
+      "name": "auto_next",
+      "value": "Lire automatiquement l’épisode suivant"
+    },
+    {
+      "name": "playback_loading",
+      "value": "Chargement des options de lecture…"
+    },
+    {
+      "name": "audio_track_number",
+      "value": "Piste audio %d"
+    },
+    {
+      "name": "subtitle_track_number",
+      "value": "Piste de sous-titres %d"
+    },
+    {
+      "name": "server_subtitle",
+      "value": "Sous-titres texte du serveur · %s"
+    },
+    {
+      "name": "subtitle_format_hint",
+      "value": "Les pistes intégrées dépendent du décodage de l’appareil. Les sous-titres texte du serveur et du cache utilisent SRT sans les styles ASS ; les sous-titres en images ne sont pas encore pris en charge. Les téléchargements tentent de conserver les pistes texte intégrées et externes convertibles ; les téléchargements existants peuvent les récupérer en ligne. Hors ligne, les pistes natives et les sous-titres texte en cache restent disponibles."
+    },
+    {
+      "name": "track_switch_failed",
+      "value": "Impossible de changer de piste audio. Vérifiez les codecs audio pris en charge par l’appareil."
+    },
+    {
+      "name": "subtitle_failed",
+      "value": "Impossible de charger ou de changer les sous-titres. Vérifiez la connexion et le format, réessayez ou désactivez-les."
+    },
+    {
+      "name": "source_switch_failed",
+      "value": "Impossible de changer de source. Vérifiez la connexion et réessayez."
+    },
+    {
+      "name": "next_episode_failed",
+      "value": "Impossible de charger l’épisode suivant. Vérifiez la connexion ou les téléchargements, puis touchez Épisode suivant pour réessayer."
+    },
+    {
+      "name": "queue_finished",
+      "value": "Vous avez atteint la fin de la file de lecture"
+    },
+    {
+      "name": "episode_order_unknown",
+      "value": "L’ordre des épisodes est incomplet. La lecture automatique est indisponible."
+    },
+    {
+      "name": "episode_queue_failed",
+      "value": "La liste des épisodes est incomplète. Réessayez."
+    },
+    {
+      "name": "next_not_downloaded",
+      "value": "L’épisode suivant n’est pas téléchargé. La lecture automatique hors ligne s’est arrêtée."
+    },
+    {
+      "name": "speed_failed",
+      "value": "L’appareil n’a pas pu appliquer cette vitesse de lecture"
+    },
+    {
+      "name": "player_release_failed",
+      "value": "Impossible de libérer les ressources du lecteur. Quittez le lecteur et réessayez."
+    },
+    {
+      "name": "pip_enter",
+      "value": "Image dans l’image"
+    },
+    {
+      "name": "pip_exit",
+      "value": "Quitter l’image dans l’image"
+    },
+    {
+      "name": "pip_unavailable",
+      "value": "L’image dans l’image n’est pas prise en charge sur cet appareil"
+    },
+    {
+      "name": "pip_failed",
+      "value": "Échec de l’image dans l’image. Réessayez."
+    },
+    {
+      "name": "background_playback",
+      "value": "Lecture en arrière-plan"
+    },
+    {
+      "name": "background_playback_hint",
+      "value": "Écoutez en arrière-plan et utilisez les commandes de l’écran verrouillé. Fermer l’image dans l’image en arrière-plan ou quitter le lecteur arrête la lecture."
+    },
+    {
+      "name": "background_unavailable",
+      "value": "L’autorisation de lecture en arrière-plan est indisponible. La lecture reste au premier plan."
+    },
+    {
+      "name": "background_stop_failed",
+      "value": "Impossible de terminer la tâche de lecture en arrière-plan. Quittez l’application et réessayez."
+    },
+    {
+      "name": "session_unavailable",
+      "value": "La session multimédia du système est indisponible. Les commandes de verrouillage, d’arrière-plan et d’image dans l’image sont indisponibles."
+    },
+    {
+      "name": "session_update_failed",
+      "value": "Impossible d’actualiser l’état de lecture du système. Réessayez."
+    },
+    {
+      "name": "system_playback_cleanup_failed",
+      "value": "Impossible de libérer les ressources de lecture du système. Quittez l’application et réessayez."
+    },
+    {
+      "name": "pip_subtitle_failed",
+      "value": "Impossible d’actualiser les sous-titres de l’image dans l’image. Quittez ce mode et réessayez."
+    },
+    {
+      "name": "playback_language_preferences",
+      "value": "Langues audio et des sous-titres"
+    },
+    {
+      "name": "preferred_audio_language",
+      "value": "Langue audio préférée"
+    },
+    {
+      "name": "preferred_subtitle_language",
+      "value": "Langue préférée des sous-titres"
+    },
+    {
+      "name": "playback_language_placeholder",
+      "value": "Laissez vide pour les valeurs par défaut ; par ex. zh, en, ja, zh-Hant"
+    },
+    {
+      "name": "preferred_subtitles_off",
+      "value": "Désactiver les sous-titres par défaut"
+    },
+    {
+      "name": "save_playback_preferences",
+      "value": "Enregistrer et appliquer"
+    },
+    {
+      "name": "reset_playback_preferences",
+      "value": "Réinitialiser les langues"
+    },
+    {
+      "name": "playback_preferences_hint",
+      "value": "Réglages communs à l’application, conservés après déconnexion et redémarrage. Utilisez un code de langue de deux ou trois lettres, éventuellement suivi d’une écriture ou d’une région. Sans correspondance, la piste par défaut est conservée. Le choix manuel vaut pour la lecture en cours ; changer de source ou d’épisode réapplique les préférences. La réinitialisation ne change pas la piste choisie manuellement."
+    },
+    {
+      "name": "playback_preferences_saved",
+      "value": "Préférences de langue enregistrées et appliquées à la lecture en cours si possible"
+    },
+    {
+      "name": "playback_language_invalid",
+      "value": "Saisissez un code valide, par ex. zh, eng ou zh-Hant ; laissez vide pour les valeurs par défaut"
+    },
+    {
+      "name": "playback_preferences_invalid",
+      "value": "Les préférences de langue enregistrées sont invalides. Les valeurs par défaut sont utilisées ; enregistrez à nouveau les réglages."
+    },
+    {
+      "name": "playback_preferences_load_failed",
+      "value": "Impossible de lire les préférences de langue. Les valeurs par défaut sont utilisées ; l’enregistrement réessaiera."
+    },
+    {
+      "name": "playback_preferences_save_failed",
+      "value": "Impossible d’enregistrer les préférences de langue. Les réglages précédents restent utilisés. Réessayez."
+    },
+    {
+      "name": "playback_preferences_restore_failed",
+      "value": "L’enregistrement et la restauration des langues ont échoué. L’écriture n’est pas confirmée ; enregistrez à nouveau les réglages."
+    },
+    {
+      "name": "api_response_invalid",
+      "value": "Jellyfin a renvoyé des données incomplètes ou invalides"
+    },
+    {
+      "name": "api_parameter_invalid",
+      "value": "Paramètres de requête invalides. Réessayez."
+    },
+    {
+      "name": "api_numeric_range",
+      "value": "Les données du média dépassent la plage d’entiers prise en charge par ce client"
+    },
+    {
+      "name": "api_session_invalid",
+      "value": "Session invalide. Reconnectez-vous."
+    },
+    {
+      "name": "next_up",
+      "value": "À suivre"
+    },
+    {
+      "name": "latest_library",
+      "value": "Ajouts récents · %s"
+    },
+    {
+      "name": "view_all",
+      "value": "Tout voir"
+    },
+    {
+      "name": "media_movie",
+      "value": "Film"
+    },
+    {
+      "name": "media_series",
+      "value": "Série"
+    },
+    {
+      "name": "media_episode",
+      "value": "Épisode"
+    },
+    {
+      "name": "media_season",
+      "value": "Saison"
+    },
+    {
+      "name": "media_video",
+      "value": "Vidéo"
+    },
+    {
+      "name": "episode_label",
+      "value": "Saison %d · Épisode %d · %s"
+    },
+    {
+      "name": "poster_unavailable",
+      "value": "Aucune affiche disponible"
+    },
+    {
+      "name": "watched_indicator",
+      "value": "Vu"
+    },
+    {
+      "name": "present_year",
+      "value": "Aujourd’hui"
+    },
+    {
+      "name": "channel_count",
+      "value": "%d canaux"
+    },
+    {
+      "name": "subtitle_chip",
+      "value": "CC"
+    },
+    {
+      "name": "detail_size",
+      "value": "Taille du fichier"
+    },
+    {
+      "name": "detail_video",
+      "value": "Vidéo"
+    },
+    {
+      "name": "detail_audio",
+      "value": "Audio"
+    },
+    {
+      "name": "detail_subtitles",
+      "value": "Sous-titres"
+    },
+    {
+      "name": "detail_genres",
+      "value": "Genres"
+    },
+    {
+      "name": "detail_directors",
+      "value": "Réalisation"
+    },
+    {
+      "name": "detail_writers",
+      "value": "Scénario"
+    },
+    {
+      "name": "bit_depth",
+      "value": "%d bits"
+    },
+    {
+      "name": "runtime_minutes",
+      "value": "%d min"
+    },
+    {
+      "name": "community_score",
+      "value": "Note %s"
+    },
+    {
+      "name": "play_not_allowed",
+      "value": "Ce compte ne peut pas lire ce média"
+    },
+    {
+      "name": "download_not_allowed",
+      "value": "Ce compte ne peut pas télécharger ce média"
+    },
+    {
+      "name": "delete_not_allowed",
+      "value": "Ce compte ne peut pas supprimer ce média"
+    },
+    {
+      "name": "media_deleted_cache_failed",
+      "value": "Le média a été supprimé du serveur, mais le cache local n’a pas pu être enregistré. Revenez en arrière et resynchronisez. Les vidéos téléchargées ont été conservées."
+    },
+    {
+      "name": "no_playable_episode",
+      "value": "Aucun épisode lisible disponible"
+    },
+    {
+      "name": "continue_play",
+      "value": "Reprendre"
+    },
+    {
+      "name": "start_over",
+      "value": "Lire depuis le début"
+    },
+    {
+      "name": "play_next_episode",
+      "value": "Lire l’épisode suivant"
+    },
+    {
+      "name": "media_versions",
+      "value": "Versions pour la lecture et le téléchargement"
+    },
+    {
+      "name": "source_number",
+      "value": "Version %d"
+    },
+    {
+      "name": "server_delete",
+      "value": "Supprimer du serveur"
+    },
+    {
+      "name": "server_delete_confirm",
+      "value": "Supprimer définitivement ce film et ses fichiers multimédias de Jellyfin ? Tous les utilisateurs sont concernés. Les fichiers téléchargés localement seront conservés."
+    },
+    {
+      "name": "trailer",
+      "value": "Bande-annonce"
+    },
+    {
+      "name": "trailer_failed",
+      "value": "Impossible d’ouvrir la bande-annonce. Vérifiez le lien ou installez une application compatible."
+    },
+    {
+      "name": "seasons",
+      "value": "Saisons"
+    },
+    {
+      "name": "episodes",
+      "value": "Épisodes"
+    },
+    {
+      "name": "actor_search",
+      "value": "Rechercher un acteur"
+    },
+    {
+      "name": "actor_order_play",
+      "value": "Nombre de lectures"
+    },
+    {
+      "name": "actor_order_watched",
+      "value": "Titres vus"
+    },
+    {
+      "name": "actor_order_unplayed",
+      "value": "Titres non vus"
+    },
+    {
+      "name": "actor_order_works",
+      "value": "Nombre de titres"
+    },
+    {
+      "name": "actor_order_recent",
+      "value": "Vus récemment"
+    },
+    {
+      "name": "actor_order_name",
+      "value": "Nom"
+    },
+    {
+      "name": "actor_order_recommended",
+      "value": "Acteurs recommandés"
+    },
+    {
+      "name": "followed_only",
+      "value": "Acteurs suivis uniquement"
+    },
+    {
+      "name": "show_actor_tags",
+      "value": "Afficher les étiquettes de style"
+    },
+    {
+      "name": "clear_filters",
+      "value": "Effacer les filtres"
+    },
+    {
+      "name": "actor_counts",
+      "value": "%d titres · %d vus · %d non vus"
+    },
+    {
+      "name": "actor_new_count",
+      "value": "Suivi · %d nouveaux titres"
+    },
+    {
+      "name": "no_filter_matches",
+      "value": "Aucun acteur ne correspond à ces filtres"
+    },
+    {
+      "name": "home_section_failed",
+      "value": "Impossible de charger cette section"
+    },
+    {
+      "name": "retry",
+      "value": "Réessayer"
+    },
+    {
+      "name": "settings",
+      "value": "Réglages"
+    },
+    {
+      "name": "cancel_sync",
+      "value": "Annuler la synchronisation"
+    },
+    {
+      "name": "sync_cancelled",
+      "value": "Synchronisation annulée. La médiathèque précédente et les téléchargements ont été conservés."
+    },
+    {
+      "name": "pending_changes",
+      "value": "Modifications en attente d’envoi : %d"
+    },
+    {
+      "name": "flush_changes",
+      "value": "Envoyer les modifications hors ligne"
+    },
+    {
+      "name": "network_failed",
+      "value": "Échec de la connexion réseau. Réessayez plus tard."
+    },
+    {
+      "name": "discover",
+      "value": "Découvrir des titres"
+    },
+    {
+      "name": "rewatch",
+      "value": "À revoir"
+    },
+    {
+      "name": "discovery_hint",
+      "value": "Suggestions selon les acteurs suivis et les genres favoris ; appuyez longuement pour en connaître la raison"
+    },
+    {
+      "name": "discovery_reason",
+      "value": "Pourquoi cette recommandation"
+    },
+    {
+      "name": "discovery_recent",
+      "value": "Ajouts récents non vus"
+    },
+    {
+      "name": "ok",
+      "value": "OK"
+    },
+    {
+      "name": "all",
+      "value": "Tous"
+    },
+    {
+      "name": "all_genres",
+      "value": "Tous les genres"
+    },
+    {
+      "name": "favorite_search",
+      "value": "Rechercher un nom, un titre original ou une série"
+    },
+    {
+      "name": "unwatched_only",
+      "value": "Non vus uniquement"
+    },
+    {
+      "name": "name_ascending",
+      "value": "Nom croissant"
+    },
+    {
+      "name": "name_descending",
+      "value": "Nom décroissant"
+    },
+    {
+      "name": "continue_first",
+      "value": "Reprise de lecture en premier"
+    },
+    {
+      "name": "favorites_loaded",
+      "value": "Chargés : %d / %d correspondances"
+    },
+    {
+      "name": "favorites_count",
+      "value": "%d correspondances / %d au total"
+    },
+    {
+      "name": "select_items",
+      "value": "Sélectionner des médias"
+    },
+    {
+      "name": "select_all",
+      "value": "Tout sélectionner"
+    },
+    {
+      "name": "batch_unfavorite",
+      "value": "Retirer les favoris sélectionnés"
+    },
+    {
+      "name": "batch_unfavorite_confirm",
+      "value": "Retirer ces %d médias des favoris ?"
+    },
+    {
+      "name": "confirm",
+      "value": "Confirmer"
+    },
+    {
+      "name": "batch_result",
+      "value": "Traités localement : %d ; échecs : %d"
+    },
+    {
+      "name": "undo",
+      "value": "Annuler l’action"
+    },
+    {
+      "name": "no_matches",
+      "value": "Aucun favori ne correspond à ces filtres"
+    },
+    {
+      "name": "no_favorites",
+      "value": "Aucun favori pour le moment"
+    },
+    {
+      "name": "download_active",
+      "value": "En cours"
+    },
+    {
+      "name": "download_completed",
+      "value": "Terminés"
+    },
+    {
+      "name": "download_failed",
+      "value": "À vérifier"
+    },
+    {
+      "name": "stop_download",
+      "value": "Arrêter le téléchargement"
+    },
+    {
+      "name": "download_failure_reason",
+      "value": "Échec du téléchargement système (%d). Vous pouvez réessayer."
+    },
+    {
+      "name": "download_preferences",
+      "value": "Préférences de téléchargement"
+    },
+    {
+      "name": "remember_source",
+      "value": "Mémoriser la version préférée pour le téléchargement"
+    },
+    {
+      "name": "source_default",
+      "value": "Télécharger la version par défaut"
+    },
+    {
+      "name": "clear_source_preference",
+      "value": "Effacer la préférence de version"
+    },
+    {
+      "name": "download_location_hint",
+      "value": "Conservé dans le dossier privé de ce compte. Désinstaller l’application supprime ces fichiers."
+    },
+    {
+      "name": "follow",
+      "value": "Suivre"
+    },
+    {
+      "name": "unfollow",
+      "value": "Ne plus suivre"
+    },
+    {
+      "name": "biography_loading",
+      "value": "Chargement de la biographie ; les titres sont déjà consultables"
+    },
+    {
+      "name": "all_tags",
+      "value": "Tous les styles"
+    },
+    {
+      "name": "tag_evidence",
+      "value": "Ces %d titres justifient cette étiquette"
+    },
+    {
+      "name": "actor_tag_boundary",
+      "value": "Les étiquettes résument les genres et thèmes de votre médiathèque. Les rôles proviennent des métadonnées du serveur."
+    },
+    {
+      "name": "credit_role",
+      "value": "Rôle : %s"
+    },
+    {
+      "name": "theme_investigation",
+      "value": "Enquête"
+    },
+    {
+      "name": "theme_revenge",
+      "value": "Vengeance"
+    },
+    {
+      "name": "theme_time_travel",
+      "value": "Voyage dans le temps"
+    },
+    {
+      "name": "theme_growth",
+      "value": "Passage à l’âge adulte"
+    },
+    {
+      "name": "change_queued",
+      "value": "Les modifications sont enregistrées localement et en attente d’envoi. Envoyez-les manuellement depuis le menu principal."
+    },
+    {
+      "name": "batch_download",
+      "value": "Télécharger cette saison"
+    },
+    {
+      "name": "batch_download_confirm",
+      "value": "Télécharger les %d épisodes sélectionnés en Wi-Fi ? Les tâches existantes seront ignorées."
+    },
+    {
+      "name": "app_lock",
+      "value": "Verrouillage de l’application"
+    },
+    {
+      "name": "lock_unlock",
+      "value": "Déverrouiller CineIsle"
+    },
+    {
+      "name": "lock_pin",
+      "value": "Saisir le PIN"
+    },
+    {
+      "name": "lock_pin_wrong",
+      "value": "PIN incorrect ou trop de tentatives. Réessayez plus tard."
+    },
+    {
+      "name": "lock_pin_format",
+      "value": "Le PIN doit comporter 6 à 12 chiffres"
+    },
+    {
+      "name": "lock_storage_failed",
+      "value": "Le stockage sécurisé est indisponible. L’application reste verrouillée ; rétablissez ce stockage puis redémarrez l’application."
+    },
+    {
+      "name": "lock_pin_mismatch",
+      "value": "Les PIN ne correspondent pas"
+    },
+    {
+      "name": "lock_policy",
+      "value": "Définissez un PIN de 6 à 12 chiffres. L’application se verrouille au démarrage à froid ou après plus de 15 minutes en arrière-plan. Le verrouillage suspend la lecture et masque le contenu."
+    },
+    {
+      "name": "lock_current_pin",
+      "value": "PIN actuel"
+    },
+    {
+      "name": "lock_new_pin",
+      "value": "Nouveau PIN (6 à 12 chiffres)"
+    },
+    {
+      "name": "lock_confirm_pin",
+      "value": "Confirmer le nouveau PIN"
+    },
+    {
+      "name": "lock_save",
+      "value": "Enregistrer le PIN"
+    },
+    {
+      "name": "lock_now",
+      "value": "Verrouiller maintenant"
+    },
+    {
+      "name": "lock_disable",
+      "value": "Désactiver le verrouillage"
+    },
+    {
+      "name": "offline_mode",
+      "value": "Mode hors ligne (cache et téléchargements de ce compte uniquement)"
+    },
+    {
+      "name": "offline_mode_enabled",
+      "value": "Désactivez le mode hors ligne avant de synchroniser"
+    },
+    {
+      "name": "download_create_failed",
+      "value": "Impossible de créer la tâche système de téléchargement. Vous pouvez réessayer."
+    },
+    {
+      "name": "controls_lock",
+      "value": "Verrouiller les commandes"
+    },
+    {
+      "name": "controls_unlock",
+      "value": "Déverrouiller les commandes"
+    },
+    {
+      "name": "download_queued",
+      "value": "En attente de téléchargement (jusqu’à quatre tâches simultanées)"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "Comptes et serveurs"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "Comptes enregistrés"
+    },
+    {
+      "name": "saved_servers",
+      "value": "Serveurs enregistrés"
+    },
+    {
+      "name": "add_account_server",
+      "value": "Ajouter un compte ou un serveur"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "Aucun compte enregistré"
+    },
+    {
+      "name": "active_account",
+      "value": "Compte actuel"
+    },
+    {
+      "name": "switch_account",
+      "value": "Changer"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "Supprimer le compte"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "Supprimer uniquement les identifiants enregistrés localement ? Le cache, les modifications hors ligne et les téléchargements de ce compte seront conservés. Le contenu du serveur ne sera pas supprimé."
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "Supprimer le serveur"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "Supprimer ce serveur et tous ses identifiants locaux ? Les données en cache et les téléchargements seront conservés. Le contenu du serveur ne sera pas supprimé."
+    },
+    {
+      "name": "save_server_only",
+      "value": "Enregistrer uniquement le serveur"
+    },
+    {
+      "name": "server_display_name",
+      "value": "Nom affiché du serveur"
+    },
+    {
+      "name": "server_addresses",
+      "value": "Nom et adresses du serveur"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "Gérer les adresses"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "Une adresse complète par ligne, jusqu’à 8. Conservez les chemins tels que /jellyfin. En cas d’échec de connexion, chaque adresse est vérifiée comme appartenant au même serveur avant le basculement dans l’ordre."
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Se connecter avec Quick Connect"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "Ouvrez Réglages → Quick Connect dans un client Jellyfin déjà connecté et saisissez ce code pour autoriser la connexion. Vérification toutes les 5 secondes ; demandez un nouveau code après 5 minutes."
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "J’ai autorisé · Vérifier la connexion"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "Quick Connect n’est pas activé sur ce serveur. Connectez-vous avec votre nom d’utilisateur et votre mot de passe."
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "Le code Quick Connect a expiré. Demandez-en un nouveau."
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "Quick Connect annulé"
+    },
+    {
+      "name": "account_switching",
+      "value": "Un changement de compte est en cours. Patientez."
+    },
+    {
+      "name": "account_not_found",
+      "value": "Ce compte a été supprimé. Reconnectez-vous."
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "Cette adresse appartient à un autre serveur. Aucun jeton de compte n’a été envoyé."
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "Cette adresse appartient déjà à un autre serveur enregistré"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "Aucune adresse enregistrée n’est accessible. Vérifiez la connexion ou gérez les adresses du serveur."
+    },
+    {
+      "name": "account_store_full",
+      "value": "Le stockage des comptes est plein. Supprimez les comptes inutilisés."
+    },
+    {
+      "name": "session_save_failed",
+      "value": "Impossible d’enregistrer les identifiants. Le compte précédent a été conservé."
+    },
+    {
+      "name": "save",
+      "value": "Enregistrer"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "Connexion annulée. Reconnectez-vous pour réessayer."
+    },
+    {
+      "name": "account_unnamed",
+      "value": "Compte sans nom"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "Réinitialiser le stockage des comptes"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "Supprimer de cet appareil tous les serveurs et identifiants enregistrés ? Cette action peut réparer un stockage de comptes endommagé. Le cache, les modifications hors ligne, les téléchargements et votre PIN seront conservés. Le contenu des serveurs ne sera pas supprimé."
+    },
+    {
+      "name": "menu_collection",
+      "value": "Ma médiathèque"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "Comptes et préférences"
+    },
+    {
+      "name": "menu_data",
+      "value": "Données et synchronisation"
+    },
+    {
+      "name": "server_address_label",
+      "value": "Adresse du serveur"
+    },
+    {
+      "name": "credentials_group",
+      "value": "Identifiants locaux"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "Gérer uniquement les identifiants enregistrés localement. Le cache et les fichiers téléchargés seront conservés."
+    },
+    {
+      "name": "offline_group",
+      "value": "Navigation et mode hors ligne"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "Filtres des favoris"
+    },
+    {
+      "name": "download_status",
+      "value": "État du téléchargement"
+    },
+    {
+      "name": "selected_count",
+      "value": "%d médias sélectionnés"
+    },
+    {
+      "name": "player_seek",
+      "value": "Position de lecture"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "Les commandes sont verrouillées. Touchez le bouton en haut à droite pour les déverrouiller."
+    },
+    {
+      "name": "player_system_group",
+      "value": "Lecture système"
+    },
+    {
+      "name": "player_media_group",
+      "value": "Médias et sous-titres"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "Vitesse et file de lecture"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "Aucune sélection"
+    },
+    {
+      "name": "recommend_group",
+      "value": "Découvrir des histoires"
+    },
+    {
+      "name": "actor_filters",
+      "value": "Filtres des acteurs"
+    },
+    {
+      "name": "actor_sort",
+      "value": "Trier par"
+    },
+    {
+      "name": "actor_profile",
+      "value": "Biographie et suivi"
+    },
+    {
+      "name": "actor_credits",
+      "value": "Titres et étiquettes"
+    },
+    {
+      "name": "actor_tags",
+      "value": "Étiquettes des titres"
+    },
+    {
+      "name": "media_detail",
+      "value": "Fiche du média"
+    },
+    {
+      "name": "detail_actions",
+      "value": "Lecture et gestion"
+    },
+    {
+      "name": "detail_story",
+      "value": "Histoire et informations"
+    },
+    {
+      "name": "detail_technical",
+      "value": "Versions et caractéristiques"
+    },
+    {
+      "name": "login_credentials",
+      "value": "Connecter votre médiathèque"
+    },
+    {
+      "name": "login_connections",
+      "value": "Autres options de connexion"
+    },
+    {
+      "name": "search_group",
+      "value": "Rechercher dans la médiathèque"
+    },
+    {
+      "name": "search_action",
+      "value": "Rechercher"
+    },
+    {
+      "name": "close_search",
+      "value": "Fermer la recherche"
+    },
+    {
+      "name": "search_history",
+      "value": "Recherches récentes"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "Saisissez l’adresse d’un serveur pour demander un code d’association, puis autorisez-le dans un client Jellyfin déjà connecté."
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "Connexion par association"
+    },
+    {
+      "name": "loading",
+      "value": "Chargement…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "Type de média"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "Genre"
+    },
+    {
+      "name": "favorite_order",
+      "value": "Ordre"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "Aucun serveur enregistré"
+    },
+    {
+      "name": "no_seasons",
+      "value": "Aucune saison"
+    },
+    {
+      "name": "no_episodes",
+      "value": "Aucun épisode"
+    },
+    {
+      "name": "library_sort",
+      "value": "Trier par"
+    },
+    {
+      "name": "library_order",
+      "value": "Sens du tri"
+    },
+    {
+      "name": "sort_name",
+      "value": "Nom"
+    },
+    {
+      "name": "sort_rating",
+      "value": "Note de la communauté"
+    },
+    {
+      "name": "sort_critic",
+      "value": "Note des critiques"
+    },
+    {
+      "name": "sort_added",
+      "value": "Date d’ajout"
+    },
+    {
+      "name": "sort_played",
+      "value": "Date de lecture"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "Date de sortie"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "Croissant"
+    },
+    {
+      "name": "sort_descending",
+      "value": "Décroissant"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "Sous-titres hors ligne · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "Impossible de conserver les sous-titres texte en cache. Connectez-vous et réessayez."
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "Vidéo téléchargée ; mise en cache des sous-titres texte en cours"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "Des sous-titres texte manquent ou ont échoué. La vidéo reste lisible."
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "Mettre en cache ou réessayer les sous-titres texte"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "La lecture automatique suit le réglage du compte sur le serveur"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "Une préférence de lecture automatique est enregistrée localement pour ce compte"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "Suivre à nouveau le réglage du serveur"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "Impossible de lire la préférence de lecture automatique. Elle reste désactivée ; réessayez de suivre le réglage du serveur."
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "Impossible d’enregistrer la préférence de lecture automatique. Réessayez."
+    },
+    {
+      "name": "media_collection",
+      "value": "Collection"
+    },
+    {
+      "name": "collection_empty",
+      "value": "Aucun titre dans cette collection"
+    },
+    {
+      "name": "collection_online_required",
+      "value": "Les membres de la collection ne sont pas en cache hors ligne. Connectez-vous pour les consulter."
+    },
+    {
+      "name": "collection_cancelled",
+      "value": "Chargement de la collection annulé"
+    },
+    {
+      "name": "download_mobile",
+      "value": "Autoriser les téléchargements cellulaires et facturés au volume"
+    },
+    {
+      "name": "download_roaming",
+      "value": "Autoriser les téléchargements en itinérance"
+    },
+    {
+      "name": "download_network_hint",
+      "value": "Wi-Fi uniquement par défaut, sans réseaux facturés au volume ni itinérance. S’applique aux nouvelles vidéos, aux files de téléchargement et aux sous-titres. Ne modifie pas les tâches existantes."
+    },
+    {
+      "name": "download_network_restricted",
+      "value": "Le réseau actuel ne respecte pas vos préférences de téléchargement. Connectez-vous en Wi-Fi ou ajustez les réglages."
+    },
+    {
+      "name": "download_space_check_failed",
+      "value": "Impossible de vérifier l’espace libre du dossier de téléchargement. Réessayez plus tard."
+    },
+    {
+      "name": "download_space_insufficient",
+      "value": "Les téléchargements et les tâches en cours nécessitent environ %d MB ; %d MB sont disponibles. Libérez de l’espace."
+    },
+    {
+      "name": "download_size_unknown",
+      "value": "La taille du média est inconnue. Le contrôle d’espace ne garantit pas la place pour le téléchargement complet."
+    },
+    {
+      "name": "gesture_seek_preview",
+      "value": "Relâchez pour aller à %s"
+    },
+    {
+      "name": "gesture_speed_hold",
+      "value": "Vitesse temporaire 2× · Relâchez pour rétablir"
+    },
+    {
+      "name": "gesture_hint",
+      "value": "Touchez deux fois pour reculer ou avancer, glissez horizontalement pour naviguer, maintenez pour accélérer temporairement ou pincez pour zoomer. Glissez verticalement à gauche pour la luminosité ou à droite pour le volume du lecteur."
+    },
+    {
+      "name": "public_users_load",
+      "value": "Choisir un utilisateur public du serveur"
+    },
+    {
+      "name": "public_users_empty",
+      "value": "Ce serveur n’a pas d’utilisateur public. Vous pouvez saisir un nom d’utilisateur."
+    },
+    {
+      "name": "public_users_invalid",
+      "value": "Données d’utilisateur public invalides. Réessayez ou saisissez le nom manuellement."
+    },
+    {
+      "name": "player_gesture_preferences",
+      "value": "Gestes de lecture et image dans l’image"
+    },
+    {
+      "name": "player_gestures_enabled",
+      "value": "Activer les gestes de lecture"
+    },
+    {
+      "name": "player_seek_gesture",
+      "value": "Glisser horizontalement pour naviguer"
+    },
+    {
+      "name": "player_zoom_gesture",
+      "value": "Pincer pour zoomer"
+    },
+    {
+      "name": "player_start_maximized",
+      "value": "Recadrer pour remplir par défaut"
+    },
+    {
+      "name": "player_back_seconds",
+      "value": "Double toucher arrière : secondes (1–300)"
+    },
+    {
+      "name": "player_forward_seconds",
+      "value": "Double toucher avant : secondes (1–300)"
+    },
+    {
+      "name": "player_save_steps",
+      "value": "Enregistrer les intervalles de saut"
+    },
+    {
+      "name": "player_steps_invalid",
+      "value": "Saisissez un nombre entier de secondes entre 1 et 300."
+    },
+    {
+      "name": "player_auto_pip",
+      "value": "Passer automatiquement en image dans l’image en arrière-plan"
+    },
+    {
+      "name": "player_ui_preferences_hint",
+      "value": "Enregistré pour le compte actuel et appliqué à la prochaine ouverture du lecteur. L’image dans l’image automatique est désactivée par défaut et dépend du système, de la lecture et du verrouillage. Les boutons de l’image dans l’image et de l’écran verrouillé conservent leurs propres intervalles de saut."
+    },
+    {
+      "name": "auto_pip_failed",
+      "value": "L’image dans l’image automatique est indisponible pour le moment. Vous pouvez essayer de l’activer manuellement."
+    },
+    {
+      "name": "sync_schedule_unavailable",
+      "value": "La planification en arrière-plan est indisponible. Les modifications ont été conservées ; envoyez-les manuellement depuis Plus."
+    },
+    {
+      "name": "sync_retry_waiting",
+      "value": "Échec de l’envoi. Les modifications ont été conservées et un nouvel essai automatique aura lieu."
+    },
+    {
+      "name": "sync_retry_exhausted",
+      "value": "Les essais automatiques d’envoi sont suspendus. Vérifiez la connexion et envoyez manuellement."
+    },
+    {
+      "name": "sync_auth_required",
+      "value": "Les envois automatiques sont suspendus. Vérifiez les autorisations du compte ou reconnectez-vous, puis envoyez manuellement."
+    },
+    {
+      "name": "player_fullscreen",
+      "value": "Passer en plein écran immersif"
+    },
+    {
+      "name": "player_exit_fullscreen",
+      "value": "Quitter le plein écran"
+    },
+    {
+      "name": "previous_episode",
+      "value": "Épisode précédent"
+    },
+    {
+      "name": "queue_first_episode",
+      "value": "C’est le premier épisode."
+    },
+    {
+      "name": "previous_episode_failed",
+      "value": "Impossible de lire l’épisode précédent. Vérifiez la connexion ou les téléchargements."
+    },
+    {
+      "name": "window_unavailable",
+      "value": "Impossible de régler la fenêtre du lecteur. Quittez le plein écran et réessayez."
+    },
+    {
+      "name": "screen_on_failed",
+      "value": "Impossible de maintenir l’écran allumé. Vérifiez les réglages du système."
+    },
+    {
+      "name": "brightness_failed",
+      "value": "Impossible de régler la luminosité de la fenêtre."
+    },
+    {
+      "name": "volume_failed",
+      "value": "Impossible de régler le volume du lecteur."
+    },
+    {
+      "name": "player_display_save_failed",
+      "value": "Impossible d’enregistrer les préférences d’affichage. Les réglages restent appliqués à cette session."
+    },
+    {
+      "name": "player_display_group",
+      "value": "Luminosité et mode nuit"
+    },
+    {
+      "name": "player_window_brightness",
+      "value": "Luminosité de la fenêtre"
+    },
+    {
+      "name": "player_brightness_value",
+      "value": "Luminosité de la fenêtre : %d%"
+    },
+    {
+      "name": "player_relative_volume",
+      "value": "Volume relatif du lecteur"
+    },
+    {
+      "name": "player_volume_value",
+      "value": "Volume du lecteur : %d%"
+    },
+    {
+      "name": "player_relative_volume_hint",
+      "value": "Modifie uniquement le volume relatif de ce lecteur. Si le système est muet ou le volume multimédia trop bas, utilisez les touches de volume de l’appareil."
+    },
+    {
+      "name": "player_night_mode",
+      "value": "Voile nocturne"
+    },
+    {
+      "name": "player_dim_opacity",
+      "value": "Opacité du voile nocturne"
+    },
+    {
+      "name": "player_dim_value",
+      "value": "Opacité du voile : %d%"
+    },
+    {
+      "name": "player_vertical_gesture",
+      "value": "Glisser verticalement pour la luminosité et le volume du lecteur"
+    },
+    {
+      "name": "player_remember_brightness",
+      "value": "Mémoriser la luminosité de la fenêtre pour ce compte"
+    },
+    {
+      "name": "search_type",
+      "value": "Type de recherche"
+    },
+    {
+      "name": "search_type_all",
+      "value": "Tous les types"
+    },
+    {
+      "name": "search_results_for",
+      "value": "Recherche : %s"
+    },
+    {
+      "name": "search_loaded_count",
+      "value": "%d / %d médias chargés"
+    },
+    {
+      "name": "search_cached_count",
+      "value": "%d médias trouvés dans le cache de ce compte"
+    },
+    {
+      "name": "search_group_partial",
+      "value": "Les groupes ne contiennent que les résultats chargés. Chargez la suite ou choisissez un type pour rechercher tous les résultats de ce type."
+    },
+    {
+      "name": "search_group_count",
+      "value": "%s · %d médias chargés"
+    },
+    {
+      "name": "device_name_group",
+      "value": "Nom de l’appareil sur le serveur"
+    },
+    {
+      "name": "device_name_hint",
+      "value": "Modifiez le nom de cet appareil sur le serveur actuel, jusqu’à 64 caractères. Laissez vide pour rétablir le nom par défaut. Nécessite l’autorisation du serveur."
+    },
+    {
+      "name": "device_name_current",
+      "value": "Dernier nom confirmé : %s"
+    },
+    {
+      "name": "device_name_unknown",
+      "value": "Le nom sur le serveur n’a pas été lu ou doit être confirmé."
+    },
+    {
+      "name": "device_name_label",
+      "value": "Nom personnalisé de l’appareil"
+    },
+    {
+      "name": "device_name_default",
+      "value": "Nom par défaut de l’appareil"
+    },
+    {
+      "name": "device_name_refresh",
+      "value": "Lire le nom sur le serveur"
+    },
+    {
+      "name": "device_name_save",
+      "value": "Enregistrer le nom de l’appareil"
+    },
+    {
+      "name": "device_name_online_required",
+      "value": "Le nom de l’appareil ne peut pas être lu ni modifié hors ligne."
+    },
+    {
+      "name": "device_name_invalid",
+      "value": "Utilisez au plus 64 caractères, sans saut de ligne ni caractère de contrôle."
+    },
+    {
+      "name": "device_name_cancelled",
+      "value": "Opération annulée. Relisez le nom de l’appareil."
+    },
+    {
+      "name": "device_name_not_confirmed",
+      "value": "Le nom renvoyé par le serveur diffère de cette modification."
+    },
+    {
+      "name": "device_name_saved",
+      "value": "L’enregistrement du nom de l’appareil a été confirmé par le serveur."
+    },
+    {
+      "name": "device_name_save_failed",
+      "value": "L’enregistrement a échoué ou n’est pas confirmé. Relisez le nom sur le serveur avant de le modifier."
+    },
+    {
+      "name": "server_discovery_hint",
+      "value": "Recherche sur le réseau local pendant environ 8 secondes. Le serveur sélectionné est vérifié anonymement et son adresse est remplie ; vous devez encore vous connecter."
+    },
+    {
+      "name": "discovery_scanning",
+      "value": "Recherche de serveurs locaux…"
+    },
+    {
+      "name": "discovery_verifying",
+      "value": "Vérification de l’identité du serveur…"
+    },
+    {
+      "name": "discovery_start",
+      "value": "Rechercher à nouveau sur le réseau local"
+    },
+    {
+      "name": "discovery_stop",
+      "value": "Arrêter la recherche ou la vérification"
+    },
+    {
+      "name": "discovery_empty",
+      "value": "Aucun serveur trouvé. Vérifiez que les appareils partagent le même réseau ou saisissez une adresse."
+    },
+    {
+      "name": "discovery_stopped",
+      "value": "Arrêté. Saisissez une adresse ou relancez la recherche."
+    },
+    {
+      "name": "discovery_limit_reached",
+      "value": "La recherche a atteint sa limite. Choisissez un serveur ou relancez-la."
+    },
+    {
+      "name": "discovery_failed",
+      "value": "Échec de la recherche locale. Vérifiez le réseau et réessayez, ou saisissez une adresse."
+    },
+    {
+      "name": "discovery_cancelled",
+      "value": "Recherche ou vérification annulée."
+    },
+    {
+      "name": "discovery_verify_timeout",
+      "value": "La vérification a expiré. Vérifiez que le serveur est accessible et réessayez."
+    },
+    {
+      "name": "discovery_verify_failed",
+      "value": "Impossible de vérifier le serveur. Réessayez ou saisissez une adresse."
+    },
+    {
+      "name": "api_network_group",
+      "value": "Connexion API et cache"
+    },
+    {
+      "name": "api_network_hint",
+      "value": "Réglages communs à l’application. Saisissez 1 à 120 secondes par champ ; les valeurs enregistrées s’appliquent aux nouvelles requêtes API. Le délai total HTTP inclut connexion et lecture ; le délai de lecture suit les règles HarmonyOS. Vidéos, images, téléchargements système et découverte locale utilisent des règles de transfert distinctes."
+    },
+    {
+      "name": "network_request_seconds",
+      "value": "Délai total HTTP (secondes)"
+    },
+    {
+      "name": "network_connect_seconds",
+      "value": "Délai de connexion (secondes)"
+    },
+    {
+      "name": "network_read_seconds",
+      "value": "Délai de lecture (secondes)"
+    },
+    {
+      "name": "network_auto_cache",
+      "value": "Utiliser automatiquement le cache du compte en cas d’échec de connexion"
+    },
+    {
+      "name": "network_cache_hint",
+      "value": "Si désactivé, les échecs de connexion ne basculent pas automatiquement sur le cache. Le mode hors ligne manuel, les téléchargements et les modifications en attente restent disponibles. Enregistrez pour appliquer."
+    },
+    {
+      "name": "network_options_save",
+      "value": "Enregistrer les réglages réseau"
+    },
+    {
+      "name": "network_options_reset",
+      "value": "Réinitialiser le réseau"
+    },
+    {
+      "name": "network_options_invalid",
+      "value": "Réglages réseau invalides. Saisissez des délais entiers de 1 à 120 secondes."
+    },
+    {
+      "name": "network_options_load_failed",
+      "value": "Impossible de lire les réglages réseau. Les valeurs par défaut ou les dernières valeurs enregistrées sont utilisées."
+    },
+    {
+      "name": "network_options_save_failed",
+      "value": "Impossible d’enregistrer les réglages réseau. Les réglages précédents et la saisie ont été conservés."
+    },
+    {
+      "name": "network_options_restore_failed",
+      "value": "Impossible de restaurer les réglages réseau. Rouvrez cette page et vérifiez les valeurs."
+    },
+    {
+      "name": "network_options_cancelled",
+      "value": "Opération de réglage réseau annulée."
+    },
+    {
+      "name": "network_options_saved",
+      "value": "Réglages réseau enregistrés. Les nouvelles requêtes les utiliseront."
+    },
+    {
+      "name": "poster_cache_group",
+      "value": "Cache des affiches et avatars"
+    },
+    {
+      "name": "poster_cache_hint",
+      "value": "20 MB par défaut, communs à l’application, jusqu’à 512 images isolées par compte. Seules les images consultées sont mises en cache ; hors ligne, les autres affichent un espace réservé. Désactiver arrête les lectures et écritures sur disque ; les images en ligne restent accessibles et les fichiers existants peuvent être effacés séparément. Le système peut récupérer cet espace."
+    },
+    {
+      "name": "poster_cache_enabled",
+      "value": "Utiliser le cache d’images sur disque"
+    },
+    {
+      "name": "poster_cache_capacity",
+      "value": "Capacité maximale (1–200 MB)"
+    },
+    {
+      "name": "poster_cache_usage",
+      "value": "Images : %s MB · %d fichiers"
+    },
+    {
+      "name": "poster_cache_unknown",
+      "value": "Utilisation du cache d’images indisponible"
+    },
+    {
+      "name": "poster_options_save",
+      "value": "Enregistrer les réglages du cache d’images"
+    },
+    {
+      "name": "poster_cache_clear",
+      "value": "Vider le cache d’images sur disque"
+    },
+    {
+      "name": "poster_cache_clear_confirm",
+      "value": "Effacer les affiches et avatars de tous les comptes locaux ? Les vidéos, métadonnées en cache et modifications en attente ne sont pas affectées. Certaines images peuvent rester en mémoire ; elles ne pourront pas être téléchargées hors ligne."
+    },
+    {
+      "name": "poster_options_invalid",
+      "value": "Saisissez une capacité entière de 1 à 200 MB."
+    },
+    {
+      "name": "poster_options_saved",
+      "value": "Préférences du cache d’images enregistrées."
+    },
+    {
+      "name": "poster_options_load_failed",
+      "value": "Impossible de lire les préférences du cache d’images. Les valeurs par défaut sont utilisées."
+    },
+    {
+      "name": "poster_options_save_failed",
+      "value": "L’enregistrement du cache d’images n’est pas confirmé. Conservez la saisie et réessayez."
+    },
+    {
+      "name": "poster_options_restore_failed",
+      "value": "Impossible de restaurer les préférences du cache d’images. Redémarrez l’application et vérifiez-les."
+    },
+    {
+      "name": "poster_cache_unavailable",
+      "value": "Impossible d’accéder au cache d’images ou de le mesurer. Le chargement des images en ligne reste possible."
+    },
+    {
+      "name": "poster_cache_trim_failed",
+      "value": "Préférences enregistrées, mais la réduction du cache n’est pas terminée. Réessayez de le vider."
+    },
+    {
+      "name": "poster_cache_cleared",
+      "value": "Cache d’images sur disque vidé."
+    },
+    {
+      "name": "poster_cache_clear_failed",
+      "value": "Le cache d’images n’a pas été entièrement vidé. Vérifiez l’espace encore utilisé et réessayez."
+    },
+    {
+      "name": "player_trickplay",
+      "value": "Miniatures de navigation"
+    },
+    {
+      "name": "player_trickplay_hint",
+      "value": "Nécessite les aperçus BIF Jellyscrub du serveur. Les aperçus en cache fonctionnent hors ligne. Le cache de 32 MiB / 16 fichiers peut supprimer les anciens aperçus."
+    },
+    {
+      "name": "player_trickplay_frame",
+      "value": "Aperçu à la position visée"
+    },
+    {
+      "name": "player_trickplay_save_failed",
+      "value": "Impossible d’enregistrer la préférence des miniatures"
+    },
+    {
+      "name": "ui_language_group",
+      "value": "Langue de l’application"
+    },
+    {
+      "name": "ui_language_hint",
+      "value": "Chinois simplifié, chinois traditionnel, anglais et français disponibles. Les autres langues système utilisent l’anglais. Ce réglage commun à l’application concerne uniquement l’interface ; les métadonnées et les préférences audio et de sous-titres restent distinctes."
+    },
+    {
+      "name": "ui_language_system",
+      "value": "Suivre le système"
+    },
+    {
+      "name": "ui_language_save",
+      "value": "Enregistrer et appliquer la langue"
+    },
+    {
+      "name": "ui_language_saved",
+      "value": "Langue de l’application enregistrée et appliquée"
+    },
+    {
+      "name": "ui_language_invalid",
+      "value": "Langue de l’application invalide. Choisissez une langue et enregistrez à nouveau."
+    },
+    {
+      "name": "ui_language_load_failed",
+      "value": "Impossible de lire la langue de l’application. Rouvrez Réglages et réessayez."
+    },
+    {
+      "name": "ui_language_save_failed",
+      "value": "Impossible d’enregistrer la langue de l’application. Le réglage précédent a été restauré. Réessayez."
+    },
+    {
+      "name": "ui_language_restore_failed",
+      "value": "Impossible de restaurer la langue de l’application. Le réglage actuel n’est pas confirmé. Redémarrez et enregistrez à nouveau."
+    },
+    {
+      "name": "ui_language_cancelled",
+      "value": "Changement de langue annulé"
+    },
+    {
+      "name": "ui_language_apply_failed",
+      "value": "Impossible d’actualiser la langue de l’application. Rouvrez Réglages et réessayez."
+    },
+    {
+      "name": "appearance_group",
+      "value": "Apparence et détails"
+    },
+    {
+      "name": "appearance_amoled",
+      "value": "Fonds noirs AMOLED"
+    },
+    {
+      "name": "appearance_amoled_hint",
+      "value": "Utiliser le noir pour les pages, cartes, champs et barres système. Désactivez pour rétablir la palette sombre CineIsle. Commun à l’application, appliqué immédiatement et conservé après redémarrage."
+    },
+    {
+      "name": "appearance_extra_info",
+      "value": "Afficher les informations multimédias détaillées"
+    },
+    {
+      "name": "appearance_extra_hint",
+      "value": "Afficher la taille du fichier et les caractéristiques complètes de la vidéo, de l’audio et des sous-titres dans les fiches des films et épisodes. Désactiver conserve le résumé, les étiquettes de base et la distribution."
+    },
+    {
+      "name": "appearance_saved",
+      "value": "Apparence enregistrée et appliquée"
+    },
+    {
+      "name": "appearance_invalid",
+      "value": "Les réglages d’apparence enregistrés sont invalides. Choisissez-les à nouveau."
+    },
+    {
+      "name": "appearance_load_failed",
+      "value": "Impossible de lire les réglages d’apparence. Rouvrez Réglages et réessayez."
+    },
+    {
+      "name": "appearance_unavailable",
+      "value": "L’apparence de la fenêtre est indisponible. Rouvrez Réglages et réessayez."
+    },
+    {
+      "name": "appearance_cancelled",
+      "value": "Modification d’apparence annulée"
+    },
+    {
+      "name": "appearance_save_failed",
+      "value": "Impossible d’enregistrer l’apparence. Une restauration a été tentée. Réessayez."
+    },
+    {
+      "name": "appearance_restore_failed",
+      "value": "La restauration de l’apparence n’est pas confirmée. Rouvrez Réglages pour vérifier et réessayez."
+    },
+    {
+      "name": "dynamic_colors",
+      "value": "Couleurs du fond d’écran"
+    },
+    {
+      "name": "dynamic_colors_hint",
+      "value": "Générer une palette sombre CineIsle à partir du fond d’écran système ; activé par défaut. Si les couleurs sont illisibles, la palette d’origine est utilisée et un nouvel essai aura lieu au retour au premier plan. Les conteneurs AMOLED restent noirs."
+    },
+    {
+      "name": "dynamic_colors_loading",
+      "value": "Lecture des couleurs du fond d’écran…"
+    },
+    {
+      "name": "dynamic_colors_active",
+      "value": "Couleurs du fond d’écran appliquées"
+    },
+    {
+      "name": "dynamic_colors_off",
+      "value": "Palette CineIsle d’origine utilisée"
+    },
+    {
+      "name": "dynamic_colors_fallback",
+      "value": "Couleurs du fond d’écran indisponibles. La palette CineIsle d’origine est utilisée ; un nouvel essai aura lieu au retour au premier plan."
+    },
+    {
+      "name": "dynamic_colors_update_failed",
+      "value": "Impossible d’actualiser les couleurs de la fenêtre. Une restauration de la palette précédente a été tentée ; rouvrez Réglages pour vérifier."
+    },
+    {
+      "name": "sync_cache_write_failed",
+      "value": "Impossible d’enregistrer le cache local. Les modifications sont conservées ; libérez de l’espace et réessayez."
+    },
+    {
+      "name": "caption_settings_title",
+      "value": "Style des sous-titres système"
+    },
+    {
+      "name": "caption_scope",
+      "value": "Ces réglages modifient la configuration système des sous-titres et affectent les autres applications compatibles. Revenir en arrière abandonne le brouillon."
+    },
+    {
+      "name": "caption_unavailable",
+      "value": "Les styles système sont indisponibles sur cet appareil. Le lecteur utilise le style par défaut."
+    },
+    {
+      "name": "caption_invalid",
+      "value": "Configuration de sous-titres invalide. Vérifiez l’échelle de police et le format des couleurs."
+    },
+    {
+      "name": "caption_changed",
+      "value": "La configuration système des sous-titres a changé. Rechargez-la avant d’appliquer vos modifications."
+    },
+    {
+      "name": "caption_save_failed",
+      "value": "Impossible d’enregistrer le style système. La configuration précédente a été conservée ou restaurée."
+    },
+    {
+      "name": "caption_save_unconfirmed",
+      "value": "Impossible de confirmer l’enregistrement ou la restauration. Rechargez la configuration système."
+    },
+    {
+      "name": "caption_saved",
+      "value": "Style système des sous-titres appliqué."
+    },
+    {
+      "name": "caption_active",
+      "value": "Style système des sous-titres utilisé"
+    },
+    {
+      "name": "caption_default",
+      "value": "Style système désactivé. Le lecteur utilise le style par défaut."
+    },
+    {
+      "name": "caption_enabled",
+      "value": "Utiliser le style système des sous-titres"
+    },
+    {
+      "name": "caption_scale",
+      "value": "Échelle de police (1–200%)"
+    },
+    {
+      "name": "caption_family",
+      "value": "Famille de polices"
+    },
+    {
+      "name": "caption_edge",
+      "value": "Contour du texte"
+    },
+    {
+      "name": "caption_foreground",
+      "value": "Couleur du texte"
+    },
+    {
+      "name": "caption_background",
+      "value": "Couleur du fond du texte"
+    },
+    {
+      "name": "caption_window",
+      "value": "Couleur de la fenêtre des sous-titres"
+    },
+    {
+      "name": "caption_color_hint",
+      "value": "Utilisez #RRGGBB ou #AARRGGBB. AA définit l’opacité : 00 est transparent, FF est opaque."
+    },
+    {
+      "name": "caption_preview",
+      "value": "Aperçu du style des sous-titres"
+    },
+    {
+      "name": "caption_preview_text",
+      "value": "Aperçu des sous-titres CineIsle\nDeuxième ligne de sous-titres"
+    },
+    {
+      "name": "caption_apply",
+      "value": "Appliquer aux sous-titres système"
+    },
+    {
+      "name": "caption_reload",
+      "value": "Recharger le style système"
+    },
+    {
+      "name": "caption_preset_light",
+      "value": "Blanc sur fond sombre"
+    },
+    {
+      "name": "caption_preset_yellow",
+      "value": "Jaune sur fond sombre"
+    },
+    {
+      "name": "caption_unsaved",
+      "value": "Cet aperçu n’est pas enregistré. Appliquez-le pour utiliser ce style."
+    },
+    {
+      "name": "caption_family_default",
+      "value": "Valeur système par défaut"
+    },
+    {
+      "name": "caption_family_mono_serif",
+      "value": "À empattements et chasse fixe"
+    },
+    {
+      "name": "caption_family_serif",
+      "value": "À empattements"
+    },
+    {
+      "name": "caption_family_mono_sans",
+      "value": "Sans empattements et à chasse fixe"
+    },
+    {
+      "name": "caption_family_sans",
+      "value": "Sans empattements"
+    },
+    {
+      "name": "caption_family_casual",
+      "value": "Décontractée"
+    },
+    {
+      "name": "caption_family_cursive",
+      "value": "Cursive"
+    },
+    {
+      "name": "caption_family_small_caps",
+      "value": "Petites capitales"
+    },
+    {
+      "name": "caption_edge_none",
+      "value": "Aucun"
+    },
+    {
+      "name": "caption_edge_raised",
+      "value": "En relief"
+    },
+    {
+      "name": "caption_edge_depressed",
+      "value": "En creux"
+    },
+    {
+      "name": "caption_edge_uniform",
+      "value": "Contour"
+    },
+    {
+      "name": "caption_edge_shadow",
+      "value": "Ombre portée"
+    },
+    {
+      "name": "change_queued_blocked",
+      "value": "Les modifications sont enregistrées localement, mais le serveur n’a pas confirmé leur réception. Les envois automatiques sont suspendus. Vérifiez le serveur ou le compte, puis réessayez manuellement."
+    },
+    {
+      "name": "batch_queued",
+      "value": "%d en attente d’envoi"
+    }
+  ]
+}

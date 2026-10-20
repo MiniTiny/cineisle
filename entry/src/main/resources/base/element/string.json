@@ -1949,7 +1949,7 @@
       "value": "拖动进度缩略图设置保存失败"
     },
     {"name": "ui_language_group", "value": "应用界面语言"},
-    {"name": "ui_language_hint", "value": "支持简体中文、繁體中文与 English；其他系统语言暂使用英文。此设置全应用共用，仅影响界面，影片元数据与音轨/字幕偏好分别保留。"},
+    {"name": "ui_language_hint", "value": "支持简体中文、繁体中文、英文和法语；其他系统语言使用英文。此设置全应用共用，仅切换界面，媒体资料及音轨/字幕偏好保持独立。"},
     {"name": "ui_language_system", "value": "跟随系统"},
     {"name": "ui_language_save", "value": "保存并应用界面语言"},
     {"name": "ui_language_saved", "value": "界面语言已保存并应用"},
@@ -1980,7 +1980,7 @@
     {"name": "dynamic_colors_update_failed", "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"},
     {
       "name": "sync_cache_write_failed",
-      "value": "回传已完成，但本机缓存保存失败；修改已保留，请释放存储空间后重试。"
+      "value": "本机缓存未能保存，修改仍保留；请释放存储空间后重试。"
     },
     {"name": "caption_settings_title", "value": "系统字幕样式"},
     {"name": "caption_scope", "value": "以下设置保存到系统字幕配置，并影响其他支持该配置的应用。返回不会保存草稿。"},
