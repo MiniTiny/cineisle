@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "target": "OHOS arm64-v8a API12",
+  "upstreamSourcesModified": false,
+  "sources": [
+    {
+      "name": "meson",
+      "repo": "mesonbuild/meson",
+      "ref": "1.11.0",
+      "url": "https://codeload.github.com/mesonbuild/meson/tar.gz/refs/tags/1.11.0",
+      "sha256": "cd2557c703cb898abb548008f876d71d53da9fbac69a33986cd36842438fea62",
+      "bytes": 5025427,
+      "license": "Apache-2.0",
+      "role": "build"
+    },
+    {
+      "name": "pkgconf",
+      "repo": "pkgconf/pkgconf",
+      "ref": "pkgconf-2.3.0",
+      "url": "https://codeload.github.com/pkgconf/pkgconf/tar.gz/refs/tags/pkgconf-2.3.0",
+      "sha256": "0ee103cd390c3ee0e77a7a1c71dcb79a50a426fa2a648f6d07f2678c23adc5e3",
+      "bytes": 121690,
+      "license": "ISC",
+      "role": "build"
+    },
+    {
+      "name": "freetype",
+      "repo": "freetype/freetype",
+      "ref": "0eca44e6e819f9e156eee0de2cbbcffd3a59e47b",
+      "url": "https://codeload.github.com/freetype/freetype/tar.gz/0eca44e6e819f9e156eee0de2cbbcffd3a59e47b",
+      "sha256": "47f0f17c7be60aafc26ea9f9b6ebae1043c81e1f0a52a6b5b9c4d96295097281",
+      "bytes": 2595650,
+      "license": "FTL and upstream component notices",
+      "role": "runtime"
+    },
+    {
+      "name": "fribidi",
+      "repo": "fribidi/fribidi",
+      "ref": "v1.0.16",
+      "url": "https://codeload.github.com/fribidi/fribidi/tar.gz/refs/tags/v1.0.16",
+      "sha256": "5a1d187a33daa58fcee2ad77f0eb9d136dd6fa4096239199ba31e850d397e8a8",
+      "bytes": 2144176,
+      "license": "LGPL-2.1-or-later",
+      "role": "runtime"
+    },
+    {
+      "name": "harfbuzz",
+      "repo": "harfbuzz/harfbuzz",
+      "ref": "14.6.0",
+      "url": "https://codeload.github.com/harfbuzz/harfbuzz/tar.gz/refs/tags/14.6.0",
+      "sha256": "eca8581e5ad8e21dbda31556c0363f764b1a754c9c1bb33ca7cd56ca1c07ddc9",
+      "bytes": 38872593,
+      "license": "Old MIT",
+      "role": "runtime"
+    },
+    {
+      "name": "libass",
+      "repo": "libass/libass",
+      "ref": "0.17.5",
+      "url": "https://codeload.github.com/libass/libass/tar.gz/refs/tags/0.17.5",
+      "sha256": "fa286fc9ee1ba3b932703a3df7b8474d01dc8abe29ec69b6fa68781dc4bf7acc",
+      "bytes": 351516,
+      "license": "ISC",
+      "role": "runtime"
+    },
+    {
+      "name": "fontconfig",
+      "repo": "fontconfig/fontconfig",
+      "ref": "2.18.3",
+      "url": "https://codeload.github.com/fontconfig/fontconfig/tar.gz/refs/tags/2.18.3",
+      "sha256": "9ae01e1d53acdef56010c5451cd34aa41d325b2faccd8606448d8fa01b2496b3",
+      "bytes": 666753,
+      "license": "MIT and upstream component notices",
+      "role": "runtime"
+    },
+    {
+      "name": "expat",
+      "repo": "libexpat/libexpat",
+      "ref": "R_2_9_0",
+      "url": "https://codeload.github.com/libexpat/libexpat/tar.gz/refs/tags/R_2_9_0",
+      "sha256": "6e8ce7b52ebbaa423c59becc7cf1e6875c42e49228c062ac8123c10e700cec27",
+      "bytes": 8488503,
+      "license": "MIT",
+      "role": "runtime"
+    }
+  ]
+}

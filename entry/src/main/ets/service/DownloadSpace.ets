@@ -4,6 +4,17 @@ import { DownloadRecord } from '../model/Models';
 import { text } from '../utils/Strings';
 
 export class DownloadSpace {
+  private static subtitleReservations: Map<DownloadRecord, number[]> = new Map();
+  static reserveSubtitles(record: DownloadRecord, count: number): () => void {
+    const claims = DownloadSpace.subtitleReservations.get(record) ?? [];
+    claims.push(count * 4 * 1024 * 1024); DownloadSpace.subtitleReservations.set(record, claims);
+    let released = false;
+    return () => {
+      if (released) { return; } released = true;
+      claims.splice(claims.indexOf(count * 4 * 1024 * 1024), 1);
+      if (!claims.length) { DownloadSpace.subtitleReservations.delete(record); }
+    };
+  }
   private static bytes(path: string): number {
     try { return fs.accessSync(path) ? Math.max(0, fs.statSync(path).size) : 0; } catch (e) { return 0; }
   }
@@ -11,7 +22,8 @@ export class DownloadSpace {
     return records.reduce((sum: number, active: DownloadRecord) => {
       const video = active.state === 'downloading' ? Math.max(0, (active.expectedSize ?? 0) - DownloadSpace.bytes(active.path)) : 0;
       const subtitles = active.subtitleState === 'pending' ? (active.subtitles ?? []).reduce((n: number, sub) => n + Math.max(0, 4 * 1024 * 1024 - DownloadSpace.bytes(sub.path)), 0) : 0;
-      return sum + video + subtitles;
+      const reserved = Math.max(0, ...(DownloadSpace.subtitleReservations.get(active) ?? []));
+      return sum + video + Math.max(subtitles, reserved);
     }, 0);
   }
   static async checkOptional(directory: string, bytes: number, records: DownloadRecord[]): Promise<void> {

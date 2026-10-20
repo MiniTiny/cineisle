@@ -42,7 +42,7 @@
 ./scripts/build.sh
 ```
 
-首次构建前会执行 OpenAPI 与原创图标生成漂移检查。生成文件位于 `entry/build/default/outputs/default/entry-default-unsigned.hap`。
+构建前会执行 OpenAPI 与原创图标生成漂移检查，并准备固定版本的ASS原生渲染依赖（Python 3.12+、主机gperf，首次需联网下载源码）。来源、缓存与离线检查见[ASS字幕说明](docs/ASS_SUBTITLES.md)。生成文件位于 `entry/build/default/outputs/default/entry-default-unsigned.hap`。
 
 ## 项目结构
 

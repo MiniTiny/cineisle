@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Les pistes intégrées dépendent du décodage de l’appareil. Les sous-titres texte du serveur et du cache utilisent SRT sans les styles ASS ; les sous-titres en images ne sont pas encore pris en charge. Les téléchargements tentent de conserver les pistes texte intégrées et externes convertibles ; les téléchargements existants peuvent les récupérer en ligne. Hors ligne, les pistes natives et les sous-titres texte en cache restent disponibles."
+      "value": "Les sous-titres ASS/SSA conservent leurs styles et animations ; les autres sous-titres texte utilisent SRT. Les pistes texte intégrées et externes peuvent être mises en cache, et les anciens caches mis à jour en ligne. Les sous-titres en images et les polices jointes aux vidéos ne sont pas encore pris en charge ; les glyphes dépendent des polices de l’appareil. Hors ligne, les sous-titres en cache et les pistes reconnues par l’appareil restent disponibles."
     },
     {
       "name": "track_switch_failed",

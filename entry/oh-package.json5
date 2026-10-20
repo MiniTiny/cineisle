@@ -2,5 +2,7 @@
   "name": "entry",
   "version": "0.2.0",
   "description": "Native phone UI and Jellyfin services",
-  "dependencies": {}
+  "dependencies": {
+    "libcineisle_ass.so": "file:./src/main/cpp/types/libcineisle_ass"
+  }
 }

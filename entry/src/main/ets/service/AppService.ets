@@ -10,7 +10,7 @@ import common from '@ohos.app.ability.common';
 import request from '@ohos.request';
 import fs from '@ohos.file.fs';
 import fileUri from '@ohos.file.fileuri';
-import { Session, DownloadRecord, ItemsResult, LibraryMembership, LibrarySnapshot, MediaItem, MediaSource, PlaybackRoute, QueryParam } from '../model/Models';
+import { Session, DownloadRecord, DownloadSubtitle, ItemsResult, LibraryMembership, LibrarySnapshot, MediaItem, MediaSource, PlaybackRoute, QueryParam } from '../model/Models';
 import { rankActors, uniqueItems } from '../utils/Protocol';
 import { JellyfinClient } from './JellyfinClient';
 import { AppLock } from './AppLock';
@@ -468,10 +468,15 @@ export class AppService {
     return record;
   }
 
-  private static async cacheSubtitles(record: DownloadRecord, client: JellyfinClient, local: LocalStore): Promise<void> {
+  private static async cacheSubtitles(record: DownloadRecord, client: JellyfinClient, local: LocalStore, plan?: DownloadSubtitle[]): Promise<void> {
     const owned = (): boolean => client === AppService.client && local === AppService.local && AppService.downloads.includes(record);
     await AppService.mutation(`subtitles:${downloadKey(record)}`, async () => {
-      await OfflineSubtitles.fetch(record, client, owned, () => { if (owned()) { local.saveDownloads(AppService.downloads); AppService.downloadListener?.(); } }, AppService.context);
+      await OfflineSubtitles.fetch(record, client, owned, () => {
+        if (owned()) {
+          local.saveDownloads(AppService.downloads);
+          try { AppService.downloadListener?.(); } catch (e) { /* UI notification cannot roll back an already persisted file index. */ }
+        }
+      }, AppService.context, plan);
     });
   }
 
@@ -485,16 +490,20 @@ export class AppService {
     if (!source) { throw new Error('no_media_source'); }
     const plan = OfflineSubtitles.plan(record, source, local.directory);
     const prepared = new DownloadRecord(); prepared.path = record.path;
-    prepared.subtitles = plan.map((subtitle) => record.subtitles?.find((old) => old.index === subtitle.index && old.state === 'ready') ?? subtitle);
+    prepared.subtitles = plan.map((subtitle) => record.subtitles?.find((old) => old.index === subtitle.index && old.path === subtitle.path && old.state === 'ready') ?? subtitle);
+    let releaseReservation: (() => void) | undefined;
     await AppService.mutation('download-admission', async () => {
       await DownloadSpace.check(local.directory, prepared, AppService.downloads.filter((value: DownloadRecord) => value !== record), true);
       if (client !== AppService.client || local !== AppService.local || !AppService.downloads.includes(record)) { throw new Error('login_required'); }
-      record.subtitles = prepared.subtitles; record.subtitleState = 'pending'; local.saveDownloads(AppService.downloads);
+      releaseReservation = DownloadSpace.reserveSubtitles(record, prepared.subtitles?.length ?? 0);
     });
-    const preference = AppService.experience?.snapshot();
-    record.network = downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
-    local.saveDownloads(AppService.downloads);
-    await AppService.cacheSubtitles(record, client, local);
+    try {
+      const preference = AppService.experience?.snapshot();
+      const previousNetwork = record.network;
+      record.network = downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
+      try { local.saveDownloads(AppService.downloads); } catch (e) { record.network = previousNetwork; throw e as Error; }
+      await AppService.cacheSubtitles(record, client, local, prepared.subtitles);
+    } finally { releaseReservation?.(); }
   }
 
   static async retryDownload(record: DownloadRecord): Promise<void> {

@@ -1,6 +1,7 @@
 oh_modules/
 node_modules/
 .hvigor/
+.cxx/
 .idea/
 build/
 **/build/

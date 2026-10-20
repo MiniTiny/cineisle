@@ -246,11 +246,11 @@ export class JellyfinClient {
     return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: 200 }));
   }
 
-  async subtitle(id: string, sourceId: string, index: number, transfer?: ApiTransport): Promise<string> {
-    if (!Number.isSafeInteger(index) || index < 0) { throw new Error('subtitle_failed'); }
+  async subtitle(id: string, sourceId: string, index: number, transfer?: ApiTransport, format: string = 'srt'): Promise<string> {
+    if (!Number.isSafeInteger(index) || index < 0 || !['srt', 'ass'].includes(format)) { throw new Error('subtitle_failed'); }
     await this.ready();
     const api = transfer ? new JellyfinApi(transfer) : this.api;
-    return api.getSubtitle({ routeItemId: id, routeMediaSourceId: sourceId, routeIndex: index, routeFormat: 'srt', startPositionTicks: 0 });
+    return api.getSubtitle({ routeItemId: id, routeMediaSourceId: sourceId, routeIndex: index, routeFormat: format, startPositionTicks: 0 });
   }
 
   subtitleTransport(): ApiTransport { return this.transport; }

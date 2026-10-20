@@ -95,6 +95,40 @@ test('progress report uses Jellyfin session endpoint and tick conversion', async
 test('direct-play stream encodes media source and auth query', () => {
   const url = client.stream('movie', 'a&source'); assert.ok(url.includes('static=true')); assert.ok(url.includes('mediaSourceId=a%26source')); assert.ok(url.includes('api_key=secret'));
 });
+// ASS delivery preserves the server's layout/style document for the native renderer.
+const styledAss = `[Script Info]
+ScriptType: v4.00+
+[Events]
+Dialogue: 0,0:00:01.00,0:00:02.00,Default,,0,0,0,,{\\pos(40,60)\\c&HFF&}中文\\Nsecond
+`;
+for (const version of ['10.8.13', '10.10.0']) {
+  test(version + ' retains raw ASS styles and delivery identity without converting to plain text', async () => {
+    const subtitles = new JellyfinClient(session, version);
+    queue.push(response(styledAss));
+    assert.equal(await subtitles.subtitle('movie / &', 'source / &', 7, undefined, 'ass'), styledAss);
+    const call = requests.at(-1), url = new URL(call.url);
+    assert.equal(decodeURIComponent(url.pathname), '/jellyfin/Videos/movie / &/source / &/Subtitles/7/Stream.ass');
+    assert.equal(url.searchParams.get('startPositionTicks'), '0');
+    assert.ok(!call.url.includes('secret')); assert.ok(call.options.header.Authorization.includes('Token="secret"'));
+  });
+  test(version + ' keeps SRT default compatible with an injected download transport', async () => {
+    const subtitles = new JellyfinClient(session, version), calls = [];
+    const transfer = { async text(path, method, query, body) { calls.push({ path, method, query, body }); return '1\n00:00:01,000 --> 00:00:02,000\ntext\n'; } };
+    const value = await subtitles.subtitle('movie', 'source', 7, transfer);
+    assert.ok(value.includes('text')); assert.equal(calls.length, 1); assert.ok(calls[0].path.endsWith('/Stream.srt')); assert.equal(calls[0].method, 'GET'); assert.equal(calls[0].body, '');
+  });
+}
+test('invalid subtitle formats and indices fail before any request or transport', async () => {
+  const count = requests.length; let sent = 0;
+  const transfer = { async text() { sent++; throw new Error('must not send'); } };
+  for (const format of ['', 'ssa', 'ASS', 'ass?api_key=x', '../ass']) {
+    await assert.rejects(client.subtitle('movie', 'source', 7, transfer, format), /subtitle_failed/);
+  }
+  for (const index of [-1, 0.5, NaN, Infinity]) {
+    await assert.rejects(client.subtitle('movie', 'source', index, transfer, 'ass'), /subtitle_failed/);
+  }
+  assert.equal(requests.length, count); assert.equal(sent, 0);
+});
 (async () => {
   for (const [name, fn] of tests) { await fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} tests passed. Platform mocks do not prove device playback.`);

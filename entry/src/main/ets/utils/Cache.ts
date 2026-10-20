@@ -105,7 +105,8 @@ export function validDownloads(records: DownloadRecord[], directory: string): bo
       if (!record.subtitles.every((subtitle: DownloadSubtitle) => {
         if (!subtitle || !Number.isSafeInteger(subtitle.index) || subtitle.index < 0 || seen.has(subtitle.index) ||
           typeof subtitle.title !== 'string' || typeof subtitle.language !== 'string' || !['pending', 'ready', 'failed'].includes(subtitle.state) ||
-          subtitle.path !== `${directory}/${downloadStem(record)}.subtitle-${subtitle.index}.srt`) { return false; }
+          (subtitle.format !== undefined && !['srt', 'ass'].includes(subtitle.format)) ||
+          subtitle.path !== `${directory}/${downloadStem(record)}.subtitle-${subtitle.index}.${subtitle.format ?? 'srt'}`) { return false; }
         seen.add(subtitle.index); return true;
       })) { return false; }
     }

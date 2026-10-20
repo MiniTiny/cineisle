@@ -2,7 +2,8 @@ import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import fs from '@ohos.file.fs';
 import { PlaybackRoute } from '../model/Models';
-import { parseSubtitles, subtitleAt, SubtitleCue, textSubtitle, TrackChoice } from '../utils/Playback';
+import { parseSubtitles, subtitleAt, SubtitleCue, subtitleFormat, textSubtitle, TrackChoice, validAssDocument } from '../utils/Playback';
+import { StyledSubtitleFrame, StyledSubtitleSession } from '../utils/StyledSubtitle';
 import { text } from '../utils/Strings';
 import { JellyfinClient } from './JellyfinClient';
 import { OfflineSubtitles } from './OfflineSubtitles';
@@ -20,6 +21,8 @@ export interface PlayerView {
   interrupted?: () => void;
   frame?: (ready: boolean) => void;
   closed?: (status: PlaybackStatus) => void;
+  styledSubtitle?: (frame: StyledSubtitleFrame | undefined) => void;
+  createStyledSubtitle?: (document: string, publish: (frame: StyledSubtitleFrame | undefined) => void, failure: () => void) => Promise<StyledSubtitleSession>;
 }
 interface PendingReport { route: PlaybackRoute; position: number; paused: boolean }
 export interface PlaybackStatus {
@@ -55,6 +58,9 @@ export class PlaybackController {
   private audioKey: string = '';
   private subtitleKey: string = '';
   private cues: SubtitleCue[] = [];
+  private styled: StyledSubtitleSession | undefined;
+  private styledTimer: number = -1;
+  private styledVisible: boolean = true;
   private nativeSubtitle: string = '';
   private subtitleEnded: boolean = false;
   private subtitleStart: number = 0;
@@ -118,6 +124,7 @@ export class PlaybackController {
     this.audioOperations = Promise.resolve(); this.pendingAudio = 0;
     const player = this.player; const file = this.file;
     this.player = undefined; this.file = undefined;
+    this.closeStyled();
     this.cues = []; this.nativeSubtitle = ''; this.view.subtitle(''); this.view.frame?.(false);
     if (!player && !file) { return; }
     // New loads wait for every detached player, including one released after a fatal error.
@@ -177,10 +184,13 @@ export class PlaybackController {
         } else if (state === 'playing') {
           this.paused = false;
           if (!this.started) { this.started = true; this.send(''); } else { this.send('Progress'); }
+          this.syncStyled();
         } else if (state === 'paused') {
           this.paused = true; if (this.started) { this.send('Progress'); }
+          this.syncStyled();
         } else if (state === 'completed') {
           this.subtitleEnded = true; this.nativeSubtitle = ''; this.view.subtitle('');
+          this.syncStyled();
           this.confirmPosition(player.duration, player.duration, true); this.seeking = false;
           this.position = player.duration; this.view.time(this.position, player.duration); this.stopReport(); this.view.complete();
         }
@@ -246,7 +256,7 @@ export class PlaybackController {
           if (subtitle.state === 'ready') {
             this.subtitles.push({ key: `local:${subtitle.index}`, index: subtitle.index, type: media.MediaType.MEDIA_TYPE_SUBTITLE,
               label: text('offline_subtitle', subtitle.title || subtitle.language || subtitle.index.toString()), remote: false,
-              language: subtitle.language, path: subtitle.path });
+              language: subtitle.language, path: subtitle.path, format: subtitle.format ?? 'srt' });
           }
         }
       } else {
@@ -254,7 +264,8 @@ export class PlaybackController {
         for (const stream of source?.MediaStreams ?? []) {
           if (textSubtitle(stream)) {
             this.subtitles.push({ key: `server:${stream.Index}`, index: stream.Index, type: media.MediaType.MEDIA_TYPE_SUBTITLE,
-              label: text('server_subtitle', stream.DisplayTitle || stream.Language || stream.Codec || stream.Index.toString()), remote: true, language: stream.Language ?? '' });
+              label: text('server_subtitle', stream.DisplayTitle || stream.Language || stream.Codec || stream.Index.toString()), remote: true,
+              language: stream.Language ?? '', format: subtitleFormat(stream) });
           }
         }
       }
@@ -286,10 +297,33 @@ export class PlaybackController {
   }
   private emitTracks(): void { this.view.tracks(this.audio.slice(), this.subtitles.slice(), this.audioKey, this.subtitleKey); }
   private renderSubtitle(): void {
+    if (this.styled) { this.view.subtitle(''); this.syncStyled(); return; }
     if (this.subtitleEnded || !this.player) { this.view.subtitle(''); return; }
     this.view.subtitle((this.subtitleKey.startsWith('server:') || this.subtitleKey.startsWith('local:')) ? subtitleAt(this.cues, this.position) :
       this.subtitleKey.startsWith('native:') && this.position >= this.subtitleStart && this.position < this.subtitleEnd ? this.nativeSubtitle : '');
   }
+
+  private closeStyled(): void {
+    clearInterval(this.styledTimer); this.styledTimer = -1;
+    const old = this.styled; this.styled = undefined; old?.close(); this.view.styledSubtitle?.(undefined);
+  }
+
+  private syncStyled(): void {
+    clearInterval(this.styledTimer); this.styledTimer = -1;
+    if (!this.styled) { return; }
+    if (!this.styledVisible || this.closed || this.failed || this.subtitleEnded || this.seeking || !this.player) { this.styled.clear(); return; }
+    this.renderStyled();
+    if (this.player.state === 'playing' && !this.paused) { this.styledTimer = setInterval(() => { this.renderStyled(); }, 50); }
+  }
+
+  private renderStyled(): void {
+    const player = this.player;
+    if (!player || !this.styled || !this.styledVisible || this.closed || this.failed || this.subtitleEnded || this.seeking) { return; }
+    const clock = Number.isFinite(player.currentTime) && player.currentTime >= 0 ? player.currentTime : this.position;
+    this.styled.render(clock, player.width, player.height);
+  }
+
+  setStyledSubtitleVisible(visible: boolean): void { this.styledVisible = visible; this.syncStyled(); }
 
   async selectAudio(key: string): Promise<void> {
     const player = this.player; const generation = this.generation; const revision = ++this.audioSelection;
@@ -326,16 +360,31 @@ export class PlaybackController {
     const player = this.player; const generation = this.generation; const revision = ++this.selection;
     const track = this.subtitles.find((track: TrackChoice) => track.key === key);
     if (!player || (key && !track)) { return; }
+    let candidate: StyledSubtitleSession | undefined;
     try {
       let cues: SubtitleCue[] = [];
+      let document = '';
       if (track?.key.startsWith('local:')) {
         const subtitle = this.route.subtitles.find((s) => s.index === track.index && s.path === track.path && s.state === 'ready');
         if (!this.route.offline || !subtitle) { throw new Error('offline_subtitle_failed'); }
-        cues = OfflineSubtitles.read(subtitle);
+        if (track.format === 'ass') { document = OfflineSubtitles.document(subtitle); }
+        else { cues = OfflineSubtitles.read(subtitle); }
       } else if (track?.remote) {
         if (!this.client) { throw new Error('login_required'); }
-        cues = parseSubtitles(await this.client.subtitle(this.route.item.Id, this.route.mediaSourceId, track.index));
-        if (!cues.length) { throw new Error('subtitle_failed'); }
+        const content = await this.client.subtitle(this.route.item.Id, this.route.mediaSourceId, track.index, undefined, track.format ?? 'srt');
+        if (track.format === 'ass') { if (!validAssDocument(content)) { throw new Error('subtitle_failed'); } document = content; }
+        else { cues = parseSubtitles(content); if (!cues.length) { throw new Error('subtitle_failed'); } }
+      }
+      if (!this.active(player, generation) || revision !== this.selection) { return; }
+      if (document) {
+        if (!this.view.createStyledSubtitle) { throw new Error('subtitle_failed'); }
+        candidate = await this.view.createStyledSubtitle(document, (frame: StyledSubtitleFrame | undefined) => {
+          if (candidate && candidate === this.styled && this.active(player, generation)) { this.view.styledSubtitle?.(this.styledVisible && !this.seeking && !this.subtitleEnded ? frame : undefined); }
+        }, () => {
+          if (candidate && candidate === this.styled && this.active(player, generation)) {
+            this.closeStyled(); this.subtitleKey = ''; this.cues = []; this.emitTracks(); this.view.error(text('subtitle_failed'));
+          }
+        });
       }
       if (!this.active(player, generation) || revision !== this.selection) { return; }
       if (track?.key.startsWith('native:')) {
@@ -345,8 +394,11 @@ export class PlaybackController {
       }
       if (!this.active(player, generation) || revision !== this.selection) { return; }
       // Subtitle rendering belongs to the view: off hides all cues without muting audio.
+      clearInterval(this.styledTimer); this.styledTimer = -1;
+      const old = this.styled; this.styled = candidate; old?.close(); this.view.styledSubtitle?.(undefined);
       this.cues = cues; this.subtitleKey = key; this.emitTracks(); this.renderSubtitle();
     } catch (e) { if (this.active(player, generation) && revision === this.selection) { this.view.error(text('subtitle_failed')); } }
+    finally { if (candidate && candidate !== this.styled) { candidate.close(); } }
   }
 
   async toggle(): Promise<void> {
@@ -364,6 +416,7 @@ export class PlaybackController {
 
   async pausePlayback(): Promise<boolean> {
     this.paused = true;
+    this.syncStyled();
     const player = this.player;
     if (!player || player.state !== 'playing') { return true; }
     try { await player.pause(); return true; }
@@ -377,17 +430,18 @@ export class PlaybackController {
 
   async hide(continuePlayback: boolean = false): Promise<boolean> {
     this.hidden = !continuePlayback;
+    this.setStyledSubtitleVisible(false);
     return continuePlayback ? true : this.pausePlayback();
   }
 
   pause(): void {
     this.hide(false);
   }
-  show(): void { this.hidden = false; }
+  show(): void { this.hidden = false; this.syncStyled(); }
   seek(position: number): void {
     if (!Number.isFinite(position) || !this.player || !['prepared', 'playing', 'paused', 'completed'].includes(this.player.state)) { return; }
     const priorSeeking = this.seeking;
-    try { this.seeking = true; this.player.seek(Math.max(0, Math.min(position, this.player.duration)), media.SeekMode.SEEK_CLOSEST);
+    try { this.seeking = true; this.syncStyled(); this.player.seek(Math.max(0, Math.min(position, this.player.duration)), media.SeekMode.SEEK_CLOSEST);
       this.position = Math.max(0, Math.min(position, this.player.duration)); this.retryPosition = this.position; this.nativeSubtitle = ''; this.renderSubtitle();
     } catch (e) { this.seeking = priorSeeking; this.view.error(text('play_error')); }
   }

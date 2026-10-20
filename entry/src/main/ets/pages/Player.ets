@@ -1,5 +1,7 @@
 import { UiPalette } from '../utils/UiPalette';
 import image from '@ohos.multimedia.image';
+import { AssSubtitle } from '../service/AssSubtitle';
+import { StyledSubtitleFrame, StyledSubtitleBounds, styledSubtitleBounds } from '../utils/StyledSubtitle';
 import { BifData, BifTicket } from '../utils/Bif';
 import { TrickplayPreview } from '../service/TrickplayPreview';
 import { IntroSegment, IntroTicket, introTarget } from '../utils/Intro';
@@ -49,6 +51,7 @@ struct Player {
   @State playbackPosition: number = 0;
   @State duration: number = 0;
   @State subtitle: string = '';
+  @State styledFrame: StyledSubtitleFrame | undefined = undefined;
   @State audio: TrackChoice[] = [];
   @State subtitles: TrackChoice[] = [];
   @State audioKey: string = '';
@@ -136,6 +139,11 @@ struct Player {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
       subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.system?.updateSubtitle(value); } },
+      styledSubtitle: (frame: StyledSubtitleFrame | undefined) => {
+        if (this.alive) { this.styledFrame = frame; this.system?.updateStyledSubtitle(frame); }
+      },
+      createStyledSubtitle: (document: string, publish: (frame: StyledSubtitleFrame | undefined) => void, failure: () => void) =>
+        AssSubtitle.create(document, (getContext(this) as common.UIAbilityContext).cacheDir, publish, failure),
       error: (message: string) => { if (this.alive) { this.message = message; this.showControls(); } },
       reportError: (failed: boolean) => { if (this.alive) { this.reportMessage = failed ? text('progress_not_saved') : ''; } },
       complete: () => { this.completed(); },
@@ -301,7 +309,7 @@ struct Player {
   }
   onBackPress(): boolean { if (this.controlsLocked) { return true; } if (this.immersive) { this.toggleImmersive(); return true; } return false; }
   private watchCaptions(): void { this.stopCaptions?.(); this.stopCaptions = undefined; if (!this.alive || !this.visible) { return; } this.stopCaptions = SystemCaptions.observe((state) => { if (this.alive && this.visible) { this.captionStyle = captionRenderStyle(state.config); } }); }
-  aboutToDisappear(): void { this.stopCaptions?.(); this.stopCaptions = undefined; this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
+  aboutToDisappear(): void { this.stopCaptions?.(); this.stopCaptions = undefined; this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.alive = false; this.styledFrame = undefined; this.controller?.setStyledSubtitleVisible(false); ++this.loadRevision; this.window?.dispose(); if (this.system) { this.system.dispose(); } else { this.controller?.close(); } }
   onPageHide(): void { this.stopCaptions?.(); this.stopCaptions = undefined; this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.saveOffline(); this.visible = false; this.syncWindow(); if (this.system) { this.system.background(); } else { this.controller?.pause(); } }
   onPageShow(): void { this.visible = true; this.watchCaptions(); this.introEnabled = playerOptions(AppService.experience?.snapshot().playerUi).introSkipper ?? true; this.trickplayEnabled = playerOptions(AppService.experience?.snapshot().playerUi).trickplay ?? true; if (!this.intro && !this.introTicket) { this.restoreIntro(); this.restoreTrickplay(); } this.syncWindow(); this.showControls(); if (this.system) { this.system.foreground(); } else { this.controller?.show(); } }
 
@@ -398,7 +406,14 @@ struct Player {
     this.cancelGesture(); if (Math.abs(scale - 1) > 0.1) { this.zoomed = scale > 1; }
   }
 
-  private syncWindow(): void { this.window?.update({ visible: this.visible && this.alive, playing: this.state === 'playing', immersive: this.immersive, locked: this.locked || !AppLock.permit(), pip: this.pipActive }); }
+  private syncWindow(): void {
+    this.controller?.setStyledSubtitleVisible(this.alive && !this.locked && AppLock.permit() && this.ownerClient === AppService.client && (this.visible || this.pipActive));
+    this.window?.update({ visible: this.visible && this.alive, playing: this.state === 'playing', immersive: this.immersive, locked: this.locked || !AppLock.permit(), pip: this.pipActive });
+  }
+  private styledBounds(): StyledSubtitleBounds {
+    return this.styledFrame ? styledSubtitleBounds(this.styledFrame, this.surfaceWidth, this.surfaceHeight, this.zoomed) ??
+      { left: 0, top: 0, width: 0, height: 0 } : { left: 0, top: 0, width: 0, height: 0 };
+  }
   private windowStateChanged(): void { if (this.locked) { this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.controlsVisible = true; } else if (this.visible) { this.restoreIntro(); this.restoreTrickplay(); } this.syncWindow(); }
   private clearHide(): void { if (this.hideTimer >= 0) { clearTimeout(this.hideTimer); this.hideTimer = -1; } }
   private showControls(): void {
@@ -476,6 +491,13 @@ struct Player {
               .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).height)
               .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); if (this.state !== 'error') { this.controller?.open(this.route, this.surfaceId); } })
             if (!this.frameReady) { Column() {}.id('playbackFrameCover').width('100%').height('100%').backgroundColor('#000000').hitTestBehavior(HitTestMode.None) }
+            if (this.styledFrame && this.frameReady && !this.pipActive) {
+              Stack({ alignContent: Alignment.TopStart }) {
+                Image(this.styledFrame.bitmap).id('playbackAssSubtitle').objectFit(ImageFit.Fill)
+                  .width(this.styledBounds().width).height(this.styledBounds().height)
+                  .position({ x: this.styledBounds().left, y: this.styledBounds().top })
+              }.width('100%').height('100%').clip(true).hitTestBehavior(HitTestMode.None)
+            }
             if (this.subtitle) {
               Column() {
                 Column() {

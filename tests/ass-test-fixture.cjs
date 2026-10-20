@@ -1,0 +1,2 @@
+// Synthetic styled text shared by protocol-free lifecycle fixtures.
+exports.ass = '[Script Info]\nScriptType: v4.00+\nPlayResX: 640\nPlayResY: 360\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, Bold, Alignment\nStyle: Default,sans-serif,30,&H000000FF,-1,2\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\nDialogue: 0,0:00:01.00,0:00:03.00,Default,,0,0,0,,{\\pos(80,60)}中文, Arabic\n';
