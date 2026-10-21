@@ -1,8 +1,8 @@
 import { MediaItem, MediaStream } from '../model/Models';
-import { inlineSubtitle, SubtitleContent, SubtitleRun } from './InlineSubtitle';
+import { inlineSubtitle, SubtitleContent, SubtitleRun, PositionedSubtitle } from './InlineSubtitle';
 
-export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number; runs?: SubtitleRun[] }
-interface SubtitleBudgetEvent { time: number; weight: number; styled: number }
+export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number; runs?: SubtitleRun[]; placement?: PositionedSubtitle }
+interface SubtitleBudgetEvent { time: number; weight: number; styled: number; positioned: number }
 export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string; format?: string }
 
 // Unknown season numbers in old caches only allow continuation within the known season.
@@ -79,25 +79,35 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
     if (start < 0 || end <= start) { continue; }
-    const content = inlineSubtitle(lines.slice(timing + 1).join('\n').replace(/\{\\[^{}]*\}/g, ''));
+    const body = lines.slice(timing + 1).join('\n');
+    // SubRip uses the first standalone SSA alignment tag, not arbitrary ASS override syntax.
+    const alignment = /\{\\an([1-9])\}/.exec(body);
+    const content = inlineSubtitle(body.replace(/\{\\[^{}]*\}/g, ''));
     if (start >= 0 && end > start && content.text) {
       const cue: SubtitleCue = { start: start, end: end, text: content.text, maxEnd: end };
-      if (content.runs.length) { cue.runs = content.runs; } cues.push(cue);
+      if (content.runs.length) { cue.runs = content.runs; }
+      if (alignment) { cue.placement = new PositionedSubtitle(cues.length, content.text, content.runs, Number(alignment[1])); }
+      cues.push(cue);
     }
   }
   cues.sort((a: SubtitleCue, b: SubtitleCue) => a.start - b.start);
   let maxEnd = 0;
   cues.forEach((cue: SubtitleCue) => { maxEnd = Math.max(maxEnd, cue.end); cue.maxEnd = maxEnd; });
   // Reject only excessive simultaneous rich text, not a long movie with many non-overlapping cues.
-  if (cues.some((cue: SubtitleCue) => !!cue.runs?.length)) {
+  if (cues.some((cue: SubtitleCue) => !!cue.runs?.length || !!cue.placement)) {
     const events: SubtitleBudgetEvent[] = [];
     cues.forEach((cue: SubtitleCue) => {
-      const weight = (cue.runs?.length ?? 1) + 1; const styled = cue.runs?.length ? 1 : 0;
-      events.push({ time: cue.start, weight: weight, styled: styled }, { time: cue.end, weight: -weight, styled: -styled });
+      const weight = (cue.runs?.length ?? 1) + 1; const styled = cue.runs?.length || cue.placement ? 1 : 0;
+      const positioned = cue.placement ? 1 : 0;
+      events.push({ time: cue.start, weight: weight, styled: styled, positioned: positioned },
+        { time: cue.end, weight: -weight, styled: -styled, positioned: -positioned });
     });
     events.sort((a: SubtitleBudgetEvent, b: SubtitleBudgetEvent) => a.time - b.time || a.weight - b.weight);
-    let weight = 0; let styled = 0;
-    for (const event of events) { weight += event.weight; styled += event.styled; if (styled > 0 && weight > 4096) { throw new Error('subtitle_failed'); } }
+    let weight = 0; let styled = 0; let positioned = 0;
+    for (const event of events) {
+      weight += event.weight; styled += event.styled; positioned += event.positioned;
+      if ((styled > 0 && weight > 4096) || positioned > 256) { throw new Error('subtitle_failed'); }
+    }
   }
   return cues;
 }
@@ -109,6 +119,16 @@ export function subtitleContentAt(cues: SubtitleCue[], position: number): Subtit
   while (low < high) { const mid = Math.floor((low + high) / 2); if (cues[mid].start <= position) { low = mid + 1; } else { high = mid; } }
   const active: SubtitleCue[] = [];
   for (let i = low - 1; i >= 0 && cues[i].maxEnd > position; i--) { if (position < cues[i].end) { active.unshift(cues[i]); } }
+  const result = cueContent(active);
+  if (active.some((cue: SubtitleCue) => !!cue.placement)) {
+    const flow = cueContent(active.filter((cue: SubtitleCue) => !cue.placement));
+    result.flowText = flow.text; result.flowRuns = flow.runs;
+    result.positioned = active.filter((cue: SubtitleCue) => !!cue.placement).map((cue: SubtitleCue) => cue.placement!);
+  }
+  return result;
+}
+
+function cueContent(active: SubtitleCue[]): SubtitleContent {
   const value = active.map((cue: SubtitleCue) => cue.text).join('\n');
   if (!active.some((cue: SubtitleCue) => !!cue.runs?.length)) { return new SubtitleContent(value); }
   if (active.length === 1) { return new SubtitleContent(value, active[0].runs); }

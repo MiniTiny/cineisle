@@ -13,6 +13,7 @@ export struct RichCaption {
   @Prop padX: number = 8;
   @Prop padY: number = 8;
   @Prop radius: number = 0;
+  @Prop stretch: boolean = true;
 
   build() {
     Text() {
@@ -28,6 +29,7 @@ export struct RichCaption {
       .fontColor(this.captionStyle.foreground).fontFamily(this.captionStyle.family).textAlign(TextAlign.Center)
       .textShadow(captionShadows(this.captionStyle.edge)).maxLines(this.limit).textOverflow({ overflow: TextOverflow.Ellipsis })
       .backgroundColor(this.captionStyle.background).borderRadius(this.radius)
-      .padding({ left: this.padX, right: this.padX, top: this.padY, bottom: this.padY }).width('100%')
+      .padding({ left: this.padX, right: this.padX, top: this.padY, bottom: this.padY })
+      .constraintSize({ maxWidth: '100%' }).width(this.stretch ? '100%' : undefined)
   }
 }
