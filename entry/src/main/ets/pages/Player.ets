@@ -112,7 +112,7 @@ struct Player {
   private alive: boolean = false;
   @State captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
   private stopCaptions: (() => void) | undefined = undefined;
-  private visible: boolean = true;
+  @State visible: boolean = true;
   private loadRevision: number = 0;
   private finished: boolean = false;
 
@@ -414,6 +414,10 @@ struct Player {
     return this.styledFrame ? styledSubtitleBounds(this.styledFrame, this.surfaceWidth, this.surfaceHeight, this.zoomed) ??
       { left: 0, top: 0, width: 0, height: 0 } : { left: 0, top: 0, width: 0, height: 0 };
   }
+  private canShowMainSubtitle(): boolean {
+    return this.alive && this.visible && this.frameReady && this.state !== 'error' && !this.pipActive &&
+      !this.locked && AppLock.permit() && this.ownerClient === AppService.client;
+  }
   private windowStateChanged(): void { if (this.locked) { this.clearIntro(); this.clearTrickplay(); this.cancelGesture(); this.clearHide(); this.controlsVisible = true; } else if (this.visible) { this.restoreIntro(); this.restoreTrickplay(); } this.syncWindow(); }
   private clearHide(): void { if (this.hideTimer >= 0) { clearTimeout(this.hideTimer); this.hideTimer = -1; } }
   private showControls(): void {
@@ -491,24 +495,20 @@ struct Player {
               .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).height)
               .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); if (this.state !== 'error') { this.controller?.open(this.route, this.surfaceId); } })
             if (!this.frameReady) { Column() {}.id('playbackFrameCover').width('100%').height('100%').backgroundColor('#000000').hitTestBehavior(HitTestMode.None) }
-            if (this.styledFrame && this.frameReady && !this.pipActive) {
+            if (this.styledFrame && this.canShowMainSubtitle()) {
               Stack({ alignContent: Alignment.TopStart }) {
                 Image(this.styledFrame.bitmap).id('playbackAssSubtitle').objectFit(ImageFit.Fill)
                   .width(this.styledBounds().width).height(this.styledBounds().height)
                   .position({ x: this.styledBounds().left, y: this.styledBounds().top })
               }.width('100%').height('100%').clip(true).hitTestBehavior(HitTestMode.None)
             }
-            if (this.subtitle) {
+            if (this.night && !this.pipActive) { Column() {}.width('100%').height('100%').backgroundColor('#000000').opacity(this.dimOpacity).hitTestBehavior(HitTestMode.None) }
+            if (this.subtitle && this.canShowMainSubtitle() && (!this.immersive || !this.controlsVisible)) {
               Column() {
-                Column() {
-                  Text(this.subtitle).fontSize(this.captionStyle.system ? `${20 * this.captionStyle.scale}vp` : 20).fontColor(this.captionStyle.foreground).textAlign(TextAlign.Center)
-                    .fontFamily(this.captionStyle.family).textShadow(captionShadows(this.captionStyle.edge))
-                    .backgroundColor(this.captionStyle.background).padding(8).width('100%')
-                }.width('94%').padding(4).backgroundColor(this.captionStyle.window)
+                this.plainSubtitle()
               }.width('100%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Center)
                 .padding({ bottom: 16 }).hitTestBehavior(HitTestMode.None)
             }
-            if (this.night && !this.pipActive) { Column() {}.width('100%').height('100%').backgroundColor('#000000').opacity(this.dimOpacity).hitTestBehavior(HitTestMode.None) }
             if (this.gestureHint) { Text(this.gestureHint).fontSize(16).fontColor('#FFFFFF').backgroundColor('#BB0D1924').padding(12).borderRadius(12).hitTestBehavior(HitTestMode.None) }
             Column() {}.width('100%').height('100%')
             .gesture(GestureGroup(GestureMode.Exclusive,
@@ -530,11 +530,15 @@ struct Player {
               }.width('100%').height('100%').padding(16).hitTestBehavior(HitTestMode.Transparent)
             }
             if (this.immersive && this.controlsVisible && !this.pipActive) {
-              Column() {
-                this.playerHeader()
-                Blank().layoutWeight(1).hitTestBehavior(HitTestMode.None)
+              Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center }) {
+                Column() { this.playerHeader() }.width('100%').flexShrink(0)
+                Blank().flexGrow(1).flexShrink(1).hitTestBehavior(HitTestMode.None)
+                if (this.subtitle && this.canShowMainSubtitle()) {
+                  Column() { this.plainSubtitle() }.width('100%').alignItems(HorizontalAlign.Center)
+                    .padding({ bottom: 8 }).flexShrink(0).hitTestBehavior(HitTestMode.None)
+                }
                 this.playbackControls()
-              }.width('100%').height('100%').justifyContent(FlexAlign.SpaceBetween).hitTestBehavior(HitTestMode.Transparent)
+              }.width('100%').height('100%').hitTestBehavior(HitTestMode.Transparent)
             }
             if (this.thumbnail && this.canScrub() && (this.sliderPreview >= 0 || this.seekPreview >= 0)) {
               Column({ space: 4 }) {
@@ -555,6 +559,16 @@ struct Player {
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
       this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
     })
+  }
+
+  @Builder
+  private plainSubtitle() {
+    Column() {
+      Text(this.subtitle).id('playbackTextSubtitle')
+        .fontSize(this.captionStyle.system ? `${20 * this.captionStyle.scale}vp` : 20).fontColor(this.captionStyle.foreground).textAlign(TextAlign.Center)
+        .fontFamily(this.captionStyle.family).textShadow(captionShadows(this.captionStyle.edge))
+        .backgroundColor(this.captionStyle.background).padding(8).width('100%')
+    }.width('94%').padding(4).backgroundColor(this.captionStyle.window).hitTestBehavior(HitTestMode.None)
   }
 
   @Builder
@@ -630,6 +644,7 @@ struct Player {
       }.padding({ left: 12, right: 12, bottom: 12 }).width('100%').alignItems(HorizontalAlign.Start)
     }.width(this.immersive ? '100%' : this.viewportWidth > this.viewportHeight ? Math.min(320, this.viewportWidth * 0.45) : '100%')
       .height(this.immersive ? Math.min(this.viewportHeight * 0.68, this.options ? this.viewportHeight * 0.68 : UiLayout.playerControls(this.viewportHeight, this.fontScale, false)) : this.viewportWidth > this.viewportHeight ? '100%' : UiLayout.playerControls(this.viewportHeight, this.fontScale, this.options && !this.controlsLocked))
+      .constraintSize({ minHeight: 44 }).flexShrink(this.immersive ? 1 : 0)
       .align(Alignment.TopStart).onTouch(() => this.showControls()).onAreaChange((_old: Area, area: Area) => { this.controlWidth = Number.parseFloat(String(area.width)); })
   }
 
