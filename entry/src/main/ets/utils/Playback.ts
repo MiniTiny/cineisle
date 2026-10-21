@@ -1,7 +1,8 @@
 import { MediaItem, MediaStream } from '../model/Models';
-import { subtitleEntities } from './SubtitleEntities';
+import { inlineSubtitle, SubtitleContent, SubtitleRun } from './InlineSubtitle';
 
-export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number }
+export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number; runs?: SubtitleRun[] }
+interface SubtitleBudgetEvent { time: number; weight: number; styled: number }
 export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string; format?: string }
 
 // Unknown season numbers in old caches only allow continuation within the known season.
@@ -68,25 +69,6 @@ function cueTime(value: string): number {
   return Number.isSafeInteger(time) ? time : -1;
 }
 
-function subtitleMarkup(value: string): string {
-  const result: string[] = [];
-  let plainStart = 0; let tagStart = -1; let quote = '';
-  // Scan once, including malformed/unclosed attributes. Repeated '<' must not cause regex rescans.
-  for (let i = 0; i < value.length; i++) {
-    const character = value[i];
-    if (tagStart < 0) { if (character === '<') { tagStart = i; } continue; }
-    if (quote) { if (character === quote) { quote = ''; } continue; }
-    if (character === '"' || character === "'") { quote = character; continue; }
-    if (character === '<') { tagStart = i; continue; }
-    if (character !== '>') { continue; }
-    result.push(value.slice(plainStart, tagStart));
-    if (/^<br(?:\s|\/?>)/i.test(value.slice(tagStart, i + 1))) { result.push('\n'); }
-    plainStart = i + 1; tagStart = -1;
-  }
-  result.push(value.slice(plainStart));
-  return result.join('');
-}
-
 // Jellyfin converts non-ASS text tracks to SRT. Decode text; never execute HTML.
 export function parseSubtitles(source: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
@@ -96,21 +78,44 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     if (timing < 0) { continue; }
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
-    const markup = subtitleMarkup(lines.slice(timing + 1).join('\n').replace(/\{\\[^{}]*\}/g, ''));
-    const content = subtitleEntities(markup).trim();
-    if (start >= 0 && end > start && content) { cues.push({ start: start, end: end, text: content, maxEnd: end }); }
+    if (start < 0 || end <= start) { continue; }
+    const content = inlineSubtitle(lines.slice(timing + 1).join('\n').replace(/\{\\[^{}]*\}/g, ''));
+    if (start >= 0 && end > start && content.text) {
+      const cue: SubtitleCue = { start: start, end: end, text: content.text, maxEnd: end };
+      if (content.runs.length) { cue.runs = content.runs; } cues.push(cue);
+    }
   }
   cues.sort((a: SubtitleCue, b: SubtitleCue) => a.start - b.start);
   let maxEnd = 0;
   cues.forEach((cue: SubtitleCue) => { maxEnd = Math.max(maxEnd, cue.end); cue.maxEnd = maxEnd; });
+  // Reject only excessive simultaneous rich text, not a long movie with many non-overlapping cues.
+  if (cues.some((cue: SubtitleCue) => !!cue.runs?.length)) {
+    const events: SubtitleBudgetEvent[] = [];
+    cues.forEach((cue: SubtitleCue) => {
+      const weight = (cue.runs?.length ?? 1) + 1; const styled = cue.runs?.length ? 1 : 0;
+      events.push({ time: cue.start, weight: weight, styled: styled }, { time: cue.end, weight: -weight, styled: -styled });
+    });
+    events.sort((a: SubtitleBudgetEvent, b: SubtitleBudgetEvent) => a.time - b.time || a.weight - b.weight);
+    let weight = 0; let styled = 0;
+    for (const event of events) { weight += event.weight; styled += event.styled; if (styled > 0 && weight > 4096) { throw new Error('subtitle_failed'); } }
+  }
   return cues;
 }
 
-export function subtitleAt(cues: SubtitleCue[], position: number): string {
-  // Binary-search the last start <= position; scan preceding cues for overlapping dialogue.
+export function subtitleAt(cues: SubtitleCue[], position: number): string { return subtitleContentAt(cues, position).text; }
+
+export function subtitleContentAt(cues: SubtitleCue[], position: number): SubtitleContent {
   let low = 0; let high = cues.length;
   while (low < high) { const mid = Math.floor((low + high) / 2); if (cues[mid].start <= position) { low = mid + 1; } else { high = mid; } }
-  const active: string[] = [];
-  for (let i = low - 1; i >= 0 && cues[i].maxEnd > position; i--) { if (position < cues[i].end) { active.unshift(cues[i].text); } }
-  return active.join('\n');
+  const active: SubtitleCue[] = [];
+  for (let i = low - 1; i >= 0 && cues[i].maxEnd > position; i--) { if (position < cues[i].end) { active.unshift(cues[i]); } }
+  const value = active.map((cue: SubtitleCue) => cue.text).join('\n');
+  if (!active.some((cue: SubtitleCue) => !!cue.runs?.length)) { return new SubtitleContent(value); }
+  if (active.length === 1) { return new SubtitleContent(value, active[0].runs); }
+  const runs: SubtitleRun[] = [];
+  active.forEach((cue: SubtitleCue, index: number) => {
+    if (index > 0) { runs.push(new SubtitleRun('\n')); }
+    runs.push(...(cue.runs ?? [new SubtitleRun(cue.text)]));
+  });
+  return new SubtitleContent(value, runs);
 }

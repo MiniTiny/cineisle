@@ -4,6 +4,8 @@ import { SystemCaptions } from '../service/SystemCaptions';
 import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { StyledSubtitleFrame, StyledSubtitleBounds, styledSubtitleBounds } from '../utils/StyledSubtitle';
+import { EMPTY_SUBTITLE_RUNS, SubtitleRun } from '../utils/InlineSubtitle';
+import { RichCaption } from './RichCaption';
 
 export class PiPSubtitleParams {
   text: string;
@@ -13,6 +15,7 @@ export class PiPSubtitleParams {
   style: CaptionRenderStyle;
   frame: StyledSubtitleFrame | undefined;
   bounds: StyledSubtitleBounds | undefined;
+  runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
   constructor(text: string, fontSize: number, maxLines: number, bottom: number, style: CaptionRenderStyle) {
     this.text = text; this.fontSize = fontSize; this.maxLines = maxLines; this.bottom = bottom; this.style = style;
   }
@@ -29,10 +32,15 @@ function pipSubtitleBuilder(params: PiPSubtitleParams) {
     }
     if (params.text) {
       Column() {
+        if (params.runs.length) {
+          RichCaption({ runs: params.runs, captionStyle: params.style, fontSize: params.fontSize,
+            limit: params.maxLines, identifier: 'pipTextSubtitle', padX: 6, padY: 3, radius: 4 }).width('100%')
+        } else {
         Text(params.text).fontColor(params.style.foreground).fontSize(params.style.system ? `${params.fontSize}vp` : params.fontSize).textAlign(TextAlign.Center)
           .fontFamily(params.style.family).textShadow(captionShadows(params.style.edge))
           .maxLines(params.maxLines).textOverflow({ overflow: TextOverflow.Ellipsis })
           .backgroundColor(params.style.background).borderRadius(4).padding({ left: 6, right: 6, top: 3, bottom: 3 }).width('100%')
+        }
       }.padding(2).backgroundColor(params.style.window).margin({ bottom: params.bottom }).width('94%')
     }
   }.width('100%').height('100%').hitTestBehavior(HitTestMode.None)
@@ -43,6 +51,7 @@ export class PiPSubtitleController extends NodeController {
   private node: BuilderNode<[PiPSubtitleParams]> | undefined = undefined;
   private context: UIContext | undefined = undefined;
   private value: string = '';
+  private runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
   private frame: StyledSubtitleFrame | undefined;
   private width: number = 0;
   private fontSize: number = 14;
@@ -62,6 +71,7 @@ export class PiPSubtitleController extends NodeController {
     const size = this.fontSize * this.style.scale;
     const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(this.height * 0.45 / (size * 1.4)))) : this.maxLines;
     const params = new PiPSubtitleParams(this.value, size, lines, this.bottom, this.style);
+    params.runs = this.runs;
     params.frame = this.frame;
     params.bounds = this.frame ? styledSubtitleBounds(this.frame, this.width, this.height, false) : undefined;
     return params;
@@ -83,9 +93,9 @@ export class PiPSubtitleController extends NodeController {
     } catch (e) { this.reportFailure(); this.releaseNode(); return null; }
   }
 
-  setText(value: string): void {
-    if (this.closed || value === this.value) { return; }
-    this.value = value; this.update();
+  setText(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS): void {
+    if (this.closed || (value === this.value && runs === this.runs)) { return; }
+    this.value = value; this.runs = runs; this.update();
   }
 
   setFrame(frame: StyledSubtitleFrame | undefined): void {
@@ -120,6 +130,6 @@ export class PiPSubtitleController extends NodeController {
 
   dispose(): void {
     if (!this.closed) { this.setText(''); this.setFrame(undefined); this.closed = true; }
-    this.value = ''; this.frame = undefined; this.releaseNode();
+    this.value = ''; this.runs = EMPTY_SUBTITLE_RUNS; this.frame = undefined; this.releaseNode();
   }
 }

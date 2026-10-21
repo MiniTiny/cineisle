@@ -408,7 +408,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "ASS/SSA subtitles retain styles and animation; other text subtitles use SRT. Downloads can cache embedded and external text tracks, and existing caches can be updated online. Image subtitles and video attachment fonts are not supported yet; glyphs depend on available device fonts. Offline playback offers cached subtitles and tracks recognized by the device."
+      "value": "ASS/SSA subtitles retain styles and animation; SRT supports bold, italic, underline, colors and font families. SRT positioning is not supported yet. Downloads can cache embedded and external text tracks, and existing caches can be updated online. Image subtitles and video attachment fonts are not supported yet; glyphs depend on available device fonts. Offline playback offers cached subtitles and tracks recognized by the device."
     },
     {
       "name": "track_switch_failed",

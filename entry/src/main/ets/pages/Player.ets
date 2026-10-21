@@ -23,6 +23,8 @@ import { PlaybackController, PlaybackStatus } from '../service/PlaybackControlle
 import { SystemCaptions } from '../service/SystemCaptions';
 import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
+import { EMPTY_SUBTITLE_RUNS, SubtitleContent, SubtitleRun } from '../utils/InlineSubtitle';
+import { RichCaption } from '../components/RichCaption';
 import { PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
@@ -51,6 +53,7 @@ struct Player {
   @State playbackPosition: number = 0;
   @State duration: number = 0;
   @State subtitle: string = '';
+  @State subtitleRuns: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
   @State styledFrame: StyledSubtitleFrame | undefined = undefined;
   @State audio: TrackChoice[] = [];
   @State subtitles: TrackChoice[] = [];
@@ -138,7 +141,10 @@ struct Player {
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
-      subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.system?.updateSubtitle(value); } },
+      subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.system?.updateSubtitle(value); } },
+      caption: (value: SubtitleContent) => {
+        if (this.alive) { this.subtitle = value.text; this.subtitleRuns = value.runs; this.system?.updateSubtitle(value.text, value.runs); }
+      },
       styledSubtitle: (frame: StyledSubtitleFrame | undefined) => {
         if (this.alive) { this.styledFrame = frame; this.system?.updateStyledSubtitle(frame); }
       },
@@ -564,10 +570,15 @@ struct Player {
   @Builder
   private plainSubtitle() {
     Column() {
+      if (this.subtitleRuns.length) {
+        RichCaption({ runs: this.subtitleRuns, captionStyle: this.captionStyle, fontSize: 20 * (this.captionStyle.system ? this.captionStyle.scale : 1),
+          identifier: 'playbackTextSubtitle' }).width('100%')
+      } else {
       Text(this.subtitle).id('playbackTextSubtitle')
         .fontSize(this.captionStyle.system ? `${20 * this.captionStyle.scale}vp` : 20).fontColor(this.captionStyle.foreground).textAlign(TextAlign.Center)
         .fontFamily(this.captionStyle.family).textShadow(captionShadows(this.captionStyle.edge))
         .backgroundColor(this.captionStyle.background).padding(8).width('100%')
+      }
     }.width('94%').padding(4).backgroundColor(this.captionStyle.window).hitTestBehavior(HitTestMode.None)
   }
 
