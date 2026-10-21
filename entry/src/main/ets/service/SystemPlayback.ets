@@ -155,6 +155,9 @@ export class SystemPlayback {
   sync(force: boolean = false): void {
     if (this.disposed) { return; }
     const status = this.controller.snapshot();
+    // Until the surface opens, the controller still has its empty default route.
+    // Keep the requested media identity used to initialize this system session.
+    if (!status.route.item.Id) { return; }
     const changed = status.state !== this.latest.state || status.route.item.Id !== this.latest.route.item.Id || status.route.mediaSourceId !== this.latest.route.mediaSourceId;
     this.latest = status;
     if (changed && status.state === 'playing') { this.playIntent = true; }
