@@ -2,7 +2,8 @@ import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import fs from '@ohos.file.fs';
 import { PlaybackRoute } from '../model/Models';
-import { parseSubtitles, subtitleAt, SubtitleCue, subtitleFormat, textSubtitle, TrackChoice, validAssDocument } from '../utils/Playback';
+import { parseSubtitles, subtitleContentAt, SubtitleCue, subtitleFormat, textSubtitle, TrackChoice, validAssDocument } from '../utils/Playback';
+import { SubtitleContent } from '../utils/InlineSubtitle';
 import { StyledSubtitleFrame, StyledSubtitleSession } from '../utils/StyledSubtitle';
 import { text } from '../utils/Strings';
 import { JellyfinClient } from './JellyfinClient';
@@ -14,6 +15,7 @@ export interface PlayerView {
   time: (position: number, duration: number) => void;
   tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => void;
   subtitle: (value: string) => void;
+  caption?: (value: SubtitleContent) => void;
   error: (message: string) => void;
   reportError: (failed: boolean) => void;
   complete: () => void;
@@ -125,7 +127,7 @@ export class PlaybackController {
     const player = this.player; const file = this.file;
     this.player = undefined; this.file = undefined;
     this.closeStyled();
-    this.cues = []; this.nativeSubtitle = ''; this.view.subtitle(''); this.view.frame?.(false);
+    this.cues = []; this.nativeSubtitle = ''; this.publishCaption(new SubtitleContent()); this.view.frame?.(false);
     if (!player && !file) { return; }
     // New loads wait for every detached player, including one released after a fatal error.
     this.releasing = this.releasing.then(async () => {
@@ -189,7 +191,7 @@ export class PlaybackController {
           this.paused = true; if (this.started) { this.send('Progress'); }
           this.syncStyled();
         } else if (state === 'completed') {
-          this.subtitleEnded = true; this.nativeSubtitle = ''; this.view.subtitle('');
+          this.subtitleEnded = true; this.nativeSubtitle = ''; this.publishCaption(new SubtitleContent());
           this.syncStyled();
           this.confirmPosition(player.duration, player.duration, true); this.seeking = false;
           this.position = player.duration; this.view.time(this.position, player.duration); this.stopReport(); this.view.complete();
@@ -296,11 +298,14 @@ export class PlaybackController {
     } catch (e) { this.view.error(text('volume_failed')); return false; }
   }
   private emitTracks(): void { this.view.tracks(this.audio.slice(), this.subtitles.slice(), this.audioKey, this.subtitleKey); }
+  private publishCaption(value: SubtitleContent): void {
+    if (this.view.caption) { this.view.caption(value); } else { this.view.subtitle(value.text); }
+  }
   private renderSubtitle(): void {
-    if (this.styled) { this.view.subtitle(''); this.syncStyled(); return; }
-    if (this.subtitleEnded || !this.player) { this.view.subtitle(''); return; }
-    this.view.subtitle((this.subtitleKey.startsWith('server:') || this.subtitleKey.startsWith('local:')) ? subtitleAt(this.cues, this.position) :
-      this.subtitleKey.startsWith('native:') && this.position >= this.subtitleStart && this.position < this.subtitleEnd ? this.nativeSubtitle : '');
+    if (this.styled) { this.publishCaption(new SubtitleContent()); this.syncStyled(); return; }
+    if (this.subtitleEnded || !this.player) { this.publishCaption(new SubtitleContent()); return; }
+    this.publishCaption((this.subtitleKey.startsWith('server:') || this.subtitleKey.startsWith('local:')) ? subtitleContentAt(this.cues, this.position) :
+      new SubtitleContent(this.subtitleKey.startsWith('native:') && this.position >= this.subtitleStart && this.position < this.subtitleEnd ? this.nativeSubtitle : ''));
   }
 
   private closeStyled(): void {
