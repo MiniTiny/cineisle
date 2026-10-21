@@ -1,4 +1,5 @@
 import { MediaItem, MediaStream } from '../model/Models';
+import { subtitleEntities } from './SubtitleEntities';
 
 export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number }
 export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string; format?: string }
@@ -60,12 +61,33 @@ function assTime(value: string): number {
 }
 
 function cueTime(value: string): number {
-  const match = /^(\d+):(\d{2}):(\d{2})[,.](\d{3})$/.exec(value.trim());
+  const match = /^(?:(\d+):)?(\d{1,2}):(\d{1,2})(?:,(\d{1,3})|\.(\d{3}))?$/.exec(value.trim());
   if (!match || Number(match[2]) > 59 || Number(match[3]) > 59) { return -1; }
-  return ((Number(match[1]) * 60 + Number(match[2])) * 60 + Number(match[3])) * 1000 + Number(match[4]);
+  // SubRip's optional comma field is a millisecond count, not a decimal fraction.
+  const time = ((Number(match[1] ?? '0') * 60 + Number(match[2])) * 60 + Number(match[3])) * 1000 + Number(match[4] ?? match[5] ?? '0');
+  return Number.isSafeInteger(time) ? time : -1;
 }
 
-// Jellyfin converts text tracks to SRT. Render plain text, not HTML or ASS styling.
+function subtitleMarkup(value: string): string {
+  const result: string[] = [];
+  let plainStart = 0; let tagStart = -1; let quote = '';
+  // Scan once, including malformed/unclosed attributes. Repeated '<' must not cause regex rescans.
+  for (let i = 0; i < value.length; i++) {
+    const character = value[i];
+    if (tagStart < 0) { if (character === '<') { tagStart = i; } continue; }
+    if (quote) { if (character === quote) { quote = ''; } continue; }
+    if (character === '"' || character === "'") { quote = character; continue; }
+    if (character === '<') { tagStart = i; continue; }
+    if (character !== '>') { continue; }
+    result.push(value.slice(plainStart, tagStart));
+    if (/^<br(?:\s|\/?>)/i.test(value.slice(tagStart, i + 1))) { result.push('\n'); }
+    plainStart = i + 1; tagStart = -1;
+  }
+  result.push(value.slice(plainStart));
+  return result.join('');
+}
+
+// Jellyfin converts non-ASS text tracks to SRT. Decode text; never execute HTML.
 export function parseSubtitles(source: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
   for (const block of source.replace(/^\uFEFF/, '').replace(/\r/g, '').split(/\n\s*\n/)) {
@@ -74,8 +96,8 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     if (timing < 0) { continue; }
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
-    const content = lines.slice(timing + 1).join('\n').replace(/<[^>]*>/g, '').replace(/\{\\[^}]*\}/g, '')
-      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
+    const markup = subtitleMarkup(lines.slice(timing + 1).join('\n').replace(/\{\\[^{}]*\}/g, ''));
+    const content = subtitleEntities(markup).trim();
     if (start >= 0 && end > start && content) { cues.push({ start: start, end: end, text: content, maxEnd: end }); }
   }
   cues.sort((a: SubtitleCue, b: SubtitleCue) => a.start - b.start);
