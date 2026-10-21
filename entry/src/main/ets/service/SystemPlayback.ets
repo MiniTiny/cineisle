@@ -26,6 +26,7 @@ export interface SystemPlayerView {
 // One owner per UIAbility. Page exit and ability destruction tear down the same resources.
 export class SystemPlayback {
   static current: SystemPlayback | undefined = undefined;
+  private static sessionHandoff: Promise<void> = Promise.resolve();
   private autoPiP: () => boolean;
   private autoQueued: boolean = false;
   private autoArmed: boolean = false;
@@ -90,11 +91,18 @@ export class SystemPlayback {
   }
 
   initialize(): Promise<void> {
-    if (!this.initialization) { this.initialization = this.createSession(); }
+    if (!this.initialization) {
+      // Multiple new pages can capture the same predecessor while its disposal is pending.
+      // Serialize the complete ownership handoff, including native creation and activation.
+      const operation = SystemPlayback.sessionHandoff.then(() => this.createSession());
+      this.initialization = operation;
+      SystemPlayback.sessionHandoff = operation.then(() => {}, () => {});
+    }
     return this.initialization;
   }
 
   private async createSession(): Promise<void> {
+    if (this.disposed) { return; }
     try {
       const previous = SystemPlayback.current;
       if (previous && previous !== this) { await previous.dispose(); if (previous.taskActive || previous.pip || previous.session || (previous.captions && !previous.captions.isReleased)) { throw new Error('system_playback_cleanup_failed'); } }
