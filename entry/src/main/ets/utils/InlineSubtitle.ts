@@ -13,10 +13,25 @@ export class SubtitleRun {
   }
 }
 export const EMPTY_SUBTITLE_RUNS: SubtitleRun[] = [];
+export class PositionedSubtitle {
+  id: number;
+  text: string;
+  runs: SubtitleRun[];
+  alignment: number;
+  constructor(id: number, text: string, runs: SubtitleRun[], alignment: number) {
+    this.id = id; this.text = text; this.runs = runs; this.alignment = alignment;
+  }
+}
+export const EMPTY_POSITIONED_SUBTITLES: PositionedSubtitle[] = [];
 export class SubtitleContent {
   text: string;
   runs: SubtitleRun[];
-  constructor(text: string = '', runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS) { this.text = text; this.runs = runs; }
+  flowText: string;
+  flowRuns: SubtitleRun[];
+  positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
+  constructor(text: string = '', runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS) {
+    this.text = text; this.runs = runs; this.flowText = text; this.flowRuns = runs;
+  }
 }
 interface FormatFrame { tag: string; style: SubtitleRun }
 interface FontAttributes { color?: string; face?: string }

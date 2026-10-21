@@ -9,7 +9,7 @@ import { PlaybackRoute } from '../model/Models';
 import { text } from '../utils/Strings';
 import { ProductIdentity } from '../utils/ProductIdentity';
 import { PlaybackController, PlaybackStatus } from './PlaybackController';
-import { EMPTY_SUBTITLE_RUNS, SubtitleRun } from '../utils/InlineSubtitle';
+import { EMPTY_SUBTITLE_RUNS, SubtitleRun, EMPTY_POSITIONED_SUBTITLES, PositionedSubtitle } from '../utils/InlineSubtitle';
 import { PiPSubtitleController } from '../components/PiPSubtitle';
 import { StyledSubtitleFrame } from '../utils/StyledSubtitle';
 
@@ -41,6 +41,7 @@ export class SystemPlayback {
   private captions: PiPSubtitleController | undefined = undefined;
   private subtitleText: string = '';
   private subtitleRuns: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
+  private positionedSubtitles: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
   private styledFrame: StyledSubtitleFrame | undefined;
   private ready: boolean = false;
   private disposed: boolean = false;
@@ -78,9 +79,9 @@ export class SystemPlayback {
 
   private emit(): void { this.view.changed({ ready: this.ready, backgroundEnabled: this.backgroundEnabled, pipSupported: this.pipSupported, pipActive: this.pipActive }); }
 
-  updateSubtitle(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS): void {
+  updateSubtitle(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS, positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES): void {
     if (this.disposed) { return; }
-    this.subtitleText = value; this.subtitleRuns = runs; this.captions?.setText(value, runs);
+    this.subtitleText = value; this.subtitleRuns = runs; this.positionedSubtitles = positioned; this.captions?.setText(value, runs, positioned);
   }
 
   updateStyledSubtitle(frame: StyledSubtitleFrame | undefined): void {
@@ -348,7 +349,7 @@ export class SystemPlayback {
     const status = this.controller.snapshot();
     this.captions?.dispose();
     this.captions = new PiPSubtitleController(() => { this.view.error(text('pip_subtitle_failed')); });
-    this.captions.setText(this.subtitleText, this.subtitleRuns);
+    this.captions.setText(this.subtitleText, this.subtitleRuns, this.positionedSubtitles);
     this.captions.setFrame(this.styledFrame);
     const pip = await PiPWindow.create({ context: this.context, componentController: this.surface,
       templateType: PiPWindow.PiPTemplateType.VIDEO_PLAY, contentWidth: Math.max(1, status.width), contentHeight: Math.max(1, status.height),
@@ -436,7 +437,7 @@ export class SystemPlayback {
     this.disposed = true; this.ready = false; this.backgroundEnabled = false; this.taskWanted = false; ++this.preferenceRevision; ++this.commandRevision;
     this.autoWait?.();
     this.controller.pausePlayback();
-    this.subtitleText = ''; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.styledFrame = undefined; this.captions?.dispose();
+    this.subtitleText = ''; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.positionedSubtitles = EMPTY_POSITIONED_SUBTITLES; this.styledFrame = undefined; this.captions?.dispose();
     this.emit(); this.closing = this.cleanup(); return this.closing;
   }
 

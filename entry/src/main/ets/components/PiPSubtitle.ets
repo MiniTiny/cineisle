@@ -4,7 +4,8 @@ import { SystemCaptions } from '../service/SystemCaptions';
 import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { StyledSubtitleFrame, StyledSubtitleBounds, styledSubtitleBounds } from '../utils/StyledSubtitle';
-import { EMPTY_SUBTITLE_RUNS, SubtitleRun } from '../utils/InlineSubtitle';
+import { EMPTY_SUBTITLE_RUNS, SubtitleRun, EMPTY_POSITIONED_SUBTITLES, PositionedSubtitle } from '../utils/InlineSubtitle';
+import { PositionedCaption } from './PositionedCaption';
 import { RichCaption } from './RichCaption';
 
 export class PiPSubtitleParams {
@@ -16,6 +17,9 @@ export class PiPSubtitleParams {
   frame: StyledSubtitleFrame | undefined;
   bounds: StyledSubtitleBounds | undefined;
   runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
+  positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
+  width: number = 0;
+  height: number = 0;
   constructor(text: string, fontSize: number, maxLines: number, bottom: number, style: CaptionRenderStyle) {
     this.text = text; this.fontSize = fontSize; this.maxLines = maxLines; this.bottom = bottom; this.style = style;
   }
@@ -43,6 +47,14 @@ function pipSubtitleBuilder(params: PiPSubtitleParams) {
         }
       }.padding(2).backgroundColor(params.style.window).margin({ bottom: params.bottom }).width('94%')
     }
+    if (params.positioned.length) {
+      Stack({ alignContent: Alignment.TopStart }) {
+        ForEach(params.positioned, (cue: PositionedSubtitle) => {
+          PositionedCaption({ cue: cue, captionStyle: params.style, fontSize: params.fontSize,
+            canvasWidth: params.width, canvasHeight: params.height, identifier: `pipPositionedSubtitle-${cue.id}` })
+        }, (cue: PositionedSubtitle): string => JSON.stringify(cue))
+      }.width('100%').height('100%').clip(true)
+    }
   }.width('100%').height('100%').hitTestBehavior(HitTestMode.None)
 }
 
@@ -52,6 +64,7 @@ export class PiPSubtitleController extends NodeController {
   private context: UIContext | undefined = undefined;
   private value: string = '';
   private runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
+  private positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
   private frame: StyledSubtitleFrame | undefined;
   private width: number = 0;
   private fontSize: number = 14;
@@ -71,7 +84,7 @@ export class PiPSubtitleController extends NodeController {
     const size = this.fontSize * this.style.scale;
     const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(this.height * 0.45 / (size * 1.4)))) : this.maxLines;
     const params = new PiPSubtitleParams(this.value, size, lines, this.bottom, this.style);
-    params.runs = this.runs;
+    params.runs = this.runs; params.positioned = this.positioned; params.width = this.width; params.height = this.height;
     params.frame = this.frame;
     params.bounds = this.frame ? styledSubtitleBounds(this.frame, this.width, this.height, false) : undefined;
     return params;
@@ -93,9 +106,9 @@ export class PiPSubtitleController extends NodeController {
     } catch (e) { this.reportFailure(); this.releaseNode(); return null; }
   }
 
-  setText(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS): void {
-    if (this.closed || (value === this.value && runs === this.runs)) { return; }
-    this.value = value; this.runs = runs; this.update();
+  setText(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS, positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES): void {
+    if (this.closed || (value === this.value && runs === this.runs && positioned === this.positioned)) { return; }
+    this.value = value; this.runs = runs; this.positioned = positioned; this.update();
   }
 
   setFrame(frame: StyledSubtitleFrame | undefined): void {
@@ -130,6 +143,6 @@ export class PiPSubtitleController extends NodeController {
 
   dispose(): void {
     if (!this.closed) { this.setText(''); this.setFrame(undefined); this.closed = true; }
-    this.value = ''; this.runs = EMPTY_SUBTITLE_RUNS; this.frame = undefined; this.releaseNode();
+    this.value = ''; this.runs = EMPTY_SUBTITLE_RUNS; this.positioned = EMPTY_POSITIONED_SUBTITLES; this.frame = undefined; this.releaseNode();
   }
 }

@@ -173,6 +173,18 @@ test('pause/restore retains current caption and close rejects late native events
   await owner.pause(); assert.equal(textOf(window), p.subtitle); p.aboutToDisappear(); await owner.dispose();
   old.emit('subtitleUpdate', cue); old.emit('timeUpdate', 1500); assert.equal(window.captionNode.builderNode.params.text, ''); assert.equal(window.captionNode.builderNode.disposed, 1);
 });
+test('positioned SRT keeps page/PiP cue identity, same-text moves, mixed flow and off cleanup', async () => {
+  const raw = '1\n00:00 --> 00:02\n{\\an7}<b>same</b>\n\n2\n00:02 --> 00:04\n{\\an3}<b>same</b>\n\n3\n00:00 --> 00:04\nFLOW\n';
+  const p = await page(route(), async () => raw); await serverCue(p, 1000); const window = await pip(p);
+  assert.equal(p.subtitle, 'FLOW'); assert.equal(p.positionedSubtitles[0].alignment, 7);
+  assert.equal(window.captionNode.builderNode.params.text, 'FLOW');
+  assert.strictEqual(window.captionNode.builderNode.params.positioned[0], p.positionedSubtitles[0]);
+  nativePlayers[0].emit('timeUpdate', 2500);
+  assert.equal(p.positionedSubtitles[0].text, 'same'); assert.equal(window.captionNode.builderNode.params.positioned[0].alignment, 3);
+  await p.system.stopPiP(); await p.system.startPiP(); assert.equal(window.captionNode.builderNode.params.positioned[0].alignment, 3);
+  await p.controller.selectSubtitle(''); assert.equal(p.positionedSubtitles.length, 0);
+  assert.equal(window.captionNode.builderNode.params.positioned.length, 0); assert.equal(p.subtitle, '');
+});
 (async () => {
   for (const [name, fn] of tests) {
     h.reset(); owners.length = 0; captions.length = 0; SystemPlayback.current = undefined;
