@@ -185,6 +185,14 @@ test('positioned SRT keeps page/PiP cue identity, same-text moves, mixed flow an
   await p.controller.selectSubtitle(''); assert.equal(p.positionedSubtitles.length, 0);
   assert.equal(window.captionNode.builderNode.params.positioned.length, 0); assert.equal(p.subtitle, '');
 });
+test('relative subtitle size survives the full page/system/PiP publication and same-text boundary', async () => {
+  const raw='1\n00:00 --> 00:02\n<big>same</big>\n\n2\n00:02 --> 00:04\n<small>same</small>\n';
+  const p=await page(route(),async()=>raw);await serverCue(p,1000);const window=await pip(p);
+  assert.equal(p.subtitleRuns[0].sizeScale,1.25);assert.equal(window.captionNode.builderNode.params.runs[0].sizeScale,1.25);
+  nativePlayers[0].emit('timeUpdate',2500);assert.equal(p.subtitle,'same');assert.equal(window.captionNode.builderNode.params.runs[0].sizeScale,.8);
+  await p.system.stopPiP();await p.system.startPiP();assert.equal(window.captionNode.builderNode.params.runs[0].sizeScale,.8);
+  await p.controller.selectSubtitle('');assert.equal(window.captionNode.builderNode.params.runs.length,0);
+});
 (async () => {
   for (const [name, fn] of tests) {
     h.reset(); owners.length = 0; captions.length = 0; SystemPlayback.current = undefined;

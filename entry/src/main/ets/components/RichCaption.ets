@@ -19,6 +19,7 @@ export struct RichCaption {
     Text() {
       ForEach(this.runs, (run: SubtitleRun) => {
         Span(run.text).fontWeight(run.bold ? FontWeight.Bold : FontWeight.Normal)
+          .fontSize(this.captionStyle.system ? `${this.fontSize * (run.sizeScale ?? 1)}vp` : this.fontSize * (run.sizeScale ?? 1))
           .fontStyle(run.italic ? FontStyle.Italic : FontStyle.Normal)
           .decoration({ type: run.underline ? TextDecorationType.Underline : TextDecorationType.None,
             color: run.color || this.captionStyle.foreground })
