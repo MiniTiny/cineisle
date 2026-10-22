@@ -23,7 +23,7 @@ if(NOT EXISTS "${CINEISLE_ASS_DEPS}/include/ass/ass.h")
     message(FATAL_ERROR "The native ASS dependency headers are missing")
 endif()
 
-add_library(cineisle_ass SHARED ass/AssRenderer.cpp ass/NapiAssRenderer.cpp)
+add_library(cineisle_ass SHARED ass/AssRenderer.cpp ass/NapiAssRenderer.cpp caption/NapiCaptionRenderer.cpp)
 target_include_directories(cineisle_ass PRIVATE "${CINEISLE_ASS_DEPS}/include")
 target_compile_options(cineisle_ass PRIVATE -Wall -Wextra)
 target_link_libraries(cineisle_ass PRIVATE
@@ -33,4 +33,4 @@ target_link_libraries(cineisle_ass PRIVATE
     "${CINEISLE_ASS_DEPS}/lib/libfreetype.a"
     "${CINEISLE_ASS_DEPS}/lib/libfribidi.a"
     "${CINEISLE_ASS_DEPS}/lib/libexpat.a"
-    ace_napi.z m)
+    ace_napi.z native_drawing m)

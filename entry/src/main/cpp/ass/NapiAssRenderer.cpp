@@ -1,4 +1,5 @@
 #include "AssRenderer.h"
+#include "../caption/NapiCaptionRenderer.h"
 #include <napi/native_api.h>
 #include <atomic>
 #include <cmath>
@@ -194,7 +195,8 @@ napi_value Init(napi_env env, napi_value exports)
     const napi_property_descriptor methods[] = {
         {"create", nullptr, Create, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"render", nullptr, Render, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"close", nullptr, Close, nullptr, nullptr, nullptr, napi_default, nullptr}
+        {"close", nullptr, Close, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"renderCaption", nullptr, RenderCineIsleCaption, nullptr, nullptr, nullptr, napi_default, nullptr}
     };
     napi_define_properties(env, exports, sizeof(methods) / sizeof(methods[0]), methods);
     return exports;

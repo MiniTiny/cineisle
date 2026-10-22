@@ -15,3 +15,17 @@ export const create: (document: string, defaultFont: string, defaultFamily: stri
 export const render: (handle: NativeAssHandle, milliseconds: number, width: number, height: number,
   videoWidth: number, videoHeight: number) => Promise<NativeAssFrame>;
 export const close: (handle: NativeAssHandle) => void;
+
+export interface NativeCaptionRun {
+  text: string; family: string; size: number; baseline: number; color: number;
+  bold: boolean; italic: boolean; underline: boolean; strike: boolean;
+}
+export interface NativeCaptionShadow { color: number; x: number; y: number; radius: number; }
+export interface NativeCaptionRequest {
+  revision?: string;
+  width: number; maxLines: number; intrinsic: boolean; runs: NativeCaptionRun[]; shadows: NativeCaptionShadow[];
+}
+export interface NativeCaptionFrame {
+  width: number; height: number; layoutWidth: number; layoutHeight: number; halo: number; rgba: ArrayBuffer;
+}
+export const renderCaption: (request: NativeCaptionRequest) => Promise<NativeCaptionFrame>;

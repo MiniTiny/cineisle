@@ -1,5 +1,9 @@
 import { subtitleEntities } from './SubtitleEntities';
 
+export class SubtitleBaseline {
+  constructor(public direction: number, public sizeScale: number, public family: string,
+    public bold: boolean, public italic: boolean) {}
+}
 export class SubtitleRun {
   text: string = '';
   bold: boolean = false;
@@ -8,13 +12,16 @@ export class SubtitleRun {
   color: string = '';
   family: string = '';
   sizeScale: number = 1;
+  strike: boolean = false;
+  baselines: SubtitleBaseline[] = [];
   constructor(text: string = '', style?: SubtitleRun) {
     this.text = text;
-    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.family = style.family; this.sizeScale = style.sizeScale ?? 1; }
+    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.family = style.family; this.sizeScale = style.sizeScale ?? 1; this.strike = style.strike ?? false; this.baselines = style.baselines ?? []; }
   }
 }
 export const EMPTY_SUBTITLE_RUNS: SubtitleRun[] = [];
 export class PositionedSubtitle {
+  revision: string = '';
   id: number;
   text: string;
   runs: SubtitleRun[];
@@ -25,6 +32,7 @@ export class PositionedSubtitle {
 }
 export const EMPTY_POSITIONED_SUBTITLES: PositionedSubtitle[] = [];
 export class SubtitleContent {
+  revision: string = '';
   text: string;
   runs: SubtitleRun[];
   flowText: string;
@@ -34,7 +42,7 @@ export class SubtitleContent {
     this.text = text; this.runs = runs; this.flowText = text; this.flowRuns = runs;
   }
 }
-interface FormatFrame { tag: string; style: SubtitleRun }
+interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string }
 interface FontAttributes { color?: string; face?: string }
 // Html.fromHtml's default (legacy) named-color values, including green = 00FF00.
 const colors: Map<string, string> = new Map<string, string>();
@@ -71,9 +79,28 @@ function fontAttributes(tag: string, start: number): FontAttributes {
   return result;
 }
 function sameStyle(a: SubtitleRun, b: SubtitleRun): boolean {
-  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && a.family === b.family && (a.sizeScale ?? 1) === (b.sizeScale ?? 1);
+  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && a.family === b.family && (a.sizeScale ?? 1) === (b.sizeScale ?? 1) && !!a.strike === !!b.strike && JSON.stringify(a.baselines ?? []) === JSON.stringify(b.baselines ?? []);
 }
-function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.family || (run.sizeScale ?? 1) !== 1; }
+function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.family || (run.sizeScale ?? 1) !== 1 || !!run.strike || !!run.baselines?.length; }
+
+// Html inserts metric spans on closing tags: inner spans affect the paint before outer spans.
+// Keep the font state at each script operation, rather than using the final glyph size for every shift.
+function scriptBaselines(stack: FormatFrame[]): SubtitleBaseline[] {
+  const result: SubtitleBaseline[] = [];
+  let scale = 1; let family = ''; let bold = false; let italic = false;
+  for (let i = stack.length - 1; i > 0; i--) {
+    const frame = stack[i];
+    if (frame.tag === 'big') { scale *= 1.25; }
+    else if (frame.tag === 'small') { scale *= 0.8; }
+    else if (frame.tag === 'b' || frame.tag === 'strong') { bold = true; }
+    else if (frame.tag === 'i' || frame.tag === 'em') { italic = true; }
+    else if (frame.tag === 'font' && frame.metricFamily) { family = frame.metricFamily; }
+    else if (frame.tag === 'sup' || frame.tag === 'sub') {
+      result.push(new SubtitleBaseline(frame.tag === 'sup' ? 1 : -1, scale, family, bold, italic));
+    }
+  }
+  return result;
+}
 
 // Keep the existing plain-text result while retaining common SubRip emphasis/font spans.
 export function inlineSubtitle(value: string): SubtitleContent {
@@ -98,26 +125,30 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (match) {
       const name = match[2].toLowerCase(); const closing = !!match[1];
       if (name === 'br' && !closing) { append('\n'); }
-      else if (['b', 'strong', 'i', 'em', 'u', 'font', 'big', 'small'].includes(name)) {
+      else if (['b', 'strong', 'i', 'em', 'u', 'font', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === name) { stack.length = j; break; } }
         } else if (!/\/\s*>$/.test(tag)) {
           if (stack.length > 64) { throw new Error('subtitle_failed'); }
           const style = new SubtitleRun('', stack[stack.length - 1].style);
+          let metricFamily = '';
           if (name === 'b' || name === 'strong') { style.bold = true; }
           else if (name === 'i' || name === 'em') { style.italic = true; }
           else if (name === 'u') { style.underline = true; }
+          else if (name === 's' || name === 'del' || name === 'strike') { style.strike = true; }
           else if (name === 'big' || name === 'small') {
             style.sizeScale *= name === 'big' ? 1.25 : 0.8;
             // Reject an excessive candidate instead of silently changing its authored size.
             if (!Number.isFinite(style.sizeScale) || style.sizeScale < 0.125 || style.sizeScale > 8) { throw new Error('subtitle_failed'); }
           }
-          else {
+          else if (name === 'font') {
             const attributes = fontAttributes(tag, match[0].length);
             style.color = fontColor(attributes.color ?? '') || style.color;
-            style.family = fontFamily(attributes.face ?? '') || style.family;
+            metricFamily = fontFamily(attributes.face ?? '');
+            style.family = metricFamily || style.family;
           }
-          stack.push({ tag: name, style: style });
+          stack.push({ tag: name, style: style, metricFamily: metricFamily });
+          style.baselines = scriptBaselines(stack);
         }
       }
     }

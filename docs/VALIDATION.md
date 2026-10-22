@@ -379,3 +379,11 @@ node tests/ass-ui.test.cjs
 运行`node tests/srt-relative-size.test.cjs`、`node tests/srt-relative-size-ui.test.cjs`、`node tests/pip-subtitle.test.cjs`及完整回归，再做SDK构建。覆盖1.25/0.8比例、嵌套恢复、普通字号、样式组合、同文字变化、定位与重叠身份、比例/片段预算、候选失败保留、迟到响应和离线原始文档；SDK树检查fp/vp传递与原生节点键，不将其当作实际字形尺寸验收。
 
 原生分别比较旧版与新版同一份三色等宽字幕：旧版大小相同，新版放大/正常/缩小的实际像素边界具有相应比例；在实际PiP持续播放跨字号边界、跳转和重建后复核。另验主窗口两倍字号、PIN、离线冷启动无业务HTTP、在线未下载源提取及关闭清理。系统字幕样式、具体字体、物理API12、真实Jellyfin与更长生命周期按各自范围记录。
+
+### SRT 删除线与上下标
+
+执行`node tests/srt-script-decoration.test.cjs`、`node tests/srt-script-decoration-ui.test.cjs`、`node tests/caption-rasterizer.test.cjs`、`node tests/pip-subtitle.test.cjs`、全量回归和`./scripts/build.sh`。覆盖删除线别名与双装饰线、脚本嵌套恢复及不同关闭顺序、字体/强调度量状态、字号单位、同文字键和PiP重建、定位、并发预算、候选失败/迟到响应与离线原始文件。另覆盖异步合并与过期位图、释放所有权、原生错误去重与显式重试、字号配置滞后和清空后框架继续更新旧图像节点。SDK夹具中的Paragraph度量是显式模拟，不证明原生像素。
+
+原生以相同三色等宽SRT对照旧版和新版：核对上/下移、删除线与下划线同时可见、字形尺寸不被上下标自动缩小，以及普通/两倍字号、主窗口/PiP持续播放跨同文字边界、跳转/重建、定位与换行、PIN、离线冷启动零业务HTTP、在线未下载源提取及关闭清理。独立API探针、产品集成、物理API12和真实Jellyfin证据分别记录，不互相替代。
+
+原生接口另验动态字体、粗斜体、UTF-16范围、混合Unicode、透明度、阴影、行数和像素预算及非法输入；原始RGBA与无装饰对照需确认添加两条装饰线不破坏字形。截图使用颜色对比核对细线，避免JPEG压缩后的亮度被误判为缺线。

@@ -10,6 +10,7 @@ import { RichCaption } from './RichCaption';
 
 export class PiPSubtitleParams {
   text: string;
+  revision: string = '';
   fontSize: number;
   maxLines: number;
   bottom: number;
@@ -38,7 +39,7 @@ function pipSubtitleBuilder(params: PiPSubtitleParams) {
       Column() {
         if (params.runs.length) {
           RichCaption({ runs: params.runs, captionStyle: params.style, fontSize: params.fontSize,
-            limit: params.maxLines, identifier: 'pipTextSubtitle', padX: 6, padY: 3, radius: 4 }).width('100%')
+            limit: params.maxLines, revision: params.revision, identifier: 'pipTextSubtitle', padX: 6, padY: 3, radius: 4 }).width('100%')
         } else {
         Text(params.text).fontColor(params.style.foreground).fontSize(params.style.system ? `${params.fontSize}vp` : params.fontSize).textAlign(TextAlign.Center)
           .fontFamily(params.style.family).textShadow(captionShadows(params.style.edge))
@@ -63,6 +64,7 @@ export class PiPSubtitleController extends NodeController {
   private node: BuilderNode<[PiPSubtitleParams]> | undefined = undefined;
   private context: UIContext | undefined = undefined;
   private value: string = '';
+  private revision: string = '';
   private runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
   private positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
   private frame: StyledSubtitleFrame | undefined;
@@ -84,7 +86,7 @@ export class PiPSubtitleController extends NodeController {
     const size = this.fontSize * this.style.scale;
     const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(this.height * 0.45 / (size * 1.4)))) : this.maxLines;
     const params = new PiPSubtitleParams(this.value, size, lines, this.bottom, this.style);
-    params.runs = this.runs; params.positioned = this.positioned; params.width = this.width; params.height = this.height;
+    params.revision = this.revision; params.runs = this.runs; params.positioned = this.positioned; params.width = this.width; params.height = this.height;
     params.frame = this.frame;
     params.bounds = this.frame ? styledSubtitleBounds(this.frame, this.width, this.height, false) : undefined;
     return params;
@@ -106,9 +108,9 @@ export class PiPSubtitleController extends NodeController {
     } catch (e) { this.reportFailure(); this.releaseNode(); return null; }
   }
 
-  setText(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS, positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES): void {
-    if (this.closed || (value === this.value && runs === this.runs && positioned === this.positioned)) { return; }
-    this.value = value; this.runs = runs; this.positioned = positioned; this.update();
+  setText(value: string, runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS, positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES, revision: string = ''): void {
+    if (this.closed || (value === this.value && runs === this.runs && positioned === this.positioned && revision === this.revision)) { return; }
+    this.value = value; this.revision = revision; this.runs = runs; this.positioned = positioned; this.update();
   }
 
   setFrame(frame: StyledSubtitleFrame | undefined): void {
@@ -143,6 +145,6 @@ export class PiPSubtitleController extends NodeController {
 
   dispose(): void {
     if (!this.closed) { this.setText(''); this.setFrame(undefined); this.closed = true; }
-    this.value = ''; this.runs = EMPTY_SUBTITLE_RUNS; this.positioned = EMPTY_POSITIONED_SUBTITLES; this.frame = undefined; this.releaseNode();
+    this.value = ''; this.revision = ''; this.runs = EMPTY_SUBTITLE_RUNS; this.positioned = EMPTY_POSITIONED_SUBTITLES; this.frame = undefined; this.releaseNode();
   }
 }
