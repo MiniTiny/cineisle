@@ -7,9 +7,10 @@ export class SubtitleRun {
   underline: boolean = false;
   color: string = '';
   family: string = '';
+  sizeScale: number = 1;
   constructor(text: string = '', style?: SubtitleRun) {
     this.text = text;
-    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.family = style.family; }
+    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.family = style.family; this.sizeScale = style.sizeScale ?? 1; }
   }
 }
 export const EMPTY_SUBTITLE_RUNS: SubtitleRun[] = [];
@@ -70,9 +71,9 @@ function fontAttributes(tag: string, start: number): FontAttributes {
   return result;
 }
 function sameStyle(a: SubtitleRun, b: SubtitleRun): boolean {
-  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && a.family === b.family;
+  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && a.family === b.family && (a.sizeScale ?? 1) === (b.sizeScale ?? 1);
 }
-function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.family; }
+function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.family || (run.sizeScale ?? 1) !== 1; }
 
 // Keep the existing plain-text result while retaining common SubRip emphasis/font spans.
 export function inlineSubtitle(value: string): SubtitleContent {
@@ -97,7 +98,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (match) {
       const name = match[2].toLowerCase(); const closing = !!match[1];
       if (name === 'br' && !closing) { append('\n'); }
-      else if (['b', 'strong', 'i', 'em', 'u', 'font'].includes(name)) {
+      else if (['b', 'strong', 'i', 'em', 'u', 'font', 'big', 'small'].includes(name)) {
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === name) { stack.length = j; break; } }
         } else if (!/\/\s*>$/.test(tag)) {
@@ -106,6 +107,11 @@ export function inlineSubtitle(value: string): SubtitleContent {
           if (name === 'b' || name === 'strong') { style.bold = true; }
           else if (name === 'i' || name === 'em') { style.italic = true; }
           else if (name === 'u') { style.underline = true; }
+          else if (name === 'big' || name === 'small') {
+            style.sizeScale *= name === 'big' ? 1.25 : 0.8;
+            // Reject an excessive candidate instead of silently changing its authored size.
+            if (!Number.isFinite(style.sizeScale) || style.sizeScale < 0.125 || style.sizeScale > 8) { throw new Error('subtitle_failed'); }
+          }
           else {
             const attributes = fontAttributes(tag, match[0].length);
             style.color = fontColor(attributes.color ?? '') || style.color;

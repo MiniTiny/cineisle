@@ -373,3 +373,9 @@ node tests/ass-ui.test.cjs
 运行`node tests/srt-position.test.cjs`、`node tests/srt-position-ui.test.cjs`与`node tests/pip-subtitle.test.cjs`，再执行完整回归和`./scripts/build.sh`。覆盖九个独立锚点、首个合法标签、大小写/转义/其他覆盖语法、重叠身份和默认流分离、测量边界、预算、同文字换位、跳转、关闭/晚到响应及完整页面到PiP发布链。SDK树夹具不证明原生几何。
 
 原生验收使用相同SRT在改动前后实际播放：核对九宫格文字框自身宽度与视图锚点，主窗口/PiP实时换位、普通字幕控制避让和背景叠放、两倍字号、跳转与PiP重建、页面隐藏/恢复、PIN、离线冷启动无业务HTTP、在线未下载源提取、ASS切换和关闭清理。另以长行/多行检查窗口换行及垂直边界。保留失败观察、修复后截图/布局、HAP和产品源码摘要；模拟器/合成媒体结果与物理设备、真实Jellyfin验收分开。
+
+### SRT 相对字号
+
+运行`node tests/srt-relative-size.test.cjs`、`node tests/srt-relative-size-ui.test.cjs`、`node tests/pip-subtitle.test.cjs`及完整回归，再做SDK构建。覆盖1.25/0.8比例、嵌套恢复、普通字号、样式组合、同文字变化、定位与重叠身份、比例/片段预算、候选失败保留、迟到响应和离线原始文档；SDK树检查fp/vp传递与原生节点键，不将其当作实际字形尺寸验收。
+
+原生分别比较旧版与新版同一份三色等宽字幕：旧版大小相同，新版放大/正常/缩小的实际像素边界具有相应比例；在实际PiP持续播放跨字号边界、跳转和重建后复核。另验主窗口两倍字号、PIN、离线冷启动无业务HTTP、在线未下载源提取及关闭清理。系统字幕样式、具体字体、物理API12、真实Jellyfin与更长生命周期按各自范围记录。
