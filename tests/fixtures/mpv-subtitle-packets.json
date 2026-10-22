@@ -1,0 +1,21 @@
+{
+  "scope": "Captured from fixed libmpv0.41dev C API with authored synthetic SRT/ASS on API26;portable data only,no account or file paths",
+  "cases": [
+    {
+      "codec": "subrip",
+      "events": "Dialogue: 0,0:00:00.52,0:00:03.52,Default,,0000,0000,0000,,{\\b1}Native Bold{\\b0} {\\i1}Italic{\\i0} {\\c&HFF00&}Green 字幕{\\c}",
+      "fontSize": 38,
+      "overflow": false,
+      "expectedPlain": "Native Bold Italic Green 字幕",
+      "expectedShared": true
+    },
+    {
+      "codec": "ass",
+      "events": "Dialogue: 0,0:00:00.52,0:00:03.52,Default,,0000,0000,0000,,{\\b1}Native Bold{\\b0} {\\i1}Italic{\\i0} {\\c&H00FF00&}Green 字幕",
+      "fontSize": 38,
+      "overflow": false,
+      "expectedPlain": "Native Bold Italic Green 字幕",
+      "expectedShared": false
+    }
+  ]
+}

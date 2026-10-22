@@ -30,6 +30,7 @@ import { followingEpisode, precedingEpisode } from '../utils/Playback';
 import { firstEpisode } from '../utils/DetailPresentation';
 
 import { PlaybackPreferenceStore } from './PlaybackPreferenceStore';
+import { EnginePreferences } from './EnginePreferences';
 import { offlineStopState } from '../utils/OfflinePlayback';
 import { ServerProfile, sessionKey, addresses } from '../utils/Accounts';
 import { ExperienceStore } from './ExperienceStore';
@@ -88,6 +89,7 @@ export class AppService {
     await AppService.posters.initialize();
     try { await NetworkPreferences.load(context); } catch (e) { /* Bounded defaults remain available; settings show the error. */ }
     try { await AppService.playbackPreferences.load(context); } catch (e) { /* Settings errors do not prevent login/browsing. */ }
+    try { await EnginePreferences.load(context); } catch (e) { /* Browsing remains available; playback/settings expose the saved-engine error. */ }
     await AppLock.ensureInitialized();
     PendingSync.configure(context, (): SyncOwner | undefined => AppService.client && AppService.local && AppService.experience ?
       { client: AppService.client, local: AppService.local, store: AppService.experience } : undefined);

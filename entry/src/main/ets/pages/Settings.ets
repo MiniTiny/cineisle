@@ -23,6 +23,9 @@ import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/Net
 import { NetworkPreferences } from '../service/NetworkPreferences';
 import { PosterCache } from '../service/PosterCache';
 import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
+import { EngineChoice, engineChoiceCaption } from '../utils/EngineChoice';
+import { EnginePreferences } from '../service/EnginePreferences';
+import { PlaybackEngines } from '../service/PlaybackEngines';
 @Entry
 @Component
 struct Settings {
@@ -48,6 +51,12 @@ struct Settings {
   @State downloadMobile: boolean = false;
   @State downloadRoaming: boolean = false;
   @State playerUi: PlayerOptions = new PlayerOptions();
+  @State engineChoice: EngineChoice = 'native';
+  @State engineKnown: boolean = false;
+  @State engineBusy: boolean = false;
+  @State engineMessage: string = '';
+  @State mpvOffered: boolean = false;
+  private engineRevision: number = 0;
   @State seekBack: string = '5';
   @State seekForward: string = '15';
   @State currentPin: string = '';
@@ -88,11 +97,12 @@ struct Settings {
     this.loadLanguage();
     this.loadNetworkDraft();
     this.loadPosters();
+    this.loadEngine();
     this.playerUi = playerOptions(AppService.experience?.snapshot().playerUi);
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
     this.loadDeviceName();
   }
-  onPageHide(): void { this.deviceVisible = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
+  onPageHide(): void { this.deviceVisible = false; ++this.engineRevision; this.engineBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
   aboutToDisappear(): void { this.onPageHide(); }
   private appearancePermit(revision: number): boolean { return revision === this.appearanceRevision && this.deviceVisible && !this.locked && AppLock.permit() && this.ownerClient === AppService.client; }
   private async loadAppearance(): Promise<void> {
@@ -128,7 +138,28 @@ struct Settings {
   }
 
   private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
-  private deviceLockChanged(): void { if (this.locked) { ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
+  private deviceLockChanged(): void { if (this.locked) { ++this.engineRevision; this.engineBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
+  private enginePermit(revision: number): boolean {
+    return revision === this.engineRevision && this.deviceVisible && !this.locked && AppLock.permit() && this.ownerClient === AppService.client;
+  }
+  private async loadEngine(): Promise<void> {
+    const revision = ++this.engineRevision; this.engineBusy = true; this.mpvOffered = PlaybackEngines.canOfferMpv();
+    try {
+      await EnginePreferences.load(getContext(this) as common.UIAbilityContext);
+      if (this.enginePermit(revision)) { this.engineChoice = EnginePreferences.snapshot(); this.engineKnown = EnginePreferences.known(); this.engineMessage = EnginePreferences.issue ? text(EnginePreferences.issue) : ''; }
+    } catch (e) { if (this.enginePermit(revision)) { this.engineKnown = false; this.engineMessage = errorText(e as Error); } }
+    finally { if (revision === this.engineRevision) { this.engineBusy = false; } }
+  }
+  private async saveEngine(choice: EngineChoice): Promise<void> {
+    if (this.engineBusy || !this.enginePermit(this.engineRevision) || (choice === 'mpv' && !this.mpvOffered)) { return; }
+    const revision = ++this.engineRevision; this.engineBusy = true; this.engineMessage = '';
+    try {
+      await PlaybackEngines.validate(choice);
+      await EnginePreferences.save(choice, () => this.enginePermit(revision));
+      if (this.enginePermit(revision)) { this.engineChoice = choice; this.engineKnown = true; this.engineMessage = text('engine_saved'); }
+    } catch (e) { if (this.enginePermit(revision)) { this.engineKnown = EnginePreferences.known(); this.engineChoice = EnginePreferences.snapshot(); this.engineMessage = errorText(e as Error); } }
+    finally { if (revision === this.engineRevision) { this.engineBusy = false; } }
+  }
   private invalidatePosters(): void { ++this.posterRevision; this.posterBusy = false; this.posterKnown = false; }
   private posterPermit(revision: number, cache: PosterCache): boolean {
     return this.deviceVisible && revision === this.posterRevision && !this.locked && AppLock.permit() && this.ownerClient === AppService.client && cache === AppService.posters;
@@ -381,6 +412,16 @@ struct Settings {
   @Builder
   private playerSettings() {
     Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.engine_title'), icon: $r('app.media.detail_play') })
+      Text(this.engineKnown ? text('engine_current', text(engineChoiceCaption(this.engineChoice))) : text('engine_unknown')).fontSize(14).fontColor('#F2F3FA').width('100%')
+      Text($r('app.string.engine_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+      BrandButton({ label: $r('app.string.engine_native'), icon: $r('app.media.detail_play'), primary: this.engineKnown && this.engineChoice === 'native', available: !this.engineBusy && !this.locked,
+        onSelect: () => this.saveEngine('native') })
+      BrandButton({ label: $r('app.string.engine_mpv'), icon: $r('app.media.detail_play'), primary: this.engineKnown && this.engineChoice === 'mpv', available: this.mpvOffered && !this.engineBusy && !this.locked,
+        onSelect: () => this.saveEngine('mpv') })
+      if (!this.mpvOffered) { Text($r('app.string.engine_mpv_requires_api')).fontSize(12).fontColor(this.palette.muted).width('100%') }
+      if (this.engineBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.engineMessage) { Text(this.engineMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
       BrandHeading({ label: $r('app.string.player_gesture_preferences'), icon: $r('app.media.player_speed') })
       Row({ space: 12 }) {
         Text($r('app.string.player_gestures_enabled')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)

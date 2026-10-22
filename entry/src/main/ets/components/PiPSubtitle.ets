@@ -84,7 +84,10 @@ export class PiPSubtitleController extends NodeController {
 
   private params(): PiPSubtitleParams {
     const size = this.fontSize * this.style.scale;
-    const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(this.height * 0.45 / (size * 1.4)))) : this.maxLines;
+    // Keep the normal line cap, but let enlarged captions use the available height.
+    // Applying the original 45% budget again after scaling needlessly drops a line.
+    const available = this.height - this.bottom - 10; // Column padding and text padding.
+    const lines = this.height > 0 ? Math.max(1, Math.min(this.maxLines, Math.floor(available / (size * 1.4)))) : this.maxLines;
     const params = new PiPSubtitleParams(this.value, size, lines, this.bottom, this.style);
     params.revision = this.revision; params.runs = this.runs; params.positioned = this.positioned; params.width = this.width; params.height = this.height;
     params.frame = this.frame;

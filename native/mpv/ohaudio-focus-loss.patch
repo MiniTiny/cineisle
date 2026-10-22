@@ -1,0 +1,105 @@
+Subject: Propagate OHAudio focus loss through the player core
+Base: ErBWs/mpv 6edeee00a07b9b76f197aa71eee3d029fb090de4
+
+Use the API10 renderer callbacks so the optional backend can retain its
+API15 floor. The audio callback only adds a thread-safe AO event; the
+player thread changes the actual pause state. Resume remains explicit.
+
+This patch is source-validated. Build and verify the full pinned dependency
+and feature set when applying it. Reduced diagnostic builds must not replace
+the complete production runtime.
+
+--- a/audio/out/ao.h
++++ b/audio/out/ao.h
+@@ -43,6 +43,7 @@
+ enum {
+     AO_EVENT_RELOAD = 1,
+     AO_EVENT_HOTPLUG = 2,
++    AO_EVENT_FOCUS_LOSS = 4,
+ };
+ 
+ enum {
+@@ -105,6 +106,7 @@
+ struct mp_async_queue *ao_get_queue(struct ao *ao);
+ int ao_query_and_reset_events(struct ao *ao, int events);
+ void ao_request_reload(struct ao *ao);
++void ao_request_focus_loss(struct ao *ao);
+ void ao_hotplug_event(struct ao *ao);
+ 
+ struct ao_hotplug;
+--- a/audio/out/ao.c
++++ b/audio/out/ao.c
+@@ -388,6 +388,12 @@
+     ao_add_events(ao, AO_EVENT_RELOAD);
+ }
+ 
++// Propagate renderer focus loss on the player thread. Fully thread-safe.
++void ao_request_focus_loss(struct ao *ao)
++{
++    ao_add_events(ao, AO_EVENT_FOCUS_LOSS);
++}
++
+ // Notify the player that the device list changed. Fully thread-safe.
+ void ao_hotplug_event(struct ao *ao)
+ {
+--- a/player/audio.c
++++ b/player/audio.c
+@@ -870,6 +870,9 @@
+ {
+     struct MPOpts *opts = mpctx->opts;
+ 
++    if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_FOCUS_LOSS))
++        set_pause_state(mpctx, true);
++
+     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD))
+         reload_audio_output(mpctx);
+ 
+--- a/audio/out/ao_ohaudio.c
++++ b/audio/out/ao_ohaudio.c
+@@ -129,6 +129,28 @@
+     return AUDIO_DATA_CALLBACK_RESULT_VALID;
+ }
+ 
++// API10 callbacks keep renderer interruption propagation available on API15.
++// The audio-service callback only enqueues an atomic event; it never calls
++// player commands or waits on the player thread. Resume requires user intent.
++static int32_t audio_on_write_legacy(OH_AudioRenderer *renderer, void *userData,
++                                    void *audioData, int32_t audioDataSize)
++{
++    audio_on_write_callback(renderer, userData, audioData, audioDataSize);
++    return 0;
++}
++
++static int32_t audio_on_interrupt(OH_AudioRenderer *renderer, void *userData,
++                                 OH_AudioInterrupt_ForceType force,
++                                 OH_AudioInterrupt_Hint hint)
++{
++    (void)renderer;
++    (void)force;
++    if (hint == AUDIOSTREAM_INTERRUPT_HINT_PAUSE ||
++        hint == AUDIOSTREAM_INTERRUPT_HINT_STOP)
++        ao_request_focus_loss(userData);
++    return 0;
++}
++
+ static int init(struct ao* ao)
+ {
+     struct priv* p = ao->priv;
+@@ -176,8 +198,15 @@
+         break;
+     }
+ 
+-    OH_AudioRenderer_OnWriteDataCallback callback = audio_on_write_callback;
+-    OH_AudioStreamBuilder_SetRendererWriteDataCallback(p->builder, callback, ao);
++    OH_AudioRenderer_Callbacks callbacks = {
++        .OH_AudioRenderer_OnWriteData = audio_on_write_legacy,
++        .OH_AudioRenderer_OnInterruptEvent = audio_on_interrupt,
++    };
++    res = OH_AudioStreamBuilder_SetRendererCallback(p->builder, callbacks, ao);
++    if (res != AUDIOSTREAM_SUCCESS) {
++        MP_ERR(ao, "Fail to register audio callbacks: error code %d.\n", res);
++        goto error;
++    }
+ 
+     res = OH_AudioStreamBuilder_GenerateRenderer(p->builder, &p->renderer);
+ 
