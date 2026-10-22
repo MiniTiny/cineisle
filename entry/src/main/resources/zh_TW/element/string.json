@@ -408,7 +408,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "ASS/SSA 可顯示樣式與動畫；SRT 支援粗體、斜體、底線、刪除線、上下標、顏色、字型、相對字級及九宮格定位。下載可快取內嵌及外掛文字字幕；舊快取可連線更新。圖片字幕與影片附件字型暫不支援，字形取決於裝置可用字型。離線可選擇已快取字幕或裝置辨識的軌道。"
+      "value": "ASS/SSA 可顯示樣式與動畫；SRT 支援粗體、斜體、底線、刪除線、上下標、顏色、字型、相對字級及九宮格定位。下載可快取內嵌及外掛文字字幕；舊快取可連線更新。MPV 可顯示支援的內嵌圖片字幕，並讀取影片附件字型；系統播放器以裝置能力為準。離線可選擇已快取字幕或裝置辨識的軌道。"
     },
     {
       "name": "track_switch_failed",
@@ -2129,6 +2129,20 @@
     {"name": "caption_edge_uniform", "value": "描邊"},
     {"name": "caption_edge_shadow", "value": "投影"},
     {"name": "change_queued_blocked", "value": "修改已儲存在本機，伺服器尚未確認。自動回傳已暫停，請檢查伺服器或帳號後手動重試。"},
-    {"name": "batch_queued", "value": "其中 %d 項待回傳"}
+    {"name": "batch_queued", "value": "其中 %d 項待回傳"},
+    {"name": "engine_title", "value": "播放引擎"},
+    {"name": "engine_current", "value": "目前引擎：%s"},
+    {"name": "engine_unknown", "value": "尚未確認已儲存的引擎"},
+    {"name": "engine_hint", "value": "新開啟的影片使用所選引擎。切換不會修改正在播放的影片。"},
+    {"name": "engine_native", "value": "系統播放器"},
+    {"name": "engine_mpv", "value": "MPV 播放器"},
+    {"name": "engine_mpv_requires_api", "value": "MPV 需要 HarmonyOS API15 或更新版本。"},
+    {"name": "engine_mpv_unavailable", "value": "目前無法使用 MPV，請檢查裝置支援，或在設定中明確選擇系統播放器。"},
+    {"name": "engine_load_failed", "value": "無法讀取播放引擎設定，請至設定頁重試或重新選擇。"},
+    {"name": "engine_invalid", "value": "播放引擎設定無效，請重新選擇。"},
+    {"name": "engine_save_failed", "value": "引擎設定儲存失敗，已保留原選擇。"},
+    {"name": "engine_restore_failed", "value": "引擎設定還原失敗，請重新儲存後再播放。"},
+    {"name": "engine_cancelled", "value": "引擎設定已取消"},
+    {"name": "engine_saved", "value": "已儲存，新開啟的影片將使用此引擎。"}
   ]
 }

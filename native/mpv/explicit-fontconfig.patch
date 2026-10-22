@@ -1,0 +1,38 @@
+Expose an explicit per-renderer fontconfig file without enabling mpv.conf or script loading.
+The application supplies a generated map from the public platform font inventory.
+
+--- a/sub/osd.h
++++ b/sub/osd.h
+@@ -156,6 +156,7 @@
+     int justify;
+     int font_provider;
+     char *fonts_dir;
++    char *fonts_config;
+ };
+ 
+ struct osd_bar_style_opts {
+--- a/sub/osd.c
++++ b/sub/osd.c
+@@ -73,6 +73,8 @@
+         {"auto", 0}, {"none", 1}, {"fontconfig", 2}), .flags = UPDATE_SUB_HARD},
+     {"fonts-dir", OPT_STRING(fonts_dir),
+         .flags = M_OPT_FILE | UPDATE_SUB_HARD},
++    {"fonts-config", OPT_STRING(fonts_config),
++        .flags = M_OPT_FILE | UPDATE_SUB_HARD},
+     {0}
+ };
+ 
+--- a/sub/ass_mp.c
++++ b/sub/ass_mp.c
+@@ -86,7 +86,10 @@
+ {
+     void *tmp = talloc_new(NULL);
+     char *default_font = mp_find_config_file(tmp, global, "subfont.ttf");
+-    char *config       = mp_find_config_file(tmp, global, "fonts.conf");
++    // A caller-provided font map remains usable with config/script loading off.
++    char *config = opts->fonts_config && opts->fonts_config[0] ?
++                   mp_get_user_path(tmp, global, opts->fonts_config) :
++                   mp_find_config_file(tmp, global, "fonts.conf");
+ 
+     if (default_font && !mp_path_exists(default_font))
+         default_font = NULL;

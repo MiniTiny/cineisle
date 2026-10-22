@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "supplements": [
+    {
+      "name": "fortanix-sgx-abi",
+      "version": "0.5.0",
+      "repository": "https://github.com/fortanix/rust-sgx",
+      "commit": "4bbac9583f3635026b35e8c17001b20973296301",
+      "url": "https://codeload.github.com/fortanix/rust-sgx/tar.gz/4bbac9583f3635026b35e8c17001b20973296301",
+      "sha256": "8904e3c513abf31da2007753edf01c86e60cca77792848801d741adb2b5e316a",
+      "bytes": 345778,
+      "noticeFiles": [
+        "LICENSE"
+      ],
+      "role": "Upstream notice supplement for another-target package in the pinned Rust standard-library lock closure"
+    },
+    {
+      "name": "r-efi",
+      "version": "4.5.0",
+      "repository": "https://github.com/r-efi/r-efi",
+      "commit": "5e0ace8ed30b69752ccb21131c717be750b645fb",
+      "url": "https://codeload.github.com/r-efi/r-efi/tar.gz/5e0ace8ed30b69752ccb21131c717be750b645fb",
+      "sha256": "6209fe6e3bc71ad95db4380fd63cb9984ef500f3ee03c6c0aebd24cc8c9c6715",
+      "bytes": 64295,
+      "noticeFiles": [
+        "AUTHORS",
+        "README.md"
+      ],
+      "role": "Upstream notice supplement for another-target package in the pinned Rust standard-library lock closure"
+    },
+    {
+      "name": "r-efi-alloc",
+      "version": "1.0.0",
+      "repository": "https://github.com/r-efi/r-efi-alloc",
+      "commit": "852dc7b8766868fe128325ca2931d113bd1014e3",
+      "url": "https://codeload.github.com/r-efi/r-efi-alloc/tar.gz/852dc7b8766868fe128325ca2931d113bd1014e3",
+      "sha256": "67e6c3c1f36224385bb3561bb80382823d4d10ebb067ff7558bb98206b93b353",
+      "bytes": 12714,
+      "noticeFiles": [
+        "AUTHORS",
+        "README.md"
+      ],
+      "role": "Upstream notice supplement for another-target package in the pinned Rust standard-library lock closure"
+    }
+  ]
+}

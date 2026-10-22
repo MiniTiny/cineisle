@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "Native phone UI and Jellyfin services",
   "dependencies": {
-    "libcineisle_ass.so": "file:./src/main/cpp/types/libcineisle_ass"
+    "libcineisle_ass.so": "file:./src/main/cpp/types/libcineisle_ass",
+    "libcineisle_mpv.so": "file:./src/main/cpp/types/libcineisle_mpv"
   }
 }

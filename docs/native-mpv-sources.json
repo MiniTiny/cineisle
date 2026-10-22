@@ -1,0 +1,1326 @@
+{
+  "schema": 1,
+  "abi": "arm64-v8a",
+  "minimumApi": 15,
+  "sourceDateEpoch": 1784100300,
+  "clientHeaderSha256": "3c073236a09cb456c6e80587d5523c8771c32fb22ca014e0f99cc3d43905b75c",
+  "expectedFeatures": [
+    "cplugins",
+    "egl-ohos",
+    "ffmpeg",
+    "gl",
+    "glibc-thread-name",
+    "glob",
+    "glob-posix",
+    "iconv",
+    "lcms2",
+    "libass",
+    "libdl",
+    "libplacebo",
+    "linux-fstatfs",
+    "lua",
+    "memrchr",
+    "ohos",
+    "posix",
+    "posix-shm",
+    "ppoll",
+    "pthread-condattr-setclock",
+    "shaderc",
+    "vector",
+    "vk-khr-display",
+    "vt.h",
+    "vulkan",
+    "zlib"
+  ],
+  "sources": [
+    {
+      "name": "mbedtls",
+      "repo": "Mbed-TLS/mbedtls",
+      "commit": "c765c831e5c2a0971410692f92f7a81d6ec65ec2",
+      "url": "https://codeload.github.com/Mbed-TLS/mbedtls/tar.gz/c765c831e5c2a0971410692f92f7a81d6ec65ec2",
+      "sha256": "0f050462eabf814c7e3b37825efc4d8dd1caf6a3b3eeb350705ad818d6ca770a",
+      "bytes": 5614554,
+      "ref": "mbedtls-3.6.4",
+      "destination": "mbedtls",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "dav1d",
+      "repo": "videolan/dav1d",
+      "commit": "42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa",
+      "url": "https://codeload.github.com/videolan/dav1d/tar.gz/42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa",
+      "sha256": "e26d41e2f496c1598f418726b871ce252ce9f18f8dbe3ad199349a42ed2cb02f",
+      "bytes": 1712972,
+      "ref": "1.5.1",
+      "destination": "dav1d",
+      "role": "runtime",
+      "noticeFiles": [
+        "COPYING"
+      ]
+    },
+    {
+      "name": "lcms",
+      "repo": "mm2/Little-CMS",
+      "commit": "5176347635785e53ee5cee92328f76fda766ecc6",
+      "url": "https://codeload.github.com/mm2/Little-CMS/tar.gz/5176347635785e53ee5cee92328f76fda766ecc6",
+      "sha256": "55c92b24f939a8493b07f076bee849af656a13cc69f330816e6936e95b312396",
+      "bytes": 5257749,
+      "ref": "lcms2.17",
+      "destination": "lcms",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "shaderc",
+      "repo": "google/shaderc",
+      "commit": "73743588fe9c39f2f1c780a087d94afac691a189",
+      "url": "https://codeload.github.com/google/shaderc/tar.gz/73743588fe9c39f2f1c780a087d94afac691a189",
+      "sha256": "8779dea9ca12a630efaa3db0c36d338128475027fe3c0ac144b53e0ed4707cf9",
+      "bytes": 229082,
+      "ref": "v2025.4",
+      "destination": "shaderc",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "dovi",
+      "repo": "quietvoid/dovi_tool",
+      "commit": "b25558062e4a56973482ec70133bd7b891320e48",
+      "url": "https://codeload.github.com/quietvoid/dovi_tool/tar.gz/b25558062e4a56973482ec70133bd7b891320e48",
+      "sha256": "595b1c756c9ad4acd5c1ddd851726eb3f0bd1786627c3d374998efc2929209ad",
+      "bytes": 489700,
+      "ref": "2.3.1",
+      "destination": "dovi",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "mpv",
+      "repo": "ErBWs/mpv",
+      "commit": "6edeee00a07b9b76f197aa71eee3d029fb090de4",
+      "url": "https://codeload.github.com/ErBWs/mpv/tar.gz/6edeee00a07b9b76f197aa71eee3d029fb090de4",
+      "sha256": "d18bcd60fa61c40bf935930c00bb90e6fb69bf32c653db6b8744846778cee1cc",
+      "bytes": 7278293,
+      "ref": "6edeee00a07b9b76f197aa71eee3d029fb090de4",
+      "destination": "mpv",
+      "role": "runtime",
+      "noticeFiles": [
+        "Copyright",
+        "LICENSE.LGPL"
+      ]
+    },
+    {
+      "name": "libplacebo",
+      "repo": "haasn/libplacebo",
+      "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "url": "https://codeload.github.com/haasn/libplacebo/tar.gz/cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "sha256": "6f8fa218cbafd8e5f50b8a82d918e1d8bbb92f9f980820bc0b34d92e9b79e484",
+      "bytes": 863019,
+      "ref": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "destination": "libplacebo",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "ffmpeg",
+      "repo": "https://code.ffmpeg.org/ErBWs/FFmpeg",
+      "commit": "7dddf74de0346fee1f17bd49563efc5ab9deaf98",
+      "sha256": "07e4c6a1f1ebdcc2d8bb30e9c7f9f944363290170f589c343427d9727560bc6b",
+      "bytes": 16407113,
+      "ref": "7dddf74de0346fee1f17bd49563efc5ab9deaf98",
+      "destination": "ffmpeg",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE.md",
+        "COPYING.LGPLv2.1",
+        "COPYING.LGPLv3"
+      ],
+      "url": "https://code.ffmpeg.org/ErBWs/FFmpeg/archive/7dddf74de0346fee1f17bd49563efc5ab9deaf98.tar.gz"
+    },
+    {
+      "name": "lua",
+      "commit": null,
+      "url": "https://www.lua.org/ftp/lua-5.2.4.tar.gz",
+      "sha256": "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b",
+      "bytes": 252651,
+      "ref": "5.2.4",
+      "destination": "lua",
+      "role": "runtime",
+      "noticeFiles": [
+        "src/lua.h"
+      ]
+    },
+    {
+      "name": "shaderc-glslang",
+      "repo": "KhronosGroup/glslang",
+      "commit": "d213562e35573012b6348b2d584457c3704ac09b",
+      "url": "https://codeload.github.com/KhronosGroup/glslang/tar.gz/d213562e35573012b6348b2d584457c3704ac09b",
+      "sha256": "9537e5896d10bc493775675153687e078d83aead3a5a3b90e9ac28af2bc966fc",
+      "bytes": 4233045,
+      "ref": "d213562e35573012b6348b2d584457c3704ac09b",
+      "destination": "shaderc/third_party/glslang",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "name": "shaderc-spirv-headers",
+      "repo": "KhronosGroup/SPIRV-Headers",
+      "commit": "01e0577914a75a2569c846778c2f93aa8e6feddd",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/01e0577914a75a2569c846778c2f93aa8e6feddd",
+      "sha256": "494bd30dc13ba798af70edd989f8df82c90757c8ce9433598480f5e00e04c454",
+      "bytes": 545892,
+      "ref": "01e0577914a75a2569c846778c2f93aa8e6feddd",
+      "destination": "shaderc/third_party/spirv-headers",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "shaderc-spirv-tools",
+      "repo": "KhronosGroup/SPIRV-Tools",
+      "commit": "19042c8921f35f7bec56b9e5c96c5f5691588ca8",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/19042c8921f35f7bec56b9e5c96c5f5691588ca8",
+      "sha256": "7ab19030df38a50cc93be26ebd3913c3e7ef3a118e1ded65a829e63b0c7ccf12",
+      "bytes": 3401218,
+      "ref": "19042c8921f35f7bec56b9e5c96c5f5691588ca8",
+      "destination": "shaderc/third_party/spirv-tools",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "libplacebo-vulkan-headers",
+      "repo": "KhronosGroup/Vulkan-Headers",
+      "commit": "450bd2232225d6c7728a4108055ac2e37cef6475",
+      "url": "https://codeload.github.com/KhronosGroup/Vulkan-Headers/tar.gz/450bd2232225d6c7728a4108055ac2e37cef6475",
+      "sha256": "26df9841c30806a994e2fdf42f7c87bcb1ced9db9a06033469123939fb3fa075",
+      "bytes": 2940820,
+      "ref": "450bd2232225d6c7728a4108055ac2e37cef6475",
+      "destination": "libplacebo/3rdparty/Vulkan-Headers",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "name": "mbedtls-framework",
+      "repo": "Mbed-TLS/mbedtls-framework",
+      "commit": "2a3e2c5ea053c14b745dbdf41f609b1edc6a72fa",
+      "url": "https://codeload.github.com/Mbed-TLS/mbedtls-framework/tar.gz/2a3e2c5ea053c14b745dbdf41f609b1edc6a72fa",
+      "sha256": "f5934ffcad4c32a95f9281f0f95908eb471ee34df721fb9d6ad4adb9567f6b61",
+      "bytes": 788082,
+      "ref": "2a3e2c5ea053c14b745dbdf41f609b1edc6a72fa",
+      "destination": "mbedtls/framework",
+      "role": "build",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "cbindgen",
+      "repo": "mozilla/cbindgen",
+      "commit": "a976056ef61e6fcf0162ae81ba57fb92c8dfb599",
+      "url": "https://codeload.github.com/mozilla/cbindgen/tar.gz/a976056ef61e6fcf0162ae81ba57fb92c8dfb599",
+      "sha256": "456449e401226e0a6e292915b7acd779332e6f0f73c1bc29c85e310593fb1bf0",
+      "bytes": 238021,
+      "ref": "a976056ef61e6fcf0162ae81ba57fb92c8dfb599",
+      "destination": "cbindgen",
+      "role": "build",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "fast_float",
+      "repo": "fastfloat/fast_float",
+      "commit": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "url": "https://codeload.github.com/fastfloat/fast_float/tar.gz/97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "sha256": "2b132274539286e41f37857cac22aa8441d21bd86d55de825a3342b149f66801",
+      "bytes": 120200,
+      "ref": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "destination": "libplacebo/3rdparty/fast_float",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE-APACHE",
+        "LICENSE-BOOST",
+        "LICENSE-MIT"
+      ]
+    },
+    {
+      "name": "glad",
+      "repo": "Dav1dde/glad",
+      "commit": "73db193f853e2ee079bf3ca8a64aa2eaf6459043",
+      "url": "https://codeload.github.com/Dav1dde/glad/tar.gz/73db193f853e2ee079bf3ca8a64aa2eaf6459043",
+      "sha256": "33dbeae44d8315ece57e14eba4b1b4a02ac5406d1c4f49cd20048c91522a6b9a",
+      "bytes": 645779,
+      "ref": "73db193f853e2ee079bf3ca8a64aa2eaf6459043",
+      "destination": "libplacebo/3rdparty/glad",
+      "role": "runtime",
+      "noticeFiles": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "jinja",
+      "repo": "pallets/jinja",
+      "commit": "15206881c006c79667fe5154fe80c01c65410679",
+      "url": "https://codeload.github.com/pallets/jinja/tar.gz/15206881c006c79667fe5154fe80c01c65410679",
+      "sha256": "b88a20dcc2e34072fcf4159325bc6c34cd4b29a81a8b83d15d2f28ba561da296",
+      "bytes": 276954,
+      "ref": "15206881c006c79667fe5154fe80c01c65410679",
+      "destination": "libplacebo/3rdparty/jinja",
+      "role": "build",
+      "noticeFiles": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "name": "markupsafe",
+      "repo": "pallets/markupsafe",
+      "commit": "297fc8e356e6836a62087949245d09a28e9f1b13",
+      "url": "https://codeload.github.com/pallets/markupsafe/tar.gz/297fc8e356e6836a62087949245d09a28e9f1b13",
+      "sha256": "da7c010c9c81a66ac73036558c1fcb6212b50482f43211cd1254035b94f82414",
+      "bytes": 83817,
+      "ref": "297fc8e356e6836a62087949245d09a28e9f1b13",
+      "destination": "libplacebo/3rdparty/markupsafe",
+      "role": "build",
+      "noticeFiles": [
+        "LICENSE.txt"
+      ]
+    }
+  ],
+  "patches": [
+    {
+      "component": "libplacebo",
+      "path": "native/mpv/libplacebo-remove-unnecessary-atomic-test.patch",
+      "sha256": "8081754fc65641696871f0b7f7cf887380919b54e443e639ac88f2ec10d4a8be"
+    },
+    {
+      "component": "libplacebo",
+      "path": "native/mpv/libplacebo-support-external-yuv-zero-copy.patch",
+      "sha256": "6aab3a5cd3253f992876eb11c20b05125e28e0b80e81603d2401ba8bc6e6ad30"
+    },
+    {
+      "component": "mpv",
+      "path": "native/mpv/ohaudio-focus-loss.patch",
+      "sha256": "ede1dca7006d9acdfd7300a2873106ce8819743109e2b4cf6ea774024c8f65a7"
+    },
+    {
+      "component": "mpv",
+      "path": "native/mpv/explicit-fontconfig.patch",
+      "sha256": "a3a72e26deb204dec72ddd8a5b98e188c4d111f255c60f7d81fdd9bbf28e61c7"
+    }
+  ],
+  "rust": {
+    "version": "1.85.1",
+    "channelManifestSha256": "1e7dae690cd12e27405a97e64704917489a27c650201bf47780a936055d67909",
+    "packages": [
+      {
+        "package": "rustc",
+        "target": "aarch64-apple-darwin",
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+        "bytes": 55006972,
+        "component": "rustc"
+      },
+      {
+        "package": "cargo",
+        "target": "aarch64-apple-darwin",
+        "url": "https://static.rust-lang.org/dist/2025-03-18/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+        "bytes": 6766048,
+        "component": "cargo"
+      },
+      {
+        "package": "rust-std",
+        "target": "aarch64-apple-darwin",
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+        "bytes": 27522824,
+        "component": "rust-std-aarch64-apple-darwin"
+      },
+      {
+        "package": "rust-std",
+        "target": "aarch64-unknown-linux-ohos",
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-std-1.85.1-aarch64-unknown-linux-ohos.tar.xz",
+        "sha256": "965517707fdc12bda71e26e509d67f37d58b9a3b9f6929d30a14d00a5bc4661f",
+        "bytes": 27518620,
+        "component": "rust-std-aarch64-unknown-linux-ohos"
+      },
+      {
+        "package": "rust-src",
+        "target": "*",
+        "url": "https://static.rust-lang.org/dist/2025-03-18/rust-src-1.85.1.tar.xz",
+        "sha256": "b5a5539009d477a07c2535aefc39cd69ad526a74eab65886a26e2c3021020827",
+        "bytes": 3036412,
+        "component": "rust-src"
+      }
+    ],
+    "stdlibLockSha256": "aa34aebc09586809bf72b16b62114d811baba843bb8296c10f07c90e4e5b8e31",
+    "stdlibSources": [
+      {
+        "name": "rust-stdlib-addr2line-0.22.0",
+        "package": "addr2line",
+        "version": "0.22.0",
+        "sha256": "6e4503c46a5c0c7844e948c9a4d6acd9f50cccb4de1c48eb9e291ea17470c678",
+        "canonicalUrl": "https://static.crates.io/crates/addr2line/addr2line-0.22.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/addr2line/0.22.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-adler-1.0.2",
+        "package": "adler",
+        "version": "1.0.2",
+        "sha256": "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe",
+        "canonicalUrl": "https://static.crates.io/crates/adler/adler-1.0.2.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/adler/1.0.2/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-allocator-api2-0.2.21",
+        "package": "allocator-api2",
+        "version": "0.2.21",
+        "sha256": "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923",
+        "canonicalUrl": "https://static.crates.io/crates/allocator-api2/allocator-api2-0.2.21.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/allocator-api2/0.2.21/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-cc-1.2.0",
+        "package": "cc",
+        "version": "1.2.0",
+        "sha256": "1aeb932158bd710538c73702db6945cb68a8fb08c519e6e12706b94263b36db8",
+        "canonicalUrl": "https://static.crates.io/crates/cc/cc-1.2.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/cc/1.2.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-cfg-if-1.0.0",
+        "package": "cfg-if",
+        "version": "1.0.0",
+        "sha256": "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd",
+        "canonicalUrl": "https://static.crates.io/crates/cfg-if/cfg-if-1.0.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/cfg-if/1.0.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-compiler_builtins-0.1.140",
+        "package": "compiler_builtins",
+        "version": "0.1.140",
+        "sha256": "df14d41c5d172a886df3753d54238eefb0f61c96cbd8b363c33ccc92c457bee3",
+        "canonicalUrl": "https://static.crates.io/crates/compiler_builtins/compiler_builtins-0.1.140.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/compiler_builtins/0.1.140/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-dlmalloc-0.2.7",
+        "package": "dlmalloc",
+        "version": "0.2.7",
+        "sha256": "d9b5e0d321d61de16390ed273b647ce51605b575916d3c25e6ddf27a1e140035",
+        "canonicalUrl": "https://static.crates.io/crates/dlmalloc/dlmalloc-0.2.7.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/dlmalloc/0.2.7/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-fortanix-sgx-abi-0.5.0",
+        "package": "fortanix-sgx-abi",
+        "version": "0.5.0",
+        "sha256": "57cafc2274c10fab234f176b25903ce17e690fca7597090d50880e047a0389c5",
+        "canonicalUrl": "https://static.crates.io/crates/fortanix-sgx-abi/fortanix-sgx-abi-0.5.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/fortanix-sgx-abi/0.5.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-getopts-0.2.21",
+        "package": "getopts",
+        "version": "0.2.21",
+        "sha256": "14dbbfd5c71d70241ecf9e6f13737f7b5ce823821063188d7e46c41d371eebd5",
+        "canonicalUrl": "https://static.crates.io/crates/getopts/getopts-0.2.21.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/getopts/0.2.21/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-gimli-0.29.0",
+        "package": "gimli",
+        "version": "0.29.0",
+        "sha256": "40ecd4077b5ae9fd2e9e169b102c6c330d0605168eb0e8bf79952b256dbefffd",
+        "canonicalUrl": "https://static.crates.io/crates/gimli/gimli-0.29.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/gimli/0.29.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-gimli-0.31.1",
+        "package": "gimli",
+        "version": "0.31.1",
+        "sha256": "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f",
+        "canonicalUrl": "https://static.crates.io/crates/gimli/gimli-0.31.1.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/gimli/0.31.1/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-hashbrown-0.15.2",
+        "package": "hashbrown",
+        "version": "0.15.2",
+        "sha256": "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289",
+        "canonicalUrl": "https://static.crates.io/crates/hashbrown/hashbrown-0.15.2.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/hashbrown/0.15.2/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-hermit-abi-0.4.0",
+        "package": "hermit-abi",
+        "version": "0.4.0",
+        "sha256": "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc",
+        "canonicalUrl": "https://static.crates.io/crates/hermit-abi/hermit-abi-0.4.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/hermit-abi/0.4.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-libc-0.2.169",
+        "package": "libc",
+        "version": "0.2.169",
+        "sha256": "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a",
+        "canonicalUrl": "https://static.crates.io/crates/libc/libc-0.2.169.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/libc/0.2.169/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-memchr-2.7.4",
+        "package": "memchr",
+        "version": "2.7.4",
+        "sha256": "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3",
+        "canonicalUrl": "https://static.crates.io/crates/memchr/memchr-2.7.4.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/memchr/2.7.4/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-miniz_oxide-0.7.4",
+        "package": "miniz_oxide",
+        "version": "0.7.4",
+        "sha256": "b8a240ddb74feaf34a79a7add65a741f3167852fba007066dcac1ca548d89c08",
+        "canonicalUrl": "https://static.crates.io/crates/miniz_oxide/miniz_oxide-0.7.4.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/miniz_oxide/0.7.4/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-object-0.36.7",
+        "package": "object",
+        "version": "0.36.7",
+        "sha256": "62948e14d923ea95ea2c7c86c71013138b66525b86bdc08d2dcc262bdb497b87",
+        "canonicalUrl": "https://static.crates.io/crates/object/object-0.36.7.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/object/0.36.7/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-r-efi-4.5.0",
+        "package": "r-efi",
+        "version": "4.5.0",
+        "sha256": "e9e935efc5854715dfc0a4c9ef18dc69dee0ec3bf9cc3ab740db831c0fdd86a3",
+        "canonicalUrl": "https://static.crates.io/crates/r-efi/r-efi-4.5.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/r-efi/4.5.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-r-efi-alloc-1.0.0",
+        "package": "r-efi-alloc",
+        "version": "1.0.0",
+        "sha256": "31d6f09fe2b6ad044bc3d2c34ce4979796581afd2f1ebc185837e02421e02fd7",
+        "canonicalUrl": "https://static.crates.io/crates/r-efi-alloc/r-efi-alloc-1.0.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/r-efi-alloc/1.0.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-rand-0.8.5",
+        "package": "rand",
+        "version": "0.8.5",
+        "sha256": "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404",
+        "canonicalUrl": "https://static.crates.io/crates/rand/rand-0.8.5.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/rand/0.8.5/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-rand_core-0.6.4",
+        "package": "rand_core",
+        "version": "0.6.4",
+        "sha256": "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c",
+        "canonicalUrl": "https://static.crates.io/crates/rand_core/rand_core-0.6.4.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/rand_core/0.6.4/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-rand_xorshift-0.3.0",
+        "package": "rand_xorshift",
+        "version": "0.3.0",
+        "sha256": "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f",
+        "canonicalUrl": "https://static.crates.io/crates/rand_xorshift/rand_xorshift-0.3.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/rand_xorshift/0.3.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-rustc-demangle-0.1.24",
+        "package": "rustc-demangle",
+        "version": "0.1.24",
+        "sha256": "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f",
+        "canonicalUrl": "https://static.crates.io/crates/rustc-demangle/rustc-demangle-0.1.24.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/rustc-demangle/0.1.24/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-shlex-1.3.0",
+        "package": "shlex",
+        "version": "1.3.0",
+        "sha256": "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64",
+        "canonicalUrl": "https://static.crates.io/crates/shlex/shlex-1.3.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/shlex/1.3.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-unicode-width-0.1.14",
+        "package": "unicode-width",
+        "version": "0.1.14",
+        "sha256": "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af",
+        "canonicalUrl": "https://static.crates.io/crates/unicode-width/unicode-width-0.1.14.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/unicode-width/0.1.14/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-unwinding-0.2.5",
+        "package": "unwinding",
+        "version": "0.2.5",
+        "sha256": "51f06a05848f650946acef3bf525fe96612226b61f74ae23ffa4e98bfbb8ab3c",
+        "canonicalUrl": "https://static.crates.io/crates/unwinding/unwinding-0.2.5.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/unwinding/0.2.5/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-wasi-0.11.0+wasi-snapshot-preview1",
+        "package": "wasi",
+        "version": "0.11.0+wasi-snapshot-preview1",
+        "sha256": "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423",
+        "canonicalUrl": "https://static.crates.io/crates/wasi/wasi-0.11.0+wasi-snapshot-preview1.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/wasi/0.11.0+wasi-snapshot-preview1/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows-sys-0.59.0",
+        "package": "windows-sys",
+        "version": "0.59.0",
+        "sha256": "1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b",
+        "canonicalUrl": "https://static.crates.io/crates/windows-sys/windows-sys-0.59.0.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows-sys/0.59.0/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows-targets-0.52.6",
+        "package": "windows-targets",
+        "version": "0.52.6",
+        "sha256": "9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973",
+        "canonicalUrl": "https://static.crates.io/crates/windows-targets/windows-targets-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows-targets/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_aarch64_gnullvm-0.52.6",
+        "package": "windows_aarch64_gnullvm",
+        "version": "0.52.6",
+        "sha256": "32a4622180e7a0ec044bb555404c800bc9fd9ec262ec147edd5989ccd0c02cd3",
+        "canonicalUrl": "https://static.crates.io/crates/windows_aarch64_gnullvm/windows_aarch64_gnullvm-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_aarch64_gnullvm/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_aarch64_msvc-0.52.6",
+        "package": "windows_aarch64_msvc",
+        "version": "0.52.6",
+        "sha256": "09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469",
+        "canonicalUrl": "https://static.crates.io/crates/windows_aarch64_msvc/windows_aarch64_msvc-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_aarch64_msvc/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_i686_gnu-0.52.6",
+        "package": "windows_i686_gnu",
+        "version": "0.52.6",
+        "sha256": "8e9b5ad5ab802e97eb8e295ac6720e509ee4c243f69d781394014ebfe8bbfa0b",
+        "canonicalUrl": "https://static.crates.io/crates/windows_i686_gnu/windows_i686_gnu-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_i686_gnu/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_i686_gnullvm-0.52.6",
+        "package": "windows_i686_gnullvm",
+        "version": "0.52.6",
+        "sha256": "0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66",
+        "canonicalUrl": "https://static.crates.io/crates/windows_i686_gnullvm/windows_i686_gnullvm-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_i686_gnullvm/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_i686_msvc-0.52.6",
+        "package": "windows_i686_msvc",
+        "version": "0.52.6",
+        "sha256": "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66",
+        "canonicalUrl": "https://static.crates.io/crates/windows_i686_msvc/windows_i686_msvc-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_i686_msvc/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_x86_64_gnu-0.52.6",
+        "package": "windows_x86_64_gnu",
+        "version": "0.52.6",
+        "sha256": "147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78",
+        "canonicalUrl": "https://static.crates.io/crates/windows_x86_64_gnu/windows_x86_64_gnu-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_x86_64_gnu/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_x86_64_gnullvm-0.52.6",
+        "package": "windows_x86_64_gnullvm",
+        "version": "0.52.6",
+        "sha256": "24d5b23dc417412679681396f2b49f3de8c1473deb516bd34410872eff51ed0d",
+        "canonicalUrl": "https://static.crates.io/crates/windows_x86_64_gnullvm/windows_x86_64_gnullvm-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_x86_64_gnullvm/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      },
+      {
+        "name": "rust-stdlib-windows_x86_64_msvc-0.52.6",
+        "package": "windows_x86_64_msvc",
+        "version": "0.52.6",
+        "sha256": "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec",
+        "canonicalUrl": "https://static.crates.io/crates/windows_x86_64_msvc/windows_x86_64_msvc-0.52.6.crate",
+        "url": "https://rsproxy.cn/api/v1/crates/windows_x86_64_msvc/0.52.6/download",
+        "role": "Rust standard-library lock closure;includes other targets/build-only packages"
+      }
+    ]
+  },
+  "cargoRegistry": {
+    "canonical": "https://github.com/rust-lang/crates.io-index",
+    "mirror": "sparse+https://rsproxy.cn/index/",
+    "integrity": "Original committed Cargo.lock package checksums;no lock updates"
+  },
+  "nativeAssManifest": "native-ass-sources.json",
+  "nativeAssManifestSha256": "7722d4b1968cbd92bacc2c3ca22dc8f3f4dc066890fb2f042bc8554179fad6c1",
+  "notes": [
+    "OHOS arm64-v8a uses the local SDK;host tools currently require macOS arm64.",
+    "Fixed full-feature source recipe;do not replace with the reduced diagnostic build.",
+    "SDK/API declaration checks and native QA are separate;source build is not physical-device or complete media acceptance."
+  ],
+  "sdkHeaders": {
+    "multimedia/player_framework/native_avbuffer.h": "30f19c65a70900311c55e7782842d085bc9bd86dbf43e52b7f2be9cf25423cee",
+    "multimedia/player_framework/native_avcodec_base.h": "26e0c847f388481497122793475f746c052c78b6aea5240c720b1fbebf87ae20",
+    "multimedia/player_framework/native_avcapability.h": "170f2c5099d2e332aab55e5d4176775860bf968806de398d15550a20749d808c",
+    "multimedia/player_framework/native_avformat.h": "0d8dbf3a281c416ba41576740d49b0e53c85afe69b47e0388b462e46732d95d4",
+    "multimedia/player_framework/native_avcodec_audiocodec.h": "10e9cb452c7b7ca24d3a87481e56d6a7e1a48bcc52cc1aa9bb5c106b1272a8ae",
+    "ohaudio/native_audiorenderer.h": "6305031d0ecaa5f5c62b28563563b4dbea784a54522d3c87b3643c56cef20c78",
+    "ohaudio/native_audiostreambuilder.h": "315a6f09ee99200688af38c2895fbce94af8de6bfa0127410735f09169147b11",
+    "native_image/native_image.h": "948099d563db6d663e59a37556ad7a1a33436ba77a62c4e65814224dbed1fc6d",
+    "native_buffer/native_buffer.h": "a48479e0e3e10d629e5819ff6843d0945bfa7780df46483fb79920294e525292",
+    "native_window/external_window.h": "9a88d967d26ba641ace0fe41239d455ab0e21d1cf45301a202d3ff1c465b4840",
+    "multimedia/player_framework/native_avcodec_videodecoder.h": "55081d3aee5605ec7421a4ec373d6e63522e6083df6723cfd34b07538bc68c73"
+  },
+  "ohosImports": [
+    {
+      "name": "OH_AVBuffer_GetAddr",
+      "header": "multimedia/player_framework/native_avbuffer.h",
+      "line": 153,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AVBuffer_GetBufferAttr",
+      "header": "multimedia/player_framework/native_avbuffer.h",
+      "line": 95,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AVBuffer_GetCapacity",
+      "header": "multimedia/player_framework/native_avbuffer.h",
+      "line": 166,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AVBuffer_SetBufferAttr",
+      "header": "multimedia/player_framework/native_avbuffer.h",
+      "line": 110,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AVCODEC_MIMETYPE_AUDIO_VIVID",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 333,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AVCODEC_MIMETYPE_VIDEO_AVC",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 257,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVCODEC_MIMETYPE_VIDEO_HEVC",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 292,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AVCapability_GetName",
+      "header": "multimedia/player_framework/native_avcapability.h",
+      "line": 217,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AVCodec_GetCapabilityByCategory",
+      "header": "multimedia/player_framework/native_avcapability.h",
+      "line": 170,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AVFormat_Create",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 98,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_Destroy",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 144,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_DumpInfo",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 446,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_GetDoubleValue",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 386,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_GetIntValue",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 312,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_SetBuffer",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 293,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_SetIntValue",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 177,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AVFormat_SetLongValue",
+      "header": "multimedia/player_framework/native_avformat.h",
+      "line": 213,
+      "introduced": 9
+    },
+    {
+      "name": "OH_AudioCodec_Configure",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 121,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_CreateByMime",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 64,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_Destroy",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 89,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_Flush",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 182,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_FreeOutputBuffer",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 274,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_Prepare",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 136,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_PushInputBuffer",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 256,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_RegisterCallback",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 103,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_Start",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 151,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioCodec_Stop",
+      "header": "multimedia/player_framework/native_avcodec_audiocodec.h",
+      "line": 166,
+      "introduced": 11
+    },
+    {
+      "name": "OH_AudioRenderer_Flush",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 120,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioRenderer_GetAudioTimestampInfo",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 575,
+      "introduced": 15
+    },
+    {
+      "name": "OH_AudioRenderer_GetUnderflowCount",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 427,
+      "introduced": 12
+    },
+    {
+      "name": "OH_AudioRenderer_GetVolume",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 376,
+      "introduced": 12
+    },
+    {
+      "name": "OH_AudioRenderer_Pause",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 92,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioRenderer_Release",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 64,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioRenderer_SetVolume",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 341,
+      "introduced": 12
+    },
+    {
+      "name": "OH_AudioRenderer_Start",
+      "header": "ohaudio/native_audiorenderer.h",
+      "line": 78,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_Create",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 65,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_Destroy",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 81,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_GenerateRenderer",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 318,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetChannelCount",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 113,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetEncodingType",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 142,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetRendererCallback",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 228,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetRendererInfo",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 189,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetSampleFormat",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 127,
+      "introduced": 10
+    },
+    {
+      "name": "OH_AudioStreamBuilder_SetSamplingRate",
+      "header": "ohaudio/native_audiostreambuilder.h",
+      "line": 97,
+      "introduced": 10
+    },
+    {
+      "name": "OH_ConsumerSurface_Create",
+      "header": "native_image/native_image.h",
+      "line": 342,
+      "introduced": 12
+    },
+    {
+      "name": "OH_ConsumerSurface_SetDefaultUsage",
+      "header": "native_image/native_image.h",
+      "line": 356,
+      "introduced": 13
+    },
+    {
+      "name": "OH_MD_KEY_AUDIO_SAMPLE_FORMAT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 729,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_AUD_CHANNEL_COUNT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 761,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_AUD_SAMPLE_RATE",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 768,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_BITRATE",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 680,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_BITS_PER_CODED_SAMPLE",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 983,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_CHANNEL_LAYOUT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 970,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_CODEC_CONFIG",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 878,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_COLOR_PRIMARIES",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 835,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_HEIGHT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 713,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_MATRIX_COEFFICIENTS",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 853,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_PIXEL_FORMAT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 721,
+      "introduced": 9
+    },
+    {
+      "name": "OH_MD_KEY_RANGE_FLAG",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 827,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_TRANSFER_CHARACTERISTICS",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 844,
+      "introduced": 10
+    },
+    {
+      "name": "OH_MD_KEY_VIDEO_PIC_HEIGHT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 1467,
+      "introduced": 12
+    },
+    {
+      "name": "OH_MD_KEY_VIDEO_PIC_WIDTH",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 1449,
+      "introduced": 12
+    },
+    {
+      "name": "OH_MD_KEY_VIDEO_SAR",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 1547,
+      "introduced": 12
+    },
+    {
+      "name": "OH_MD_KEY_VIDEO_SLICE_HEIGHT",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 1432,
+      "introduced": 12
+    },
+    {
+      "name": "OH_MD_KEY_VIDEO_STRIDE",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 1416,
+      "introduced": 12
+    },
+    {
+      "name": "OH_MD_KEY_WIDTH",
+      "header": "multimedia/player_framework/native_avcodec_base.h",
+      "line": 700,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeBuffer_FromNativeWindowBuffer",
+      "header": "native_buffer/native_buffer.h",
+      "line": 286,
+      "introduced": 12
+    },
+    {
+      "name": "OH_NativeBuffer_GetConfig",
+      "header": "native_buffer/native_buffer.h",
+      "line": 217,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeBuffer_GetSeqNum",
+      "header": "native_buffer/native_buffer.h",
+      "line": 258,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeBuffer_Reference",
+      "header": "native_buffer/native_buffer.h",
+      "line": 191,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeBuffer_Unreference",
+      "header": "native_buffer/native_buffer.h",
+      "line": 204,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeImage_AcquireNativeWindow",
+      "header": "native_image/native_image.h",
+      "line": 114,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeImage_AcquireNativeWindowBuffer",
+      "header": "native_image/native_image.h",
+      "line": 300,
+      "introduced": 12
+    },
+    {
+      "name": "OH_NativeImage_Create",
+      "header": "native_image/native_image.h",
+      "line": 101,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeImage_Destroy",
+      "header": "native_image/native_image.h",
+      "line": 240,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeImage_ReleaseNativeWindowBuffer",
+      "header": "native_image/native_image.h",
+      "line": 321,
+      "introduced": 12
+    },
+    {
+      "name": "OH_NativeImage_SetOnFrameAvailableListener",
+      "header": "native_image/native_image.h",
+      "line": 214,
+      "introduced": 11
+    },
+    {
+      "name": "OH_NativeImage_UnsetOnFrameAvailableListener",
+      "header": "native_image/native_image.h",
+      "line": 227,
+      "introduced": 11
+    },
+    {
+      "name": "OH_NativeImage_UpdateSurfaceImage",
+      "header": "native_image/native_image.h",
+      "line": 157,
+      "introduced": 9
+    },
+    {
+      "name": "OH_NativeWindow_CreateNativeWindowFromSurfaceId",
+      "header": "native_window/external_window.h",
+      "line": 763,
+      "introduced": 12
+    },
+    {
+      "name": "OH_NativeWindow_DestroyNativeWindow",
+      "header": "native_window/external_window.h",
+      "line": 438,
+      "introduced": 8
+    },
+    {
+      "name": "OH_NativeWindow_NativeObjectReference",
+      "header": "native_window/external_window.h",
+      "line": 608,
+      "introduced": 8
+    },
+    {
+      "name": "OH_NativeWindow_NativeObjectUnreference",
+      "header": "native_window/external_window.h",
+      "line": 621,
+      "introduced": 8
+    },
+    {
+      "name": "OH_NativeWindow_NativeWindowHandleOpt",
+      "header": "native_window/external_window.h",
+      "line": 580,
+      "introduced": 8
+    },
+    {
+      "name": "OH_NativeWindow_SetColorSpace",
+      "header": "native_window/external_window.h",
+      "line": 856,
+      "introduced": 12
+    },
+    {
+      "name": "OH_NativeWindow_SetMetadataValue",
+      "header": "native_window/external_window.h",
+      "line": 891,
+      "introduced": 12
+    },
+    {
+      "name": "OH_VideoDecoder_Configure",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 182,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_CreateByName",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 72,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_Destroy",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 86,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_Flush",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 250,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_FreeOutputBuffer",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 476,
+      "introduced": 11
+    },
+    {
+      "name": "OH_VideoDecoder_GetOutputDescription",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 277,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_Prepare",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 199,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_PushInputBuffer",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 393,
+      "introduced": 11
+    },
+    {
+      "name": "OH_VideoDecoder_RegisterCallback",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 121,
+      "introduced": 11
+    },
+    {
+      "name": "OH_VideoDecoder_RenderOutputBuffer",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 414,
+      "introduced": 11
+    },
+    {
+      "name": "OH_VideoDecoder_SetSurface",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 142,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_Start",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 216,
+      "introduced": 9
+    },
+    {
+      "name": "OH_VideoDecoder_Stop",
+      "header": "multimedia/player_framework/native_avcodec_videodecoder.h",
+      "line": 233,
+      "introduced": 9
+    }
+  ]
+}

@@ -20,6 +20,7 @@ import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
 import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController, PlaybackStatus } from '../service/PlaybackController';
+import { PlaybackSurface } from '../service/PlaybackSurface';
 import { SystemCaptions } from '../service/SystemCaptions';
 import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
@@ -31,6 +32,8 @@ import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { ExperienceState } from '../utils/Experience';
+import { EnginePreferences } from '../service/EnginePreferences';
+import { PlaybackEngines } from '../service/PlaybackEngines';
 
 @Entry
 @Component
@@ -111,7 +114,9 @@ struct Player {
   @State subtitlesOff: boolean = false;
   @State settingsBusy: boolean = false;
   @State settingsMessage: string = '';
-  private surface: XComponentController = new XComponentController();
+  private surface: PlaybackSurface = new PlaybackSurface((identity: string, width: number, height: number) => {
+    if (this.alive && (!this.surfaceId || this.surfaceId === identity)) { this.controller?.setSurfaceSize(width, height); }
+  });
   private surfaceId: string = '';
   private controller: PlaybackController | undefined = undefined;
   private system: SystemPlayback | undefined = undefined;
@@ -158,7 +163,7 @@ struct Player {
       complete: () => { this.completed(); },
       beforePlay: async () => { if (!this.alive || this.ownerClient !== AppService.client || !AppLock.permit()) { return false; } return this.system ? this.system.permitPlay() : this.visible; },
       interrupted: () => { this.cancelGesture(); this.system?.pause(); }
-    }, () => AppService.playbackPreferences.snapshot());
+    }, () => AppService.playbackPreferences.snapshot(), () => PlaybackEngines.create(EnginePreferences.requireChoice(), (getContext(this) as common.UIAbilityContext).cacheDir));
     this.connectSystem(); this.restoreIntro(); this.restoreTrickplay();
   }
 
@@ -502,7 +507,7 @@ struct Player {
             XComponent({ id: 'playbackSurface', type: XComponentType.SURFACE, controller: this.surface })
               .width(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).width)
               .height(UiLayout.videoFrame(this.surfaceWidth, this.surfaceHeight, this.videoAspect, this.zoomed).height)
-              .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); if (this.state !== 'error') { this.controller?.open(this.route, this.surfaceId); } })
+              .onLoad(() => { this.surfaceId = this.surface.getXComponentSurfaceId(); this.surface.publish(); if (this.state !== 'error') { this.controller?.open(this.route, this.surfaceId); } })
             if (!this.frameReady) { Column() {}.id('playbackFrameCover').width('100%').height('100%').backgroundColor('#000000').hitTestBehavior(HitTestMode.None) }
             if (this.styledFrame && this.canShowMainSubtitle()) {
               Stack({ alignContent: Alignment.TopStart }) {

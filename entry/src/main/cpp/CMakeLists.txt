@@ -34,3 +34,10 @@ target_link_libraries(cineisle_ass PRIVATE
     "${CINEISLE_ASS_DEPS}/lib/libfribidi.a"
     "${CINEISLE_ASS_DEPS}/lib/libexpat.a"
     ace_napi.z native_drawing m)
+
+# This API12-safe shim resolves the optional API15+ backend only after explicit capability checks.
+# Do not link libmpv here: startup on API12 must not resolve its newer platform imports.
+add_library(cineisle_mpv SHARED mpv/NapiMpv.cpp)
+target_include_directories(cineisle_mpv PRIVATE mpv/include)
+target_compile_options(cineisle_mpv PRIVATE -Wall -Wextra)
+target_link_libraries(cineisle_mpv PRIVATE ace_napi.z dl)

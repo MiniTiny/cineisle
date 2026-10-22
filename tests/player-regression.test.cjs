@@ -11,6 +11,8 @@ process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }))
 const cache = new Map(), platform = new Map(), nativePlayers = [], nativeQueue = [], httpQueue = [], requests = [];
 platform.set('libcineisle_ass.so', { async create() { throw new Error('ASS requires an explicit native fixture'); } });
 platform.set('@ohos.font', {});
+platform.set('libcineisle_mpv.so', { async capability() { return { supported: false, loaded: false }; }, async create() { throw new Error('MPV requires an explicit native fixture'); } });
+platform.set('@ohos.deviceInfo', { sdkApiVersion: 26 });
 require('./download-platform.cjs').install(platform);
 let routeParams = {}, closes = 0;
 const fileApi = { accessSync: fs.existsSync, openSync: p => ({ fd: fs.openSync(p, 'r') }),
@@ -95,6 +97,7 @@ function rig(overrides = {}) {
 const tests = [];
 function test(name, fn) { tests.push([name, fn]); }
 function reset() {
+  const engine = load('service/EnginePreferences.ets').EnginePreferences; engine.ready = true; engine.value = 'native'; engine.issue = '';
   AppService.intros = undefined; AppService.trickplays = undefined; AppService.loadAutoNext = async () => true;
   const { AppLock } = load('service/AppLock.ets'); AppLock.initialized = true; AppLock.locked = false; AppLock.enabled = false; AppLock.fault = false; systemPlatform.reset(); nativePlayers.length = 0; nativeQueue.length = 0; httpQueue.length = 0; requests.length = 0; AppService.client = client(); AppService.downloads = []; AppService.snapshot = new LibrarySnapshot(); routeParams = {}; }
 

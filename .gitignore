@@ -32,3 +32,8 @@ docs/audits/
 docs/brand/
 docs/artifact.json
 docs/*.log
+
+# Verified optional runtime files are prepared from pinned manifests, never committed.
+/entry/libs/arm64-v8a/libmpv.so
+/entry/libs/arm64-v8a/libc++_shared.so
+/entry/src/main/resources/rawfile/third_party/mpv/

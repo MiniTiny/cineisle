@@ -1,0 +1,17 @@
+{
+  "schema": 2,
+  "version": "mpv-6edeee00-cineisle-focus-fonts1",
+  "abi": "arm64-v8a",
+  "minimumApi": 15,
+  "clientApiMajor": 2,
+  "clientApiMinor": 5,
+  "clientHeaderSha256": "3c073236a09cb456c6e80587d5523c8771c32fb22ca014e0f99cc3d43905b75c",
+  "sourceManifest": "native-mpv-sources.json",
+  "sourceManifestSha256": "8ea9591ab28ed53680fe5cb0c52dc4bd353f84da1c7edb3c91b5ddcec6002b79",
+  "noticeManifest": "native-mpv-notices.json",
+  "noticeManifestSha256": "1fe08ea3eadf414d3ecdca920e9880b716e629f48d69ae8e507e13bd36a48914",
+  "sourceCommit": "6edeee00a07b9b76f197aa71eee3d029fb090de4",
+  "referenceWrapperCommit": "b709a5950181376a9947860e637b38270d3cc913",
+  "sourceProvenanceStatus": "fixed-source-full-dependency-build;native acceptance tracked separately",
+  "artifactHashes": "Per-build exact arm64-v8a hashes are recorded and verified in .local/native-mpv/prepared.json"
+}

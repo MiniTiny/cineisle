@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Los subtítulos ASS/SSA conservan los estilos y la animación; SRT admite negrita, cursiva, subrayado, tachado, superíndice, subíndice, colores, familias tipográficas, tamaños relativos y alineación en nueve posiciones. Las descargas pueden guardar pistas de texto incrustadas y externas, y las cachés existentes pueden actualizarse con conexión. Los subtítulos de imagen y las fuentes adjuntas al vídeo aún no son compatibles; los glifos dependen de las fuentes disponibles en el dispositivo. La reproducción sin conexión ofrece subtítulos guardados y pistas reconocidas por el dispositivo."
+      "value": "Los subtítulos ASS/SSA conservan los estilos y la animación; SRT admite negrita, cursiva, subrayado, tachado, superíndice, subíndice, colores, familias tipográficas, tamaños relativos y alineación en nueve posiciones. Las descargas pueden guardar pistas de texto incrustadas y externas, y las cachés existentes pueden actualizarse con conexión. MPV puede mostrar subtítulos de imagen incrustados compatibles y usar fuentes adjuntas al vídeo; la reproducción del sistema depende de las capacidades del dispositivo. La reproducción sin conexión ofrece subtítulos guardados y pistas reconocidas por el dispositivo."
     },
     {
       "name": "track_switch_failed",
@@ -2255,6 +2255,20 @@
     {
       "name": "batch_queued",
       "value": "%d pendientes de envío"
-    }
+    },
+    {"name": "engine_title", "value": "Motor de reproducción"},
+    {"name": "engine_current", "value": "Motor actual: %s"},
+    {"name": "engine_unknown", "value": "No se ha confirmado el motor guardado"},
+    {"name": "engine_hint", "value": "Los vídeos que abras usarán este motor. El cambio no afecta al vídeo en reproducción."},
+    {"name": "engine_native", "value": "Reproductor del sistema"},
+    {"name": "engine_mpv", "value": "Reproductor MPV"},
+    {"name": "engine_mpv_requires_api", "value": "MPV requiere HarmonyOS API15 o posterior."},
+    {"name": "engine_mpv_unavailable", "value": "MPV no está disponible. Comprueba la compatibilidad o elige el reproductor del sistema en Ajustes."},
+    {"name": "engine_load_failed", "value": "No se puede leer el motor guardado. Reintenta o elige un motor en Ajustes."},
+    {"name": "engine_invalid", "value": "El ajuste del motor no es válido. Elige un motor de nuevo."},
+    {"name": "engine_save_failed", "value": "No se pudo guardar el motor. Se conserva la elección anterior."},
+    {"name": "engine_restore_failed", "value": "No se pudo restaurar el motor. Guarda una elección antes de reproducir."},
+    {"name": "engine_cancelled", "value": "Ajuste del motor cancelado"},
+    {"name": "engine_saved", "value": "Guardado. Los vídeos que abras usarán este motor."}
   ]
 }
