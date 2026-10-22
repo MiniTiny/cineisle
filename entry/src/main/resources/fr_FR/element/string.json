@@ -1978,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Chinois simplifié, chinois traditionnel, anglais et français disponibles. Les autres langues système utilisent l’anglais. Ce réglage commun à l’application concerne uniquement l’interface ; les métadonnées et les préférences audio et de sous-titres restent distinctes."
+      "value": "Chinois simplifié, chinois traditionnel, anglais, français et espagnol disponibles. Les autres langues système utilisent l’anglais. Ce réglage commun à l’application concerne uniquement l’interface ; les métadonnées et les préférences audio et de sous-titres restent distinctes."
     },
     {
       "name": "ui_language_system",
