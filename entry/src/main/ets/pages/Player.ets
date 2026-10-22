@@ -55,6 +55,7 @@ struct Player {
   @State duration: number = 0;
   @State subtitle: string = '';
   @State subtitleRuns: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
+  @State subtitleRevision: string = '';
   @State positionedSubtitles: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
   @State styledFrame: StyledSubtitleFrame | undefined = undefined;
   @State audio: TrackChoice[] = [];
@@ -143,9 +144,9 @@ struct Player {
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
-      subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.positionedSubtitles = EMPTY_POSITIONED_SUBTITLES; this.system?.updateSubtitle(value); } },
+      subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.subtitleRevision = ''; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.positionedSubtitles = EMPTY_POSITIONED_SUBTITLES; this.system?.updateSubtitle(value); } },
       caption: (value: SubtitleContent) => {
-        if (this.alive) { this.subtitle = value.flowText; this.subtitleRuns = value.flowRuns; this.positionedSubtitles = value.positioned; this.system?.updateSubtitle(value.flowText, value.flowRuns, value.positioned); }
+        if (this.alive) { this.subtitle = value.flowText; this.subtitleRevision = value.revision; this.subtitleRuns = value.flowRuns; this.positionedSubtitles = value.positioned; this.system?.updateSubtitle(value.flowText, value.flowRuns, value.positioned, value.revision); }
       },
       styledSubtitle: (frame: StyledSubtitleFrame | undefined) => {
         if (this.alive) { this.styledFrame = frame; this.system?.updateStyledSubtitle(frame); }
@@ -583,7 +584,7 @@ struct Player {
     Column() {
       if (this.subtitleRuns.length) {
         RichCaption({ runs: this.subtitleRuns, captionStyle: this.captionStyle, fontSize: 20 * (this.captionStyle.system ? this.captionStyle.scale : 1),
-          identifier: 'playbackTextSubtitle' }).width('100%')
+          identifier: 'playbackTextSubtitle', revision: this.subtitleRevision }).width('100%')
       } else {
       Text(this.subtitle).id('playbackTextSubtitle')
         .fontSize(this.captionStyle.system ? `${20 * this.captionStyle.scale}vp` : 20).fontColor(this.captionStyle.foreground).textAlign(TextAlign.Center)

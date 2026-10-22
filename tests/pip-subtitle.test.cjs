@@ -193,6 +193,14 @@ test('relative subtitle size survives the full page/system/PiP publication and s
   await p.system.stopPiP();await p.system.startPiP();assert.equal(window.captionNode.builderNode.params.runs[0].sizeScale,.8);
   await p.controller.selectSubtitle('');assert.equal(window.captionNode.builderNode.params.runs.length,0);
 });
+test('script and dual decorations survive page/system/PiP same-text updates and explicit cleanup', async () => {
+  const raw='1\n00:00 --> 00:02\n<s><u><sup>same</sup></u></s>\n\n2\n00:02 --> 00:04\n<sub>same</sub>\n';
+  const p=await page(route(),async()=>raw);await serverCue(p,1000);const window=await pip(p);
+  assert.ok(p.subtitleRuns[0].strike&&p.subtitleRuns[0].underline);assert.equal(window.captionNode.builderNode.params.runs[0].baselines[0].direction,1);
+  nativePlayers[0].emit('timeUpdate',2500);assert.equal(p.subtitle,'same');assert.equal(window.captionNode.builderNode.params.runs[0].baselines[0].direction,-1);assert.equal(window.captionNode.builderNode.params.runs[0].strike,false);
+  await p.system.stopPiP();await p.system.startPiP();assert.equal(window.captionNode.builderNode.params.runs[0].baselines[0].direction,-1);
+  await p.controller.selectSubtitle('');assert.equal(window.captionNode.builderNode.params.runs.length,0);
+});
 (async () => {
   for (const [name, fn] of tests) {
     h.reset(); owners.length = 0; captions.length = 0; SystemPlayback.current = undefined;
