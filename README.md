@@ -1,5 +1,7 @@
 # 映屿 · CineIsle
 
+[简体中文](README.md) | [English](README.en.md)
+
 映屿（CineIsle）是一款面向 HarmonyOS NEXT 的私人影视库客户端，通过 Jellyfin 连接您的电影与剧集。使用 ArkTS 与 ArkUI Stage 模型开发，最低支持 HarmonyOS 5.0 / API 12，应用包名为 `com.cineisle.app`。
 
 「映屿」意为一座属于自己的影像岛屿，英文名 CineIsle 由 cinema 与 isle 组合而成。
