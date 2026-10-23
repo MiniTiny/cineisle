@@ -75,4 +75,40 @@ test('SDK network failure retains identity and never acquires a platform numeric
   const client=h.activate(); h.queue.push(Object.assign(Error('SDK failure'),{code:2300001}));
   await assert.rejects(client.request('/probe'),e=>e instanceof AppFailure&&e.failureCode==='network_failed'&&e.message==='network_failed'&&e.code===undefined);
 });
+for (const source of ['http', 'space']) test('captured '+source+' presentation survives language change and resource failure', async () => {
+  const client=h.activate(); let language='zh';
+  const manager={getStringByNameSync:(key,...args)=>language+':'+key+':'+args.join(',')};
+  strings.initializeStrings(manager);
+  let error;
+  if(source==='http') {
+    h.queue.push({responseCode:503,result:''});
+    try { await client.request('/probe'); } catch(e) { error=e; }
+  } else {
+    const {DownloadSpace}=h.load('service/DownloadSpace.ets');
+    const api=h.platform.get('@ohos.file.statvfs'), original=api.getFreeSize;
+    api.getFreeSize=async()=>1048576;
+    try { await DownloadSpace.check(h.directory,{expectedSize:1048576},[]); } catch(e) { error=e; }
+    finally { api.getFreeSize=original; }
+  }
+  const expected=source==='http'?'zh:http_failed:503':'zh:download_space_insufficient:9,1';
+  assert.ok(error instanceof AppFailure); assert.equal(error.message,expected);
+  assert.equal(strings.errorText(error),expected);
+  language='en'; assert.equal(strings.errorText(error),expected);
+  manager.getStringByNameSync=()=>{throw Error('resource unavailable')};
+  assert.equal(strings.errorText(error),expected);
+  manager.getStringByNameSync=key=>key;
+  assert.equal(strings.errorText(error),expected);
+  assert.equal(connectionFailure(error),source==='http');
+});
+test('resource-key errors retain the original lookup-at-display behavior',()=>{
+  let language='zh'; strings.initializeStrings({getStringByNameSync:key=>language+':'+key});
+  const typed=new AppFailure('login_expired','authorization');
+  for(const error of [typed,Error('login_expired')]) {
+    language='zh';assert.equal(strings.errorText(error),'zh:login_expired');
+    language='en';assert.equal(strings.errorText(error),'en:login_expired');
+  }
+  strings.initializeStrings({getStringByNameSync:()=>{throw Error('unavailable')}});
+  assert.equal(strings.errorText(typed),'login_expired');
+  assert.equal(authorizationFailure(typed),true);
+});
 (async()=>{for(const [name,fn]of tests){h.reset();await fn();console.log('PASS '+name)}console.log(`${tests.length} error contract tests passed. Native HTTP/OS remain explicit fixtures.`)})().catch(e=>{console.error(e);process.exitCode=1});
