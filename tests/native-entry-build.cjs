@@ -1,7 +1,7 @@
 // Host compile of production entrypoints. No production source rewriting or copied validation logic.
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawnSync}=require('node:child_process');
-exports.build=()=>{
+exports.build=({core=false}={})=>{
   const root=path.resolve(__dirname,'..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'cineisle-native-entry-'));
   const cleanup=()=>fs.rmSync(directory,{recursive:true,force:true});
   process.on('exit',cleanup);
@@ -34,5 +34,11 @@ exports.build=()=>{
   const output=path.join(directory,'entry.node');
   const linking=process.platform==='darwin'?['-bundle','-undefined','dynamic_lookup']:['-shared'];
   run(compiler,[...common,...linking,...objects,traps,'-o',output]);
-  return {native:require(output),directory,cleanup};
+  let coreExecutable;
+  if(core){
+    coreExecutable=path.join(directory,'ass-core');
+    run(compiler,[...common,'tests/native-entry-fixture/ass-core.cpp','entry/src/main/cpp/ass/AssRenderer.cpp',
+      'tests/native-entry-fixture/ass-engine.cpp','-o',coreExecutable]);
+  }
+  return {native:require(output),directory,cleanup,coreExecutable};
 };

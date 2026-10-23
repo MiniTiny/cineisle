@@ -25,11 +25,12 @@ test('ASS native core rejects empty/NUL documents and invalid font values',async
   await assert.rejects(n.create('doc','',''),/ass_input_invalid/);
   assert.throws(()=>n.create(7,font,''),/ass_argument_invalid/);
 });
-for(const [kind,values]of [['canvas',[4095,4096,4097]],['source',[32767,32768,32769]]])for(const value of values)test(`ASS render ${kind} ${value}`,async()=>{
+for(const [axis,index,maximum]of [['canvas-width',0,4096],['canvas-height',1,4096],['source-width',2,32768],['source-height',3,32768]])for(const value of [maximum-1,maximum,maximum+1])test(`ASS binding ${axis} ${value}`,async()=>{
   const handle=await n.create('doc',font,'');
-  try{const args=kind==='canvas'?[value,1,1,1]:[1,1,value,value];
-    if(value>(kind==='canvas'?4096:32768))assert.throws(()=>n.render(handle,0,...args),/ass_argument_invalid/);
-    else assert.equal((await n.render(handle,0,...args)).canvasWidth,args[0]);
+  try{const args=[1,1,1,1];args[index]=value;
+    // The other three dimensions and the area remain valid: no other guard can mask this axis.
+    if(value>maximum)assert.throws(()=>n.render(handle,0,...args),/ass_argument_invalid/);
+    else {const frame=await n.render(handle,0,...args);assert.equal(frame.canvasWidth,args[0]);assert.equal(frame.canvasHeight,args[1]);}
   }finally{n.close(handle)}
 });
 for(const height of [1079,1080,1081])test('ASS native core pixel budget at 1920 x '+height,async()=>{
