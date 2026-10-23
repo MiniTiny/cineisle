@@ -2,6 +2,7 @@ import statvfs from '@ohos.file.statvfs';
 import fs from '@ohos.file.fs';
 import { DownloadRecord } from '../model/Models';
 import { text } from '../utils/Strings';
+import { AppFailure } from '../utils/Failures';
 
 export class DownloadSpace {
   private static subtitleReservations: Map<DownloadRecord, number[]> = new Map();
@@ -38,7 +39,8 @@ export class DownloadSpace {
     const subtitles = (record.subtitles ?? []).filter((sub) => sub.state !== 'ready' || !fs.accessSync(sub.path));
     const needed = (subtitleOnly ? 0 : record.expectedSize ?? 0) + subtitles.length * 4 * 1024 * 1024 + 8 * 1024 * 1024;
     if (!Number.isSafeInteger(reserved + needed) || free < reserved + needed) {
-      throw new Error(text('download_space_insufficient', Math.ceil((reserved + needed) / 1048576), Math.floor(free / 1048576)));
+      const requiredMb = Math.ceil((reserved + needed) / 1048576); const availableMb = Math.floor(free / 1048576);
+      throw new AppFailure('download_space_insufficient', 'storage', text('download_space_insufficient', requiredMb, availableMb), [requiredMb, availableMb]);
     }
   }
 }

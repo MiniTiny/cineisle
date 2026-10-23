@@ -10,6 +10,7 @@ import { ExperienceStore } from './ExperienceStore';
 import { JellyfinClient } from './JellyfinClient';
 import { ExperienceState, PendingEdit, PendingPosition, connectionFailure } from '../utils/Experience';
 import { sessionKey } from '../utils/Accounts';
+import { failureCode } from '../utils/Failures';
 
 export interface SyncOwner { client: JellyfinClient; local: LocalStore; store: ExperienceStore }
 interface ItemSyncIntent { id: string; position?: PendingPosition; played?: PendingEdit; favorite?: PendingEdit }
@@ -116,7 +117,7 @@ export class PendingSync {
       } catch (e) {
         if (!await allowed()) { continue; }
         if (PendingSync.stamp(store.snapshot()) !== stamp) { retryAt = Math.min(retryAt, Date.now() + 1000); continue; }
-        const transient = connectionFailure(e as Error) || (e as Error).message === 'sync_cache_write_failed';
+        const transient = connectionFailure(e as Error) || failureCode(e as Error) === 'sync_cache_write_failed';
         const result = store.update((next: ExperienceState) => {
           next.syncAttempts = Math.min(5, (next.syncAttempts ?? 0) + 1);
           next.syncBlocked = !transient;

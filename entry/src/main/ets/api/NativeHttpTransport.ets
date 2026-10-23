@@ -8,10 +8,10 @@ import { PublicSystemInfo } from './generated/Models';
 import { addresses } from '../utils/Accounts';
 import { ProductIdentity } from '../utils/ProductIdentity';
 import { NetworkOptions, NetworkPolicy } from '../utils/NetworkOptions';
+import { AppFailure, endpointRecoveryFailure } from '../utils/Failures';
 
-class HttpFailure extends Error {
-  status: number;
-  constructor(status: number) { super(text('http_failed', status)); this.status = status; }
+class HttpFailure extends AppFailure {
+  constructor(status: number) { super('http_failed', 'response', text('http_failed', status), [status], status); }
 }
 // The generated client owns wire routes/types; this adapter owns native HTTP and credentials.
 export class NativeHttpTransport implements ApiTransport {
@@ -53,15 +53,14 @@ export class NativeHttpTransport implements ApiTransport {
   }
 
   private async read(path: string, method: string, params: ApiQuery[], body: string, accept: string): Promise<string> {
-    if (method === 'GET' && NetworkPolicy.cacheRequired()) { throw new Error('network_failed'); }
+    if (method === 'GET' && NetworkPolicy.cacheRequired()) { throw new AppFailure('network_failed', 'network'); }
     return this.readAttempt(path, method, params, body, accept, [], NetworkPolicy.snapshot());
   }
   private async readAttempt(path: string, method: string, params: ApiQuery[], body: string, accept: string, tried: string[], policy: NetworkOptions): Promise<string> {
     const address = this.session.server;
     try { return await this.at(address, path, method, params, body, accept, policy); }
     catch (e) {
-      const message = (e as Error).message;
-      if (!this.session.serverId || (!this.session.token && path !== '/System/Info/Public') || !(message === 'network_failed' || [408, 502, 503, 504].includes((e as HttpFailure).status))) { throw e as Error; }
+      if (!this.session.serverId || (!this.session.token && path !== '/System/Info/Public') || !endpointRecoveryFailure(e as Error)) { throw e as Error; }
       const attempted = [...tried, address]; const candidates = addresses(this.session.addresses ?? [address]).filter((v: string) => !attempted.includes(v)); if (!candidates.length) { throw e as Error; }
       if (!this.recovery) {
         this.recovery = this.recover(address, candidates, policy);
@@ -106,8 +105,8 @@ export class NativeHttpTransport implements ApiTransport {
       // Native HTTP rejects an explicitly empty body on some POST/DELETE requests.
       if (body) { options.extraData = body; }
       const response = await this.timed(connection, `${address}${path}${query ? '?' + query : ''}`, options, policy.requestMs);
-      if (response.responseCode === 401) { throw new Error('login_expired'); }
-      if (response.responseCode === 403) { throw new Error('permission_denied'); }
+      if (response.responseCode === 401) { throw new AppFailure('login_expired', 'authorization'); }
+      if (response.responseCode === 403) { throw new AppFailure('permission_denied', 'authorization'); }
       if (response.responseCode < 200 || response.responseCode >= 300) { throw new HttpFailure(response.responseCode); }
       if (response.responseCode === 204) { return ''; }
       if (typeof response.result !== 'string') { throw new Error('api_response_invalid'); }
@@ -115,14 +114,14 @@ export class NativeHttpTransport implements ApiTransport {
       return response.result;
     } catch (e) {
       const code = (e as BusinessError).code;
-      if (code !== undefined && code >= 2300000 && code < 2400000) { throw new Error('network_failed'); }
+      if (code !== undefined && code >= 2300000 && code < 2400000) { throw new AppFailure('network_failed', 'network'); }
       throw e as Error;
     } finally { connection.destroy(); }
   }
   private timed(connection: http.HttpRequest, url: string, options: http.HttpRequestOptions, duration: number): Promise<http.HttpResponse> {
     return new Promise<http.HttpResponse>((resolve, reject) => {
       let settled = false;
-      const timer = setTimeout(() => { if (!settled) { settled = true; reject(new Error('network_failed')); } }, duration);
+      const timer = setTimeout(() => { if (!settled) { settled = true; reject(new AppFailure('network_failed', 'network')); } }, duration);
       try {
         connection.request(url, options).then((response: http.HttpResponse) => {
           if (!settled) { settled = true; clearTimeout(timer); resolve(response); }
