@@ -2,11 +2,12 @@ import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import deviceInfo from '@ohos.deviceInfo';
 import * as native from 'libcineisle_mpv.so';
-import { PlaybackEngine, PlaybackEvents } from './PlaybackEngine';
+import { PlaybackEngine, PlaybackEvents, PlaybackBackendInfo } from './PlaybackEngine';
 import { MpvAudioFocus } from './MpvAudioFocus';
 import { SubtitleContent } from '../utils/InlineSubtitle';
 import { mpvTextSubtitle } from '../utils/MpvTextSubtitle';
 import { AssFonts } from './AssFonts';
+import { MpvOptions, defaultMpvOptions, copyMpvOptions, validMpvOptions } from '../utils/MpvOptions';
 
 // The shim is safe to import on API12; the optional library is loaded only inside capability/create.
 export class MpvPlaybackEngine implements PlaybackEngine {
@@ -41,23 +42,30 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private frameReady: boolean = false;
   private source: string = '';
   private fontConfiguration: string;
+  private options: MpvOptions;
   private descriptor: media.AVFileDescriptor | undefined;
   private surface: string | undefined;
   private renderer: audio.AudioRendererInfo | undefined;
   private focus: MpvAudioFocus = new MpvAudioFocus(() => this.interrupted());
   private value: native.MpvState = { loaded: false, rendered: false, paused: true, ended: false, seeking: false,
     error: 0, duration: 0, position: 0, width: 0, height: 0, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, tracks: [],
-    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: 55, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0 };
+    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: 55, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0,
+    hardwareDecoder: '', videoOutput: '', audioOutput: '' };
 
   static async available(): Promise<boolean> {
     if (deviceInfo.sdkApiVersion < 15) { return false; }
     return (await native.capability(deviceInfo.sdkApiVersion)).supported;
   }
-  private constructor(fontConfiguration: string) { this.fontConfiguration = fontConfiguration; }
-  static async create(cacheDirectory: string): Promise<PlaybackEngine> {
+  private constructor(fontConfiguration: string, options: MpvOptions) { this.fontConfiguration = fontConfiguration; this.options = copyMpvOptions(options); }
+  static async create(cacheDirectory: string, options: MpvOptions = defaultMpvOptions()): Promise<PlaybackEngine> {
     if (!await MpvPlaybackEngine.available()) { throw new Error('mpv_unavailable'); }
     if (!cacheDirectory || !cacheDirectory.startsWith('/')) { throw new Error('mpv_font_unavailable'); }
-    return new MpvPlaybackEngine(AssFonts.prepare(cacheDirectory).configuration);
+    if (!validMpvOptions(options)) { throw new Error('mpv_options_invalid'); }
+    return new MpvPlaybackEngine(AssFonts.prepare(cacheDirectory).configuration, options);
+  }
+  get backend(): PlaybackBackendInfo | undefined {
+    if (!this.value.loaded || !this.value.rendered || this.released || this.failed) { return undefined; }
+    return { hardwareDecoder: this.value.hardwareDecoder, videoOutput: this.value.videoOutput, audioOutput: this.value.audioOutput };
   }
   get state(): string { return this.phase; }
   get duration(): number { return this.value.duration; }
@@ -102,7 +110,8 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     pending.catch(() => {});
     this.timeout = setTimeout(() => { this.fail(); }, 30000);
     try {
-      const handle = await native.create({ api: deviceInfo.sdkApiVersion, source: this.source, surface: this.surface!, fontConfiguration: this.fontConfiguration });
+      const handle = await native.create({ api: deviceInfo.sdkApiVersion, source: this.source, surface: this.surface!, fontConfiguration: this.fontConfiguration,
+        hardwareDecoder: this.options.hwdec, videoOutput: this.options.vo });
       if (this.released || this.failed) { await native.release(handle); return; }
       this.handle = handle; this.timer = setInterval(() => { this.refresh(); }, 200);
       await this.refresh(); await pending;

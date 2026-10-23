@@ -2086,6 +2086,25 @@
     {"name": "engine_save_failed", "value": "Could not save the engine. The previous choice was kept."},
     {"name": "engine_restore_failed", "value": "Could not restore the engine setting. Save a choice again before playing."},
     {"name": "engine_cancelled", "value": "Engine setting cancelled"},
-    {"name": "engine_saved", "value": "Saved. Newly opened videos will use this engine."}
+    {"name": "engine_saved", "value": "Saved. Newly opened videos will use this engine."},
+    {"name": "mpv_options_title", "value": "MPV playback options"},
+    {"name": "mpv_hardware_label", "value": "Decoding mode"},
+    {"name": "mpv_video_label", "value": "Video output"},
+    {"name": "mpv_hardware_software", "value": "Software decoding"},
+    {"name": "mpv_hardware_ohcodec", "value": "OpenHarmony hardware decoding"},
+    {"name": "mpv_hardware_copy", "value": "OpenHarmony hardware decoding with copy-back"},
+    {"name": "mpv_options_hint", "value": "Saved for the app and applied to the next video. Unavailable hardware decoding may fall back to software; the player shows the actual backends."},
+    {"name": "mpv_audio_fixed", "value": "Audio output uses OpenHarmony system audio."},
+    {"name": "mpv_options_current", "value": "Saved: decoding %s · video %s"},
+    {"name": "mpv_options_unknown", "value": "MPV options are unconfirmed. Select and save options to repair an invalid configuration."},
+    {"name": "mpv_options_save", "value": "Save MPV options"},
+    {"name": "mpv_options_saved", "value": "MPV options saved for the next video"},
+    {"name": "mpv_options_invalid", "value": "MPV options are invalid or unsupported; select and save them again"},
+    {"name": "mpv_options_load_failed", "value": "Unable to read MPV options"},
+    {"name": "mpv_options_save_failed", "value": "MPV options were not saved; try again"},
+    {"name": "mpv_options_restore_failed", "value": "MPV options could not be restored; select and save them again before playback"},
+    {"name": "mpv_options_cancelled", "value": "Saving MPV options was cancelled"},
+    {"name": "mpv_backend_actual", "value": "Actual decoding: %s · video: %s · audio: %s"},
+    {"name": "mpv_backend_unknown", "value": "Not reported yet"}
   ]
 }

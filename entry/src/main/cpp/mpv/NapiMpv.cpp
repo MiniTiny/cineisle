@@ -61,6 +61,7 @@ struct State {
     double duration = 0, position = 0, width = 0, height = 0, speed = 1, volume = 1;
     uint32_t seekRevision = 0, seekDone = 0;
     std::string subtitleText, subtitleAss, subtitleEvents;
+    std::string hardwareDecoder, videoOutput, audioOutput;
     double subtitleStart = -1, subtitleEnd = -1;
     double subtitleFontSize = 55;
     double surfaceWidth = 0, surfaceHeight = 0;
@@ -90,7 +91,7 @@ const mpv_node *Field(const mpv_node &value, const char *name) {
     }
     return nullptr;
 }
-struct Request { int api = 0; std::string source, surface, fontConfiguration; };
+struct Request { int api = 0; std::string source, surface, fontConfiguration; std::string hardwareDecoder = "no", videoOutput = "gpu-next"; };
 struct Command { std::string type; double value = 0, height = 0; };
 struct Session : std::enable_shared_from_this<Session> {
     Api &api;
@@ -154,8 +155,10 @@ struct Session : std::enable_shared_from_this<Session> {
         handle = api.create(); Require(handle != nullptr, "mpv_create_failed");
         Option("config", "no"); Option("load-scripts", "no"); Option("osc", "no"); Option("osd-level", "0");
         Option("terminal", "no"); Option("msg-level", "all=no"); Option("idle", "yes"); Option("keep-open", "yes");
-        Option("pause", "yes"); Option("vo", "gpu-next"); Option("gpu-context", "ohos"); Option("opengl-es", "yes");
-        Option("hwdec", "no"); Option("sub-auto", "no"); Option("audio-file-auto", "no");
+        Option("pause", "yes"); Option("vo", request.videoOutput.c_str()); Option("gpu-context", "ohos"); Option("opengl-es", "yes");
+        Option("ao", "ohaudio"); Option("hwdec", request.hardwareDecoder.c_str());
+        Option("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1");
+        Option("sub-auto", "no"); Option("audio-file-auto", "no");
         Option("network-timeout", "15");
         if (!request.fontConfiguration.empty()) {
             Option("sub-fonts-config", request.fontConfiguration.c_str());
@@ -185,6 +188,10 @@ struct Session : std::enable_shared_from_this<Session> {
         int value = fallback ? 1 : 0;
         return api.get_property(handle, name, MPV_FORMAT_FLAG, &value) >= 0 ? value != 0 : fallback;
     }
+    std::string PropertyText(const char *name) {
+        Node node(api);
+        return api.get_property(handle, name, MPV_FORMAT_NODE, &node.value) >= 0 ? Text(node.value) : "";
+    }
     State Snapshot() {
         Require(handle != nullptr, "mpv_closed");
         for (int i = 0; i < 128; ++i) {
@@ -207,6 +214,8 @@ struct Session : std::enable_shared_from_this<Session> {
         state.volume = Number("volume", 100) / 100; state.paused = Flag("pause", true);
         state.surfaceWidth = std::max(0.0, Number("osd-width")); state.surfaceHeight = std::max(0.0, Number("osd-height"));
         state.ended = Flag("eof-reached", state.ended);
+        state.hardwareDecoder = PropertyText("hwdec-current");
+        state.videoOutput = PropertyText("current-vo"); state.audioOutput = PropertyText("current-ao");
         if (restartedAfterSeek && std::abs(state.position - seekTarget) <= 1000) {
             state.seekDone = state.seekRevision; state.seeking = false; seekObserved = false; restartedAfterSeek = false;
         }
@@ -346,6 +355,7 @@ napi_value Encode(napi_env e, const State &s) {
     Set(e, object, "subtitleStart", s.subtitleStart); Set(e, object, "subtitleEnd", s.subtitleEnd);
     Set(e, object, "subtitleEvents", s.subtitleEvents); Set(e, object, "subtitleFontSize", s.subtitleFontSize); Set(e, object, "subtitleOverflow", s.subtitleOverflow);
     Set(e, object, "surfaceWidth", s.surfaceWidth); Set(e, object, "surfaceHeight", s.surfaceHeight);
+    Set(e, object, "hardwareDecoder", s.hardwareDecoder); Set(e, object, "videoOutput", s.videoOutput); Set(e, object, "audioOutput", s.audioOutput);
     napi_value tracks; Check(napi_create_array_with_length(e, s.tracks.size(), &tracks));
     for (size_t i = 0; i < s.tracks.size(); ++i) {
         const auto &track = s.tracks[i]; napi_value item; Check(napi_create_object(e, &item));
@@ -399,6 +409,19 @@ napi_value Create(napi_env e, napi_callback_info info) {
         if (hasFonts) {
             work->request.fontConfiguration = String(e, Field(e, value, "fontConfiguration"), 4096);
             Require(!work->request.fontConfiguration.empty() && work->request.fontConfiguration.front() == '/', "mpv_argument_invalid");
+        }
+        bool hasHardware = false, hasVideo = false;
+        Check(napi_has_named_property(e, value, "hardwareDecoder", &hasHardware));
+        Check(napi_has_named_property(e, value, "videoOutput", &hasVideo));
+        if (hasHardware) {
+            auto mode = String(e, Field(e, value, "hardwareDecoder"), 32);
+            Require(mode == "no" || mode == "ohcodec" || mode == "ohcodec-copy", "mpv_argument_invalid");
+            work->request.hardwareDecoder = mode;
+        }
+        if (hasVideo) {
+            auto output = String(e, Field(e, value, "videoOutput"), 32);
+            Require(output == "gpu" || output == "gpu-next", "mpv_argument_invalid");
+            work->request.videoOutput = output;
         }
         Require(!work->request.source.empty() && !work->request.surface.empty(), "mpv_argument_invalid"); return Submit(e, std::move(work)); }
     catch (...) { napi_throw_error(e, nullptr, "mpv_argument_invalid"); return nullptr; }

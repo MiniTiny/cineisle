@@ -9,7 +9,7 @@ import { text } from '../utils/Strings';
 import { JellyfinClient } from './JellyfinClient';
 import { OfflineSubtitles } from './OfflineSubtitles';
 import { PlaybackPreferences, preferredTrack } from '../utils/PlaybackPreferences';
-import { PlaybackEngine, PlaybackEngineFactory, NativePlaybackEngine, EngineSubtitle } from './PlaybackEngine';
+import { PlaybackEngine, PlaybackEngineFactory, NativePlaybackEngine, EngineSubtitle, PlaybackBackendInfo } from './PlaybackEngine';
 
 export interface PlayerView {
   state: (state: string) => void;
@@ -32,6 +32,7 @@ export interface PlaybackStatus {
   route: PlaybackRoute; state: string; position: number; duration: number; speed: number; width: number; height: number;
   checkpoint?: number;
   checkpointCompleted?: boolean;
+  backend?: PlaybackBackendInfo;
 }
 
 // Owns the native player and its FD. Every asynchronous callback is tied to one load.
@@ -235,7 +236,8 @@ export class PlaybackController {
       } else { player.url = route.url; }
     } catch (e) {
       const code = (e as Error).message;
-      this.fail(generation, ['engine_load_failed', 'engine_invalid', 'engine_restore_failed', 'engine_mpv_unavailable'].includes(code) ? code : 'play_error');
+        this.fail(generation, ['engine_load_failed', 'engine_invalid', 'engine_restore_failed', 'engine_mpv_unavailable',
+          'mpv_options_load_failed', 'mpv_options_invalid', 'mpv_options_restore_failed'].includes(code) ? code : 'play_error');
     }
   }
 
@@ -444,7 +446,7 @@ export class PlaybackController {
 
   snapshot(): PlaybackStatus {
     return { route: this.route, state: this.closed ? 'released' : this.failed ? 'error' : this.player?.state ?? 'loading', position: this.position,
-      duration: this.player?.duration ?? this.duration, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0, checkpoint: this.checkpoint, checkpointCompleted: this.checkpointCompleted };
+        duration: this.player?.duration ?? this.duration, speed: this.rate, width: this.player?.width ?? 0, height: this.player?.height ?? 0, checkpoint: this.checkpoint, checkpointCompleted: this.checkpointCompleted, backend: this.player?.backend };
   }
 
   async hide(continuePlayback: boolean = false): Promise<boolean> {

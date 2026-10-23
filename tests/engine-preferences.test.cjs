@@ -61,7 +61,7 @@ test('serialized writes preserve each invocation result and the final persisted 
 test('validation and factory dispatch never replace a requested MPV failure with a native player', async () => {
   h.reset(); let calls = 0; const create = MpvPlaybackEngine.create, available = MpvPlaybackEngine.available;
   MpvPlaybackEngine.available = async () => false; MpvPlaybackEngine.create = async () => { ++calls; throw Error('internal fixture'); };
-  try { await assert.rejects(PlaybackEngines.validate('mpv'), /engine_mpv_unavailable/); await assert.rejects(PlaybackEngines.create('mpv'), /engine_mpv_unavailable/); assert.equal(calls, 1); assert.equal(h.nativePlayers.length, 0);
+  try { await assert.rejects(PlaybackEngines.validate('mpv'), /engine_mpv_unavailable/); await assert.rejects(PlaybackEngines.create('mpv'), /engine_mpv_unavailable/); assert.equal(calls, 0); assert.equal(h.nativePlayers.length, 0);
     await assert.rejects(PlaybackEngines.create('unknown'), /engine_invalid/);
   } finally { MpvPlaybackEngine.create = create; MpvPlaybackEngine.available = available; }
 });
@@ -71,9 +71,9 @@ test('API12 disables MPV eligibility without a native capability probe', async (
 });
 test('actual Player factory reads the global choice at open and reports an unavailable backend', async () => {
   h.reset(); fresh(); await store.load(context); await store.save('mpv', () => true); h.setRoute(h.route()); const p = new h.Player(); p.aboutToAppear();
-  const create = MpvPlaybackEngine.create; let calls = 0; MpvPlaybackEngine.create = async () => { calls++; throw Error('fixture'); };
+  const create = MpvPlaybackEngine.create, available = MpvPlaybackEngine.available; let calls = 0; MpvPlaybackEngine.available = async () => true; MpvPlaybackEngine.create = async () => { calls++; throw Error('fixture'); };
   try { await p.controller.open(p.route, 'surface'); await h.settle(); assert.equal(calls, 1); assert.equal(p.state, 'error'); assert.equal(p.message, 'engine_mpv_unavailable'); assert.equal(h.nativePlayers.length, 0); }
-  finally { p.aboutToDisappear(); MpvPlaybackEngine.create = create; }
+  finally { p.aboutToDisappear(); MpvPlaybackEngine.create = create; MpvPlaybackEngine.available = available; }
 });
 test('actual Player uses a saved native choice for the next opened video', async () => {
   h.reset(); fresh(); await store.load(context); await store.save('native', () => true); h.setRoute(h.route()); const p = new h.Player(); p.aboutToAppear();
