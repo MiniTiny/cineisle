@@ -1,3 +1,4 @@
+import { SubtitleDocumentLimits, CaptionRenderLimits } from './SubtitleLimits';
 import { MediaItem, MediaStream } from '../model/Models';
 import { inlineSubtitle, SubtitleContent, SubtitleRun, PositionedSubtitle } from './InlineSubtitle';
 
@@ -38,7 +39,7 @@ export function subtitleFormat(stream: MediaStream): string {
 
 // Check the stored document before committing its cache entry. Full ASS interpretation belongs to libass.
 export function validAssDocument(source: string): boolean {
-  if (!source || source.length > 1024 * 1024 || source.includes('\u0000')) { return false; }
+  if (!source || source.length > SubtitleDocumentLimits.maxCodeUnits || source.includes('\u0000')) { return false; }
   let section = ''; let fields: string[] = []; let script = false;
   for (const raw of source.replace(/^\uFEFF/, '').replace(/\r/g, '').split('\n')) {
     const line = raw.trim();
@@ -107,7 +108,7 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     let weight = 0; let styled = 0; let positioned = 0;
     for (const event of events) {
       weight += event.weight; styled += event.styled; positioned += event.positioned;
-      if ((styled > 0 && weight > 4096) || positioned > 256) { throw new Error('subtitle_failed'); }
+      if ((styled > 0 && weight > CaptionRenderLimits.maxSimultaneousRunWeight) || positioned > CaptionRenderLimits.maxPositionedCues) { throw new Error('subtitle_failed'); }
     }
   }
   return cues;

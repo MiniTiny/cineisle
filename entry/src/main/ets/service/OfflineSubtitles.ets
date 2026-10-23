@@ -1,3 +1,4 @@
+import { SubtitleTransferLimits, SubtitleDocumentLimits } from '../utils/SubtitleLimits';
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import { downloadNetwork } from '../utils/Downloads';
@@ -21,7 +22,7 @@ export class OfflineSubtitles {
   }
 
   static document(subtitle: DownloadSubtitle): string {
-    if (!fs.accessSync(subtitle.path) || fs.statSync(subtitle.path).size > 4 * 1024 * 1024) { throw new Error('offline_subtitle_failed'); }
+    if (!fs.accessSync(subtitle.path) || fs.statSync(subtitle.path).size > SubtitleTransferLimits.maxBytes) { throw new Error('offline_subtitle_failed'); }
     const content = fs.readTextSync(subtitle.path);
     if ((subtitle.format ?? 'srt') === 'ass' ? !validAssDocument(content) : !parseSubtitles(content).length) { throw new Error('offline_subtitle_failed'); }
     return content;
@@ -48,7 +49,7 @@ export class OfflineSubtitles {
         const content = await client.subtitle(record.id, record.mediaSourceId ?? '', subtitle.index,
           new SubtitleTransfer(client.subtitleTransport(), context, subtitle.path, record.network ?? downloadNetwork(), owned), subtitle.format ?? 'srt');
         if (!owned()) { return; }
-        if (content.length > 1024 * 1024 || (subtitle.format === 'ass' ? !validAssDocument(content) : !parseSubtitles(content).length)) { throw new Error('offline_subtitle_failed'); }
+        if (content.length > SubtitleDocumentLimits.maxCodeUnits || (subtitle.format === 'ass' ? !validAssDocument(content) : !parseSubtitles(content).length)) { throw new Error('offline_subtitle_failed'); }
         const file = fs.openSync(subtitle.path + '.tmp', fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNC);
         try { fs.writeSync(file.fd, content); fs.fsyncSync(file.fd); } finally { fs.closeSync(file); }
         fs.renameSync(subtitle.path + '.tmp', subtitle.path); subtitle.state = 'ready'; downloaded = true;

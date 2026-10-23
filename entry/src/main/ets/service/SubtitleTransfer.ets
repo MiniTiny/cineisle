@@ -1,3 +1,4 @@
+import { SubtitleTransferLimits } from '../utils/SubtitleLimits';
 import common from '@ohos.app.ability.common';
 import request from '@ohos.request';
 import { DownloadNetworkGuard } from './DownloadNetworkGuard';
@@ -29,7 +30,7 @@ export class SubtitleTransfer implements ApiTransport {
         let content = ''; let error = failed || !this.owned();
         try {
           if (!error) {
-            if (!fs.accessSync(this.path) || fs.statSync(this.path).size > 4 * 1024 * 1024) { error = true; }
+            if (!fs.accessSync(this.path) || fs.statSync(this.path).size > SubtitleTransferLimits.maxBytes) { error = true; }
             else { content = fs.readTextSync(this.path); }
           }
         } catch (e) { error = true; }
@@ -46,7 +47,7 @@ export class SubtitleTransfer implements ApiTransport {
               metered: this.policy.mobile, roaming: this.policy.mobile && this.policy.roaming, redirect: false, retry: false });
             remove = async () => { await request.agent.remove(task.tid); };
             task.on('completed', () => { finish(false); }); task.on('failed', () => { finish(true); });
-            task.on('progress', (progress: request.agent.Progress) => { if (!this.owned() || progress.processed > 4 * 1024 * 1024) { finish(true); } });
+            task.on('progress', (progress: request.agent.Progress) => { if (!this.owned() || progress.processed > SubtitleTransferLimits.maxBytes) { finish(true); } });
             if (!this.owned()) { await finish(true); return; }
             await task.start();
           } else {
@@ -54,7 +55,7 @@ export class SubtitleTransfer implements ApiTransport {
               enableMetered: this.policy.mobile, enableRoaming: this.policy.mobile && this.policy.roaming });
             remove = async () => { if (!await task.delete()) { throw new Error('cancel_download_failed'); } };
             task.on('complete', () => { finish(false); }); task.on('fail', () => { finish(true); });
-            task.on('progress', (received: number) => { if (!this.owned() || received > 4 * 1024 * 1024) { finish(true); } });
+            task.on('progress', (received: number) => { if (!this.owned() || received > SubtitleTransferLimits.maxBytes) { finish(true); } });
             if (!this.owned()) { await finish(true); return; }
           }
           if (!finished) { timer = setTimeout(() => { finish(true); }, 30000); watch = setInterval(() => { if (!this.owned()) { finish(true); } }, 500); }

@@ -1,3 +1,4 @@
+import { CaptionRenderLimits } from './SubtitleLimits';
 import { subtitleEntities } from './SubtitleEntities';
 
 export class SubtitleBaseline {
@@ -138,7 +139,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (!raw) { return; }
     const style = stack[stack.length - 1].style; const previous = pieces[pieces.length - 1];
     if (previous && appendedRevision === styleRevision && sameStyle(previous, style)) { previous.text += raw; }
-    else { if (pieces.length >= 4096) { throw new Error('subtitle_failed'); } pieces.push(new SubtitleRun(raw, style)); appendedRevision = styleRevision; }
+    else { if (pieces.length >= CaptionRenderLimits.maxRunsPerCue) { throw new Error('subtitle_failed'); } pieces.push(new SubtitleRun(raw, style)); appendedRevision = styleRevision; }
     trailingBreaks = raw === '\n' || raw === '\n\n' ? Math.min(2, trailingBreaks + raw.length) : 0;
   };
   const appendText = (raw: string): void => {
