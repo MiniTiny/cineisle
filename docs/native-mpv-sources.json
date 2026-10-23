@@ -324,6 +324,16 @@
       "component": "mpv",
       "path": "native/mpv/explicit-fontconfig.patch",
       "sha256": "a3a72e26deb204dec72ddd8a5b98e188c4d111f255c60f7d81fdd9bbf28e61c7"
+    },
+    {
+      "component": "mpv",
+      "path": "native/mpv/ohcodec-init-cleanup.patch",
+      "sha256": "e991fa10bdad9658458ce6abccf6c948600af8bdd83d74c07da89ee77787d308"
+    },
+    {
+      "component": "mpv",
+      "path": "native/mpv/egl-buffer-geometry.patch",
+      "sha256": "0c83221f6320bd2a5f02f3f2da0ab23ebbe189f62a5cd027dcbe84e2fc117ac6"
     }
   ],
   "rust": {

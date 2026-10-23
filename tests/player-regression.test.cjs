@@ -23,6 +23,7 @@ platform.set('@ohos.file.fileuri', { getUriFromPath: p => 'file://' + p });
 for (const id of ['@ohos.app.ability.common', '@ohos.request', '@ohos.resourceManager', '@ohos.security.asset']) platform.set(id, {});
 const systemPlatform = require('./system-platform.cjs');
 systemPlatform.install(platform);
+systemPlatform.context.filesDir = directory; systemPlatform.context.cacheDir = directory;
 const windowPlatform = require('./window-platform.cjs'); windowPlatform.install(platform);
 const preferencesPlatform = require('./preferences-platform.cjs').install(platform, directory);
 platform.set('@ohos.util', { generateRandomUUID: () => 'device', TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } }, TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });

@@ -126,6 +126,15 @@ struct Player {
   @State visible: boolean = true;
   private loadRevision: number = 0;
   private finished: boolean = false;
+  @State backendKnown: boolean = false;
+  @State backendHardware: string = '';
+  @State backendVideo: string = '';
+  @State backendAudio: string = '';
+  private syncBackend(status?: PlaybackStatus): void {
+    const backend = status && !['error', 'released', 'loading', 'initialized'].includes(status.state) ? status.backend : undefined;
+    this.backendKnown = !!backend; this.backendHardware = backend?.hardwareDecoder ?? '';
+    this.backendVideo = backend?.videoOutput ?? ''; this.backendAudio = backend?.audioOutput ?? '';
+  }
 
   aboutToAppear(): void {
     this.route = router.getParams() as PlaybackRoute;
@@ -142,10 +151,10 @@ struct Player {
     this.showPreferences(AppService.playbackPreferences.snapshot());
     this.settingsMessage = AppService.playbackPreferences.issue ? text(AppService.playbackPreferences.issue) : '';
     this.controller = new PlaybackController(AppService.client, {
-      state: (state: string) => { if (this.alive) { this.state = state; if (state === 'error') { this.options = false; this.clearIntro(); this.clearTrickplay(); this.system?.stopPiP(); } if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
+      state: (state: string) => { if (this.alive) { this.state = state; this.syncBackend(this.controller?.snapshot()); if (state === 'error') { this.options = false; this.clearIntro(); this.clearTrickplay(); this.system?.stopPiP(); } if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
       frame: (ready: boolean) => { if (this.alive) { this.frameReady = ready; } },
       closed: (status: PlaybackStatus) => { this.finishOffline(status); },
-      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
+      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.syncBackend(status); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
@@ -163,7 +172,7 @@ struct Player {
       complete: () => { this.completed(); },
       beforePlay: async () => { if (!this.alive || this.ownerClient !== AppService.client || !AppLock.permit()) { return false; } return this.system ? this.system.permitPlay() : this.visible; },
       interrupted: () => { this.cancelGesture(); this.system?.pause(); }
-    }, () => AppService.playbackPreferences.snapshot(), () => PlaybackEngines.create(EnginePreferences.requireChoice(), (getContext(this) as common.UIAbilityContext).cacheDir));
+    }, () => AppService.playbackPreferences.snapshot(), () => PlaybackEngines.create(EnginePreferences.requireChoice(), getContext(this) as common.UIAbilityContext));
     this.connectSystem(); this.restoreIntro(); this.restoreTrickplay();
   }
 
@@ -680,6 +689,11 @@ struct Player {
   systemOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_system_group'), icon: $r('app.media.player_background') })
+      if (this.backendKnown) {
+        Text($r('app.string.mpv_backend_actual', this.backendHardware === 'no' ? text('mpv_hardware_software') : this.backendHardware || text('mpv_backend_unknown'),
+          this.backendVideo || text('mpv_backend_unknown'), this.backendAudio || text('mpv_backend_unknown')))
+          .id('mpvActualBackend').fontSize(12).fontColor(this.palette.muted).width('100%')
+      }
       BrandButton({ label: this.pipActive ? $r('app.string.pip_exit') : $r('app.string.pip_enter'),
         icon: this.pipActive ? $r('app.media.player_pip_exit') : $r('app.media.player_pip'), primary: this.pipActive,
         available: this.systemReady && this.pipSupported && !this.busy && ['prepared', 'playing', 'paused'].includes(this.state),

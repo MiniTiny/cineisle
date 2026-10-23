@@ -1,0 +1,62 @@
+--- a/video/out/opengl/context_ohos.c
++++ b/video/out/opengl/context_ohos.c
+@@ -28,6 +28,8 @@
+     EGLDisplay egl_display;
+     EGLContext egl_context;
+     EGLSurface egl_surface;
++    EGLConfig egl_config;
++    int buffer_width, buffer_height;
+ };
+-
++
+ static pl_color_space_t ohos_preferred_csp(struct ra_ctx *ctx)
+@@ -75,12 +77,11 @@
+         goto fail;
+     }
+-
++
+-    EGLConfig config;
+-    if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &config))
++    if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &p->egl_config))
+         goto fail;
+-
++
+     OHNativeWindow *native_window = vo_ohos_native_window(ctx->vo);
+-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
++    p->egl_surface = eglCreateWindowSurface(p->egl_display, p->egl_config,
+                                     (EGLNativeWindowType)native_window, NULL);
+-
++
+     if (p->egl_surface == EGL_NO_SURFACE) {
+@@ -116,7 +117,30 @@
+     int w, h;
+     if (!vo_ohos_surface_size(ctx->vo, &w, &h))
+         return false;
++    // A transferred PiP Surface may keep EGL buffers at the previous window
++    // size. Match the producer allocation before changing the GL viewport.
++    int ret = OH_NativeWindow_NativeWindowHandleOpt(
++        vo_ohos_native_window(ctx->vo), SET_BUFFER_GEOMETRY, w, h);
++    if (ret != 0) {
++        MP_ERR(ctx, "Failed to resize NativeWindow buffers: %d\n", ret);
++        return false;
++    }
+-
++
++    struct priv *p = ctx->priv;
++    if (p->buffer_width && (p->buffer_width != w || p->buffer_height != h)) {
++        if (!eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
++                            EGL_NO_CONTEXT))
++            return false;
++        eglDestroySurface(p->egl_display, p->egl_surface);
++        p->egl_surface = eglCreateWindowSurface(p->egl_display, p->egl_config,
++                (EGLNativeWindowType)vo_ohos_native_window(ctx->vo), NULL);
++        if (p->egl_surface == EGL_NO_SURFACE ||
++            !eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
++                            p->egl_context))
++            return false;
++    }
++    p->buffer_width = w;
++    p->buffer_height = h;
+     ctx->vo->dwidth = w;
+     ctx->vo->dheight = h;
+     ra_gl_ctx_resize(ctx->swapchain, w, h, 0);

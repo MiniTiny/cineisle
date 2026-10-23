@@ -2143,6 +2143,25 @@
     {"name": "engine_save_failed", "value": "引擎設定儲存失敗，已保留原選擇。"},
     {"name": "engine_restore_failed", "value": "引擎設定還原失敗，請重新儲存後再播放。"},
     {"name": "engine_cancelled", "value": "引擎設定已取消"},
-    {"name": "engine_saved", "value": "已儲存，新開啟的影片將使用此引擎。"}
+    {"name": "engine_saved", "value": "已儲存，新開啟的影片將使用此引擎。"},
+    {"name": "mpv_options_title", "value": "MPV 播放設定"},
+    {"name": "mpv_hardware_label", "value": "解碼方式"},
+    {"name": "mpv_video_label", "value": "影像輸出"},
+    {"name": "mpv_hardware_software", "value": "軟體解碼"},
+    {"name": "mpv_hardware_ohcodec", "value": "OpenHarmony 硬體解碼"},
+    {"name": "mpv_hardware_copy", "value": "OpenHarmony 硬體解碼複製回傳"},
+    {"name": "mpv_options_hint", "value": "依應用程式儲存，僅套用於下次開啟的影片。硬體解碼無法使用時可能改用軟體解碼；播放器會顯示實際後端。"},
+    {"name": "mpv_audio_fixed", "value": "音訊輸出由 OpenHarmony 系統音訊管理。"},
+    {"name": "mpv_options_current", "value": "已儲存：解碼 %s · 影像 %s"},
+    {"name": "mpv_options_unknown", "value": "MPV 設定尚未確認；重新選擇並儲存可明確修復異常設定。"},
+    {"name": "mpv_options_save", "value": "儲存 MPV 設定"},
+    {"name": "mpv_options_saved", "value": "MPV 設定已儲存，下次開啟影片時生效"},
+    {"name": "mpv_options_invalid", "value": "MPV 設定損壞或不支援，請重新選擇並儲存"},
+    {"name": "mpv_options_load_failed", "value": "無法讀取 MPV 設定"},
+    {"name": "mpv_options_save_failed", "value": "MPV 設定未儲存，請重試"},
+    {"name": "mpv_options_restore_failed", "value": "MPV 設定回復失敗，請重新選擇並儲存後再播放"},
+    {"name": "mpv_options_cancelled", "value": "本次 MPV 設定儲存已取消"},
+    {"name": "mpv_backend_actual", "value": "實際解碼：%s · 影像：%s · 音訊：%s"},
+    {"name": "mpv_backend_unknown", "value": "尚未回報"}
   ]
 }

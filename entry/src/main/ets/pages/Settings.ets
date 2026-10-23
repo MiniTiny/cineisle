@@ -26,6 +26,8 @@ import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
 import { EngineChoice, engineChoiceCaption } from '../utils/EngineChoice';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
+import { MpvPreferences } from '../service/MpvPreferences';
+import { MpvHardware, MpvVideo, MPV_HARDWARE_MODES, MPV_VIDEO_OUTPUTS, mpvHardwareCaption } from '../utils/MpvOptions';
 @Entry
 @Component
 struct Settings {
@@ -57,6 +59,14 @@ struct Settings {
   @State engineMessage: string = '';
   @State mpvOffered: boolean = false;
   private engineRevision: number = 0;
+  @State mpvHardware: MpvHardware = 'ohcodec';
+  @State mpvVideo: MpvVideo = 'gpu-next';
+  @State mpvSavedHardware: MpvHardware = 'ohcodec';
+  @State mpvSavedVideo: MpvVideo = 'gpu-next';
+  @State mpvOptionsKnown: boolean = false;
+  @State mpvOptionsBusy: boolean = false;
+  @State mpvOptionsMessage: string = '';
+  private mpvOptionsRevision: number = 0;
   @State seekBack: string = '5';
   @State seekForward: string = '15';
   @State currentPin: string = '';
@@ -102,7 +112,7 @@ struct Settings {
     this.seekBack = (this.playerUi.back / 1000).toString(); this.seekForward = (this.playerUi.forward / 1000).toString();
     this.loadDeviceName();
   }
-  onPageHide(): void { this.deviceVisible = false; ++this.engineRevision; this.engineBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
+  onPageHide(): void { this.deviceVisible = false; ++this.engineRevision; this.engineBusy = false; ++this.mpvOptionsRevision; this.mpvOptionsBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); }
   aboutToDisappear(): void { this.onPageHide(); }
   private appearancePermit(revision: number): boolean { return revision === this.appearanceRevision && this.deviceVisible && !this.locked && AppLock.permit() && this.ownerClient === AppService.client; }
   private async loadAppearance(): Promise<void> {
@@ -138,7 +148,7 @@ struct Settings {
   }
 
   private invalidateDevice(): void { ++this.deviceRevision; this.deviceLoaded = false; this.deviceBusy = false; }
-  private deviceLockChanged(): void { if (this.locked) { ++this.engineRevision; this.engineBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
+  private deviceLockChanged(): void { if (this.locked) { ++this.engineRevision; this.engineBusy = false; ++this.mpvOptionsRevision; this.mpvOptionsBusy = false; ++this.appearanceRevision; this.appearanceBusy = false; ++this.languageRevision; this.languageBusy = false; ++this.networkRevision; this.invalidatePosters(); this.invalidateDevice(); } }
   private enginePermit(revision: number): boolean {
     return revision === this.engineRevision && this.deviceVisible && !this.locked && AppLock.permit() && this.ownerClient === AppService.client;
   }
@@ -147,18 +157,47 @@ struct Settings {
     try {
       await EnginePreferences.load(getContext(this) as common.UIAbilityContext);
       if (this.enginePermit(revision)) { this.engineChoice = EnginePreferences.snapshot(); this.engineKnown = EnginePreferences.known(); this.engineMessage = EnginePreferences.issue ? text(EnginePreferences.issue) : ''; }
+        if (this.enginePermit(revision) && this.engineChoice === 'mpv' && this.mpvOffered) { await this.loadMpvOptions(); }
     } catch (e) { if (this.enginePermit(revision)) { this.engineKnown = false; this.engineMessage = errorText(e as Error); } }
     finally { if (revision === this.engineRevision) { this.engineBusy = false; } }
   }
   private async saveEngine(choice: EngineChoice): Promise<void> {
     if (this.engineBusy || !this.enginePermit(this.engineRevision) || (choice === 'mpv' && !this.mpvOffered)) { return; }
     const revision = ++this.engineRevision; this.engineBusy = true; this.engineMessage = '';
+    ++this.mpvOptionsRevision; this.mpvOptionsBusy = false;
     try {
       await PlaybackEngines.validate(choice);
       await EnginePreferences.save(choice, () => this.enginePermit(revision));
       if (this.enginePermit(revision)) { this.engineChoice = choice; this.engineKnown = true; this.engineMessage = text('engine_saved'); }
+        if (this.enginePermit(revision) && choice === 'mpv') { await this.loadMpvOptions(); }
     } catch (e) { if (this.enginePermit(revision)) { this.engineKnown = EnginePreferences.known(); this.engineChoice = EnginePreferences.snapshot(); this.engineMessage = errorText(e as Error); } }
     finally { if (revision === this.engineRevision) { this.engineBusy = false; } }
+  }
+  private mpvOptionsPermit(revision: number): boolean {
+    return revision === this.mpvOptionsRevision && this.deviceVisible && !this.locked && AppLock.permit() &&
+      this.ownerClient === AppService.client && this.engineKnown && this.engineChoice === 'mpv' && this.mpvOffered;
+  }
+  private async loadMpvOptions(): Promise<void> {
+    const revision = ++this.mpvOptionsRevision; this.mpvOptionsBusy = true;
+    try {
+      await MpvPreferences.load(getContext(this) as common.UIAbilityContext);
+      if (this.mpvOptionsPermit(revision)) {
+        const value = MpvPreferences.requireOptions(); this.mpvHardware = value.hwdec; this.mpvVideo = value.vo;
+        this.mpvSavedHardware = value.hwdec; this.mpvSavedVideo = value.vo; this.mpvOptionsKnown = true; this.mpvOptionsMessage = '';
+      }
+    } catch (e) { if (this.mpvOptionsPermit(revision)) { this.mpvOptionsKnown = false; this.mpvOptionsMessage = errorText(e as Error); } }
+    finally { if (revision === this.mpvOptionsRevision) { this.mpvOptionsBusy = false; } }
+  }
+  private async saveMpvOptions(): Promise<void> {
+    if (this.mpvOptionsBusy || this.engineBusy || !this.mpvOptionsPermit(this.mpvOptionsRevision)) { return; }
+    const revision = ++this.mpvOptionsRevision; this.mpvOptionsBusy = true; this.mpvOptionsMessage = '';
+    try {
+      const saved = await MpvPreferences.save({ hwdec: this.mpvHardware, vo: this.mpvVideo }, () => this.mpvOptionsPermit(revision));
+      if (this.mpvOptionsPermit(revision)) {
+        this.mpvSavedHardware = saved.hwdec; this.mpvSavedVideo = saved.vo; this.mpvOptionsKnown = true; this.mpvOptionsMessage = text('mpv_options_saved');
+      }
+    } catch (e) { if (this.mpvOptionsPermit(revision)) { this.mpvOptionsKnown = MpvPreferences.known(); this.mpvOptionsMessage = errorText(e as Error); } }
+    finally { if (revision === this.mpvOptionsRevision) { this.mpvOptionsBusy = false; } }
   }
   private invalidatePosters(): void { ++this.posterRevision; this.posterBusy = false; this.posterKnown = false; }
   private posterPermit(revision: number, cache: PosterCache): boolean {
@@ -410,6 +449,30 @@ struct Settings {
   }
 
   @Builder
+  private mpvSettings() {
+    Column({ space: 12 }) {
+      BrandHeading({ label: $r('app.string.mpv_options_title'), icon: $r('app.media.detail_play') })
+      Text(this.mpvOptionsKnown ? text('mpv_options_current', text(mpvHardwareCaption(this.mpvSavedHardware)), this.mpvSavedVideo) : text('mpv_options_unknown')).fontSize(14).fontColor('#F2F3FA').width('100%')
+      Text($r('app.string.mpv_hardware_label')).fontSize(14).fontColor('#F2F3FA').width('100%')
+      Select([{ value: text('mpv_hardware_software') }, { value: text('mpv_hardware_ohcodec') }, { value: text('mpv_hardware_copy') }])
+        .selected(MPV_HARDWARE_MODES.indexOf(this.mpvHardware)).value(text(mpvHardwareCaption(this.mpvHardware)))
+        .fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).width('100%')
+        .enabled(!this.mpvOptionsBusy && !this.engineBusy && !this.locked).accessibilityText($r('app.string.mpv_hardware_label'))
+        .onSelect((index: number) => { if (Number.isInteger(index) && index >= 0 && index < MPV_HARDWARE_MODES.length) { this.mpvHardware = MPV_HARDWARE_MODES[index]; } })
+      Text($r('app.string.mpv_video_label')).fontSize(14).fontColor('#F2F3FA').width('100%')
+      Select([{ value: 'gpu-next' }, { value: 'gpu' }]).selected(MPV_VIDEO_OUTPUTS.indexOf(this.mpvVideo)).value(this.mpvVideo)
+        .fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).width('100%')
+        .enabled(!this.mpvOptionsBusy && !this.engineBusy && !this.locked).accessibilityText($r('app.string.mpv_video_label'))
+        .onSelect((index: number) => { if (Number.isInteger(index) && index >= 0 && index < MPV_VIDEO_OUTPUTS.length) { this.mpvVideo = MPV_VIDEO_OUTPUTS[index]; } })
+      Text($r('app.string.mpv_options_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
+      Text($r('app.string.mpv_audio_fixed')).fontSize(12).fontColor(this.palette.muted).width('100%')
+      BrandButton({ label: $r('app.string.mpv_options_save'), icon: $r('app.media.menu_save'),
+        available: !this.mpvOptionsBusy && !this.engineBusy && !this.locked, onSelect: () => this.saveMpvOptions() })
+      if (this.mpvOptionsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
+      if (this.mpvOptionsMessage) { Text(this.mpvOptionsMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+    }.width('100%')
+  }
+  @Builder
   private playerSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.engine_title'), icon: $r('app.media.detail_play') })
@@ -422,6 +485,7 @@ struct Settings {
       if (!this.mpvOffered) { Text($r('app.string.engine_mpv_requires_api')).fontSize(12).fontColor(this.palette.muted).width('100%') }
       if (this.engineBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.engineMessage) { Text(this.engineMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
+        if (this.engineKnown && this.engineChoice === 'mpv' && this.mpvOffered) { this.mpvSettings(); }
       BrandHeading({ label: $r('app.string.player_gesture_preferences'), icon: $r('app.media.player_speed') })
       Row({ space: 12 }) {
         Text($r('app.string.player_gestures_enabled')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)

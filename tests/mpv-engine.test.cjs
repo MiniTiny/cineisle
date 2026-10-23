@@ -18,7 +18,7 @@ function pure(file) {
 const deferred = () => { let resolve, reject; const promise = new Promise((r, j) => { resolve = r; reject = j; }); return { promise, resolve, reject }; };
 const settle = async () => { for (let i = 0; i < 5; ++i) await new Promise(setImmediate); };
 const initial = () => ({ loaded: true, rendered: true, paused: true, ended: false, seeking: false, error: 0,
-  duration: 9000, position: 0, width: 640, height: 360, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, surfaceWidth: 0, surfaceHeight: 0,
+  duration: 9000, position: 0, width: 640, height: 360, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, surfaceWidth: 0, surfaceHeight: 0, hardwareDecoder: 'no', videoOutput: 'gpu-next', audioOutput: 'ohaudio',
   tracks: [{ index: 0, id: 1, kind: 'audio', language: 'eng', title: 'English', selected: true },
     { index: 1, id: 1, kind: 'sub', language: 'zho', title: 'Chinese', selected: true }] });
 function rig(api = 26) {
@@ -55,6 +55,7 @@ function rig(api = 26) {
   vm.runInNewContext(focusJs, { module: focusModule, exports: focusModule.exports, require(id) { assert.equal(id, '@ohos.multimedia.audio'); return audio; } });
   platform['./MpvAudioFocus'] = focusModule.exports;
   platform['../utils/MpvTextSubtitle'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvTextSubtitle.ts'));
+  platform['../utils/MpvOptions'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvOptions.ts'));
   const module = { exports: {} };
   vm.runInNewContext(js, { module, exports: module.exports, require(id) { assert.ok(id in platform, 'unexpected platform import ' + id); return platform[id]; },
     setInterval(fn) { const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { timers.delete(id); },
@@ -76,6 +77,23 @@ test('each MPV source receives its platform font configuration without global co
   const request = r.calls.find(c => c[0] === 'create')[1];
   assert.equal(request.fontConfiguration, '/cache/ass-fonts/fonts.conf');
   assert.equal(request.source, 'https://example.invalid/synthetic'); await p.release();
+});
+test('new MPV instances request platform hardware by default and retain their own option snapshot', async () => {
+  const r = rig(), defaults = await r.open(); const request = r.calls.find(c => c[0] === 'create')[1];
+  assert.equal(request.hardwareDecoder, 'ohcodec'); assert.equal(request.videoOutput, 'gpu-next'); await defaults.release();
+  const options = { hwdec: 'no', vo: 'gpu' }; const p = await r.Engine.create('/cache', options);
+  options.hwdec = 'ohcodec-copy'; options.vo = 'gpu-next'; p.bind(r.eventSink); p.url = 'https://example.invalid/second'; await settle(); p.surfaceId = '456';
+  await p.prepare(); const second = r.calls.filter(c => c[0] === 'create').at(-1)[1];
+  assert.equal(second.hardwareDecoder, 'no'); assert.equal(second.videoOutput, 'gpu'); await p.release();
+});
+test('actual backend reports software fallback rather than the requested hardware mode', async () => {
+  const r = rig(), p = await r.open(); assert.equal(p.backend.hardwareDecoder, 'no'); assert.equal(p.backend.videoOutput, 'gpu-next'); assert.equal(p.backend.audioOutput, 'ohaudio');
+  r.value.hardwareDecoder = 'ohcodec-copy'; r.value.videoOutput = 'gpu'; await p.refresh(); assert.equal(p.backend.hardwareDecoder, 'ohcodec-copy'); assert.equal(p.backend.videoOutput, 'gpu');
+  await p.release(); assert.equal(p.backend, undefined);
+});
+test('invalid native option choices stop before font preparation or native create', async () => {
+  const r = rig(); await assert.rejects(r.Engine.create('/cache', { hwdec: 'mediacodec', vo: 'null' }), /mpv_options_invalid/);
+  assert.equal(r.calls.filter(c => c[0] === 'font-prepare' || c[0] === 'create').length, 0);
 });
 test('font preparation failure is visible before a native source is created', async () => {
   const r = rig(); r.fonts.prepare = () => { throw Error('font fixture unavailable'); };

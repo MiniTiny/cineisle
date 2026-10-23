@@ -3,6 +3,7 @@ import audio from '@ohos.multimedia.audio';
 import { SubtitleContent } from '../utils/InlineSubtitle';
 
 export interface EngineSubtitle extends media.SubtitleInfo { content?: SubtitleContent }
+export interface PlaybackBackendInfo { hardwareDecoder: string; videoOutput: string; audioOutput: string }
 
 export interface PlaybackEvents {
   state: (state: string) => void;
@@ -17,6 +18,7 @@ export interface PlaybackEvents {
 // The controller retains queue, reports, subtitle caches and progress ownership across engines.
 export interface PlaybackEngine {
   readonly nativeSubtitles: boolean;
+  readonly backend: PlaybackBackendInfo | undefined;
   readonly state: string;
   readonly duration: number;
   readonly currentTime: number;
@@ -44,6 +46,7 @@ export type PlaybackEngineFactory = () => Promise<PlaybackEngine>;
 
 export class NativePlaybackEngine implements PlaybackEngine {
   readonly nativeSubtitles: boolean = false;
+  get backend(): PlaybackBackendInfo | undefined { return undefined; }
   private player: media.AVPlayer;
   private constructor(player: media.AVPlayer) { this.player = player; }
   static async create(): Promise<PlaybackEngine> { return new NativePlaybackEngine(await media.createAVPlayer()); }
