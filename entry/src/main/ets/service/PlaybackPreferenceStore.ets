@@ -4,6 +4,8 @@ import { canonicalPreferences, copyPreferences, PlaybackPreferences, validPrefer
 
 // App-level settings, independent of account caches. Publish only after durable flush succeeds.
 export class PlaybackPreferenceStore {
+  private static readonly storeName: string = 'playback_languages';
+  private static readonly valueKey: string = 'settings_v1';
   private context: common.UIAbilityContext | undefined = undefined;
   private store: preferences.Preferences | undefined = undefined;
   private loading: Promise<void> | undefined = undefined;
@@ -24,8 +26,8 @@ export class PlaybackPreferenceStore {
 
   private async read(context: common.UIAbilityContext): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'playback_languages' });
-      const raw = await store.get('settings_v1', '');
+      const store = await preferences.getPreferences(context, { name: PlaybackPreferenceStore.storeName });
+      const raw = await store.get(PlaybackPreferenceStore.valueKey, '');
       this.persisted = typeof raw === 'string' ? raw : '';
       this.issue = '';
       if (raw !== '') {
@@ -49,11 +51,11 @@ export class PlaybackPreferenceStore {
       const store = this.store!; const previous = this.persisted;
       try {
         const encoded = JSON.stringify(next);
-        await store.put('settings_v1', encoded); await store.flush();
+        await store.put(PlaybackPreferenceStore.valueKey, encoded); await store.flush();
         this.persisted = encoded; this.value = copyPreferences(next); this.issue = '';
       } catch (e) {
         // A failed flush can leave the platform instance dirty; restore its previous value before retrying.
-        try { await store.put('settings_v1', previous); await store.flush(); } catch (restoreError) {
+        try { await store.put(PlaybackPreferenceStore.valueKey, previous); await store.flush(); } catch (restoreError) {
           this.issue = 'playback_preferences_restore_failed'; throw new Error(this.issue);
         }
         this.issue = 'playback_preferences_save_failed'; throw new Error(this.issue);

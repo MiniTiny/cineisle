@@ -4,6 +4,8 @@ import { MpvOptions, defaultMpvOptions, copyMpvOptions, decodeMpvOptions, validM
 
 // Application-level options are independent of the selected account and default AVPlayer.
 export class MpvPreferences {
+  private static readonly storeName: string = 'mpv_playback_options';
+  private static readonly valueKey: string = 'options_v1';
   private static context: common.UIAbilityContext | undefined;
   private static store: preferences.Preferences | undefined;
   private static loading: Promise<void> | undefined;
@@ -31,8 +33,8 @@ export class MpvPreferences {
   }
   private static async read(context: common.UIAbilityContext): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'mpv_playback_options' });
-      const raw = await store.get('options_v1', '');
+      const store = await preferences.getPreferences(context, { name: MpvPreferences.storeName });
+      const raw = await store.get(MpvPreferences.valueKey, '');
       MpvPreferences.store = store; MpvPreferences.raw = raw;
       const value = typeof raw === 'string' ? decodeMpvOptions(raw) : undefined;
       if (!value) { throw new Error('mpv_options_invalid'); }
@@ -57,10 +59,10 @@ export class MpvPreferences {
       const store = MpvPreferences.store!; const previous = MpvPreferences.raw;
       if (!allowed()) { throw new Error('mpv_options_cancelled'); }
       try {
-        await store.put('options_v1', JSON.stringify(next)); await store.flush();
+        await store.put(MpvPreferences.valueKey, JSON.stringify(next)); await store.flush();
         if (!allowed()) { throw new Error('mpv_options_cancelled'); }
       } catch (e) {
-        try { await store.put('options_v1', previous); await store.flush(); }
+        try { await store.put(MpvPreferences.valueKey, previous); await store.flush(); }
         catch (_) { MpvPreferences.ready = false; MpvPreferences.issue = 'mpv_options_restore_failed'; throw new Error(MpvPreferences.issue); }
         MpvPreferences.issue = (e as Error).message === 'mpv_options_cancelled' ? 'mpv_options_cancelled' : 'mpv_options_save_failed';
         throw new Error(MpvPreferences.issue);
