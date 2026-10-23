@@ -392,6 +392,10 @@ node tests/ass-ui.test.cjs
 
 运行`node tests/spanish-language.test.cjs`、语言策略及设置UI回归、完整回归与`./scripts/build.sh`。检查所有界面键、占位符、换行、技术名称及删除/未确认回传等关键文案，验证显式选择、系统地区映射、冷启动持久化和失败恢复。原生诊断包分别检查设置、菜单、详情、下载、退出账户及冷启动；窄屏、横屏和两倍字号核对可滚动操作与主要按钮。系统地区用语、真实服务与真机独立验收，不以英文回退充当完整翻译。
 
+### 德语界面
+
+运行`node tests/german-language.test.cjs`、应用语言策略及设置UI回归、完整回归与`./scripts/build.sh`。检查全部界面键、格式参数、百分号、换行、技术名称以及删除、保留本机文件、回传未确认和硬解回退等关键文案。验证显式Deutsch选择、德语地区系统映射、跨账户全局持久化、冷启动及失败回滚。原生诊断包检查即时切换、菜单、详情、下载、退出账户、冷启动及恢复系统跟随；在普通/两倍字号、竖屏/横屏检查较长德语文本及保存按钮可滚动访问。德语地区术语、实际系统语言变更、真机及真实Jellyfin分别验收，不以策略夹具代替系统切换。
+
 ### 可选 MPV 后端与内嵌字幕
 
 运行`node tests/mpv-engine.test.cjs`、`node tests/mpv-text-subtitles.test.cjs`、`node tests/mpv-subtitle-controller.test.cjs`、`node tests/playback-surface.test.cjs`、引擎偏好、系统字幕和PiP回归，再执行`node tests/run-regression.cjs`与`./scripts/build.sh`。覆盖低版本不加载、取消与晚到创建、异步所有权、焦点交接、字幕轨道和未知效果保留、定位/重叠/预算、关闭与迟到事件，以及未观察到中间seeking状态的同句快速跳转和原生浮点时钟的字幕起点边界。另覆盖物理Surface尺寸缓存、初始化就绪、实际画布回读、重配置后漂移、连续变化合并和退役回调。SDK夹具及捕获的事件包只证明相应契约。
