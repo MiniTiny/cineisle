@@ -17,7 +17,7 @@ export const render: (handle: NativeAssHandle, milliseconds: number, width: numb
 export const close: (handle: NativeAssHandle) => void;
 
 export interface NativeCaptionRun {
-  text: string; family: string; size: number; baseline: number; color: number;
+  text: string; family: string; size: number; baseline: number; color: number; background?: number;
   bold: boolean; italic: boolean; underline: boolean; strike: boolean;
 }
 export interface NativeCaptionShadow { color: number; x: number; y: number; radius: number; }

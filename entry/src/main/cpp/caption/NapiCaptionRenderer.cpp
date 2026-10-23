@@ -2,6 +2,7 @@
 #include <native_drawing/drawing_text_typography.h>
 #include <native_drawing/drawing_font_collection.h>
 #include <native_drawing/drawing_bitmap.h>
+#include <native_drawing/drawing_brush.h>
 #include <native_drawing/drawing_canvas.h>
 #include <native_drawing/drawing_pen.h>
 #include <native_drawing/drawing_filter.h>
@@ -27,7 +28,7 @@ struct Run {
     std::string text, family;
     size_t units = 0;
     double size = 20, baseline = 0;
-    uint32_t color = 0xFFFFFFFF;
+    uint32_t color = 0xFFFFFFFF, background = 0;
     bool bold = false, italic = false, underline = false, strike = false;
 };
 struct Shadow { uint32_t color; double x, y, radius; };
@@ -73,6 +74,8 @@ Request Read(napi_env env, napi_value value) {
         run.size = Number(env, Field(env, entry, "size"), 0.01, 8192);
         run.baseline = Number(env, Field(env, entry, "baseline"), -1000000, 1000000);
         run.color = Integer(env, Field(env, entry, "color"), 0, UINT32_MAX);
+        bool hasBackground; Check(napi_has_named_property(env, entry, "background", &hasBackground));
+        if (hasBackground) { run.background = Integer(env, Field(env, entry, "background"), 0, UINT32_MAX); }
         run.bold = Boolean(env, Field(env, entry, "bold")); run.italic = Boolean(env, Field(env, entry, "italic"));
         run.underline = Boolean(env, Field(env, entry, "underline")); run.strike = Boolean(env, Field(env, entry, "strike"));
         out.runs.push_back(std::move(run));
@@ -109,6 +112,7 @@ int Direction(const Request &request) {
 struct Paragraph {
     Own<OH_Drawing_FontCollection, OH_Drawing_DestroyFontCollection> fonts{OH_Drawing_CreateFontCollection(), OH_Drawing_DestroyFontCollection};
     Own<OH_Drawing_TypographyStyle, OH_Drawing_DestroyTypographyStyle> style{OH_Drawing_CreateTypographyStyle(), OH_Drawing_DestroyTypographyStyle};
+    std::vector<Own<OH_Drawing_Brush, OH_Drawing_BrushDestroy>> backgrounds;
     Own<OH_Drawing_TypographyCreate, OH_Drawing_DestroyTypographyHandler> builder{nullptr, OH_Drawing_DestroyTypographyHandler};
     Own<OH_Drawing_Typography, OH_Drawing_DestroyTypography> text{nullptr, OH_Drawing_DestroyTypography};
     std::vector<size_t> starts, ends;
@@ -130,6 +134,13 @@ struct Paragraph {
             OH_Drawing_SetTextStyleFontWeight(s.get(), run.bold ? FONT_WEIGHT_700 : FONT_WEIGHT_400);
             OH_Drawing_SetTextStyleFontStyle(s.get(), run.italic ? FONT_STYLE_ITALIC : FONT_STYLE_NORMAL);
             OH_Drawing_SetTextStyleColor(s.get(), run.color);
+            if ((run.background >> 24) != 0) {
+                Own<OH_Drawing_Brush, OH_Drawing_BrushDestroy> brush(OH_Drawing_BrushCreate(), OH_Drawing_BrushDestroy);
+                if (!brush) { throw std::bad_alloc(); }
+                OH_Drawing_BrushSetColor(brush.get(), run.background);
+                OH_Drawing_SetTextStyleBackgroundBrush(s.get(), brush.get());
+                backgrounds.push_back(std::move(brush));
+            }
             OH_Drawing_TextStyleSetBaselineShift(s.get(), run.baseline * orientation);
             if (run.strike) { OH_Drawing_SetTextStyleDecoration(s.get(), TEXT_DECORATION_LINE_THROUGH); OH_Drawing_SetTextStyleDecorationColor(s.get(), run.color); }
             for (const auto &shadow : request.shadows) {
