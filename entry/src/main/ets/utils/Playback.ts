@@ -79,11 +79,12 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
     if (start < 0 || end <= start) { continue; }
-    const body = lines.slice(timing + 1).join('\n');
+    // Fixed SubripParser trims physical SRT lines and supplies explicit HTML breaks.
+    const body = lines.slice(timing + 1).map((line: string): string => line.trim()).filter((line: string): boolean => !!line).join('<br>');
     // SubRip uses the first standalone SSA alignment tag, not arbitrary ASS override syntax.
     const alignment = /\{\\an([1-9])\}/.exec(body);
     const content = inlineSubtitle(body.replace(/\{\\[^{}]*\}/g, ''));
-    if (start >= 0 && end > start && content.text) {
+    if (start >= 0 && end > start && content.text.trim()) {
       const cue: SubtitleCue = { start: start, end: end, text: content.text, maxEnd: end };
       if (content.runs.length) { cue.runs = content.runs; }
       if (alignment) { cue.placement = new PositionedSubtitle(cues.length, content.text, content.runs, Number(alignment[1])); }

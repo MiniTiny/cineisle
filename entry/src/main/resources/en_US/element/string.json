@@ -408,7 +408,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "ASS/SSA subtitles retain styles and animation; SRT supports bold, italic, underline, strikethrough, superscript, subscript, foreground/background colors in span styles, font families, relative sizes and nine-position alignment. Downloads can cache embedded and external text tracks, and existing caches can be updated online. MPV can render supported embedded image subtitles and use video attachment fonts; system playback depends on device capabilities. Offline playback offers cached subtitles and tracks recognized by the device."
+      "value": "ASS/SSA subtitles retain styles and animation; SRT supports bold, italic, underline, strikethrough, superscript, subscript, foreground/background colors in span styles, font families, relative sizes and nine-position alignment. Downloads can cache embedded and external text tracks, and existing caches can be updated online. MPV can render supported embedded image subtitles and use video attachment fonts; system playback depends on device capabilities. Offline playback offers cached subtitles and tracks recognized by the device. Paragraph tags p/div preserve paragraph breaks; cite/dfn are italic and tt is monospaced."
     },
     {
       "name": "track_switch_failed",

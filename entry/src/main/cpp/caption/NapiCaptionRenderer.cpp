@@ -116,12 +116,12 @@ struct Paragraph {
     Own<OH_Drawing_TypographyCreate, OH_Drawing_DestroyTypographyHandler> builder{nullptr, OH_Drawing_DestroyTypographyHandler};
     Own<OH_Drawing_Typography, OH_Drawing_DestroyTypography> text{nullptr, OH_Drawing_DestroyTypography};
     std::vector<size_t> starts, ends;
-    Paragraph(const Request &request, int orientation) {
+    Paragraph(const Request &request, int orientation, bool ellipsis = true) {
         if (!fonts || !style) { throw std::bad_alloc(); }
         OH_Drawing_SetTypographyTextAlign(style.get(), TEXT_ALIGN_CENTER);
         OH_Drawing_SetTypographyTextDirection(style.get(), Direction(request));
         OH_Drawing_SetTypographyTextMaxLines(style.get(), request.lines);
-        OH_Drawing_SetTypographyTextEllipsis(style.get(), "\xE2\x80\xA6");
+        OH_Drawing_SetTypographyTextEllipsis(style.get(), ellipsis ? "\xE2\x80\xA6" : "");
         builder.reset(OH_Drawing_CreateTypographyHandler(style.get(), fonts.get())); if (!builder) { throw std::bad_alloc(); }
         size_t index = 0;
         for (const auto &run : request.runs) {
@@ -204,13 +204,42 @@ void Line(OH_Drawing_Canvas *canvas, const Underline &line, const Shadow &shadow
     OH_Drawing_CanvasDrawLine(canvas, line.left + shadow.x, line.y + shadow.y, line.right + shadow.x, line.y + shadow.y);
     OH_Drawing_CanvasDetachPen(canvas);
 }
+void KeepVisibleTail(const Request &request, int orientation, double width, std::unique_ptr<Paragraph> &paragraph) {
+    if (!OH_Drawing_TypographyDidExceedMaxLines(paragraph->text.get())) { return; }
+    size_t total = 0; for (const auto &run : request.runs) { total += run.units; }
+    size_t visible = total;
+    for (auto run = request.runs.rbegin(); run != request.runs.rend(); ++run) {
+        auto character = run->text.rbegin();
+        while (character != run->text.rend() && *character == '\n') { --visible; ++character; }
+        if (character != run->text.rend()) { break; }
+    }
+    if (visible == total) { return; }
+    // One extra line, without ellipsis, exposes the full ranges of the original visible lines.
+    // The painted paragraph retains the original limit; only terminal empty lines may be clipped silently.
+    Request probeRequest = request; probeRequest.lines = request.lines + 1;
+    Paragraph probe(probeRequest, orientation, false); OH_Drawing_TypographyLayout(probe.text.get(), width);
+    const size_t count = std::min<size_t>(request.lines, OH_Drawing_TypographyGetLineCount(probe.text.get()));
+    size_t end = 0;
+    for (size_t i = 0; i < count; ++i) {
+        OH_Drawing_LineMetrics line{};
+        if (!OH_Drawing_TypographyGetLineMetricsAt(probe.text.get(), int(i), &line)) { throw std::runtime_error("caption_layout_failed"); }
+        end = std::max(end, line.endIndex);
+    }
+    if (end < visible) { return; } // Real content overflow keeps the normal ellipsis.
+    auto complete = std::make_unique<Paragraph>(request, orientation, false);
+    OH_Drawing_TypographyLayout(complete->text.get(), width);
+    paragraph.swap(complete); // Destroy each old typography before its owned fonts and brushes.
+}
 Frame Rasterize(const Request &request) {
-    Paragraph paragraph(request, Orientation());
+    const int orientation = Orientation();
+    auto owner = std::make_unique<Paragraph>(request, orientation);
     double width = request.width;
     if (request.intrinsic) {
-        width = std::min(width, std::max(1.0, std::ceil(OH_Drawing_TypographyGetLongestLine(paragraph.text.get()))));
-        OH_Drawing_TypographyLayout(paragraph.text.get(), width);
+        width = std::min(width, std::max(1.0, std::ceil(OH_Drawing_TypographyGetLongestLine(owner->text.get()))));
+        OH_Drawing_TypographyLayout(owner->text.get(), width);
     }
+    KeepVisibleTail(request, orientation, width, owner);
+    Paragraph &paragraph = *owner;
     const double height = std::ceil(OH_Drawing_TypographyGetHeight(paragraph.text.get()));
     double halo = 2;
     for (const auto &shadow : request.shadows) { halo = std::max(halo, std::ceil(shadow.radius * 3 + std::max(std::abs(shadow.x), std::abs(shadow.y))) + 2); }

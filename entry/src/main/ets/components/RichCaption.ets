@@ -3,7 +3,7 @@ import { CaptionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { NativeCaption } from './NativeCaption';
 
-// Main and PiP share text semantics; scripted captions use per-window native typography.
+// Structured captions share per-window native typography in the main player and PiP.
 @Component
 export struct RichCaption {
   @Prop runs: SubtitleRun[] = [];
@@ -41,7 +41,7 @@ export struct RichCaption {
   }
 
   build() {
-    if (this.runs.some((run: SubtitleRun): boolean => !!run.baselines?.length || !!run.background)) {
+    if (this.runs.some((run: SubtitleRun): boolean => !!run.paragraph || !!run.baselines?.length || !!run.background)) {
       NativeCaption({ runs: this.runs, captionStyle: this.captionStyle, fontSize: this.fontSize, limit: this.limit,
         identifier: this.identifier, revision: this.revision, padX: this.padX, padY: this.padY, radius: this.radius, stretch: this.stretch, availableWidth: this.availableWidth })
     } else if (this.runs.some((run: SubtitleRun): boolean => run.underline && !!run.strike)) {

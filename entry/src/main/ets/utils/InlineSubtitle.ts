@@ -11,13 +11,14 @@ export class SubtitleRun {
   underline: boolean = false;
   color: string = '';
   background: string = '';
+  paragraph: boolean = false;
   family: string = '';
   sizeScale: number = 1;
   strike: boolean = false;
   baselines: SubtitleBaseline[] = [];
   constructor(text: string = '', style?: SubtitleRun) {
     this.text = text;
-    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.background = style.background ?? ''; this.family = style.family; this.sizeScale = style.sizeScale ?? 1; this.strike = style.strike ?? false; this.baselines = style.baselines ?? []; }
+    if (style) { this.bold = style.bold; this.italic = style.italic; this.underline = style.underline; this.color = style.color; this.background = style.background ?? ''; this.paragraph = style.paragraph ?? false; this.family = style.family; this.sizeScale = style.sizeScale ?? 1; this.strike = style.strike ?? false; this.baselines = style.baselines ?? []; }
   }
 }
 export const EMPTY_SUBTITLE_RUNS: SubtitleRun[] = [];
@@ -93,9 +94,9 @@ function fontAttributes(tag: string, start: number): FontAttributes {
   return result;
 }
 function sameStyle(a: SubtitleRun, b: SubtitleRun): boolean {
-  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && (a.background ?? '') === (b.background ?? '') && a.family === b.family && (a.sizeScale ?? 1) === (b.sizeScale ?? 1) && !!a.strike === !!b.strike && JSON.stringify(a.baselines ?? []) === JSON.stringify(b.baselines ?? []);
+  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color && (a.background ?? '') === (b.background ?? '') && !!a.paragraph === !!b.paragraph && a.family === b.family && (a.sizeScale ?? 1) === (b.sizeScale ?? 1) && !!a.strike === !!b.strike && JSON.stringify(a.baselines ?? []) === JSON.stringify(b.baselines ?? []);
 }
-function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.background || !!run.family || (run.sizeScale ?? 1) !== 1 || !!run.strike || !!run.baselines?.length; }
+function hasStyle(run: SubtitleRun): boolean { return run.bold || run.italic || run.underline || !!run.color || !!run.background || !!run.paragraph || !!run.family || (run.sizeScale ?? 1) !== 1 || !!run.strike || !!run.baselines?.length; }
 
 // Html inserts metric spans on closing tags: inner spans affect the paint before outer spans.
 // Keep the font state at each script operation, rather than using the final glyph size for every shift.
@@ -128,17 +129,89 @@ export function inlineSubtitle(value: string): SubtitleContent {
   };
   const endStyle = (name: string): void => {
     // Html closes the last property mark, even when a nested span did not open it.
-    if (name === 'span') { endMark(strikeMarks); endMark(backgroundMarks); endMark(colorMarks); }
+    if (name === 'span' || name === 'p') { endMark(strikeMarks); endMark(backgroundMarks); endMark(colorMarks); }
     else if (name === 'font') { endMark(colorMarks); }
     else if (['s', 'del', 'strike'].includes(name)) { endMark(strikeMarks); }
   };
-  let plainStart = 0; let tagStart = -1; let quote = '';
+  let plainStart = 0; let tagStart = -1; let quote = ''; let trailingBreaks = 0; let paragraph = false;
   const append = (raw: string): void => {
     if (!raw) { return; }
     const style = stack[stack.length - 1].style; const previous = pieces[pieces.length - 1];
     if (previous && appendedRevision === styleRevision && sameStyle(previous, style)) { previous.text += raw; }
     else { if (pieces.length >= 4096) { throw new Error('subtitle_failed'); } pieces.push(new SubtitleRun(raw, style)); appendedRevision = styleRevision; }
+    trailingBreaks = raw === '\n' || raw === '\n\n' ? Math.min(2, trailingBreaks + raw.length) : 0;
   };
+  const appendText = (raw: string): void => {
+    // Decode before folding, as Html.characters does. Encoded tags remain literal text.
+    // The legacy HTML scanner drops nonzero numeric controls, rather than turning them into breaks.
+    const readable = raw.replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
+      const code = digits[0].toLowerCase() === 'x' ? Number.parseInt(digits.slice(1), 16) : Number.parseInt(digits, 10);
+      return code > 0 && code < 32 ? '' : entity;
+    });
+    let text = subtitleEntities(readable).replace(/[ \n]+/g, ' ');
+    const previous = pieces[pieces.length - 1]?.text;
+    const last = previous ? previous[previous.length - 1] : '\n';
+    if ((last === ' ' || last === '\n') && text.startsWith(' ')) { text = text.slice(1); }
+    append(text);
+  };
+  const blockBreak = (): void => {
+    if (pieces.length && trailingBreaks < 2) { append('\n'.repeat(2 - trailingBreaks)); }
+  };
+  const closeTo = (index: number): void => {
+    while (stack.length > index) {
+      const frame = stack.pop()!; ++styleRevision; endStyle(frame.tag);
+      if (frame.tag === 'p' || frame.tag === 'div') { blockBreak(); }
+    }
+  };
+  const openFrame = (name: string, tag: string = '', start: number = 0): void => {
+    ++styleRevision;
+    if (stack.length > 64) { throw new Error('subtitle_failed'); }
+    const style = new SubtitleRun('', stack[stack.length - 1].style);
+    let metricFamily = '';
+    if (name === 'b' || name === 'strong') { style.bold = true; }
+    else if (['i', 'em', 'cite', 'dfn'].includes(name)) { style.italic = true; }
+    else if (name === 'tt') { metricFamily = 'monospace'; style.family = metricFamily; }
+    else if (name === 'u') { style.underline = true; }
+    else if (name === 's' || name === 'del' || name === 'strike') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
+    else if (name === 'big' || name === 'small') {
+      style.sizeScale *= name === 'big' ? 1.25 : 0.8;
+      // Reject an excessive candidate instead of silently changing its authored size.
+      if (!Number.isFinite(style.sizeScale) || style.sizeScale < 0.125 || style.sizeScale > 8) { throw new Error('subtitle_failed'); }
+    }
+    else if (name === 'font') {
+      const attributes = fontAttributes(tag, start);
+      const color = fontColor(attributes.color ?? '');
+      if (color) { colorMarks.push({ start: pieces.length, property: 'color', value: color }); }
+      metricFamily = fontFamily(attributes.face ?? '');
+      style.family = metricFamily || style.family;
+    }
+    else if (name === 'span' || name === 'p') {
+      const css = subtitleEntities(fontAttributes(tag, start).style ?? '');
+      // One preceding whitespace gives the same capture without quadratic retries over long blank styles.
+      const foreground = /(?:\s|^)color\s*:\s*(\S*)\b/.exec(css);
+      const background = /(?:\s|^)background(?:-color)?\s*:\s*(\S*)\b/.exec(css);
+      const decoration = /(?:\s|^)text-decoration\s*:\s*(\S*)\b/.exec(css);
+      const foregroundColor = foreground ? htmlColor(foreground[1]) : '';
+      const backgroundColor = background ? htmlColor(background[1]) : '';
+      if (foregroundColor) { colorMarks.push({ start: pieces.length, property: 'color', value: foregroundColor }); }
+      if (backgroundColor) { backgroundMarks.push({ start: pieces.length, property: 'background', value: backgroundColor }); }
+      if (decoration?.[1].toLowerCase() === 'line-through') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
+    }
+    stack.push({ tag: name, style: style, metricFamily: metricFamily });
+    style.baselines = scriptBaselines(stack);
+  };
+  // Restart phrasing styles around blocks; span/font attributes end at that boundary.
+  const restartable = ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'];
+  const suspendInline = (): string[] => {
+    const restart: string[] = [];
+    while (stack.length > 1 && !['p', 'div'].includes(stack[stack.length - 1].tag)) {
+      const name = stack[stack.length - 1].tag;
+      if (restartable.includes(name)) { restart.unshift(name); }
+      closeTo(stack.length - 1);
+    }
+    return restart;
+  };
+  const restartInline = (names: string[]): void => { names.forEach((name: string): void => openFrame(name)); };
   for (let i = 0; i < value.length; i++) {
     const character = value[i];
     if (tagStart < 0) { if (character === '<') { tagStart = i; } continue; }
@@ -146,55 +219,37 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (character === '"' || character === "'") { quote = character; continue; }
     if (character === '<') { tagStart = i; continue; }
     if (character !== '>') { continue; }
-    append(value.slice(plainStart, tagStart));
+    appendText(value.slice(plainStart, tagStart));
     const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*)\b/i.exec(tag);
     if (match) {
       const name = match[2].toLowerCase(); const closing = !!match[1];
       if (name === 'br' && !closing) { append('\n'); }
-      else if (['b', 'strong', 'i', 'em', 'u', 'font', 'span', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
-        ++styleRevision;
+      else if (['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
+        const block = name === 'p' || name === 'div';
         if (closing) {
-          for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === name) { for (let k = stack.length - 1; k >= j; k--) { endStyle(stack[k].tag); } stack.length = j; break; } }
-        } else if (!/\/\s*>$/.test(tag)) {
-          if (stack.length > 64) { throw new Error('subtitle_failed'); }
-          const style = new SubtitleRun('', stack[stack.length - 1].style);
-          let metricFamily = '';
-          if (name === 'b' || name === 'strong') { style.bold = true; }
-          else if (name === 'i' || name === 'em') { style.italic = true; }
-          else if (name === 'u') { style.underline = true; }
-          else if (name === 's' || name === 'del' || name === 'strike') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
-          else if (name === 'big' || name === 'small') {
-            style.sizeScale *= name === 'big' ? 1.25 : 0.8;
-            // Reject an excessive candidate instead of silently changing its authored size.
-            if (!Number.isFinite(style.sizeScale) || style.sizeScale < 0.125 || style.sizeScale > 8) { throw new Error('subtitle_failed'); }
+          for (let j = stack.length - 1; j > 0; j--) {
+            if (stack[j].tag === name) {
+              const restart = block ? suspendInline() : [];
+              closeTo(j); restartInline(restart); break;
+            }
           }
-          else if (name === 'font') {
-            const attributes = fontAttributes(tag, match[0].length);
-            const color = fontColor(attributes.color ?? '');
-            if (color) { colorMarks.push({ start: pieces.length, property: 'color', value: color }); }
-            metricFamily = fontFamily(attributes.face ?? '');
-            style.family = metricFamily || style.family;
+        } else {
+          const restart = block ? suspendInline() : [];
+          if (block) {
+            paragraph = true;
+            // Paragraphs close implicitly at a new block; div nesting remains valid.
+            for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === 'p') { closeTo(j); break; } }
+            blockBreak();
           }
-          else if (name === 'span') {
-            const css = subtitleEntities(fontAttributes(tag, match[0].length).style ?? '');
-            // One preceding whitespace gives the same capture without quadratic retries over long blank styles.
-            const foreground = /(?:\s|^)color\s*:\s*(\S*)\b/.exec(css);
-            const background = /(?:\s|^)background(?:-color)?\s*:\s*(\S*)\b/.exec(css);
-            const decoration = /(?:\s|^)text-decoration\s*:\s*(\S*)\b/.exec(css);
-            const foregroundColor = foreground ? htmlColor(foreground[1]) : '';
-            const backgroundColor = background ? htmlColor(background[1]) : '';
-            if (foregroundColor) { colorMarks.push({ start: pieces.length, property: 'color', value: foregroundColor }); }
-            if (backgroundColor) { backgroundMarks.push({ start: pieces.length, property: 'background', value: backgroundColor }); }
-            if (decoration?.[1].toLowerCase() === 'line-through') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
-          }
-          stack.push({ tag: name, style: style, metricFamily: metricFamily });
-          style.baselines = scriptBaselines(stack);
+          if (!/\/\s*>$/.test(tag)) { openFrame(name, tag, match[0].length); }
+          restartInline(restart);
         }
       }
     }
     plainStart = i + 1; tagStart = -1;
   }
-  append(value.slice(plainStart));
+  appendText(value.slice(plainStart));
+  suspendInline(); closeTo(1);
   while (strikeMarks.length) { endMark(strikeMarks); }
   while (backgroundMarks.length) { endMark(backgroundMarks); }
   while (colorMarks.length) { endMark(colorMarks); }
@@ -206,22 +261,15 @@ export function inlineSubtitle(value: string): SubtitleContent {
       else { pieces[i].strike = true; }
     }
   }
-  const raw = pieces.map((run: SubtitleRun) => run.text).join('');
-  const text = subtitleEntities(raw).trim();
+  if (paragraph) { pieces.forEach((run: SubtitleRun): void => { run.paragraph = true; }); }
+  const text = pieces.map((run: SubtitleRun) => run.text).join('');
   if (!pieces.some((run: SubtitleRun) => hasStyle(run))) { return new SubtitleContent(text); }
-  const decoded = pieces.map((run: SubtitleRun) => new SubtitleRun(subtitleEntities(run.text), run));
-  const all = decoded.map((run: SubtitleRun) => run.text).join('');
-  // Broken entities crossing markup boundaries keep the established readable plain-text fallback.
-  if (all.trim() !== text) { return new SubtitleContent(text); }
-  let skip = all.length - all.trimStart().length; let remaining = text.length;
   const runs: SubtitleRun[] = [];
-  for (const run of decoded) {
-    const from = Math.min(skip, run.text.length); skip -= from;
-    const kept = run.text.slice(from, from + remaining); remaining -= kept.length;
-    if (kept) {
+  for (const run of pieces) {
+    if (run.text) {
       const previous = runs[runs.length - 1];
-      if (previous && sameStyle(previous, run)) { previous.text += kept; }
-      else { runs.push(new SubtitleRun(kept, run)); }
+      if (previous && sameStyle(previous, run)) { previous.text += run.text; }
+      else { runs.push(new SubtitleRun(run.text, run)); }
     }
   }
   return new SubtitleContent(text, runs.some((run: SubtitleRun) => hasStyle(run)) ? runs : EMPTY_SUBTITLE_RUNS);

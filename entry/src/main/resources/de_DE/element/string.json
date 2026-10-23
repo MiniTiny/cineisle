@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "ASS/SSA-Untertitel behalten Stile und Animationen bei; SRT unterstützt Fett- und Kursivschrift, Unter- und Durchstreichungen, Hoch- und Tiefstellung, Farben und Hintergründe in span-Stilen, Schriftfamilien, relative Größen und neun Ausrichtungspositionen. Downloads können eingebettete und externe Textspuren speichern; vorhandene Caches lassen sich online ergänzen. MPV kann unterstützte eingebettete Bilduntertitel darstellen und angehängte Videoschriften verwenden; die Systemwiedergabe hängt von den Fähigkeiten des Geräts ab. Offline stehen gespeicherte Untertitel und vom Gerät erkannte Spuren zur Verfügung."
+      "value": "ASS/SSA-Untertitel behalten Stile und Animationen bei; SRT unterstützt Fett- und Kursivschrift, Unter- und Durchstreichungen, Hoch- und Tiefstellung, Farben und Hintergründe in span-Stilen, Schriftfamilien, relative Größen und neun Ausrichtungspositionen. Downloads können eingebettete und externe Textspuren speichern; vorhandene Caches lassen sich online ergänzen. MPV kann unterstützte eingebettete Bilduntertitel darstellen und angehängte Videoschriften verwenden; die Systemwiedergabe hängt von den Fähigkeiten des Geräts ab. Offline stehen gespeicherte Untertitel und vom Gerät erkannte Spuren zur Verfügung. p/div bewahren Absatzumbrüche; cite/dfn verwenden Kursivschrift und tt eine nichtproportionale Schrift."
     },
     {
       "name": "track_switch_failed",

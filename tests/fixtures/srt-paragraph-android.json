@@ -1,0 +1,3240 @@
+{
+  "schema": 1,
+  "reference": "Actual Android API34 Html.fromHtml(String)/TextPaint;directHTML and fixed SubripParser line.trim plus br joining;not browser layout",
+  "cases": [
+    {
+      "mode": "html",
+      "source": "<p>FIRST</p><p>SECOND</p>",
+      "html": "<p>FIRST</p><p>SECOND</p>",
+      "text": "FIRST\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "FIRST\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "A<p>B</p>C",
+      "html": "A<p>B</p>C",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div>FIRST</div><div>SECOND</div>",
+      "html": "<div>FIRST</div><div>SECOND</div>",
+      "text": "FIRST\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "FIRST\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "A<div>B</div>C",
+      "html": "A<div>B</div>C",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A<br>B</p>",
+      "html": "<p>A<br>B</p>",
+      "text": "A\nB\n\n",
+      "runs": [
+        {
+          "text": "A\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A</p><br>B",
+      "html": "<p>A</p><br>B",
+      "text": "A\n\n\nB",
+      "runs": [
+        {
+          "text": "A\n\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A</p><p></p><p>B</p>",
+      "html": "<p>A</p><p></p><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div>A<div>B</div>C</div>D",
+      "html": "<div>A<div>B</div>C</div>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A<span style=\"color: red\">B</span>C</p>D",
+      "html": "<p>A<span style=\"color: red\">B</span>C</p>D",
+      "text": "ABC\n\nD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p style=\"color: red; background: blue; text-decoration: line-through\">A</p>B",
+      "html": "<p style=\"color: red; background: blue; text-decoration: line-through\">A</p>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#FF0000FF",
+          "strike": true,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div style=\"color: red; background: blue\">A</div>B",
+      "html": "<div style=\"color: red; background: blue\">A</div>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<span style=\"color: red\">A<p>B</p>C</span>D",
+      "html": "<span style=\"color: red\">A<p>B</p>C</span>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>  A   B  </p>   <p> C </p>",
+      "html": "<p>  A   B  </p>   <p> C </p>",
+      "text": "A B \n\nC \n\n",
+      "runs": [
+        {
+          "text": "A B \n\nC \n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "  <p>A</p>  B  ",
+      "html": "  <p>A</p>  B  ",
+      "text": "A\n\nB ",
+      "runs": [
+        {
+          "text": "A\n\nB ",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A&nbsp;  B</p>",
+      "html": "<p>A&nbsp;  B</p>",
+      "text": "A  B\n\n",
+      "runs": [
+        {
+          "text": "A  B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>&lt;p&gt;literal&lt;/p&gt;</p>",
+      "html": "<p>&lt;p&gt;literal&lt;/p&gt;</p>",
+      "text": "<p>literal</p>\n\n",
+      "runs": [
+        {
+          "text": "<p>literal</p>\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<P>A</P><DIV>B</DIV>",
+      "html": "<P>A</P><DIV>B</DIV>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A",
+      "html": "<p>A",
+      "text": "A\n\n",
+      "runs": [
+        {
+          "text": "A\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div>A",
+      "html": "<div>A",
+      "text": "A\n\n",
+      "runs": [
+        {
+          "text": "A\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "A<p>B<p>C",
+      "html": "A<p>B<p>C",
+      "text": "A\n\nB\n\nC\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A<div>B</div>C</p>",
+      "html": "<p>A<div>B</div>C</p>",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><b>A</b></p><p><i>B</i></p>",
+      "html": "<p><b>A</b></p><p><i>B</i></p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><font color=\"red\">A</font></p><p>B</p>",
+      "html": "<p><font color=\"red\">A</font></p><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p style=\"background: blue\">A<br>B</p>C",
+      "html": "<p style=\"background: blue\">A<br>B</p>C",
+      "text": "A\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\nB",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div>A<br><br>B</div>",
+      "html": "<div>A<br><br>B</div>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p></p>",
+      "html": "<p></p>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "html",
+      "source": "<p> </p>",
+      "html": "<p> </p>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "html",
+      "source": "<div></div>",
+      "html": "<div></div>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "html",
+      "source": "<p><br></p>",
+      "html": "<p><br></p>",
+      "text": "\n\n",
+      "runs": [
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<cite>CITE</cite> plain",
+      "html": "<cite>CITE</cite> plain",
+      "text": "CITE plain",
+      "runs": [
+        {
+          "text": "CITE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<dfn>DEF</dfn> plain",
+      "html": "<dfn>DEF</dfn> plain",
+      "text": "DEF plain",
+      "runs": [
+        {
+          "text": "DEF",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<tt>CODE</tt> plain",
+      "html": "<tt>CODE</tt> plain",
+      "text": "CODE plain",
+      "runs": [
+        {
+          "text": "CODE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><cite>A</cite><dfn>B</dfn><tt>C</tt></p>",
+      "html": "<p><cite>A</cite><dfn>B</dfn><tt>C</tt></p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<div><span style=\"background: blue\">中文 Café</span></div><p>SECOND</p>",
+      "html": "<div><span style=\"background: blue\">中文 Café</span></div><p>SECOND</p>",
+      "text": "中文 Café\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "中文 Café",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "A<br><p>B</p>",
+      "html": "A<br><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A</p><div>B</div><p>C</p>",
+      "html": "<p>A</p><div>B</div><p>C</p>",
+      "text": "A\n\nB\n\nC\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p style=\"color: red\">A<span>B</span>C</p>D",
+      "html": "<p style=\"color: red\">A<span>B</span>C</p>D",
+      "text": "ABC\n\nD",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A</p>\n<p>B</p>",
+      "html": "<p>A</p>\n<p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": " <p>A</p>\tB",
+      "html": " <p>A</p>\tB",
+      "text": "A\n\n\tB",
+      "runs": [
+        {
+          "text": "A\n\n\tB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A</p><!-- comment --><p>B</p>",
+      "html": "<p>A</p><!-- comment --><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<b>A<p>B</p>C</b>D",
+      "html": "<b>A<p>B</p>C</b>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<i>A<div>B</div>C</i>D",
+      "html": "<i>A<div>B</div>C</i>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<font color=\"red\">A<p>B</p>C</font>D",
+      "html": "<font color=\"red\">A<p>B</p>C</font>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<font face=\"serif\">A<div>B</div>C</font>D",
+      "html": "<font face=\"serif\">A<div>B</div>C</font>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "serif"
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<tt>A<p>B</p>C</tt>D",
+      "html": "<tt>A<p>B</p>C</tt>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<cite>A<p>B</p>C</cite>D",
+      "html": "<cite>A<p>B</p>C</cite>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<dfn>A<p>B</p>C</dfn>D",
+      "html": "<dfn>A<p>B</p>C</dfn>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<span style=\"background: blue\">A<div>B</div>C</span>D",
+      "html": "<span style=\"background: blue\">A<div>B</div>C</span>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><b>A<p>B</b>C</p>",
+      "html": "<p><b>A<p>B</b>C</p>",
+      "text": "A\n\nBC\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<b><p>A</p><p>B</p></b>",
+      "html": "<b><p>A</p><p>B</p></b>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<u>A<div>B</div>C</u>D",
+      "html": "<u>A<div>B</div>C</u>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p/>A<div/>B",
+      "html": "<p/>A<div/>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "A<p/>B",
+      "html": "A<p/>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><span style=\"color: red\">A</span> B</p>",
+      "html": "<p><span style=\"color: red\">A</span> B</p>",
+      "text": "A B\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": " B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p><font color=\"red\">A </font>B</p>",
+      "html": "<p><font color=\"red\">A </font>B</p>",
+      "text": "A B\n\n",
+      "runs": [
+        {
+          "text": "A ",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>&#32;A&#32;&#32;B&#10;C</p>",
+      "html": "<p>&#32;A&#32;&#32;B&#10;C</p>",
+      "text": "A BC\n\n",
+      "runs": [
+        {
+          "text": "A BC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A&#9;B&#13;C</p>",
+      "html": "<p>A&#9;B&#13;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A&#x0a;B&#00010;C</p>",
+      "html": "<p>A&#x0a;B&#00010;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A&#1;B&#31;C</p>",
+      "html": "<p>A&#1;B&#31;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "html",
+      "source": "<p>A&#0;B</p>",
+      "html": "<p>A&#0;B</p>",
+      "text": "A&#0;B\n\n",
+      "runs": [
+        {
+          "text": "A&#0;B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>FIRST</p><p>SECOND</p>",
+      "html": "<p>FIRST</p><p>SECOND</p>",
+      "text": "FIRST\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "FIRST\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "A<p>B</p>C",
+      "html": "A<p>B</p>C",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div>FIRST</div><div>SECOND</div>",
+      "html": "<div>FIRST</div><div>SECOND</div>",
+      "text": "FIRST\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "FIRST\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "A<div>B</div>C",
+      "html": "A<div>B</div>C",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A<br>B</p>",
+      "html": "<p>A<br>B</p>",
+      "text": "A\nB\n\n",
+      "runs": [
+        {
+          "text": "A\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A</p><br>B",
+      "html": "<p>A</p><br>B",
+      "text": "A\n\n\nB",
+      "runs": [
+        {
+          "text": "A\n\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A</p><p></p><p>B</p>",
+      "html": "<p>A</p><p></p><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div>A<div>B</div>C</div>D",
+      "html": "<div>A<div>B</div>C</div>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A<span style=\"color: red\">B</span>C</p>D",
+      "html": "<p>A<span style=\"color: red\">B</span>C</p>D",
+      "text": "ABC\n\nD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p style=\"color: red; background: blue; text-decoration: line-through\">A</p>B",
+      "html": "<p style=\"color: red; background: blue; text-decoration: line-through\">A</p>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#FF0000FF",
+          "strike": true,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div style=\"color: red; background: blue\">A</div>B",
+      "html": "<div style=\"color: red; background: blue\">A</div>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<span style=\"color: red\">A<p>B</p>C</span>D",
+      "html": "<span style=\"color: red\">A<p>B</p>C</span>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>  A   B  </p>   <p> C </p>",
+      "html": "<p>  A   B  </p>   <p> C </p>",
+      "text": "A B \n\nC \n\n",
+      "runs": [
+        {
+          "text": "A B \n\nC \n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "  <p>A</p>  B  ",
+      "html": "<p>A</p>  B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A&nbsp;  B</p>",
+      "html": "<p>A&nbsp;  B</p>",
+      "text": "A  B\n\n",
+      "runs": [
+        {
+          "text": "A  B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>&lt;p&gt;literal&lt;/p&gt;</p>",
+      "html": "<p>&lt;p&gt;literal&lt;/p&gt;</p>",
+      "text": "<p>literal</p>\n\n",
+      "runs": [
+        {
+          "text": "<p>literal</p>\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<P>A</P><DIV>B</DIV>",
+      "html": "<P>A</P><DIV>B</DIV>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A",
+      "html": "<p>A",
+      "text": "A\n\n",
+      "runs": [
+        {
+          "text": "A\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div>A",
+      "html": "<div>A",
+      "text": "A\n\n",
+      "runs": [
+        {
+          "text": "A\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "A<p>B<p>C",
+      "html": "A<p>B<p>C",
+      "text": "A\n\nB\n\nC\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A<div>B</div>C</p>",
+      "html": "<p>A<div>B</div>C</p>",
+      "text": "A\n\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><b>A</b></p><p><i>B</i></p>",
+      "html": "<p><b>A</b></p><p><i>B</i></p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><font color=\"red\">A</font></p><p>B</p>",
+      "html": "<p><font color=\"red\">A</font></p><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p style=\"background: blue\">A<br>B</p>C",
+      "html": "<p style=\"background: blue\">A<br>B</p>C",
+      "text": "A\nB\n\nC",
+      "runs": [
+        {
+          "text": "A\nB",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div>A<br><br>B</div>",
+      "html": "<div>A<br><br>B</div>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p></p>",
+      "html": "<p></p>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "srt",
+      "source": "<p> </p>",
+      "html": "<p> </p>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "srt",
+      "source": "<div></div>",
+      "html": "<div></div>",
+      "text": "",
+      "runs": []
+    },
+    {
+      "mode": "srt",
+      "source": "<p><br></p>",
+      "html": "<p><br></p>",
+      "text": "\n\n",
+      "runs": [
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<cite>CITE</cite> plain",
+      "html": "<cite>CITE</cite> plain",
+      "text": "CITE plain",
+      "runs": [
+        {
+          "text": "CITE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<dfn>DEF</dfn> plain",
+      "html": "<dfn>DEF</dfn> plain",
+      "text": "DEF plain",
+      "runs": [
+        {
+          "text": "DEF",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<tt>CODE</tt> plain",
+      "html": "<tt>CODE</tt> plain",
+      "text": "CODE plain",
+      "runs": [
+        {
+          "text": "CODE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": " plain",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><cite>A</cite><dfn>B</dfn><tt>C</tt></p>",
+      "html": "<p><cite>A</cite><dfn>B</dfn><tt>C</tt></p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<div><span style=\"background: blue\">中文 Café</span></div><p>SECOND</p>",
+      "html": "<div><span style=\"background: blue\">中文 Café</span></div><p>SECOND</p>",
+      "text": "中文 Café\n\nSECOND\n\n",
+      "runs": [
+        {
+          "text": "中文 Café",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nSECOND\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "A<br><p>B</p>",
+      "html": "A<br><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A</p><div>B</div><p>C</p>",
+      "html": "<p>A</p><div>B</div><p>C</p>",
+      "text": "A\n\nB\n\nC\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\nC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p style=\"color: red\">A<span>B</span>C</p>D",
+      "html": "<p style=\"color: red\">A<span>B</span>C</p>D",
+      "text": "ABC\n\nD",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\nD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A</p>\n<p>B</p>",
+      "html": "<p>A</p><br><p>B</p>",
+      "text": "A\n\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": " <p>A</p>\tB",
+      "html": "<p>A</p>\tB",
+      "text": "A\n\n\tB",
+      "runs": [
+        {
+          "text": "A\n\n\tB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A</p><!-- comment --><p>B</p>",
+      "html": "<p>A</p><!-- comment --><p>B</p>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A\n\nB\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<b>A<p>B</p>C</b>D",
+      "html": "<b>A<p>B</p>C</b>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<i>A<div>B</div>C</i>D",
+      "html": "<i>A<div>B</div>C</i>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<font color=\"red\">A<p>B</p>C</font>D",
+      "html": "<font color=\"red\">A<p>B</p>C</font>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<font face=\"serif\">A<div>B</div>C</font>D",
+      "html": "<font face=\"serif\">A<div>B</div>C</font>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "serif"
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<tt>A<p>B</p>C</tt>D",
+      "html": "<tt>A<p>B</p>C</tt>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": "monospace"
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<cite>A<p>B</p>C</cite>D",
+      "html": "<cite>A<p>B</p>C</cite>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<dfn>A<p>B</p>C</dfn>D",
+      "html": "<dfn>A<p>B</p>C</dfn>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": true,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<span style=\"background: blue\">A<div>B</div>C</span>D",
+      "html": "<span style=\"background: blue\">A<div>B</div>C</span>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\nB\n\nCD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><b>A<p>B</b>C</p>",
+      "html": "<p><b>A<p>B</b>C</p>",
+      "text": "A\n\nBC\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<b><p>A</p><p>B</p></b>",
+      "html": "<b><p>A</p><p>B</p></b>",
+      "text": "A\n\nB\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": true,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<u>A<div>B</div>C</u>D",
+      "html": "<u>A<div>B</div>C</u>D",
+      "text": "A\n\nB\n\nCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "C",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p/>A<div/>B",
+      "html": "<p/>A<div/>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "A<p/>B",
+      "html": "A<p/>B",
+      "text": "A\n\nB",
+      "runs": [
+        {
+          "text": "A\n\nB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><span style=\"color: red\">A</span> B</p>",
+      "html": "<p><span style=\"color: red\">A</span> B</p>",
+      "text": "A B\n\n",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": " B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p><font color=\"red\">A </font>B</p>",
+      "html": "<p><font color=\"red\">A </font>B</p>",
+      "text": "A B\n\n",
+      "runs": [
+        {
+          "text": "A ",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        },
+        {
+          "text": "B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>&#32;A&#32;&#32;B&#10;C</p>",
+      "html": "<p>&#32;A&#32;&#32;B&#10;C</p>",
+      "text": "A BC\n\n",
+      "runs": [
+        {
+          "text": "A BC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A&#9;B&#13;C</p>",
+      "html": "<p>A&#9;B&#13;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A&#x0a;B&#00010;C</p>",
+      "html": "<p>A&#x0a;B&#00010;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A&#1;B&#31;C</p>",
+      "html": "<p>A&#1;B&#31;C</p>",
+      "text": "ABC\n\n",
+      "runs": [
+        {
+          "text": "ABC\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    },
+    {
+      "mode": "srt",
+      "source": "<p>A&#0;B</p>",
+      "html": "<p>A&#0;B</p>",
+      "text": "A&#0;B\n\n",
+      "runs": [
+        {
+          "text": "A&#0;B\n\n",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false,
+          "bold": false,
+          "italic": false,
+          "family": ""
+        }
+      ]
+    }
+  ]
+}
