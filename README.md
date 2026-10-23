@@ -25,7 +25,7 @@
 
 1. 克隆仓库并切换到 `develop` 分支：
    ```bash
-   git clone https://gitee.com/angeladoudou/cineisle.git
+   git clone https://github.com/MiniTiny/cineisle.git
    cd cineisle
    git checkout develop
    ```
