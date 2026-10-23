@@ -1,6 +1,6 @@
 # 映屿分支约定
 
-仓库采用特性/发布模型，使用以下三种分支类型。
+仓库托管于 [GitHub](https://github.com/MiniTiny/cineisle)，`origin` 指向 `https://github.com/MiniTiny/cineisle.git`。仓库采用特性/发布模型，使用以下三种分支类型。
 
 | 分支 | 用途 | 创建与合并 |
 |---|---|---|
@@ -25,7 +25,7 @@ git push -u origin feature/quick-connect
 
 示例名称仅说明命名方式，不代表 Quick Connect 已实现。分支名称使用简短英文与连字符；每个分支限定一个可验收的变更范围。
 
-在 Gitee 创建从 `feature/<名称>` 到 `develop` 的 PR，说明实际行为、验证证据和未运行的验收。合并前运行 `./scripts/build.sh` 与 `node tests/run-regression.cjs`；根据功能补充设备、真实 Jellyfin 或视频验收。合并后可删除已完成的特性分支。
+在 GitHub 创建从 `feature/<名称>` 到 `develop` 的 PR，说明实际行为、验证证据和未运行的验收。合并前运行 `./scripts/build.sh` 与 `node tests/run-regression.cjs`；根据功能补充设备、真实 Jellyfin 或视频验收。合并后可删除已完成的特性分支。
 
 ## 发布
 
