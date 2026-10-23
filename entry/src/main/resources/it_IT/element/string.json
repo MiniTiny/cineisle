@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "I sottotitoli ASS/SSA mantengono stili e animazioni; SRT supporta grassetto, corsivo, sottolineato, barrato, apici, pedici, colori del testo e dello sfondo negli stili span, famiglie di caratteri, dimensioni relative e allineamento in nove posizioni. I download possono conservare nella cache tracce testuali incorporate ed esterne; le cache esistenti si possono aggiornare online. MPV può visualizzare i sottotitoli incorporati a immagini supportati e usare i caratteri allegati al video; la riproduzione di sistema dipende dalle capacità del dispositivo. Offline sono disponibili i sottotitoli nella cache e le tracce riconosciute dal dispositivo."
+      "value": "I sottotitoli ASS/SSA mantengono stili e animazioni; SRT supporta grassetto, corsivo, sottolineato, barrato, apici, pedici, colori del testo e dello sfondo negli stili span, famiglie di caratteri, dimensioni relative e allineamento in nove posizioni. I download possono conservare nella cache tracce testuali incorporate ed esterne; le cache esistenti si possono aggiornare online. MPV può visualizzare i sottotitoli incorporati a immagini supportati e usare i caratteri allegati al video; la riproduzione di sistema dipende dalle capacità del dispositivo. Offline sono disponibili i sottotitoli nella cache e le tracce riconosciute dal dispositivo. I tag p/div mantengono le interruzioni di paragrafo; cite/dfn usano il corsivo e tt un carattere a spaziatura fissa."
     },
     {
       "name": "track_switch_failed",

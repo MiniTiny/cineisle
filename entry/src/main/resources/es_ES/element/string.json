@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Los subtítulos ASS/SSA conservan los estilos y la animación; SRT admite negrita, cursiva, subrayado, tachado, superíndice, subíndice, colores y fondos de estilos span, familias tipográficas, tamaños relativos y alineación en nueve posiciones. Las descargas pueden guardar pistas de texto incrustadas y externas, y las cachés existentes pueden actualizarse con conexión. MPV puede mostrar subtítulos de imagen incrustados compatibles y usar fuentes adjuntas al vídeo; la reproducción del sistema depende de las capacidades del dispositivo. La reproducción sin conexión ofrece subtítulos guardados y pistas reconocidas por el dispositivo."
+      "value": "Los subtítulos ASS/SSA conservan los estilos y la animación; SRT admite negrita, cursiva, subrayado, tachado, superíndice, subíndice, colores y fondos de estilos span, familias tipográficas, tamaños relativos y alineación en nueve posiciones. Las descargas pueden guardar pistas de texto incrustadas y externas, y las cachés existentes pueden actualizarse con conexión. MPV puede mostrar subtítulos de imagen incrustados compatibles y usar fuentes adjuntas al vídeo; la reproducción del sistema depende de las capacidades del dispositivo. La reproducción sin conexión ofrece subtítulos guardados y pistas reconocidas por el dispositivo. Las etiquetas p/div conservan los saltos de párrafo; cite/dfn usan cursiva y tt una fuente monoespaciada."
     },
     {
       "name": "track_switch_failed",
