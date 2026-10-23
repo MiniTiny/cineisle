@@ -1,6 +1,7 @@
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
 export { connectionFailure, authorizationFailure } from './Failures';
+import { SyncRetryPolicy } from './SyncPolicy';
 
 export interface PendingEdit { id: string; field: string; value: boolean; revision: number; item?: MediaItem; localOnly?: boolean }
 export interface PendingPosition { id: string; ticks: number; revision: number; item: MediaItem }
@@ -161,7 +162,7 @@ export function discovery(items: MediaItem[], signals: MediaItem[], follows: Fol
 }
 export function validExperience(value: ExperienceState): boolean {
   if (value?.playerUi !== undefined && !validPlayerOptions(value.playerUi)) { return false; }
-  if ((value?.syncAttempts !== undefined && (!Number.isSafeInteger(value.syncAttempts) || value.syncAttempts < 0 || value.syncAttempts > 5)) ||
+  if ((value?.syncAttempts !== undefined && (!Number.isSafeInteger(value.syncAttempts) || value.syncAttempts < 0 || value.syncAttempts > SyncRetryPolicy.maxAttempts)) ||
     (value?.syncNextAt !== undefined && (!Number.isSafeInteger(value.syncNextAt) || value.syncNextAt < 0)) ||
     (value?.syncBlocked !== undefined && typeof value.syncBlocked !== 'boolean')) { return false; }
   if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||

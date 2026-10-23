@@ -24,6 +24,7 @@ import { DownloadNetworkGuard } from './DownloadNetworkGuard';
 import { DownloadNetwork, downloadNetwork } from '../utils/Downloads';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
+import { SyncRetryPolicy } from '../utils/SyncPolicy';
 import { initializeStrings, text } from '../utils/Strings';
 import { validMediaItem } from '../utils/Cache';
 import { followingEpisode, precedingEpisode } from '../utils/Playback';
@@ -657,7 +658,7 @@ export class AppService {
             queued = true;
             if (client === AppService.client && store === AppService.experience && store?.snapshot().pending.some((p: PendingEdit) => p.id === item.Id && p.field === field && p.revision === revision)) {
               const transient = connectionFailure(e as Error);
-              store.update((next: ExperienceState) => { next.syncAttempts = 0; next.syncBlocked = !transient; next.syncNextAt = transient ? Date.now() + 30000 : 0; });
+              store.update((next: ExperienceState) => { next.syncAttempts = 0; next.syncBlocked = !transient; next.syncNextAt = transient ? SyncRetryPolicy.nextRetryAt(Date.now(), 1) : 0; });
               PendingSync.deferred(e as Error);
             }
           }
