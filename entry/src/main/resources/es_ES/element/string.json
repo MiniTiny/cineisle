@@ -1978,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Admite chino simplificado, chino tradicional, inglés, francés, español y alemán. Para otros idiomas del sistema se usa inglés. Este ajuste global solo cambia la interfaz; los metadatos multimedia y las preferencias de audio y subtítulos son independientes."
+      "value": "Admite chino simplificado, chino tradicional, inglés, francés, español, alemán e italiano. Para otros idiomas del sistema se usa inglés. Este ajuste global solo cambia la interfaz; los metadatos multimedia y las preferencias de audio y subtítulos son independientes."
     },
     {
       "name": "ui_language_system",

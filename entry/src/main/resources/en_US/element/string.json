@@ -1972,7 +1972,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Supports Simplified Chinese, Traditional Chinese, English, French, Spanish and German. Other system languages use English. This app-wide setting changes the interface only; media metadata and audio/subtitle preferences remain separate."
+      "value": "Supports Simplified Chinese, Traditional Chinese, English, French, Spanish, German and Italian. Other system languages use English. This app-wide setting changes the interface only; media metadata and audio/subtitle preferences remain separate."
     },
     {
       "name": "ui_language_system",
