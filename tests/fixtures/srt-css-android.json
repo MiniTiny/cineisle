@@ -1,0 +1,735 @@
+{
+  "schema": 1,
+  "reference": "Actual Android API34 Html.fromHtml(String), called by fixed Media3 SubripParser;CharacterStyle effects in TextPaint;not browser CSS",
+  "cases": [
+    {
+      "html": "<span style='color: red'>RED</span>",
+      "text": "RED",
+      "runs": [
+        {
+          "text": "RED",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='background-color: blue'>BLUE BG</span>",
+      "text": "BLUE BG",
+      "runs": [
+        {
+          "text": "BLUE BG",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='text-decoration: line-through'>STRIKE</span>",
+      "text": "STRIKE",
+      "runs": [
+        {
+          "text": "STRIKE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": true,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: yellow; background-color: blue; text-decoration: line-through'>COMBO</span>",
+      "text": "COMBO",
+      "runs": [
+        {
+          "text": "COMBO",
+          "color": "#FFFFFF00",
+          "background": "#FF0000FF",
+          "strike": true,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color:red;background-color:blue;text-decoration:line-through'>COMPACT</span>",
+      "text": "COMPACT",
+      "runs": [
+        {
+          "text": "COMPACT",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'><span style='color: blue'>INNER</span>OUTER</span>END",
+      "text": "INNEROUTEREND",
+      "runs": [
+        {
+          "text": "INNEROUTER",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "END",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'>A<span style='background-color: blue'>B</span>C</span>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "A",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "B",
+          "color": "#FFFF0000",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "CD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='lime'>A<span style='color: red'>B</span>C</font>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "ABC",
+          "color": "#FF00FF00",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'>A<font color='blue'>B</font>C</span>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "ABC",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='background: red'>A<span style='background-color: blue'>B</span>C</span>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "ABC",
+          "color": "#FFFFFFFF",
+          "background": "#FFFF0000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='Color: red; BACKGROUND-COLOR: blue; Text-Decoration: line-through'>CASE</span>",
+      "text": "CASE",
+      "runs": [
+        {
+          "text": "CASE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<SPAN STYLE='color: RED; background: BLUE; text-decoration: LINE-THROUGH'>CASE VALUE</SPAN>",
+      "text": "CASE VALUE",
+      "runs": [
+        {
+          "text": "CASE VALUE",
+          "color": "#FFFF0000",
+          "background": "#FF0000FF",
+          "strike": true,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='font-weight: bold; font-style: italic; text-decoration: underline'>UNSUPPORTED</span>",
+      "text": "UNSUPPORTED",
+      "runs": [
+        {
+          "text": "UNSUPPORTED",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: invalid; color: red; background-color: nonsense'>INVALID FIRST</span>",
+      "text": "INVALID FIRST",
+      "runs": [
+        {
+          "text": "INVALID FIRST",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red; color: blue'>FIRST</span>",
+      "text": "FIRST",
+      "runs": [
+        {
+          "text": "FIRST",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #f00'>SHORT</span>",
+      "text": "SHORT",
+      "runs": [
+        {
+          "text": "SHORT",
+          "color": "#FF000F00",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: 255'>DECIMAL</span>",
+      "text": "DECIMAL",
+      "runs": [
+        {
+          "text": "DECIMAL",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: 0xff0000'>HEX</span>",
+      "text": "HEX",
+      "runs": [
+        {
+          "text": "HEX",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #80ff0000'>OVERFLOW</span>",
+      "text": "OVERFLOW",
+      "runs": [
+        {
+          "text": "OVERFLOW",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #00ff0000'>ZERO ALPHA</span>",
+      "text": "ZERO ALPHA",
+      "runs": [
+        {
+          "text": "ZERO ALPHA",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: rgb(255,0,0)'>RGB</span>",
+      "text": "RGB",
+      "runs": [
+        {
+          "text": "RGB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red !important'>IMPORTANT</span>",
+      "text": "IMPORTANT",
+      "runs": [
+        {
+          "text": "IMPORTANT",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'>A<span>EMPTY</span>B</span>C",
+      "text": "AEMPTYBC",
+      "runs": [
+        {
+          "text": "AEMPTY",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "BC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='text-decoration: line-through'>A<span>B</span>C</span>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": true,
+          "underline": false
+        },
+        {
+          "text": "CD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'>A<b>B</b><u>C</u><sup>D</sup><small>E</small></span>F",
+      "text": "ABCDEF",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "C",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": true
+        },
+        {
+          "text": "DE",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "F",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red' style='color: blue'>DUPLICATE</span>",
+      "text": "DUPLICATE",
+      "runs": [
+        {
+          "text": "DUPLICATE",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='#ff0000'>BASE FONT</font>",
+      "text": "BASE FONT",
+      "runs": [
+        {
+          "text": "BASE FONT",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: &#35;ff0000; background: blue'>ENTITY</span>",
+      "text": "ENTITY",
+      "runs": [
+        {
+          "text": "ENTITY",
+          "color": "#FFFF0000",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'>中文 Café Å 𝄞</span>",
+      "text": "中文 Café Å 𝄞",
+      "runs": [
+        {
+          "text": "中文 Café Å 𝄞",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='background-color: blue'>LEFT<br>RIGHT</span>",
+      "text": "LEFT\nRIGHT",
+      "runs": [
+        {
+          "text": "LEFT\nRIGHT",
+          "color": "#FFFFFFFF",
+          "background": "#FF0000FF",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<FONT COLOR=\"#00ff00\" FACE=\"Times New Roman\">A&#39;<font color=\"blue\">B</font>C</FONT>",
+      "text": "A'BC",
+      "runs": [
+        {
+          "text": "A'BC",
+          "color": "#FF00FF00",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='red' color='blue'>DUPLICATE FONT</font>",
+      "text": "DUPLICATE FONT",
+      "runs": [
+        {
+          "text": "DUPLICATE FONT",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='#80123456'>OVERFLOW FONT</font>",
+      "text": "OVERFLOW FONT",
+      "runs": [
+        {
+          "text": "OVERFLOW FONT",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='255'>DECIMAL FONT</font>",
+      "text": "DECIMAL FONT",
+      "runs": [
+        {
+          "text": "DECIMAL FONT",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: -16776961'>NEGATIVE</span>",
+      "text": "NEGATIVE",
+      "runs": [
+        {
+          "text": "NEGATIVE",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: 0777'>OCTAL</span>",
+      "text": "OCTAL",
+      "runs": [
+        {
+          "text": "OCTAL",
+          "color": "#FF0001FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #0'>ZERO</span>",
+      "text": "ZERO",
+      "runs": [
+        {
+          "text": "ZERO",
+          "color": "#FF000000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #abc'>ABC</span>",
+      "text": "ABC",
+      "runs": [
+        {
+          "text": "ABC",
+          "color": "#FF000ABC",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: +255'>PLUS</span>",
+      "text": "PLUS",
+      "runs": [
+        {
+          "text": "PLUS",
+          "color": "#FF0000FF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: 0XFF0000'>UPPER HEX</span>",
+      "text": "UPPER HEX",
+      "runs": [
+        {
+          "text": "UPPER HEX",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: -1'>SENTINEL</span>",
+      "text": "SENTINEL",
+      "runs": [
+        {
+          "text": "SENTINEL",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: 2147483648'>RANGE</span>",
+      "text": "RANGE",
+      "runs": [
+        {
+          "text": "RANGE",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: red'><span style='color: invalid'>INNER</span>AFTER</span>END",
+      "text": "INNERAFTEREND",
+      "runs": [
+        {
+          "text": "INNER",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "AFTEREND",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<s>A<span>B</span>C</s>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": true,
+          "underline": false
+        },
+        {
+          "text": "CD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='text-decoration: line-through'>A<s>B</s>C</span>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "ABC",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": true,
+          "underline": false
+        },
+        {
+          "text": "D",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color='red'>A<font>B</font>C</font>D",
+      "text": "ABCD",
+      "runs": [
+        {
+          "text": "AB",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        },
+        {
+          "text": "CD",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<font color=' red '>SPACED FONT</font>",
+      "text": "SPACED FONT",
+      "runs": [
+        {
+          "text": "SPACED FONT",
+          "color": "#FFFFFFFF",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    },
+    {
+      "html": "<span style='color: #ff0000'>AMP &amp; &#233;</span>",
+      "text": "AMP & é",
+      "runs": [
+        {
+          "text": "AMP & é",
+          "color": "#FFFF0000",
+          "background": "#00000000",
+          "strike": false,
+          "underline": false
+        }
+      ]
+    }
+  ]
+}

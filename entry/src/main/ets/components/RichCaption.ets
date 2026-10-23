@@ -41,7 +41,7 @@ export struct RichCaption {
   }
 
   build() {
-    if (this.runs.some((run: SubtitleRun): boolean => !!run.baselines?.length)) {
+    if (this.runs.some((run: SubtitleRun): boolean => !!run.baselines?.length || !!run.background)) {
       NativeCaption({ runs: this.runs, captionStyle: this.captionStyle, fontSize: this.fontSize, limit: this.limit,
         identifier: this.identifier, revision: this.revision, padX: this.padX, padY: this.padY, radius: this.radius, stretch: this.stretch, availableWidth: this.availableWidth })
     } else if (this.runs.some((run: SubtitleRun): boolean => run.underline && !!run.strike)) {

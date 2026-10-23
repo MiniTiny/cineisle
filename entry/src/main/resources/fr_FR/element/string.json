@@ -414,7 +414,7 @@
     },
     {
       "name": "subtitle_format_hint",
-      "value": "Les sous-titres ASS/SSA conservent leurs styles et animations ; SRT prend en charge le gras, l’italique, le soulignement, le texte barré, les exposants et indices, les couleurs, les familles de polices, les tailles relatives et le placement sur neuf positions. Les pistes texte intégrées et externes peuvent être mises en cache, et les anciens caches mis à jour en ligne. MPV peut afficher les sous-titres en images intégrés pris en charge et utiliser les polices jointes aux vidéos ; la lecture système dépend des capacités de l’appareil. Hors ligne, les sous-titres en cache et les pistes reconnues par l’appareil restent disponibles."
+      "value": "Les sous-titres ASS/SSA conservent leurs styles et animations ; SRT prend en charge le gras, l’italique, le soulignement, le texte barré, les exposants et indices, les couleurs et fonds des styles span, les familles de polices, les tailles relatives et le placement sur neuf positions. Les pistes texte intégrées et externes peuvent être mises en cache, et les anciens caches mis à jour en ligne. MPV peut afficher les sous-titres en images intégrés pris en charge et utiliser les polices jointes aux vidéos ; la lecture système dépend des capacités de l’appareil. Hors ligne, les sous-titres en cache et les pistes reconnues par l’appareil restent disponibles."
     },
     {
       "name": "track_switch_failed",

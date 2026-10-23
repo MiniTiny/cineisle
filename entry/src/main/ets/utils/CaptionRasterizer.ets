@@ -23,7 +23,7 @@ export function captionRequest(runs: SubtitleRun[], style: CaptionRenderStyle, s
   return { revision: revision, width: context.vp2px(width), maxLines: maxLines, intrinsic: intrinsic,
     runs: runs.map((run: SubtitleRun): native.NativeCaptionRun => ({ text: run.text,
       family: run.family || style.family, size: style.system ? context.vp2px(size * (run.sizeScale ?? 1)) : fontScale === undefined ? context.fp2px(size * (run.sizeScale ?? 1)) : context.vp2px(size * (run.sizeScale ?? 1) * fontScale),
-      baseline: metrics.offset(run, style, size, context, fontScale), color: captionArgb(run.color || style.foreground),
+      baseline: metrics.offset(run, style, size, context, fontScale), color: captionArgb(run.color || style.foreground), background: run.background ? captionArgb(run.background) : 0,
       bold: !!run.bold, italic: !!run.italic, underline: !!run.underline, strike: !!run.strike })),
     shadows: captionShadows(style.edge).map((shadow: ShadowOptions): native.NativeCaptionShadow => ({ color: captionArgb(shadow.color as CaptionColor),
       x: context.vp2px(Number(shadow.offsetX ?? 0)), y: context.vp2px(Number(shadow.offsetY ?? 0)),
