@@ -1,5 +1,6 @@
 // Call the real public C++ renderer API directly, without the outer N-API guards.
 #include "../../entry/src/main/cpp/ass/AssRenderer.h"
+#include "ass-engine.h"
 #include <array>
 #include <cstdio>
 #include <functional>
@@ -72,6 +73,36 @@ int main(int argc, char **argv)
             });
         }
         Expect("core negative clock", "ass_frame_invalid", [&] { renderer->Render(-1, 1, 1, 1, 1); });
+        for (size_t images : {99999, 100000, 100001}) {
+            ass_fixture::SetImageCount(images);
+            const auto before = ass_fixture::RenderCalls();
+            Expect("core image chain " + std::to_string(images), images > 100000 ? "ass_frame_too_complex" : "", [&] {
+                const auto frame = renderer->Render(0, 1, 1, 1, 1);
+                if (!frame.changed || frame.present || !frame.pixels.empty() || frame.canvasWidth != 1 || frame.canvasHeight != 1) {
+                    throw std::runtime_error("invisible image chain changed the empty frame contract");
+                }
+            });
+            if (ass_fixture::RenderCalls() != before + 1) { throw std::runtime_error("core image chain did not reach libass"); }
+        }
+        ass_fixture::SetImageCount(0);
+        Expect("core cache quotas applied once to each renderer", "", [&] {
+            ass_fixture::ResetCacheCalls();
+            auto first = AssRenderer::Create("doc", font, "");
+            auto second = AssRenderer::Create("doc", font, "");
+            const auto &calls = ass_fixture::CacheCalls();
+            if (calls.size() != 2 || !calls[0].renderer || !calls[1].renderer || calls[0].renderer == calls[1].renderer) {
+                throw std::runtime_error("core cache call count or renderer identity changed");
+            }
+            for (const auto &call : calls) {
+                if (call.glyphEntries != 1000 || call.bitmapMiB != 16) {
+                    throw std::runtime_error("core cache quota changed: glyphs=" + std::to_string(call.glyphEntries) +
+                        ", bitmapMiB=" + std::to_string(call.bitmapMiB));
+                }
+            }
+            first->Render(0, 1, 1, 1, 1); second->Render(0, 1, 1, 1, 1);
+            first->Close(); second->Close();
+            if (calls.size() != 2) { throw std::runtime_error("core cache quotas reapplied during render/close"); }
+        });
         renderer->Close();
         Expect("core closed renderer", "ass_renderer_closed", [&] { renderer->Render(0, 1, 1, 1, 1); });
         std::cout << count << " native ASS core tests passed. Production core API with explicit libass fixture; no rendering claim.\n";
