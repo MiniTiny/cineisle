@@ -32,7 +32,8 @@ napi_value Configure(napi_env e, napi_callback_info info) {
     number("trackCount", value.trackCount); number("firstTrackId", value.firstTrackId); number("events", value.events);
     if (Has(e, object, "version")) Check(napi_get_value_uint32(e, Field(e, object, "version"), &value.version));
     auto flag = [&](const char *key, bool &target) { if (Has(e, object, key)) Check(napi_get_value_bool(e, Field(e, object, key), &target)); };
-    flag("failInitialize", value.failInitialize); flag("failProperty", value.failProperty); flag("repeatTrackId", value.repeatTrackId);
+    flag("failInitialize", value.failInitialize); flag("failInitializeOnce", value.failInitializeOnce);
+    flag("failProperty", value.failProperty); flag("repeatTrackId", value.repeatTrackId);
     auto text = [&](const char *key, std::string &target) {
         if (!Has(e, object, key)) return;
         size_t length; auto field = Field(e, object, key); Check(napi_get_value_string_utf8(e, field, nullptr, 0, &length));

@@ -17,6 +17,7 @@ if (mode) {
   for (const phase of ['setup', 'cleanup']) test('unmodified fixture ' + phase + ' failure is invalid evidence', () => {
     const result = classify(child(phase), expected);
     assert.equal(result.status, 'invalid'); assert.equal(result.caseResult.phase, 'fixture'); assert.equal(result.caseResult.fixturePhase, phase);
+    assert.equal(result.caseResult.error.cause.message, 'intentional external fixture failure');
   });
   test('an unrelated exception is invalid even inside the selected case', () => assert.equal(classify(child('unrelated'), expected).status, 'invalid'));
   test('successful negative control survives', () => assert.equal(classify(child('pass'), expected).status, 'survived'));
@@ -43,6 +44,13 @@ if (mode) {
   test('intact production guard plus a four-worker barrier failure is invalid, not detected', () => {
     const result = classify(native.run(built, { name: active.name, pool: '4' }), active);
     assert.equal(result.status, 'invalid'); assert.equal(result.caseResult.phase, 'fixture'); assert.equal(result.caseResult.fixturePhase, 'barrier');
+  });
+  test('intact production guard plus a real first initialize failure is invalid, not detected', () => {
+    const raw = native.run(built, { name: active.name, mode: 'initialize-failure' });
+    const result = classify(raw, active);
+    assert.equal(raw.status, 1); assert.equal(result.status, 'invalid'); assert.equal(result.detected, false);
+    assert.equal(result.caseResult.phase, 'fixture'); assert.equal(result.caseResult.fixturePhase, 'initial-create');
+    assert.equal(result.caseResult.error.cause.message, 'mpv_initialize_failed');
   });
   (async () => {
     try { for (const [name, fn] of tests) { await fn(); console.log('PASS ' + name); } console.log(`${tests.length} MPV probe control tests passed. No production mutation or device claim.`); }

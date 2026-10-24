@@ -9,7 +9,7 @@ namespace mpv_fixture {
 struct Configuration {
     unsigned version = (2U << 16) | 5;
     int trackCount = 0, firstTrackId = 1, events = 0;
-    bool failInitialize = false, failProperty = false, repeatTrackId = false;
+    bool failInitialize = false, failInitializeOnce = false, failProperty = false, repeatTrackId = false;
     std::string block, plain, styled, full, language, title, codec;
 };
 struct Inspection {

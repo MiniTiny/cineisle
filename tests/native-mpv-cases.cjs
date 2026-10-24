@@ -201,10 +201,16 @@ if (mode.startsWith('api-')) {
     assert.equal(n.inspect().destroyed, 2);
   });
   test('native execute admits four overlapping opens and rejects the fifth without leaking reservation', async () => {
-    n.configure({ block: 'initialize' }); const initial = [];
+    n.configure({ block: 'initialize', failInitializeOnce: mode === 'initialize-failure' }); const initial = [];
     const pending = Array.from({ length: 4 }, () => observe(n.create(request())).then(result => { initial.push(result); return result; })); let fifth;
     try {
       await until(() => n.inspect().blocked === 4 || initial.length);
+      await fixture('initial-create', () => {
+        // Busy means the budget rejected one of the first four: keep it detectable.
+        // An unrelated open failure cannot establish the fifth-create boundary.
+        const unrelated = initial.find(result => result.error && result.error.message !== 'mpv_busy');
+        if (unrelated) throw unrelated.error;
+      });
       assert.ok(!initial.some(result => result.error), 'all four initial opens must be admitted');
       assert.equal(n.inspect().blocked, 4); assert.equal(n.inspect().active, 4);
       pending.push(observe(n.create(request())).then(result => (fifth = result)));
@@ -214,6 +220,7 @@ if (mode.startsWith('api-')) {
       await fixture('cleanup', async () => {
         n.unblock(); const outcomes = await Promise.all(pending);
         await Promise.all(outcomes.filter(o => o.value).map(o => n.release(o.value)));
+        assert.equal(n.inspect().active, 0); assert.equal(n.inspect().live, 0);
       });
     }
     assert.equal(n.inspect().active, 0); assert.equal(n.inspect().destroyed, 4);

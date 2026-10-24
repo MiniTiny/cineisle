@@ -34,7 +34,14 @@ function run({ output = path.join(root, '.local/test-results/mpv-probes'), selec
     }
     assert.equal(evidence.negativeControls['32'].status, 'survived', 'Intact source must pass the valid fixture');
     assert.equal(evidence.negativeControls['4'].status, 'invalid');
-    assert.equal(evidence.negativeControls['4'].caseResult.fixturePhase, 'barrier'); save();
+    assert.equal(evidence.negativeControls['4'].caseResult.fixturePhase, 'barrier');
+    const initialization = native.run(baseline, { name: active.name, mode: 'initialize-failure' });
+    persist('control-initialize-failure', initialization);
+    const initializationResult = evidence.negativeControls['initialize-failure'] = classify(initialization, active);
+    assert.equal(initialization.status, 1); assert.equal(initializationResult.status, 'invalid');
+    assert.equal(initializationResult.detected, false); assert.equal(initializationResult.caseResult.phase, 'fixture');
+    assert.equal(initializationResult.caseResult.fixturePhase, 'initial-create');
+    assert.equal(initializationResult.caseResult.error.cause.message, 'mpv_initialize_failed'); save();
     const cache = new Map();
     function worker(recipe, id) {
       const resultFile = path.join(output, id + '-raw.json'); fs.rmSync(resultFile, { force: true });

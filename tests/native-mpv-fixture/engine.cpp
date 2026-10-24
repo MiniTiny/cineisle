@@ -61,7 +61,10 @@ extern "C" {
 unsigned long mpv_client_api_version() { std::lock_guard<std::mutex> lock(mutex); ++inspection.versionCalls; return config.version; }
 mpv_handle *mpv_create() { std::lock_guard<std::mutex> lock(mutex); ++inspection.created; ++inspection.live; return new mpv_handle; }
 int mpv_initialize(mpv_handle *) {
-    std::unique_lock<std::mutex> lock(mutex); Barrier(lock, "initialize");
+    std::unique_lock<std::mutex> lock(mutex);
+    // Fail one real open before the concurrency barrier; later opens still block.
+    if (config.failInitializeOnce) { config.failInitializeOnce = false; return MPV_ERROR_GENERIC; }
+    Barrier(lock, "initialize");
     return config.failInitialize ? MPV_ERROR_GENERIC : 0;
 }
 void mpv_terminate_destroy(mpv_handle *handle) { std::lock_guard<std::mutex> lock(mutex); ++inspection.destroyed; --inspection.live; delete handle; }

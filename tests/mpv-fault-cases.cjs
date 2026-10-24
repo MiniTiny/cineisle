@@ -34,6 +34,7 @@ module.exports = [
   probe("native-active-guard-removed", cpp, "prior >= limits::kMaxActiveSessions", "false", "native", "native execute admits four overlapping opens and rejects the fifth without leaking reservation"),
   probe("native-active-comparison", cpp, "prior >= limits::kMaxActiveSessions", "prior > limits::kMaxActiveSessions", "native", "native execute admits four overlapping opens and rejects the fifth without leaking reservation"),
   probe("native-active-parameter-drift", header, "kMaxActiveSessions = 4", "kMaxActiveSessions = 5", "native", "native execute admits four overlapping opens and rejects the fifth without leaking reservation"),
+  probe("native-active-parameter-lowered", header, "kMaxActiveSessions = 4", "kMaxActiveSessions = 3", "native", "native execute admits four overlapping opens and rejects the fifth without leaking reservation"),
   probe("native-queue-guard-removed", cpp, "release || tasks.size() < limits::kMaxQueuedTasks", "true", "native", "N-API queue admits 63/64, rejects 65 and releases while full"),
   probe("core-queue-guard-removed", cpp, "release || tasks.size() < limits::kMaxQueuedTasks", "true", "native", "core queue admits 63/64, rejects 65 and releases while full"),
   probe("native-queue-comparison", cpp, "tasks.size() < limits::kMaxQueuedTasks", "tasks.size() <= limits::kMaxQueuedTasks", "native", "N-API queue admits 63/64, rejects 65 and releases while full"),

@@ -18,7 +18,8 @@ async function runCase(name, action, { before = () => {}, after = () => {} } = {
   } catch (error) {
     const record = { version: 1, name, status: 'failed', phase: error?.code === 'ERR_MPV_FIXTURE' ? 'fixture' : phase,
       fixturePhase: error?.fixturePhase,
-      error: { name: error?.name, code: error?.code, message: String(error?.message || error).slice(0, 240) } };
+      error: { name: error?.name, code: error?.code, message: String(error?.message || error).slice(0, 240),
+        cause: error?.cause && { name: error.cause.name, code: error.cause.code, message: String(error.cause.message || error.cause).slice(0, 240) } } };
     console.error(prefix + JSON.stringify(record)); console.error('FAIL ' + name); throw error;
   }
 }
