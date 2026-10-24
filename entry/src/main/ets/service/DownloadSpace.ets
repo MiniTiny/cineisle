@@ -6,6 +6,8 @@ import { text } from '../utils/Strings';
 import { AppFailure } from '../utils/Failures';
 
 export class DownloadSpace {
+  private static readonly bytesPerMiB: number = 1048576;
+  private static readonly safetyMarginBytes: number = 8 * DownloadSpace.bytesPerMiB;
   private static subtitleReservations: Map<DownloadRecord, number[]> = new Map();
   static reserveSubtitles(record: DownloadRecord, count: number): () => void {
     const claims = DownloadSpace.subtitleReservations.get(record) ?? [];
@@ -29,7 +31,7 @@ export class DownloadSpace {
     }, 0);
   }
   static async checkOptional(directory: string, bytes: number, records: DownloadRecord[]): Promise<void> {
-    const free = await statvfs.getFreeSize(directory); const needed = DownloadSpace.reserved(records) + bytes + 8 * 1048576;
+    const free = await statvfs.getFreeSize(directory); const needed = DownloadSpace.reserved(records) + bytes + DownloadSpace.safetyMarginBytes;
     if (!Number.isSafeInteger(free) || !Number.isSafeInteger(needed) || bytes < 0 || free < needed) { throw new Error('download_space_check_failed'); }
   }
   static async check(directory: string, record: DownloadRecord, records: DownloadRecord[], subtitleOnly: boolean = false): Promise<void> {
@@ -38,9 +40,9 @@ export class DownloadSpace {
     if (!Number.isSafeInteger(free) || free < 0) { throw new Error('download_space_check_failed'); }
     const reserved = DownloadSpace.reserved(records);
     const subtitles = (record.subtitles ?? []).filter((sub) => sub.state !== 'ready' || !fs.accessSync(sub.path));
-    const needed = (subtitleOnly ? 0 : record.expectedSize ?? 0) + subtitles.length * SubtitleTransferLimits.maxBytes + 8 * 1024 * 1024;
+    const needed = (subtitleOnly ? 0 : record.expectedSize ?? 0) + subtitles.length * SubtitleTransferLimits.maxBytes + DownloadSpace.safetyMarginBytes;
     if (!Number.isSafeInteger(reserved + needed) || free < reserved + needed) {
-      const requiredMb = Math.ceil((reserved + needed) / 1048576); const availableMb = Math.floor(free / 1048576);
+      const requiredMb = Math.ceil((reserved + needed) / DownloadSpace.bytesPerMiB); const availableMb = Math.floor(free / DownloadSpace.bytesPerMiB);
       throw new AppFailure('download_space_insufficient', 'storage', text('download_space_insufficient', requiredMb, availableMb), [requiredMb, availableMb]);
     }
   }

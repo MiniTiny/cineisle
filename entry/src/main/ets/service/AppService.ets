@@ -1,6 +1,6 @@
 import { TrickplayRepository } from './TrickplayRepository';
 import { TrickplayNetwork } from './TrickplayNetwork';
-import { BifTicket } from '../utils/Bif';
+import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
 import util from '@ohos.util';
 import { downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
@@ -384,7 +384,7 @@ export class AppService {
     const owned = (): boolean => client === AppService.client && local === AppService.local && allowed();
     return AppService.trickplays?.load(client, local, id, offline, owned, (work: () => Promise<void>) => AppService.mutation('download-admission', async () => {
       if (!local || !owned()) { return; }
-      await DownloadSpace.checkOptional(local.directory, 16 * 1048576, AppService.downloads);
+      await DownloadSpace.checkOptional(local.directory, BIF_LIMIT, AppService.downloads);
       if (owned()) { await work(); }
     }));
   }
