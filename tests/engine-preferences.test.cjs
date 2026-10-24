@@ -1,5 +1,6 @@
 // Real global store, factory, controller and Player paths with explicit native/Preferences fixtures.
 const assert = require('node:assert/strict');
+const { runCase } = require('./mpv-probe-result.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const h = require('./player-regression.test.cjs');
@@ -87,4 +88,9 @@ test('actual Player uses a saved native choice for the next opened video', async
   finally { await p.controller.close(); p.aboutToDisappear(); }
 });
 const watchdog = setTimeout(() => { console.error('FAIL engine preference fixture did not settle'); process.exitCode = 1; }, 15000);
-(async () => { for (const [name, fn] of tests) { h.reset(); await fn(); console.log('PASS', name); } console.log(`${tests.length} engine preference tests passed. Explicit native/Preferences fixtures; no OS storage or decoding claim.`); })().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));
+(async () => {
+  const selected = process.argv[2] ? tests.filter(([name]) => name.includes(process.argv[2])) : tests;
+  assert.ok(selected.length, 'No engine preference cases selected');
+  for (const [name, fn] of selected) { await runCase(name, fn, { before: () => h.reset() }); console.log('PASS', name); }
+  console.log(`${selected.length} engine preference tests passed. Explicit native/Preferences fixtures; no OS storage or decoding claim.`);
+})().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));

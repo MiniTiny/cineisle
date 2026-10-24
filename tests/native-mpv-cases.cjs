@@ -1,5 +1,6 @@
 // Independent boundary expectations. Do not import the production limit declarations.
 const assert = require('node:assert/strict');
+const { fixture, runCase } = require('./mpv-probe-result.cjs');
 const n = require(process.argv[2]), mode = process.argv[3];
 const tests = [], test = (name, fn) => tests.push([name, fn]);
 const request = () => ({ api: 15, source: 'fixture://movie', surface: '1' });
@@ -7,10 +8,15 @@ const observe = promise => promise.then(value => ({ value }), error => ({ error 
 const utf8 = size => '中😀'.repeat(Math.floor(size / 7)) + 'x'.repeat(size % 7);
 const clip = (value, bytes) => { let result = ''; for (const char of value) { if (Buffer.byteLength(result + char) > bytes) break; result += char; } return result; };
 async function until(check) {
-  const end = Date.now() + 4000;
-  while (!check()) { assert.ok(Date.now() < end, 'fixture barrier did not reach its expected state'); await new Promise(setImmediate); }
+  await fixture('barrier', async () => {
+    const end = Date.now() + 4000;
+    while (!check()) { assert.ok(Date.now() < end, 'fixture barrier did not reach its expected state'); await new Promise(setImmediate); }
+  });
 }
-async function opened(fn) { const handle = await n.create(request()); try { return await fn(handle); } finally { await n.release(handle); } }
+async function opened(fn) {
+  const handle = await fixture('setup', () => n.create(request()));
+  try { return await fn(handle); } finally { await fixture('cleanup', () => n.release(handle)); }
+}
 
 if (mode.startsWith('api-')) {
   test('native loader rejects incompatible libmpv ' + mode, async () => {
@@ -64,7 +70,7 @@ if (mode.startsWith('api-')) {
           if (field === 'source') assert.equal(n.inspect().commands.find(c => c.name === 'loadfile').value, value);
           if (field === 'fontConfiguration') assert.equal(n.inspect().options['sub-fonts-config'], value);
           if (field === 'surface') assert.equal(n.inspect().options.wid, '1');
-        } finally { await n.release(handle); }
+        } finally { await fixture('cleanup', () => n.release(handle)); }
       }
     });
   }
@@ -148,26 +154,32 @@ if (mode.startsWith('api-')) {
     assert.equal(n.inspect().destroyed, 2);
   });
   test('native execute admits four overlapping opens and rejects the fifth without leaking reservation', async () => {
-    n.configure({ block: 'initialize' }); const pending = Array.from({ length: 4 }, () => observe(n.create(request()))); let fifth;
+    n.configure({ block: 'initialize' }); const initial = [];
+    const pending = Array.from({ length: 4 }, () => observe(n.create(request())).then(result => { initial.push(result); return result; })); let fifth;
     try {
-      await until(() => n.inspect().blocked === 4); assert.equal(n.inspect().active, 4);
+      await until(() => n.inspect().blocked === 4 || initial.length);
+      assert.ok(!initial.some(result => result.error), 'all four initial opens must be admitted');
+      assert.equal(n.inspect().blocked, 4); assert.equal(n.inspect().active, 4);
       pending.push(observe(n.create(request())).then(result => (fifth = result)));
       await until(() => fifth || n.inspect().blocked === 5);
       assert.equal(fifth?.error?.message, 'mpv_busy'); assert.equal(n.inspect().active, 4); assert.equal(n.inspect().created, 4);
     } finally {
-      n.unblock(); const outcomes = await Promise.all(pending);
-      await Promise.all(outcomes.filter(o => o.value).map(o => n.release(o.value)));
+      await fixture('cleanup', async () => {
+        n.unblock(); const outcomes = await Promise.all(pending);
+        await Promise.all(outcomes.filter(o => o.value).map(o => n.release(o.value)));
+      });
     }
     assert.equal(n.inspect().active, 0); assert.equal(n.inspect().destroyed, 4);
     await opened(async () => {});
   });
   for (const layer of ['N-API', 'core']) test(`${layer} queue admits 63/64, rejects 65 and releases while full`, async () => {
-    const handle = await n.create(request()); n.configure({ block: 'set:pause' });
+    const handle = await fixture('setup', () => n.create(request())); n.configure({ block: 'set:pause' });
     const pending = [observe(n.command(handle, { type: 'pause', value: 0 }))]; let release;
     try {
       await until(() => n.inspect().blocked === 1); assert.equal(n.queueSize(handle), 0);
       for (let i = 0; i < 64; ++i) {
-        pending.push(observe(n.command(handle, { type: 'volume', value: i / 64 })));
+        let work; assert.doesNotThrow(() => { work = n.command(handle, { type: 'volume', value: i / 64 }); });
+        pending.push(observe(work));
         if (i === 62) assert.equal(n.queueSize(handle), 63);
       }
       assert.equal(n.queueSize(handle), 64);
@@ -179,9 +191,11 @@ if (mode.startsWith('api-')) {
       assert.throws(() => n.command(handle, { type: 'volume', value: 0 }), { message: 'mpv_closed' });
       assert.equal(n.inspect().blocked, 1); assert.equal(n.inspect().active, 1);
     } finally {
-      n.unblock(); const outcomes = await Promise.all(pending);
-      await (release || n.release(handle));
-      assert.ok(outcomes.every(o => !o.error));
+      await fixture('cleanup', async () => {
+        n.unblock(); const outcomes = await Promise.all(pending);
+        await (release || n.release(handle));
+        assert.ok(outcomes.every(o => !o.error));
+      });
     }
     assert.equal(n.inspect().active, 0); assert.equal(n.inspect().destroyed, 1);
     assert.deepEqual(n.inspect().properties.filter(p => p.name === 'volume').map(p => Number(p.value)), Array.from({ length: 64 }, (_, i) => i / 64 * 100));
@@ -200,9 +214,9 @@ if (mode.startsWith('api-')) {
   const selected = process.argv[4] ? tests.filter(([name]) => name.includes(process.argv[4])) : tests;
   assert.ok(selected.length, 'no selected native MPV cases');
   for (const [name, fn] of selected) {
-    n.reset();
-    try { await fn(); assert.equal(n.inspect().active, 0); assert.equal(n.inspect().live, 0); }
-    catch (error) { console.error('FAIL ' + name); throw error; }
+    await runCase(name, fn, { before: () => n.reset(), after: () => {
+      assert.equal(n.inspect().active, 0); assert.equal(n.inspect().live, 0);
+    } });
     console.log('PASS ' + name);
   }
   console.log(`${selected.length} native MPV fixture cases passed (${mode}).`);

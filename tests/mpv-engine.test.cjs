@@ -1,5 +1,6 @@
 // Executes the real ArkTS adapter against explicit async bridge fixtures; no decoder/audio/UI claim.
 const assert = require('node:assert/strict');
+const { fixture, runCase } = require('./mpv-probe-result.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -361,7 +362,7 @@ for (const axis of ['width', 'height']) for (const value of [1, 8191, 8192, 8193
         await p.refresh(); assert.equal(r.calls.filter(c => c[0] === 'surface-size').length, 0);
         assert.equal(p.state, 'prepared'); assert.equal(r.events.filter(e => e[0] === 'error').length, 0);
       }
-    } finally { await p.release(); }
+    } finally { await fixture('cleanup', () => p.release()); }
   });
 }
 test('native surface update failure becomes a real playback error', async () => {
@@ -378,7 +379,7 @@ const watchdog = setTimeout(() => { console.error('FAIL: adapter fixture did not
   const selected = process.argv[2] ? cases.filter(([name]) => name.includes(process.argv[2])) : cases;
   assert.ok(selected.length, 'No MPV adapter cases selected');
   for (const [name, fn] of selected) {
-    try { await fn(); } catch (error) { console.error('FAIL ' + name); throw error; }
+    await runCase(name, fn);
     console.log('PASS', name);
   }
   console.log(`${selected.length} MPV adapter cases passed. Async bridge fixtures; no decoder/audio/UI claim.`);
