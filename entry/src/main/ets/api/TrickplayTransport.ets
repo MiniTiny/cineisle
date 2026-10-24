@@ -6,6 +6,8 @@ import { BIF_LIMIT, BifTransfer, bifWidth } from '../utils/Bif';
 
 // Optional Jellyscrub plugin routes, separate from the core Jellyfin OpenAPI contract.
 export class TrickplayTransport extends NativeHttpTransport {
+  // HTTP bytes and manifest string code units are independent limits.
+  private static readonly maxManifestResponseBytes: number = 16384;
   private owner: Session;
   constructor(session: Session) { super(session); this.owner = session; }
   fetch(id: string, allowed: () => boolean): BifTransfer {
@@ -26,7 +28,7 @@ export class TrickplayTransport extends NativeHttpTransport {
           close(); connection = http.createHttp(); timer = setTimeout(() => finish(), Math.min(policy.requestMs, binary ? 8000 : 3000));
           connection.request(endpoint + '/Trickplay/' + encodeURIComponent(id) + path, {
             method: http.RequestMethod.GET, header: { 'Authorization': this.authorization(), 'Accept': binary ? 'application/octet-stream' : 'application/json' },
-            expectDataType: binary ? http.HttpDataType.ARRAY_BUFFER : http.HttpDataType.STRING, usingCache: false, maxLimit: binary ? BIF_LIMIT : 16384,
+            expectDataType: binary ? http.HttpDataType.ARRAY_BUFFER : http.HttpDataType.STRING, usingCache: false, maxLimit: binary ? BIF_LIMIT : TrickplayTransport.maxManifestResponseBytes,
             connectTimeout: Math.min(policy.connectMs, 3000), readTimeout: Math.min(policy.readMs, binary ? 6000 : 2000)
           }).then((response: http.HttpResponse) => {
             if (settled) { return; }

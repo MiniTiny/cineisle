@@ -1,5 +1,5 @@
 import fs from '@ohos.file.fs';
-import { BIF_LIMIT, BifData, BifTicket, BifTransfer, parseBif } from '../utils/Bif';
+import { BIF_LIMIT, BifFormat, BifData, BifTicket, BifTransfer, parseBif } from '../utils/Bif';
 import { JellyfinClient } from './JellyfinClient';
 import { LocalStore } from './LocalStore';
 
@@ -7,6 +7,10 @@ interface CacheFile { name: string; size: number; modified: number }
 interface Job { run: () => Promise<void>; live: () => boolean; done: () => void }
 // Small disposable per-account cache: 32 MiB / 16 BIFs, oldest write evicted first.
 export class TrickplayRepository {
+  private static readonly maxConcurrentJobs: number = 2;
+  private static readonly maxQueuedJobs: number = 8;
+  private static readonly maxCacheBytes: number = 32 * 1048576;
+  private static readonly maxCacheFiles: number = 16;
   private serial: Promise<void> = Promise.resolve();
   private active: number = 0;
   private waiting: Job[] = [];
@@ -33,19 +37,19 @@ export class TrickplayRepository {
       } catch (e) { /* Optional plugin/cache errors never fail playback or a video download. */ }
       finally { finish(); }
     } };
-    if (this.waiting.length >= 8 || !live()) { finish(); }
+    if (this.waiting.length >= TrickplayRepository.maxQueuedJobs || !live()) { finish(); }
     else { this.waiting.push(job); this.drain(); }
     return { result: result, cancel: () => { active = false; transfer?.cancel(); this.waiting = this.waiting.filter((value: Job) => value !== job); finish(); } };
   }
   private drain(): void {
-    while (this.active < 2 && this.waiting.length) {
+    while (this.active < TrickplayRepository.maxConcurrentJobs && this.waiting.length) {
       const job = this.waiting.shift()!; if (!job.live()) { job.done(); continue; }
       ++this.active; job.run().finally(() => { --this.active; this.drain(); });
     }
   }
   private async read(path: string, allowed: () => boolean): Promise<BifData | undefined> {
     try {
-      const size = (await fs.stat(path)).size; if (!Number.isInteger(size) || size < 76 || size > BIF_LIMIT) { throw new Error('invalid'); }
+      const size = (await fs.stat(path)).size; if (!Number.isInteger(size) || size < BifFormat.minimumFileBytes || size > BIF_LIMIT) { throw new Error('invalid'); }
       const file = await fs.open(path, fs.OpenMode.READ_ONLY); const bytes = new Uint8Array(size);
       try { let offset = 0; while (offset < size) { const part = new ArrayBuffer(size - offset); const n = await fs.read(file.fd, part); if (n <= 0 || n > size - offset) { throw new Error('invalid'); } bytes.set(new Uint8Array(part, 0, n), offset); offset += n; } }
       finally { await fs.close(file); }
@@ -65,7 +69,7 @@ export class TrickplayRepository {
     // Count an existing destination too: the atomic temporary file also needs space.
     entries.sort((a: CacheFile, b: CacheFile) => a.modified - b.modified || a.name.localeCompare(b.name));
     let total = entries.reduce((n: number, value: CacheFile) => n + value.size, 0);
-    while (entries.length && (total + bytes.byteLength > 32 * 1048576 || entries.length >= 16)) { if (!allowed()) { return; } const entry = entries.shift()!; await fs.unlink(root + '/' + entry.name); total -= entry.size; }
+    while (entries.length && (total + bytes.byteLength > TrickplayRepository.maxCacheBytes || entries.length >= TrickplayRepository.maxCacheFiles)) { if (!allowed()) { return; } const entry = entries.shift()!; await fs.unlink(root + '/' + entry.name); total -= entry.size; }
     const temporary = root + '/' + id + '.part';
     try {
       if (!allowed()) { return; }

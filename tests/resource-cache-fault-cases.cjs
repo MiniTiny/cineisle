@@ -1,4 +1,5 @@
 const poster = 'entry/src/main/ets/service/PosterCache.ets', image = 'entry/src/main/ets/utils/PosterOptions.ts', transport = 'entry/src/main/ets/api/PosterTransport.ets';
+const bif = 'entry/src/main/ets/utils/Bif.ts', preview = 'entry/src/main/ets/service/TrickplayRepository.ets', bifHttp = 'entry/src/main/ets/api/TrickplayTransport.ets';
 const probe = (id, file, old, replacement, name) => ({ id, file, old, replacement, name });
 module.exports = [
   ...[[160, 'small'], [480, 'medium'], [1280, 'large']].map(([width, profile]) => probe(`poster-${profile}-width`, image, `${profile}WidthPx: number = ${width}`, `${profile}WidthPx: number = ${width + 1}`, `poster HTTP primary width ${width}`)),
@@ -27,5 +28,52 @@ module.exports = [
   probe('poster-capacity-comparison', poster, '+ extra > this.options.maxMb * 1024 * 1024', '+ extra >= this.options.maxMb * 1024 * 1024', 'poster actual cache byte quota 1048576'),
   probe('poster-capacity-consumer', poster, '+ extra > this.options.maxMb * 1024 * 1024', '+ extra > this.options.maxMb * 1024 * 1024 + 1', 'poster actual cache byte quota 1048577'),
   probe('poster-account-comparison', poster, 'account.length > PosterCache.maxAccountKeyCodeUnits', 'account.length >= PosterCache.maxAccountKeyCodeUnits', 'poster account code units 300'),
-  probe('poster-account-declaration', poster, 'maxAccountKeyCodeUnits: number = 300', 'maxAccountKeyCodeUnits: number = 301', 'poster account code units 301')
+  probe('poster-account-declaration', poster, 'maxAccountKeyCodeUnits: number = 300', 'maxAccountKeyCodeUnits: number = 301', 'poster account code units 301'),
+  ...[
+    ['manifest', 'json.length', 'maxManifestCodeUnits', '16384', '16385', 'bif manifest code units 16384', 'bif manifest code units 16385'],
+    ['version', 'value.Version.length', 'maxVersionCodeUnits', '64', '65', 'bif manifest version code units 64', 'bif manifest version code units 65'],
+    ['resolutions', 'value.WidthResolutions.length', 'maxResolutions', '32', '33', 'bif resolution count 32', 'bif resolution count 33'],
+    ['frames', 'count', 'maxFrames', '4096', '4097', 'bif legal frame count 4096', 'bif legal frame count 4097'],
+    ['frame-bytes', 'end - offset', 'maxFrameBytes', '524288', '524289', 'bif legal frame bytes 524288', 'bif legal frame bytes 524289'],
+    ['time', 'time', 'maxTimestampMs', '172800000', '172800001', 'bif legal timestamp 172800000', 'bif legal timestamp 172800001']
+  ].flatMap(([id, expression, field, maximum, raised, at, over]) => [
+    probe(`bif-${id}-guard`, bif, `${expression} > BifLimits.${field}`, 'false', over),
+    probe(`bif-${id}-comparison`, bif, `${expression} > BifLimits.${field}`, `${expression} >= BifLimits.${field}`, at),
+    probe(`bif-${id}-declaration`, bif, `${field}: number = ${maximum}`, `${field}: number = ${raised}`, over)
+  ]),
+  probe('bif-min-width-guard', bif, 'w >= BifLimits.minWidthPx', 'true', 'bif resolution width 31'),
+  probe('bif-min-width-comparison', bif, 'w >= BifLimits.minWidthPx', 'w > BifLimits.minWidthPx', 'bif resolution width 32'),
+  probe('bif-min-width-declaration', bif, 'minWidthPx: number = 32', 'minWidthPx: number = 31', 'bif resolution width 31'),
+  probe('bif-max-width-guard', bif, 'w <= BifLimits.maxWidthPx', 'true', 'bif resolution width 1921'),
+  probe('bif-max-width-comparison', bif, 'w <= BifLimits.maxWidthPx', 'w < BifLimits.maxWidthPx', 'bif resolution width 1920'),
+  probe('bif-max-width-declaration', bif, 'maxWidthPx: number = 1920', 'maxWidthPx: number = 1921', 'bif resolution width 1921'),
+  probe('bif-preferred-comparison', bif, 'w <= BifLimits.preferredWidthPx', 'w < BifLimits.preferredWidthPx', 'bif preferred width is a soft selection boundary'),
+  probe('bif-preferred-declaration', bif, 'preferredWidthPx: number = 640', 'preferredWidthPx: number = 641', 'bif preferred width is a soft selection boundary'),
+  probe('bif-preferred-fallback', bif, 'Math.min(...value.WidthResolutions)', 'undefined', 'bif preferred width is a soft selection boundary'),
+  probe('bif-file-guard', bif, 'bytes.byteLength > BIF_LIMIT', 'false', 'bif legal file bytes 16777217'),
+  probe('bif-file-comparison', bif, 'bytes.byteLength > BIF_LIMIT', 'bytes.byteLength >= BIF_LIMIT', 'bif legal file bytes 16777216'),
+  probe('bif-file-declaration', bif, 'BIF_LIMIT = 16 * 1024 * 1024', 'BIF_LIMIT = 16 * 1024 * 1024 + 1', 'bif legal file bytes 16777217'),
+  probe('bif-minimum-parser-comparison', bif, 'bytes.byteLength < BifFormat.minimumFileBytes', 'bytes.byteLength <= BifFormat.minimumFileBytes', 'bif minimum legal file is 76 bytes'),
+  probe('bif-minimum-reader-comparison', preview, 'size < BifFormat.minimumFileBytes', 'size <= BifFormat.minimumFileBytes', 'bif cached minimum file uses the real read path'),
+  probe('bif-http-manifest-declaration', bifHttp, 'maxManifestResponseBytes: number = 16384', 'maxManifestResponseBytes: number = 16385', 'bif actual HTTP stage byte budgets'),
+  probe('bif-http-manifest-consumer', bifHttp, 'maxLimit: binary ? BIF_LIMIT : TrickplayTransport.maxManifestResponseBytes', 'maxLimit: binary ? BIF_LIMIT : 16385', 'bif actual HTTP stage byte budgets'),
+  probe('bif-http-binary-consumer', bifHttp, 'maxLimit: binary ? BIF_LIMIT : TrickplayTransport.maxManifestResponseBytes', 'maxLimit: binary ? BIF_LIMIT + 1 : TrickplayTransport.maxManifestResponseBytes', 'bif actual HTTP stage byte budgets'),
+  probe('bif-cache-byte-guard', preview, 'total + bytes.byteLength > TrickplayRepository.maxCacheBytes', 'false', 'bif actual cache byte quota 33554433'),
+  probe('bif-cache-byte-comparison', preview, 'total + bytes.byteLength > TrickplayRepository.maxCacheBytes', 'total + bytes.byteLength >= TrickplayRepository.maxCacheBytes', 'bif actual cache byte quota 33554432'),
+  probe('bif-cache-byte-declaration', preview, 'maxCacheBytes: number = 32 * 1048576', 'maxCacheBytes: number = 32 * 1048576 + 1', 'bif actual cache byte quota 33554433'),
+  probe('bif-cache-file-guard', preview, 'entries.length >= TrickplayRepository.maxCacheFiles', 'false', 'bif actual cache file quota 17'),
+  probe('bif-cache-file-comparison', preview, 'entries.length >= TrickplayRepository.maxCacheFiles', 'entries.length > TrickplayRepository.maxCacheFiles', 'bif actual cache file quota 17'),
+  probe('bif-cache-file-declaration', preview, 'maxCacheFiles: number = 16', 'maxCacheFiles: number = 17', 'bif actual cache file quota 17'),
+  probe('bif-cache-file-lowered', preview, 'maxCacheFiles: number = 16', 'maxCacheFiles: number = 15', 'bif actual cache file quota 16'),
+  ...['bytes', 'files'].map(axis => probe(`bif-overwrite-${axis}-excluded`, preview, 'entries.push({ name: name, size: stat.size, modified: stat.mtime });', "if (name !== id + '.bif') entries.push({ name: name, size: stat.size, modified: stat.mtime });", `bif overwrite counts actual temporary ${axis}`)),
+  probe('bif-eviction-time-order', preview, 'a.modified - b.modified', 'b.modified - a.modified', 'bif overwrite counts actual temporary bytes'),
+  probe('bif-eviction-name-order', preview, 'a.name.localeCompare(b.name)', 'b.name.localeCompare(a.name)', 'bif actual cache byte quota 33554433'),
+  probe('bif-queue-guard', preview, 'this.waiting.length >= TrickplayRepository.maxQueuedJobs', 'false', 'bif overlapping admission 11'),
+  probe('bif-queue-comparison', preview, 'this.waiting.length >= TrickplayRepository.maxQueuedJobs', 'this.waiting.length > TrickplayRepository.maxQueuedJobs', 'bif overlapping admission 11'),
+  probe('bif-queue-declaration', preview, 'maxQueuedJobs: number = 8', 'maxQueuedJobs: number = 9', 'bif overlapping admission 11'),
+  probe('bif-queue-lowered', preview, 'maxQueuedJobs: number = 8', 'maxQueuedJobs: number = 7', 'bif overlapping admission 10'),
+  probe('bif-concurrency-guard', preview, 'this.active < TrickplayRepository.maxConcurrentJobs', 'true', 'bif overlapping admission 10'),
+  probe('bif-concurrency-comparison', preview, 'this.active < TrickplayRepository.maxConcurrentJobs', 'this.active <= TrickplayRepository.maxConcurrentJobs', 'bif overlapping admission 10'),
+  probe('bif-concurrency-declaration', preview, 'maxConcurrentJobs: number = 2', 'maxConcurrentJobs: number = 3', 'bif overlapping admission 10'),
+  probe('bif-concurrency-lowered', preview, 'maxConcurrentJobs: number = 2', 'maxConcurrentJobs: number = 1', 'bif overlapping admission 9')
 ];
