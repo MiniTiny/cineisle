@@ -3,7 +3,7 @@ import { TrickplayNetwork } from './TrickplayNetwork';
 import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
 import util from '@ohos.util';
-import { downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
+import { DownloadMetadataLimits, downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
 import background from '@ohos.resourceschedule.backgroundTaskManager';
 import { BackgroundLease } from './BackgroundLease';
 import common from '@ohos.app.ability.common';
@@ -420,7 +420,7 @@ export class AppService {
     const record = new DownloadRecord(); record.id = item.Id; record.item = JSON.parse(JSON.stringify(item)) as MediaItem; record.item.MediaSources = info.MediaSources; record.mediaSourceId = source.Id;
     record.fileId = util.generateRandomUUID().replace(/-/g, '').toLowerCase();
     if (!/^[a-f0-9]{32}$/.test(record.fileId)) { throw new Error('download_create_failed'); }
-    record.sourceName = (source.Name || source.Container || '').slice(0, 256);
+    record.sourceName = (source.Name || source.Container || '').slice(0, DownloadMetadataLimits.maxSourceNameCodeUnits);
     record.network = network ?? downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
     record.expectedSize = Number.isSafeInteger(source.Size) && (source.Size ?? 0) > 0 ? source.Size : undefined;
     const extension = /^[a-zA-Z0-9]+$/.test(source.Container ?? '') ? source.Container : 'media';
