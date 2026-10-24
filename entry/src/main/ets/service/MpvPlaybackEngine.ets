@@ -8,6 +8,7 @@ import { SubtitleContent } from '../utils/InlineSubtitle';
 import { mpvTextSubtitle } from '../utils/MpvTextSubtitle';
 import { AssFonts } from './AssFonts';
 import { MpvOptions, defaultMpvOptions, copyMpvOptions, validMpvOptions } from '../utils/MpvOptions';
+import { MpvBridgeLimits } from '../utils/MpvLimits';
 
 // The shim is safe to import on API12; the optional library is loaded only inside capability/create.
 export class MpvPlaybackEngine implements PlaybackEngine {
@@ -53,7 +54,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     hardwareDecoder: '', videoOutput: '', audioOutput: '' };
 
   static async available(): Promise<boolean> {
-    if (deviceInfo.sdkApiVersion < 15) { return false; }
+    if (deviceInfo.sdkApiVersion < MpvBridgeLimits.minPlatformApi) { return false; }
     return (await native.capability(deviceInfo.sdkApiVersion)).supported;
   }
   private constructor(fontConfiguration: string, options: MpvOptions) { this.fontConfiguration = fontConfiguration; this.options = copyMpvOptions(options); }
@@ -255,7 +256,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   }
   setVolume(value: number): void { if (!Number.isFinite(value) || value < 0 || value > 1) { throw new Error('mpv_volume_invalid'); } this.dispatch('volume', value); }
   setSurfaceSize(width: number, height: number): void {
-    if (![width, height].every((value: number): boolean => Number.isSafeInteger(value) && value > 0 && value <= 8192)) { throw new Error('mpv_surface_invalid'); }
+    if (![width, height].every((value: number): boolean => Number.isSafeInteger(value) && value > 0 && value <= MpvBridgeLimits.maxSurfaceDimensionPx)) { throw new Error('mpv_surface_invalid'); }
     if (this.released || this.failed) { return; }
     this.surfacePixelWidth = width; this.surfacePixelHeight = height;
     if (this.handle) { this.refresh(); }

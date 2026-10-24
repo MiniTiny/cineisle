@@ -4,10 +4,11 @@ import { EngineChoice } from '../utils/EngineChoice';
 import { PlaybackEngine, NativePlaybackEngine } from './PlaybackEngine';
 import { MpvPlaybackEngine } from './MpvPlaybackEngine';
 import { MpvPreferences } from './MpvPreferences';
+import { MpvBridgeLimits } from '../utils/MpvLimits';
 
 export class PlaybackEngines {
   // Cheap UI eligibility check. The optional library is probed only on explicit MPV selection or playback.
-  static canOfferMpv(): boolean { return deviceInfo.sdkApiVersion >= 15; }
+  static canOfferMpv(): boolean { return deviceInfo.sdkApiVersion >= MpvBridgeLimits.minPlatformApi; }
   static async validate(choice: EngineChoice): Promise<void> {
     if (choice !== 'native' && choice !== 'mpv') { throw new Error('engine_invalid'); }
     if (choice === 'mpv') {

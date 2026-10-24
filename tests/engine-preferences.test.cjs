@@ -69,6 +69,12 @@ test('API12 disables MPV eligibility without a native capability probe', async (
   const info = h.platform.get('@ohos.deviceInfo'), level = info.sdkApiVersion; info.sdkApiVersion = 12;
   try { assert.equal(PlaybackEngines.canOfferMpv(), false); await assert.rejects(PlaybackEngines.validate('mpv'), /engine_mpv_unavailable/); } finally { info.sdkApiVersion = level; }
 });
+for (const api of [14, 15, 16]) test('factory eligibility preserves API15 independently at ' + api, () => {
+  const info = h.platform.get('@ohos.deviceInfo'), level = info.sdkApiVersion, available = MpvPlaybackEngine.available;
+  let probes = 0; info.sdkApiVersion = api; MpvPlaybackEngine.available = async () => { ++probes; return true; };
+  try { assert.equal(PlaybackEngines.canOfferMpv(), api >= 15); assert.equal(probes, 0); }
+  finally { info.sdkApiVersion = level; MpvPlaybackEngine.available = available; }
+});
 test('actual Player factory reads the global choice at open and reports an unavailable backend', async () => {
   h.reset(); fresh(); await store.load(context); await store.save('mpv', () => true); h.setRoute(h.route()); const p = new h.Player(); p.aboutToAppear();
   const create = MpvPlaybackEngine.create, available = MpvPlaybackEngine.available; let calls = 0; MpvPlaybackEngine.available = async () => true; MpvPlaybackEngine.create = async () => { calls++; throw Error('fixture'); };
