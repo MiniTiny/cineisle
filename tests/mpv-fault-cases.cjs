@@ -4,6 +4,14 @@ const adapter = 'entry/src/main/ets/service/MpvPlaybackEngine.ets', limits = 'en
 const probe = (id, path, old, replacement, kind, name, error = { code: 'ERR_ASSERTION' }) =>
   ({ id, path, old, new: replacement, kind, name, mode: 'behavior', error });
 module.exports = [
+  probe('backend-hardware-guard-removed', cpp, 'Require(length <= maximum, "mpv_argument_invalid");', 'Require(true, "mpv_argument_invalid");', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 33'),
+  probe('backend-video-guard-removed', cpp, 'Require(length <= maximum, "mpv_argument_invalid");', 'Require(true, "mpv_argument_invalid");', 'native', 'native backend videoOutput UTF-8 byte boundary 33'),
+  probe('backend-hardware-comparison', cpp, 'length <= maximum', 'length < maximum', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 32'),
+  probe('backend-video-comparison', cpp, 'length <= maximum', 'length < maximum', 'native', 'native backend videoOutput UTF-8 byte boundary 32'),
+  probe('backend-hardware-budget-drift', header, 'kMaxBackendOptionUtf8Bytes = 32', 'kMaxBackendOptionUtf8Bytes = 33', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 33'),
+  probe('backend-video-budget-drift', header, 'kMaxBackendOptionUtf8Bytes = 32', 'kMaxBackendOptionUtf8Bytes = 33', 'native', 'native backend videoOutput UTF-8 byte boundary 33'),
+  probe('backend-hardware-consumer-drift', cpp, '"hardwareDecoder"), limits::kMaxBackendOptionUtf8Bytes', '"hardwareDecoder"), limits::kMaxSourceUtf8Bytes', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 33'),
+  probe('backend-video-consumer-drift', cpp, '"videoOutput"), limits::kMaxBackendOptionUtf8Bytes', '"videoOutput"), limits::kMaxSourceUtf8Bytes', 'native', 'native backend videoOutput UTF-8 byte boundary 33'),
   probe("native-width-guard-removed", cpp, "value <= limits::kMaxSurfaceDimensionPx", "true", "native", "N-API surface width independently 8193"),
   probe("core-width-guard-removed", cpp, "value <= limits::kMaxSurfaceDimensionPx", "true", "native", "core surface width independently 8193"),
   probe("native-height-guard-removed", cpp, "command.height <= limits::kMaxSurfaceDimensionPx", "true", "native", "N-API surface height independently 8193"),

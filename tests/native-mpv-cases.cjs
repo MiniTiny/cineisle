@@ -87,6 +87,21 @@ if (mode.startsWith('api-')) {
   for (const [field, value] of [['hardwareDecoder', 'mediacodec'], ['videoOutput', 'null']]) test('native invalid backend ' + field, () => {
     assert.throws(() => n.create({ ...request(), [field]: value }), { message: 'mpv_argument_invalid' }); assert.equal(n.inspect().created, 0);
   });
+  for (const field of ['hardwareDecoder', 'videoOutput']) for (const size of [31, 32, 33]) {
+    test(`native backend ${field} UTF-8 byte boundary ${size}`, async () => {
+      const value = utf8(size);
+      await fixture('input', () => { assert.equal(Buffer.byteLength(value), size); assert.ok(value.length < size); });
+      // All three values fail the whitelist. The actual copy trace independently
+      // proves whether String() admitted the bytes before whitelist evaluation.
+      assert.throws(() => n.create({ ...request(), [field]: value }), { message: 'mpv_argument_invalid' });
+      const reads = n.stringReads();
+      assert.deepEqual(reads.filter(r => !r.copy).map(r => r.bytes), [15, 1, size]);
+      const admitted = size <= 32 ? [15, 1, size] : [15, 1];
+      assert.deepEqual(reads.filter(r => r.copy).map(r => r.bytes), admitted, 'backend byte budget must precede whitelist rejection');
+      assert.deepEqual(reads.filter(r => r.copy).map(r => r.capacity), admitted.map(n => n + 1));
+      assert.equal(n.inspect().created, 0);
+    });
+  }
   for (const layer of ['N-API', 'core']) for (const axis of ['width', 'height']) for (const value of [1, 8191, 8192, 0, -1, 1.5, 8193, NaN, Infinity, -Infinity]) {
     test(`${layer} surface ${axis} independently ${value}`, async () => opened(async handle => {
       const [width, height] = axis === 'width' ? [value, 1] : [1, value];

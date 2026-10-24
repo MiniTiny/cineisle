@@ -1,7 +1,15 @@
 // Include the unchanged production translation unit to expose its lower entrypoints
-// to tests. Redirect only module registration; all five exported callbacks are real.
+// to tests. All five exported callbacks remain real. Observe external N-API string
+// reads without copying validation or exposing input contents.
 #include <node_api.h>
 #include "engine.h"
+struct StringRead { bool copy; size_t bytes, capacity; };
+static std::vector<StringRead> stringReads;
+static napi_status ObserveStringRead(napi_env e, napi_value value, char *data, size_t capacity, size_t *length) {
+    const auto status = napi_get_value_string_utf8(e, value, data, capacity, length);
+    if (status == napi_ok) stringReads.push_back({data != nullptr, *length, capacity});
+    return status;
+}
 static napi_value FixtureInit(napi_env, napi_value);
 static void FixtureRegister(napi_module *original) {
     static napi_module fixture = *original;
@@ -9,8 +17,10 @@ static void FixtureRegister(napi_module *original) {
     napi_module_register(&fixture);
 }
 #define napi_module_register FixtureRegister
+#define napi_get_value_string_utf8 ObserveStringRead
 #include "../../entry/src/main/cpp/mpv/NapiMpv.cpp"
 #undef napi_module_register
+#undef napi_get_value_string_utf8
 
 namespace {
 napi_value Undefined(napi_env e) { napi_value out; Check(napi_get_undefined(e, &out)); return out; }
@@ -32,7 +42,16 @@ napi_value Configure(napi_env e, napi_callback_info info) {
     text("language", value.language); text("title", value.title); text("codec", value.codec);
     mpv_fixture::Configure(value); return Undefined(e);
 }
-napi_value Reset(napi_env e, napi_callback_info) { mpv_fixture::Reset(); return Undefined(e); }
+napi_value Reset(napi_env e, napi_callback_info) { mpv_fixture::Reset(); stringReads.clear(); return Undefined(e); }
+napi_value ReadTrace(napi_env e, napi_callback_info) {
+    napi_value out; Check(napi_create_array_with_length(e, stringReads.size(), &out));
+    for (size_t i = 0; i < stringReads.size(); ++i) {
+        const auto &read = stringReads[i]; napi_value row; Check(napi_create_object(e, &row));
+        Set(e, row, "copy", read.copy); Set(e, row, "bytes", double(read.bytes)); Set(e, row, "capacity", double(read.capacity));
+        Check(napi_set_element(e, out, i, row));
+    }
+    return out;
+}
 napi_value Unblock(napi_env e, napi_callback_info) { mpv_fixture::Unblock(); return Undefined(e); }
 napi_value Inspect(napi_env e, napi_callback_info) {
     auto value = mpv_fixture::Inspect(); napi_value out, options, properties, commands;
@@ -78,6 +97,7 @@ static napi_value FixtureInit(napi_env e, napi_value exports) {
     napi_property_descriptor descriptors[] = {
         {"configure", nullptr, Configure, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"reset", nullptr, Reset, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"stringReads", nullptr, ReadTrace, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"unblock", nullptr, Unblock, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"inspect", nullptr, Inspect, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"coreSurface", nullptr, CoreSurface, nullptr, nullptr, nullptr, napi_default, nullptr},
