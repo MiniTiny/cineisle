@@ -1,5 +1,6 @@
 #include <napi/native_api.h>
 #include <mpv/client.h>
+#include "MpvLimits.h"
 #include <dlfcn.h>
 #include <atomic>
 #include <algorithm>
@@ -21,8 +22,7 @@
 #include <vector>
 
 namespace {
-constexpr int MIN_API = 15;
-constexpr size_t MAX_QUEUE = 64, MAX_TRACKS = 256;
+namespace limits = cineisle::mpv_limits;
 std::atomic<unsigned> active{0};
 void Require(bool value, const char *code) { if (!value) throw std::runtime_error(code); }
 void Check(napi_status value) { Require(value == napi_ok, "mpv_argument_invalid"); }
@@ -41,7 +41,7 @@ struct Api {
             LOAD(set_option) LOAD(command) LOAD(set_property) LOAD(get_property) LOAD(wait_event) LOAD(free_node_contents)
 #undef LOAD
             const auto version = client_api_version();
-            Require((version >> 16) == 2 && (version & 0xffff) >= 5, "mpv_unavailable");
+            Require((version >> 16) == limits::kClientApiMajor && (version & 0xffff) >= limits::kMinClientApiMinor, "mpv_unavailable");
         } catch (...) { dlclose(library); library = nullptr; throw; }
     }
     // Keep the successfully loaded API alive for all sessions and library-owned caches until process exit.
@@ -49,7 +49,7 @@ struct Api {
 std::mutex apiMutex;
 Api *api = nullptr;
 Api &Load(int level) {
-    Require(level >= MIN_API, "mpv_unavailable");
+    Require(level >= limits::kMinPlatformApi, "mpv_unavailable");
     std::lock_guard<std::mutex> lock(apiMutex);
     if (!api) api = new Api();
     return *api;
@@ -73,7 +73,7 @@ struct Node {
     explicit Node(Api &api) : api(api) {}
     ~Node() { api.free_node_contents(&value); }
 };
-std::string Text(const mpv_node &value, size_t maximum = 256) {
+std::string Text(const mpv_node &value, size_t maximum = limits::kMaxShortTextUtf8Bytes) {
     if (value.format != MPV_FORMAT_STRING || !value.u.string) return {};
     std::string result = value.u.string;
     if (result.size() > maximum) {
@@ -127,7 +127,7 @@ struct Session : std::enable_shared_from_this<Session> {
         {
             std::lock_guard<std::mutex> lock(mutex);
             Require(!closing, "mpv_closed");
-            Require(release || tasks.size() < MAX_QUEUE, "mpv_busy");
+            Require(release || tasks.size() < limits::kMaxQueuedTasks, "mpv_busy");
             if (release) closing = true;
             tasks.emplace_back([result, operation = std::move(operation)] {
                 try {
@@ -159,7 +159,7 @@ struct Session : std::enable_shared_from_this<Session> {
         Option("ao", "ohaudio"); Option("hwdec", request.hardwareDecoder.c_str());
         Option("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1");
         Option("sub-auto", "no"); Option("audio-file-auto", "no");
-        Option("network-timeout", "15");
+        Option("network-timeout", limits::kNetworkTimeoutSeconds);
         if (!request.fontConfiguration.empty()) {
             Option("sub-fonts-config", request.fontConfiguration.c_str());
             Option("sub-font-provider", "fontconfig");
@@ -167,7 +167,7 @@ struct Session : std::enable_shared_from_this<Session> {
         // Match the fixed Android backend for local and network streams. Auto caching
         // leaves local subtitle packets outside the seekable cache after a seek.
         Option("cache", "yes"); Option("cache-pause-initial", "yes");
-        Option("demuxer-max-bytes", "32MiB"); Option("demuxer-max-back-bytes", "32MiB");
+        Option("demuxer-max-bytes", limits::kDemuxerForwardCache); Option("demuxer-max-back-bytes", limits::kDemuxerBackwardCache);
         uint64_t surface = 0;
         for (const auto c : request.surface) {
             Require(c >= '0' && c <= '9' && surface <= (UINT64_MAX - unsigned(c - '0')) / 10, "mpv_argument_invalid");
@@ -194,7 +194,7 @@ struct Session : std::enable_shared_from_this<Session> {
     }
     State Snapshot() {
         Require(handle != nullptr, "mpv_closed");
-        for (int i = 0; i < 128; ++i) {
+        for (int i = 0; i < limits::kMaxEventsPerSnapshot; ++i) {
             auto *event = api.wait_event(handle, 0); if (event->event_id == MPV_EVENT_NONE) break;
             if (event->event_id == MPV_EVENT_FILE_LOADED) state.loaded = true;
             if (event->event_id == MPV_EVENT_SEEK) { state.seeking = true; seekObserved = true; }
@@ -221,7 +221,7 @@ struct Session : std::enable_shared_from_this<Session> {
         }
         Node node(api);
         if (api.get_property(handle, "track-list", MPV_FORMAT_NODE, &node.value) >= 0 && node.value.format == MPV_FORMAT_NODE_ARRAY && node.value.u.list) {
-            Require(node.value.u.list->num >= 0 && node.value.u.list->num <= int(MAX_TRACKS), "mpv_tracks_invalid");
+            Require(node.value.u.list->num >= 0 && node.value.u.list->num <= int(limits::kMaxTracks), "mpv_tracks_invalid");
             state.tracks.clear();
             for (int i = 0; i < node.value.u.list->num; ++i) {
                 const auto &item = node.value.u.list->values[i]; auto *type = Field(item, "type"), *id = Field(item, "id");
@@ -230,25 +230,25 @@ struct Session : std::enable_shared_from_this<Session> {
                 if (kind != "audio" && kind != "sub") continue;
                 const auto key = std::make_pair(kind, id->u.int64);
                 auto known = trackIndices.find(key);
-                if (known == trackIndices.end()) { Require(trackIndices.size() < MAX_TRACKS, "mpv_tracks_invalid"); known = trackIndices.emplace(key, nextTrackIndex++).first; }
+                if (known == trackIndices.end()) { Require(trackIndices.size() < limits::kMaxTracks, "mpv_tracks_invalid"); known = trackIndices.emplace(key, nextTrackIndex++).first; }
                 Track track; track.index = known->second; track.id = id->u.int64; track.kind = kind;
-                if (auto *language = Field(item, "lang")) track.language = Text(*language, 63);
+                if (auto *language = Field(item, "lang")) track.language = Text(*language, limits::kMaxTrackLanguageUtf8Bytes);
                 if (auto *title = Field(item, "title")) track.title = Text(*title);
-                if (auto *codec = Field(item, "codec")) track.codec = Text(*codec, 63);
+                if (auto *codec = Field(item, "codec")) track.codec = Text(*codec, limits::kMaxTrackCodecUtf8Bytes);
                 if (auto *selected = Field(item, "selected")) track.selected = selected->format == MPV_FORMAT_FLAG && selected->u.flag;
                 state.tracks.push_back(std::move(track));
             }
         }
         Node plain(api), styled(api), events(api);
-        state.subtitleText = api.get_property(handle, "sub-text", MPV_FORMAT_NODE, &plain.value) >= 0 ? Text(plain.value, 16384) : "";
-        state.subtitleAss = api.get_property(handle, "sub-text/ass", MPV_FORMAT_NODE, &styled.value) >= 0 ? Text(styled.value, 32768) : "";
+        state.subtitleText = api.get_property(handle, "sub-text", MPV_FORMAT_NODE, &plain.value) >= 0 ? Text(plain.value, limits::kMaxSubtitleTextUtf8Bytes) : "";
+        state.subtitleAss = api.get_property(handle, "sub-text/ass", MPV_FORMAT_NODE, &styled.value) >= 0 ? Text(styled.value, limits::kMaxSubtitleAssUtf8Bytes) : "";
         state.subtitleStart = Number("sub-start/full", -1) * 1000;
         state.subtitleEnd = Number("sub-end/full", -1) * 1000;
         state.subtitleFontSize = Number("sub-font-size", 55);
         state.subtitleEvents.clear(); state.subtitleOverflow = false;
         if (api.get_property(handle, "sub-text/ass-full", MPV_FORMAT_NODE, &events.value) >= 0) {
-            state.subtitleOverflow = events.value.format == MPV_FORMAT_STRING && events.value.u.string && std::strlen(events.value.u.string) > 65536;
-            if (!state.subtitleOverflow) state.subtitleEvents = Text(events.value, 65536);
+            state.subtitleOverflow = events.value.format == MPV_FORMAT_STRING && events.value.u.string && std::strlen(events.value.u.string) > limits::kMaxSubtitleEventsUtf8Bytes;
+            if (!state.subtitleOverflow) state.subtitleEvents = Text(events.value, limits::kMaxSubtitleEventsUtf8Bytes);
         }
         return state;
     }
@@ -260,17 +260,17 @@ struct Session : std::enable_shared_from_this<Session> {
             Require(value == 0 || value == 1, "mpv_argument_invalid"); int flag = value == 1;
             code = api.set_property(handle, op == "pause" ? "pause" : "sub-visibility", MPV_FORMAT_FLAG, &flag);
         } else if (op == "surface-size") {
-            Require(value >= 1 && value <= 8192 && std::floor(value) == value &&
-                command.height >= 1 && command.height <= 8192 && std::floor(command.height) == command.height, "mpv_argument_invalid");
+            Require(value >= 1 && value <= limits::kMaxSurfaceDimensionPx && std::floor(value) == value &&
+                command.height >= 1 && command.height <= limits::kMaxSurfaceDimensionPx && std::floor(command.height) == command.height, "mpv_argument_invalid");
             const auto size = std::to_string(int(value)) + "x" + std::to_string(int(command.height));
             const char *text = size.c_str();
             code = api.set_property(handle, "ohos-surface-size", MPV_FORMAT_STRING, &text);
         } else if (op == "speed" || op == "volume") {
-            Require(op == "speed" ? value >= 0.25 && value <= 4 : value >= 0 && value <= 1, "mpv_argument_invalid");
+            Require(op == "speed" ? value >= limits::kMinNativeSpeed && value <= limits::kMaxNativeSpeed : value >= 0 && value <= 1, "mpv_argument_invalid");
             double amount = op == "volume" ? value * 100 : value;
             code = api.set_property(handle, op.c_str(), MPV_FORMAT_DOUBLE, &amount);
         } else if (op == "seek") {
-            Require(value >= 0 && value <= 1e12, "mpv_argument_invalid");
+            Require(value >= 0 && value <= limits::kMaxSeekMs, "mpv_argument_invalid");
             Snapshot(); const auto seconds = std::to_string(value / 1000);
             const char *args[] = {"seek", seconds.c_str(), "absolute+exact", nullptr}; code = api.command(handle, args);
             if (code >= 0) { ++state.seekRevision; state.seeking = true; state.ended = false; seekObserved = false; restartedAfterSeek = false; seekTarget = value; }
@@ -326,7 +326,7 @@ void Execute(napi_env, void *pointer) {
         } else if (work.kind == Work::CREATE) {
             auto &api = Load(work.request.api);
             const auto prior = active.fetch_add(1);
-            if (prior >= 4) { --active; throw std::runtime_error("mpv_busy"); }
+            if (prior >= limits::kMaxActiveSessions) { --active; throw std::runtime_error("mpv_busy"); }
             try { work.session = std::make_shared<Session>(api); work.session->Start(); }
             catch (...) { work.session.reset(); --active; throw; }
             auto session = work.session; auto request = work.request;
@@ -398,28 +398,28 @@ napi_value Submit(napi_env e, std::unique_ptr<Work> work) {
     work.release(); return promise;
 }
 napi_value Capability(napi_env e, napi_callback_info info) {
-    try { size_t count = 1; napi_value value; Check(napi_get_cb_info(e, info, &count, &value, nullptr, nullptr)); Require(count == 1, "mpv_argument_invalid"); auto work = std::make_unique<Work>(); work->kind = Work::CAPABILITY; const auto level = Number(e, value); Require(level >= 0 && level <= 1000 && std::floor(level) == level, "mpv_argument_invalid"); work->level = int(level); return Submit(e, std::move(work)); }
+    try { size_t count = 1; napi_value value; Check(napi_get_cb_info(e, info, &count, &value, nullptr, nullptr)); Require(count == 1, "mpv_argument_invalid"); auto work = std::make_unique<Work>(); work->kind = Work::CAPABILITY; const auto level = Number(e, value); Require(level >= 0 && level <= limits::kMaxApiArgument && std::floor(level) == level, "mpv_argument_invalid"); work->level = int(level); return Submit(e, std::move(work)); }
     catch (...) { napi_throw_error(e, nullptr, "mpv_argument_invalid"); return nullptr; }
 }
 napi_value Create(napi_env e, napi_callback_info info) {
     try { size_t count = 1; napi_value value; Check(napi_get_cb_info(e, info, &count, &value, nullptr, nullptr)); Require(count == 1, "mpv_argument_invalid"); auto work = std::make_unique<Work>(); work->kind = Work::CREATE;
-        const auto level = Number(e, Field(e, value, "api")); Require(level >= 0 && level <= 1000 && std::floor(level) == level, "mpv_argument_invalid"); work->request.api = int(level);
-        work->request.source = String(e, Field(e, value, "source"), 16384); work->request.surface = String(e, Field(e, value, "surface"), 24);
+        const auto level = Number(e, Field(e, value, "api")); Require(level >= 0 && level <= limits::kMaxApiArgument && std::floor(level) == level, "mpv_argument_invalid"); work->request.api = int(level);
+        work->request.source = String(e, Field(e, value, "source"), limits::kMaxSourceUtf8Bytes); work->request.surface = String(e, Field(e, value, "surface"), limits::kMaxSurfaceIdUtf8Bytes);
         bool hasFonts = false; Check(napi_has_named_property(e, value, "fontConfiguration", &hasFonts));
         if (hasFonts) {
-            work->request.fontConfiguration = String(e, Field(e, value, "fontConfiguration"), 4096);
+            work->request.fontConfiguration = String(e, Field(e, value, "fontConfiguration"), limits::kMaxFontConfigPathUtf8Bytes);
             Require(!work->request.fontConfiguration.empty() && work->request.fontConfiguration.front() == '/', "mpv_argument_invalid");
         }
         bool hasHardware = false, hasVideo = false;
         Check(napi_has_named_property(e, value, "hardwareDecoder", &hasHardware));
         Check(napi_has_named_property(e, value, "videoOutput", &hasVideo));
         if (hasHardware) {
-            auto mode = String(e, Field(e, value, "hardwareDecoder"), 32);
+            auto mode = String(e, Field(e, value, "hardwareDecoder"), limits::kMaxBackendOptionUtf8Bytes);
             Require(mode == "no" || mode == "ohcodec" || mode == "ohcodec-copy", "mpv_argument_invalid");
             work->request.hardwareDecoder = mode;
         }
         if (hasVideo) {
-            auto output = String(e, Field(e, value, "videoOutput"), 32);
+            auto output = String(e, Field(e, value, "videoOutput"), limits::kMaxBackendOptionUtf8Bytes);
             Require(output == "gpu" || output == "gpu-next", "mpv_argument_invalid");
             work->request.videoOutput = output;
         }
@@ -433,7 +433,7 @@ napi_value Operate(napi_env e, napi_callback_info info, Work::Kind kind) {
         else if (kind == Work::RELEASE) {
             session->Abandon();
         } else {
-            work->command.type = String(e, Field(e, values[1], "type"), 32); work->command.value = Number(e, Field(e, values[1], "value"));
+            work->command.type = String(e, Field(e, values[1], "type"), limits::kMaxCommandTypeUtf8Bytes); work->command.value = Number(e, Field(e, values[1], "value"));
             if (work->command.type == "surface-size") work->command.height = Number(e, Field(e, values[1], "height"));
             auto command = work->command;
             work->operation = session->Enqueue<void>([session, command] { session->Set(command); });

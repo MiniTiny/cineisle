@@ -1,5 +1,6 @@
 // Real global store, factory, controller and Player paths with explicit native/Preferences fixtures.
 const assert = require('node:assert/strict');
+const { runCase } = require('./mpv-probe-result.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const h = require('./player-regression.test.cjs');
@@ -69,6 +70,12 @@ test('API12 disables MPV eligibility without a native capability probe', async (
   const info = h.platform.get('@ohos.deviceInfo'), level = info.sdkApiVersion; info.sdkApiVersion = 12;
   try { assert.equal(PlaybackEngines.canOfferMpv(), false); await assert.rejects(PlaybackEngines.validate('mpv'), /engine_mpv_unavailable/); } finally { info.sdkApiVersion = level; }
 });
+for (const api of [14, 15, 16]) test('factory eligibility preserves API15 independently at ' + api, () => {
+  const info = h.platform.get('@ohos.deviceInfo'), level = info.sdkApiVersion, available = MpvPlaybackEngine.available;
+  let probes = 0; info.sdkApiVersion = api; MpvPlaybackEngine.available = async () => { ++probes; return true; };
+  try { assert.equal(PlaybackEngines.canOfferMpv(), api >= 15); assert.equal(probes, 0); }
+  finally { info.sdkApiVersion = level; MpvPlaybackEngine.available = available; }
+});
 test('actual Player factory reads the global choice at open and reports an unavailable backend', async () => {
   h.reset(); fresh(); await store.load(context); await store.save('mpv', () => true); h.setRoute(h.route()); const p = new h.Player(); p.aboutToAppear();
   const create = MpvPlaybackEngine.create, available = MpvPlaybackEngine.available; let calls = 0; MpvPlaybackEngine.available = async () => true; MpvPlaybackEngine.create = async () => { calls++; throw Error('fixture'); };
@@ -81,4 +88,9 @@ test('actual Player uses a saved native choice for the next opened video', async
   finally { await p.controller.close(); p.aboutToDisappear(); }
 });
 const watchdog = setTimeout(() => { console.error('FAIL engine preference fixture did not settle'); process.exitCode = 1; }, 15000);
-(async () => { for (const [name, fn] of tests) { h.reset(); await fn(); console.log('PASS', name); } console.log(`${tests.length} engine preference tests passed. Explicit native/Preferences fixtures; no OS storage or decoding claim.`); })().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));
+(async () => {
+  const selected = process.argv[2] ? tests.filter(([name]) => name.includes(process.argv[2])) : tests;
+  assert.ok(selected.length, 'No engine preference cases selected');
+  for (const [name, fn] of selected) { await runCase(name, fn, { before: () => h.reset() }); console.log('PASS', name); }
+  console.log(`${selected.length} engine preference tests passed. Explicit native/Preferences fixtures; no OS storage or decoding claim.`);
+})().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));

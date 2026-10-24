@@ -1,5 +1,6 @@
 // Executes the real ArkTS adapter against explicit async bridge fixtures; no decoder/audio/UI claim.
 const assert = require('node:assert/strict');
+const { fixture, runCase } = require('./mpv-probe-result.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -56,6 +57,7 @@ function rig(api = 26) {
   platform['./MpvAudioFocus'] = focusModule.exports;
   platform['../utils/MpvTextSubtitle'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvTextSubtitle.ts'));
   platform['../utils/MpvOptions'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvOptions.ts'));
+    platform['../utils/MpvLimits'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvLimits.ts'));
   const module = { exports: {} };
   vm.runInNewContext(js, { module, exports: module.exports, require(id) { assert.ok(id in platform, 'unexpected platform import ' + id); return platform[id]; },
     setInterval(fn) { const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { timers.delete(id); },
@@ -70,6 +72,15 @@ const cases = [];
 function test(name, fn) { cases.push([name, fn]); }
 test('API12 rejects the optional engine without touching native capability or create', async () => {
   const r = rig(12); assert.equal(await r.Engine.available(), false); await assert.rejects(r.Engine.create('/cache'), /mpv_unavailable/); assert.deepEqual(r.calls, []);
+});
+for (const api of [14, 15, 16]) test('adapter independently preserves the API15 boundary at ' + api, async () => {
+  const r = rig(api);
+  assert.equal(await r.Engine.available(), api >= 15);
+  if (api < 15) { await assert.rejects(r.Engine.create('/cache'), /mpv_unavailable/); assert.deepEqual(r.calls, []); }
+  else {
+    const p = await r.open(); assert.equal(r.calls.find(c => c[0] === 'create')[1].api, api);
+    assert.ok(r.calls.some(c => c[0] === 'capability' && c[1] === api)); await p.release();
+  }
 });
 test('each MPV source receives its platform font configuration without global config loading', async () => {
   const r = rig(), p = await r.open();
@@ -339,6 +350,21 @@ test('late resize after release and invalid physical dimensions never reach nati
   assert.equal(r.calls.filter(c => c[0] === 'surface-size').length, 0);
   for (const [w,h] of [[0,10],[10,NaN],[8193,10],[10.5,20],[-1,20]]) assert.throws(() => p.setSurfaceSize(w,h), /mpv_surface_invalid/);
 });
+for (const axis of ['width', 'height']) for (const value of [1, 8191, 8192, 8193, 0, -1, 1.5, NaN, Infinity, -Infinity]) {
+  test(`adapter surface ${axis} independently ${value}`, async () => {
+    const r = rig(), p = await r.open(); const [width, height] = axis === 'width' ? [value, 1] : [1, value];
+    try {
+      if ([1, 8191, 8192].includes(value)) {
+        p.setSurfaceSize(width, height); await p.refresh();
+        assert.deepEqual(r.calls.filter(c => c[0] === 'surface-size'), [['surface-size', width, height]]);
+      } else {
+        assert.throws(() => p.setSurfaceSize(width, height), /mpv_surface_invalid/);
+        await p.refresh(); assert.equal(r.calls.filter(c => c[0] === 'surface-size').length, 0);
+        assert.equal(p.state, 'prepared'); assert.equal(r.events.filter(e => e[0] === 'error').length, 0);
+      }
+    } finally { await fixture('cleanup', () => p.release()); }
+  });
+}
 test('native surface update failure becomes a real playback error', async () => {
   const r = rig(), p = await r.open(); const command = r.bridge.command; r.bridge.command = async (h,c) => { if (c.type === 'surface-size') throw Error('native resize failed'); return command(h,c); }; p.setSurfaceSize(1280,720); await settle(); assert.equal(p.state,'error'); assert.equal(r.events.filter(e=>e[0]==='error').length,1); await p.release();
 });
@@ -349,4 +375,12 @@ test('native VO geometry that drifts after seek/reconfiguration is brought back 
   const r=rig(),p=await r.open(1280,720);await p.refresh();assert.equal(r.calls.filter(c=>c[0]==='surface-size').length,1);r.value.surfaceWidth=2276;r.value.surfaceHeight=1280;await p.refresh();await p.refresh();assert.deepEqual(r.calls.filter(c=>c[0]==='surface-size'),[['surface-size',1280,720],['surface-size',1280,720]]);await p.release();
 });
 const watchdog = setTimeout(() => { console.error('FAIL: adapter fixture did not settle'); process.exitCode = 1; }, 15000);
-(async () => { for (const [name, fn] of cases) { await fn(); console.log('PASS', name); } console.log(`${cases.length} MPV adapter cases passed. Async bridge fixtures; no decoder/audio/UI claim.`); })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));
+(async () => {
+  const selected = process.argv[2] ? cases.filter(([name]) => name.includes(process.argv[2])) : cases;
+  assert.ok(selected.length, 'No MPV adapter cases selected');
+  for (const [name, fn] of selected) {
+    await runCase(name, fn);
+    console.log('PASS', name);
+  }
+  console.log(`${selected.length} MPV adapter cases passed. Async bridge fixtures; no decoder/audio/UI claim.`);
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));
