@@ -31,6 +31,18 @@ function run(output = path.join(root, '.local/test-results/resource-probes'), se
       const normal = classify(positive, name), failed = classify(negative, name); evidence.ioControls.push({ name, normal, failed });
       assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.fixturePhase, phase); assert.match(failed.record.error.cause.message, /EISDIR|EPERM/); save();
     }
+    evidence.httpControls = [];
+    for (const [label, name, flag, attempt] of [
+      ['poster', 'poster HTTP primary width 480', '--http-open-failure', 1],
+      ['bif-manifest', 'bif actual HTTP stage byte budgets', '--http-open-failure', 1],
+      ['bif-binary', 'bif actual HTTP stage byte budgets', '--http-binary-open-failure', 2],
+      ['intro', 'intro actual HTTP byte budget', '--http-open-failure', 1]
+    ]) {
+      const positive = child(name), negative = child(name, flag); persist('http-' + label + '-positive', positive); persist('http-' + label + '-negative', negative);
+      const normal = classify(positive, name), failed = classify(negative, name); evidence.httpControls.push({ name, attempt, normal, failed });
+      assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.fixturePhase, 'http-platform');
+      assert.equal(failed.record.error.cause.code, 'EIO'); assert.equal(failed.record.error.cause.message, 'injected HTTP initialization failure at create #' + attempt); save();
+    }
     const cache = new Set();
     for (const r of selected) {
       if (!cache.has(r.name)) { const raw = child(r.name), result = classify(raw, r.name); persist(r.id + '-baseline', raw); evidence.baselines.push({ name: r.name, ...result }); assert.equal(result.status, 'survived', 'Invalid intact baseline: ' + r.id); cache.add(r.name); }

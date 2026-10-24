@@ -33,6 +33,18 @@ if (process.argv[2]) {
     const raw = spawnSync(process.execPath, [path.join(__dirname, 'resource-cache-boundaries.test.cjs'), name, flag], { encoding: 'utf8', timeout: 15000 });
     const r = classify(raw, name); assert.equal(r.status, 'invalid'); assert.equal(r.record.fixturePhase, phase); assert.match(r.record.error.cause.message, /EISDIR|EPERM/);
   });
+  for (const [name, flag, attempt] of [
+    ['poster HTTP primary width 480', '--http-open-failure', 1],
+    ['bif actual HTTP stage byte budgets', '--http-open-failure', 1],
+    ['bif actual HTTP stage byte budgets', '--http-binary-open-failure', 2],
+    ['intro actual HTTP byte budget', '--http-open-failure', 1]
+  ]) test(name + ' create #' + attempt + ' platform failure is invalid evidence', () => {
+    const run = fault => spawnSync(process.execPath, [path.join(__dirname, 'resource-cache-boundaries.test.cjs'), name, ...(fault ? [flag] : [])], { encoding: 'utf8', timeout: 15000 });
+    assert.equal(classify(run(false), name).status, 'survived');
+    const failed = classify(run(true), name); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.phase, 'fixture');
+    assert.equal(failed.record.fixturePhase, 'http-platform'); assert.equal(failed.record.error.cause.code, 'EIO');
+    assert.equal(failed.record.error.cause.message, 'injected HTTP initialization failure at create #' + attempt);
+  });
   for (const [name, fn] of tests) { fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} resource probe control tests passed.`);
 }

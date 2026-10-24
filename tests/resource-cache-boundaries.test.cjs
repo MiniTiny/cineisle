@@ -27,6 +27,26 @@ async function cache() {
   return fixture('cache-open', async () => { const value = new PosterCache(h.context); await value.initialize(); assert.equal(value.issue, ''); return value; });
 }
 async function healthy(cache) { await fixture('cache-io', () => assert.equal(cache.issue, '')); }
+// Observe failures before production converts optional HTTP errors to a missing result.
+// Parameter/guard mutations still reach the boundary assertions when the platform is healthy.
+function wireHttp(factory) {
+  const errors = []; let attempts = 0;
+  http.createHttp = () => {
+    try {
+      ++attempts;
+      if ((process.argv[3] === '--http-open-failure' && attempts === 1) ||
+          (process.argv[3] === '--http-binary-open-failure' && attempts === 2)) {
+        throw Object.assign(new Error('injected HTTP initialization failure at create #' + attempts), { code: 'EIO' });
+      }
+      const connection = factory(), request = connection.request.bind(connection);
+      connection.request = async (...args) => {
+        try { return await request(...args); } catch (error) { errors.push(error); throw error; }
+      };
+      return connection;
+    } catch (error) { errors.push(error); throw error; }
+  };
+  return () => fixture('http-platform', () => { if (errors.length) throw errors[0]; });
+}
 async function before() {
   A.posters?.cancelAll(false); h.reset(); platform.reset(); http.createHttp = originalHttp;
   Date.now = originalNow; ioErrors.length = 0;
@@ -43,8 +63,9 @@ async function after() { http.createHttp = originalHttp; Date.now = originalNow;
 
 for (const backdrop of [false, true]) for (const width of [160, 480, 1280]) test(`poster HTTP ${backdrop ? 'backdrop' : 'primary'} width ${width}`, async check => {
   const calls = []; let destroyed = 0;
-  http.createHttp = () => ({ async request(url, options) { calls.push({ url, options }); return { responseCode: 200, result: jpeg() }; }, destroy() { destroyed++; } });
+  const healthyHttp = wireHttp(() => ({ async request(url, options) { calls.push({ url, options }); return { responseCode: 200, result: jpeg() }; }, destroy() { destroyed++; } }));
   const result = await observe(h.activate().poster({ ...target(), backdrop, width }, () => true).result);
+  await healthyHttp();
   check(() => { assert.ifError(result.error); assert.equal(result.value.byteLength, 128); assert.equal(calls.length, 1); const url = new URL(calls[0].url);
     assert.equal(url.pathname, backdrop ? '/jellyfin/Items/one/Images/Backdrop/0' : '/jellyfin/Items/one/Images/Primary');
     assert.equal(url.searchParams.get('maxWidth'), String(width)); assert.equal(url.searchParams.get('quality'), '85'); assert.equal(url.searchParams.get('format'), 'Jpg');
@@ -144,8 +165,9 @@ for (const size of [16777215, 16777216, 16777217]) test(`bif legal file bytes ${
 test('bif minimum legal file is 76 bytes', check => { const bytes = legalBif(); assert.equal(bytes.byteLength, 76); check(() => { assert.ok(parseBif(bytes)); assert.equal(parseBif(bytes.slice(0, 75)), undefined); }); });
 test('bif actual HTTP stage byte budgets', async check => {
   const calls = []; let destroyed = 0;
-  http.createHttp = () => ({ async request(url, options) { calls.push({ url, options }); return calls.length === 1 ? { responseCode: 200, result: manifest([639, 640, 641]) } : { responseCode: 200, result: legalBif() }; }, destroy() { destroyed++; } });
+  const healthyHttp = wireHttp(() => ({ async request(url, options) { calls.push({ url, options }); return calls.length === 1 ? { responseCode: 200, result: manifest([639, 640, 641]) } : { responseCode: 200, result: legalBif() }; }, destroy() { destroyed++; } }));
   const result = await h.activate().trickplay('movie', () => true).result;
+  await healthyHttp();
   check(() => { assert.ok(result); assert.equal(calls.length, 2); assert.equal(calls[0].options.maxLimit, 16384); assert.equal(calls[1].options.maxLimit, 16777216);
     assert.ok(calls[0].url.endsWith('/Trickplay/movie/GetManifest')); assert.ok(calls[1].url.endsWith('/Trickplay/movie/640/GetBIF')); assert.equal(destroyed, 2); });
 });
@@ -254,8 +276,9 @@ test('intro cached touch preserves recency across a full cache insert', async ch
   check(() => { assert.deepEqual(cached, introSegment); assert.equal(rows.length, 512); assert.ok(rows.some(r => r.id === 'ep-0')); assert.ok(rows.some(r => r.id === 'new')); assert.equal(rows.some(r => r.id === 'ep-1'), false); });
 });
 test('intro actual HTTP byte budget', async check => {
-  const calls = []; let destroyed = 0; http.createHttp = () => ({ async request(url, options) { calls.push({ url, options }); return { responseCode: 200, result: introWire() }; }, destroy() { destroyed++; } });
+  const calls = []; let destroyed = 0; const healthyHttp = wireHttp(() => ({ async request(url, options) { calls.push({ url, options }); return { responseCode: 200, result: introWire() }; }, destroy() { destroyed++; } }));
   const result = await h.activate().intro('episode', () => true).result;
+  await healthyHttp();
   check(() => { assert.deepEqual(result, introSegment); assert.equal(calls.length, 1); assert.ok(calls[0].url.endsWith('/Episode/episode/IntroTimestamps/v1')); assert.equal(calls[0].options.maxLimit, 16384); assert.equal(destroyed, 1); });
 });
 for (const failure of ['write', 'rename']) test(`intro optional ${failure} failure preserves playback and old metadata`, async check => {
