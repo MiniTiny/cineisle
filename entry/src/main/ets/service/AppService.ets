@@ -40,6 +40,8 @@ import { ExperienceState, PendingEdit, PendingPosition, applyPending, connection
 
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
+  // Applies to queue pumping only; direct single downloads retain their own admission path.
+  private static readonly maxQueuedActiveDownloads: number = 4;
   static posters: PosterCache | undefined;
   static trickplays: TrickplayRepository | undefined;
   static intros: IntroRepository | undefined;
@@ -591,7 +593,7 @@ export class AppService {
     if (AppService.accountBusy || AppService.pumping || !AppService.client) { return; } AppService.pumping = true;
     const client = AppService.client; const local = AppService.local;
     try {
-      while (client === AppService.client && AppService.downloads.filter((r: DownloadRecord) => r.state === 'downloading').length < 4) {
+      while (client === AppService.client && AppService.downloads.filter((r: DownloadRecord) => r.state === 'downloading').length < AppService.maxQueuedActiveDownloads) {
         const record = AppService.downloads.find((r: DownloadRecord) => r.state === 'queued'); if (!record) { return; }
         try {
           const latest = await client.detail(record.id);

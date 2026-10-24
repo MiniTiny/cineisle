@@ -24,7 +24,7 @@ if (process.argv[2] === '--worker') {
     }
     assert.equal(classify({ ...raw, status: 2 }, name).status, 'invalid');
   });
-  for (const kind of ['space']) for (const c of require('./download-' + kind + '-fault-cases.cjs').controls) test(`download ${kind} actual ${c.phase} failure is invalid for ${c.name}`, () => {
+  for (const kind of ['space', 'queue']) for (const c of require('./download-' + kind + '-fault-cases.cjs').controls) test(`download ${kind} actual ${c.phase} failure is invalid for ${c.name}`, () => {
     const run = fault => spawnSync(process.execPath, [path.join(__dirname, c.suite), c.name, ...(fault ? ['--fault=' + c.phase] : [])], { encoding: 'utf8', timeout: 20000 });
     const positive = classify(run(false), c.name), negative = classify(run(true), c.name);
     assert.equal(positive.status, 'survived'); assert.equal(negative.status, 'invalid');
