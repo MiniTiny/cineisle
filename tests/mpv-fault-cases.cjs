@@ -1,9 +1,14 @@
 // Mutations run only in an isolated source copy; expectations stay independent.
 const cpp = 'entry/src/main/cpp/mpv/NapiMpv.cpp', header = 'entry/src/main/cpp/mpv/MpvLimits.h';
 const adapter = 'entry/src/main/ets/service/MpvPlaybackEngine.ets', limits = 'entry/src/main/ets/utils/MpvLimits.ts';
-const probe = (id, path, old, replacement, kind, name, error = { code: 'ERR_ASSERTION' }) =>
-  ({ id, path, old, new: replacement, kind, name, mode: 'behavior', error });
+const probe = (id, path, old, replacement, kind, name, error = { code: 'ERR_ASSERTION' }, mode = 'behavior') =>
+  ({ id, path, old, new: replacement, kind, name, mode, error });
 module.exports = [
+  probe('client-minor-equality', cpp, '(version & 0xffff) >= limits::kMinClientApiMinor', '(version & 0xffff) == limits::kMinClientApiMinor', 'native', 'native loader accepts compatible libmpv api-newer', { code: 'ERR_ASSERTION' }, 'api-newer'),
+  probe('client-minor-strict-comparison', cpp, '(version & 0xffff) >= limits::kMinClientApiMinor', '(version & 0xffff) > limits::kMinClientApiMinor', 'native', 'native loader accepts compatible libmpv api-current', { code: 'ERR_ASSERTION' }, 'api-current'),
+  probe('client-minor-minimum-raised', header, 'kMinClientApiMinor = 5', 'kMinClientApiMinor = 6', 'native', 'native loader accepts compatible libmpv api-current', { code: 'ERR_ASSERTION' }, 'api-current'),
+  probe('client-minor-minimum-lowered', header, 'kMinClientApiMinor = 5', 'kMinClientApiMinor = 4', 'native', 'native loader rejects incompatible libmpv api-minor', { code: 'ERR_ASSERTION' }, 'api-minor'),
+  probe('client-major-comparison', cpp, '(version >> 16) == limits::kClientApiMajor', '(version >> 16) >= limits::kClientApiMajor', 'native', 'native loader rejects incompatible libmpv api-major', { code: 'ERR_ASSERTION' }, 'api-major'),
   probe('backend-hardware-guard-removed', cpp, 'Require(length <= maximum, "mpv_argument_invalid");', 'Require(true, "mpv_argument_invalid");', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 33'),
   probe('backend-video-guard-removed', cpp, 'Require(length <= maximum, "mpv_argument_invalid");', 'Require(true, "mpv_argument_invalid");', 'native', 'native backend videoOutput UTF-8 byte boundary 33'),
   probe('backend-hardware-comparison', cpp, 'length <= maximum', 'length < maximum', 'native', 'native backend hardwareDecoder UTF-8 byte boundary 32'),

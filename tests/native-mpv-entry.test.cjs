@@ -3,7 +3,7 @@ const assert = require('node:assert/strict'), path = require('node:path'), { spa
 const built = require('./native-mpv-build.cjs').build();
 let total = 0;
 try {
-  for (const mode of ['behavior', 'api-major', 'api-minor']) {
+  for (const mode of ['behavior', 'api-major', 'api-minor', 'api-current', 'api-newer']) {
     const result = spawnSync(process.execPath, [path.join(__dirname, 'native-mpv-cases.cjs'), built.addon, mode], {
       cwd: built.root, encoding: 'utf8', timeout: 45000, maxBuffer: 4 * 1024 * 1024,
       env: { ...process.env, UV_THREADPOOL_SIZE: '32', DYLD_LIBRARY_PATH: built.directory, LD_LIBRARY_PATH: built.directory }

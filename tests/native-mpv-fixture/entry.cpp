@@ -59,6 +59,7 @@ napi_value Inspect(napi_env e, napi_callback_info) {
     Set(e, out, "created", double(value.created)); Set(e, out, "destroyed", double(value.destroyed)); Set(e, out, "live", double(value.live));
     Set(e, out, "blocked", double(value.blocked)); Set(e, out, "versionCalls", double(value.versionCalls)); Set(e, out, "eventCalls", double(value.eventCalls));
     Set(e, out, "active", double(active.load()));
+    { std::lock_guard<std::mutex> lock(apiMutex); Set(e, out, "apiLoaded", api != nullptr); }
     for (const auto &option : value.options) Set(e, options, option.first.c_str(), option.second);
     auto pairs = [&](const auto &list, napi_value &array) {
         Check(napi_create_array_with_length(e, list.size(), &array));

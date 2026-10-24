@@ -19,11 +19,24 @@ async function opened(fn) {
 }
 
 if (mode.startsWith('api-')) {
-  test('native loader rejects incompatible libmpv ' + mode, async () => {
-    n.configure({ version: mode === 'api-major' ? (3 << 16) | 5 : (2 << 16) | 4 });
-    const capability = await n.capability(15); assert.equal(capability.supported, false); assert.equal(capability.loaded, false);
-    await assert.rejects(n.create(request()), { message: 'mpv_unavailable' });
-    assert.equal(n.inspect().created, 0); assert.equal(n.inspect().active, 0);
+  const versions = { 'api-major': (3 << 16) | 5, 'api-minor': (2 << 16) | 4, 'api-current': (2 << 16) | 5, 'api-newer': (2 << 16) | 6 };
+  const accepted = mode === 'api-current' || mode === 'api-newer';
+  assert.ok(Object.hasOwn(versions, mode), 'Unknown client API fixture mode');
+  test(`native loader ${accepted ? 'accepts compatible' : 'rejects incompatible'} libmpv ${mode}`, async () => {
+    // Each mode runs in a separate process. Resetting the dependency fixture in
+    // one process would not reset the production Api singleton or its checks.
+    await fixture('setup', () => { assert.equal(n.inspect().apiLoaded, false); assert.equal(n.inspect().versionCalls, 0); });
+    n.configure({ version: versions[mode] });
+    const capability = await n.capability(15);
+    assert.equal(capability.supported, accepted); assert.equal(capability.loaded, accepted);
+    if (accepted) {
+      assert.equal(capability.apiVersion, versions[mode]);
+      const handle = await n.create(request()); await fixture('cleanup', () => n.release(handle));
+      assert.equal(n.inspect().created, 1); assert.equal(n.inspect().destroyed, 1);
+    } else {
+      await assert.rejects(n.create(request()), { message: 'mpv_unavailable' }); assert.equal(n.inspect().created, 0);
+    }
+    assert.equal(n.inspect().active, 0);
   });
 } else {
   test('native API14 refuses loading before any libmpv version or create call', async () => {
