@@ -159,6 +159,25 @@ if (mode.startsWith('api-')) {
     const value = utf8(maximum + delta); n.configure({ trackCount: 1, [field]: value });
     assert.equal((await n.snapshot(handle)).tracks[0][field], clip(value, maximum));
   }));
+  for (const [field, maximum] of [['plain', 16384], ['styled', 32768], ['language', 63], ['codec', 63], ['title', 256]]) {
+    for (const char of ['中', '😀']) for (let inside = 1; inside < Buffer.byteLength(char); ++inside) {
+      test(`native ${field} UTF-8 interior ${char} byte ${inside}`, async () => opened(async handle => {
+        const prefix = 'x'.repeat(maximum - inside), value = prefix + char + 'z';
+        await fixture('input', () => {
+          assert.equal(maximum - Buffer.byteLength(prefix), inside);
+          assert.ok(Buffer.byteLength(value) > maximum);
+        });
+        const track = field !== 'plain' && field !== 'styled';
+        n.configure({ trackCount: track ? 1 : 0, [field]: value });
+        const snapshot = await n.snapshot(handle);
+        const actual = field === 'plain' ? snapshot.subtitleText : field === 'styled' ? snapshot.subtitleAss : snapshot.tracks[0][field];
+        // The expected output is the known ASCII prefix, not another copy of the
+        // production continuation-byte algorithm or a value read from its limits.
+        assert.equal(Buffer.byteLength(actual), maximum - inside, 'drop the entire partial character');
+        assert.equal(actual, prefix); assert.equal(actual.includes('\ufffd'), false);
+      }));
+    }
+  }
   for (const trackCount of [-1, 255, 256, 257]) test('native track array budget ' + trackCount, async () => opened(async handle => {
     // Repeated IDs keep the independent historical-identity guard out of the way.
     n.configure({ trackCount, repeatTrackId: true });

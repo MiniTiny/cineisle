@@ -1,9 +1,14 @@
 // Mutations run only in an isolated source copy; expectations stay independent.
 const cpp = 'entry/src/main/cpp/mpv/NapiMpv.cpp', header = 'entry/src/main/cpp/mpv/MpvLimits.h';
 const adapter = 'entry/src/main/ets/service/MpvPlaybackEngine.ets', limits = 'entry/src/main/ets/utils/MpvLimits.ts';
+const rollback = 'while (end && (static_cast<unsigned char>(result[end]) & 0xc0) == 0x80) --end;';
 const probe = (id, path, old, replacement, kind, name, error = { code: 'ERR_ASSERTION' }, mode = 'behavior') =>
   ({ id, path, old, new: replacement, kind, name, mode, error });
 module.exports = [
+  ...['plain', 'styled', 'language', 'codec', 'title'].flatMap(field => [
+    probe(`utf8-${field}-rollback-removed`, cpp, rollback, '', 'native', `native ${field} UTF-8 interior 😀 byte 3`),
+    probe(`utf8-${field}-rollback-once`, cpp, rollback, rollback.replace('while', 'if'), 'native', `native ${field} UTF-8 interior 😀 byte 3`)
+  ]),
   probe('client-minor-equality', cpp, '(version & 0xffff) >= limits::kMinClientApiMinor', '(version & 0xffff) == limits::kMinClientApiMinor', 'native', 'native loader accepts compatible libmpv api-newer', { code: 'ERR_ASSERTION' }, 'api-newer'),
   probe('client-minor-strict-comparison', cpp, '(version & 0xffff) >= limits::kMinClientApiMinor', '(version & 0xffff) > limits::kMinClientApiMinor', 'native', 'native loader accepts compatible libmpv api-current', { code: 'ERR_ASSERTION' }, 'api-current'),
   probe('client-minor-minimum-raised', header, 'kMinClientApiMinor = 5', 'kMinClientApiMinor = 6', 'native', 'native loader accepts compatible libmpv api-current', { code: 'ERR_ASSERTION' }, 'api-current'),
