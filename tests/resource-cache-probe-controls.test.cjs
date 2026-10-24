@@ -29,6 +29,10 @@ if (process.argv[2]) {
     const raw = spawnSync(process.execPath, [path.join(__dirname, 'resource-cache-boundaries.test.cjs'), name, '--cache-open-failure'], { encoding: 'utf8', timeout: 15000 });
     const r = classify(raw, name); assert.equal(r.status, 'invalid'); assert.equal(r.record.fixturePhase, 'cache-open'); assert.equal(r.record.error.cause.code, 'ERR_ASSERTION'); assert.match(r.record.error.cause.message, /poster_cache_unavailable/);
   });
+  for (const [name, flag, phase] of [['bif actual cache file quota 17', '--bif-io-failure', 'bif-io'], ['intro actual repository insert 513', '--intro-io-failure', 'intro-io']]) test(phase + ' real filesystem failure is invalid evidence', () => {
+    const raw = spawnSync(process.execPath, [path.join(__dirname, 'resource-cache-boundaries.test.cjs'), name, flag], { encoding: 'utf8', timeout: 15000 });
+    const r = classify(raw, name); assert.equal(r.status, 'invalid'); assert.equal(r.record.fixturePhase, phase); assert.match(r.record.error.cause.message, /EISDIR|EPERM/);
+  });
   for (const [name, fn] of tests) { fn(); console.log('PASS ' + name); }
   console.log(`${tests.length} resource probe control tests passed.`);
 }

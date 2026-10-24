@@ -1,4 +1,4 @@
-import { IntroEntry, IntroSegment, IntroTicket, validIntro } from '../utils/Intro';
+import { IntroLimits, IntroEntry, IntroSegment, IntroTicket, validIntro } from '../utils/Intro';
 import { JellyfinClient } from './JellyfinClient';
 import { LocalStore } from './LocalStore';
 
@@ -9,7 +9,7 @@ export class IntroRepository {
     const live = (): boolean => { try { return active && allowed(); } catch (e) { return false; } };
     const save = (segment: IntroSegment): void => {
       if (!local || !live()) { return; }
-      try { const entries = local.intros().filter((entry: IntroEntry) => entry.id !== id); entries.push({ id: id, segment: segment, touched: Date.now() }); local.saveIntros(entries.sort((a: IntroEntry, b: IntroEntry) => b.touched - a.touched).slice(0, 512)); } catch (e) { /* Optional cache failure never blocks playback. */ }
+      try { const entries = local.intros().filter((entry: IntroEntry) => entry.id !== id); entries.push({ id: id, segment: segment, touched: Date.now() }); local.saveIntros(entries.sort((a: IntroEntry, b: IntroEntry) => b.touched - a.touched).slice(0, IntroLimits.maxCacheEntries)); } catch (e) { /* Optional cache failure never blocks playback. */ }
     };
     const result = (async (): Promise<IntroSegment | undefined> => {
       if (!live() || !/^[a-zA-Z0-9-]{1,128}$/.test(id)) { return undefined; }

@@ -25,6 +25,12 @@ function run(output = path.join(root, '.local/test-results/resource-probes'), se
     evidence.cacheOpenPositive = classify(validCache, opening); evidence.cacheOpenNegative = classify(failedCache, opening);
     assert.equal(evidence.cacheOpenPositive.status, 'survived'); assert.equal(evidence.cacheOpenNegative.status, 'invalid');
     assert.equal(evidence.cacheOpenNegative.record.fixturePhase, 'cache-open'); assert.match(evidence.cacheOpenNegative.record.error.cause.message, /poster_cache_unavailable/); save();
+    evidence.ioControls = [];
+    for (const [name, flag, phase] of [['bif actual cache file quota 17', '--bif-io-failure', 'bif-io'], ['intro actual repository insert 513', '--intro-io-failure', 'intro-io']]) {
+      const positive = child(name), negative = child(name, flag); persist(phase + '-positive', positive); persist(phase + '-negative', negative);
+      const normal = classify(positive, name), failed = classify(negative, name); evidence.ioControls.push({ name, normal, failed });
+      assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.fixturePhase, phase); assert.match(failed.record.error.cause.message, /EISDIR|EPERM/); save();
+    }
     const cache = new Set();
     for (const r of selected) {
       if (!cache.has(r.name)) { const raw = child(r.name), result = classify(raw, r.name); persist(r.id + '-baseline', raw); evidence.baselines.push({ name: r.name, ...result }); assert.equal(result.status, 'survived', 'Invalid intact baseline: ' + r.id); cache.add(r.name); }

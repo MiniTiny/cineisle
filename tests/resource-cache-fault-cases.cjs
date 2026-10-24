@@ -1,5 +1,6 @@
 const poster = 'entry/src/main/ets/service/PosterCache.ets', image = 'entry/src/main/ets/utils/PosterOptions.ts', transport = 'entry/src/main/ets/api/PosterTransport.ets';
 const bif = 'entry/src/main/ets/utils/Bif.ts', preview = 'entry/src/main/ets/service/TrickplayRepository.ets', bifHttp = 'entry/src/main/ets/api/TrickplayTransport.ets';
+const intro = 'entry/src/main/ets/utils/Intro.ts', introRepo = 'entry/src/main/ets/service/IntroRepository.ets', introHttp = 'entry/src/main/ets/api/IntroTransport.ets', store = 'entry/src/main/ets/service/LocalStore.ets';
 const probe = (id, file, old, replacement, name) => ({ id, file, old, replacement, name });
 module.exports = [
   ...[[160, 'small'], [480, 'medium'], [1280, 'large']].map(([width, profile]) => probe(`poster-${profile}-width`, image, `${profile}WidthPx: number = ${width}`, `${profile}WidthPx: number = ${width + 1}`, `poster HTTP primary width ${width}`)),
@@ -75,5 +76,22 @@ module.exports = [
   probe('bif-concurrency-guard', preview, 'this.active < TrickplayRepository.maxConcurrentJobs', 'true', 'bif overlapping admission 10'),
   probe('bif-concurrency-comparison', preview, 'this.active < TrickplayRepository.maxConcurrentJobs', 'this.active <= TrickplayRepository.maxConcurrentJobs', 'bif overlapping admission 10'),
   probe('bif-concurrency-declaration', preview, 'maxConcurrentJobs: number = 2', 'maxConcurrentJobs: number = 3', 'bif overlapping admission 10'),
-  probe('bif-concurrency-lowered', preview, 'maxConcurrentJobs: number = 2', 'maxConcurrentJobs: number = 1', 'bif overlapping admission 9')
+  probe('bif-concurrency-lowered', preview, 'maxConcurrentJobs: number = 2', 'maxConcurrentJobs: number = 1', 'bif overlapping admission 9'),
+  probe('intro-json-guard', intro, 'source.length > IntroLimits.maxResponseCodeUnits', 'false', 'intro response code units 16385'),
+  probe('intro-json-comparison', intro, 'source.length > IntroLimits.maxResponseCodeUnits', 'source.length >= IntroLimits.maxResponseCodeUnits', 'intro response code units 16384'),
+  probe('intro-json-declaration', intro, 'maxResponseCodeUnits: number = 16384', 'maxResponseCodeUnits: number = 16385', 'intro response code units 16385'),
+  probe('intro-entry-guard', intro, 'entries.length <= IntroLimits.maxCacheEntries', 'true', 'intro entries validation 513'),
+  probe('intro-entry-comparison', intro, 'entries.length <= IntroLimits.maxCacheEntries', 'entries.length < IntroLimits.maxCacheEntries', 'intro entries validation 512'),
+  probe('intro-entry-declaration', intro, 'maxCacheEntries: number = 512', 'maxCacheEntries: number = 513', 'intro entries validation 513'),
+  probe('intro-entry-lowered', intro, 'maxCacheEntries: number = 512', 'maxCacheEntries: number = 511', 'intro entries validation 512'),
+  probe('intro-entry-repository-declaration', intro, 'maxCacheEntries: number = 512', 'maxCacheEntries: number = 513', 'intro actual repository insert 513'),
+  probe('intro-entry-write-consumer', introRepo, '.slice(0, IntroLimits.maxCacheEntries)', '.slice(0, IntroLimits.maxResponseCodeUnits)', 'intro actual repository insert 513'),
+  probe('intro-entry-write-lowered', introRepo, '.slice(0, IntroLimits.maxCacheEntries)', '.slice(0, IntroLimits.maxCacheEntries - 1)', 'intro actual repository insert 512'),
+  probe('intro-entry-read-consumer', store, "this.read<IntroEntry[]>('intros', [], validIntroEntries)", "this.read<IntroEntry[]>('intros', [], () => true)", 'intro actual stored read 513'),
+  probe('intro-recency-order', introRepo, 'b.touched - a.touched', 'a.touched - b.touched', 'intro actual repository insert 513'),
+  probe('intro-recency-write-consumer', introRepo, 'touched: Date.now()', 'touched: 0', 'intro cached touch preserves recency across a full cache insert'),
+  probe('intro-http-declaration', introHttp, 'maxResponseBytes: number = 16384', 'maxResponseBytes: number = 16385', 'intro actual HTTP byte budget'),
+  probe('intro-http-consumer', introHttp, 'maxLimit: IntroTransport.maxResponseBytes', 'maxLimit: IntroTransport.maxResponseBytes + 1', 'intro actual HTTP byte budget'),
+  probe('intro-time-comparison', intro, 'n * 1000 > maximum', 'n * 1000 >= maximum', 'intro duration milliseconds 172800000'),
+  probe('intro-time-declaration', intro, 'maximum = 48 * 60 * 60 * 1000', 'maximum = 48 * 60 * 60 * 1000 + 1', 'intro duration milliseconds 172800001')
 ];

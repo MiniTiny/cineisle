@@ -7,9 +7,13 @@ const { PosterCache } = h.load('service/PosterCache.ets');
 const { bif } = require('./bif-fixture.cjs');
 const { parseBif, bifWidth } = h.load('utils/Bif.ts');
 const { TrickplayRepository } = h.load('service/TrickplayRepository.ets');
+const { IntroRepository } = h.load('service/IntroRepository.ets');
+const { introFromJson, validIntroEntries } = h.load('utils/Intro.ts');
 const { NetworkPolicy, NetworkOptions } = h.load('utils/NetworkOptions.ts');
 const http = h.platform.get('@ohos.net.http'), originalHttp = http.createHttp, originalNow = Date.now;
-const fileApi = h.platform.get('@ohos.file.fs'), originalWrite = fileApi.write, originalRename = fileApi.rename, originalRead = fileApi.read;
+const fileApi = h.platform.get('@ohos.file.fs'), originalRename = fileApi.rename, originalRenameSync = fileApi.renameSync;
+const asyncIO = Object.fromEntries(['mkdir', 'listFile', 'stat', 'readText', 'open', 'close', 'fsync', 'rename', 'unlink', 'write', 'read'].map(name => [name, fileApi[name]]));
+const syncIO = Object.fromEntries(['openSync', 'closeSync', 'writeSync', 'fsyncSync', 'renameSync', 'readTextSync'].map(name => [name, fileApi[name]]));
 const ioErrors = [];
 const tests = [], test = (name, action) => tests.push({ name, action });
 const settle = async () => { for (let i = 0; i < 8; i++) await new Promise(setImmediate); };
@@ -26,12 +30,16 @@ async function healthy(cache) { await fixture('cache-io', () => assert.equal(cac
 async function before() {
   A.posters?.cancelAll(false); h.reset(); platform.reset(); http.createHttp = originalHttp;
   Date.now = originalNow; ioErrors.length = 0;
-  for (const [name, fn] of [['write', originalWrite], ['rename', originalRename], ['read', originalRead]]) fileApi[name] = async (...args) => { try { return await fn(...args); } catch (error) { ioErrors.push(error.code || error.message); throw error; } };
+  // Missing index/stat/cleanup targets are cache misses. Failed writes or directory IO are not.
+  for (const [name, fn] of Object.entries(asyncIO)) fileApi[name] = async (...args) => { try { return await fn(...args); } catch (error) { if (error.code !== 'ENOENT' || !['stat', 'readText', 'unlink'].includes(name)) ioErrors.push(name + ':' + (error.code || error.message)); throw error; } };
+  for (const [name, fn] of Object.entries(syncIO)) fileApi[name] = (...args) => { try { return fn(...args); } catch (error) { ioErrors.push(name + ':' + (error.code || error.message)); throw error; } };
   NetworkPolicy.publish(new NetworkOptions()); NetworkPolicy.networkAvailable = undefined;
   if (process.argv[3] === '--fixture-failure') { const blocked = path.join(h.directory, 'blocked'); fs.writeFileSync(blocked, 'file'); fs.writeFileSync(path.join(blocked, 'child'), 'unreachable'); }
   if (process.argv[3] === '--cache-open-failure') { fs.mkdirSync(path.dirname(platform.root), { recursive: true }); fs.writeFileSync(platform.root, 'not a cache directory'); }
+  if (process.argv[3] === '--bif-io-failure') { h.activate(); fs.mkdirSync(path.join(A.local.directory, 'trickplay-v1/interrupted.part'), { recursive: true }); }
+  if (process.argv[3] === '--intro-io-failure') { h.activate(); fs.mkdirSync(path.join(A.local.directory, 'intros.json.tmp'), { recursive: true }); }
 }
-async function after() { http.createHttp = originalHttp; Date.now = originalNow; fileApi.write = originalWrite; fileApi.rename = originalRename; fileApi.read = originalRead; }
+async function after() { http.createHttp = originalHttp; Date.now = originalNow; Object.assign(fileApi, asyncIO, syncIO); }
 
 for (const backdrop of [false, true]) for (const width of [160, 480, 1280]) test(`poster HTTP ${backdrop ? 'backdrop' : 'primary'} width ${width}`, async check => {
   const calls = []; let destroyed = 0;
@@ -203,9 +211,64 @@ for (const total of [9, 10, 11]) test(`bif overlapping admission ${total}`, asyn
   } finally { await fixture('release-bif', async () => { tickets.forEach(t => t.cancel()); gates.forEach(g => g.resolve(undefined)); await Promise.all(promises); await settle(); assert.equal(env.repo.active, 0); assert.equal(env.repo.waiting.length, 0); }); }
 });
 
+const introSegment = { start: 10000, end: 30000, show: 5000, hide: 25000 };
+const introWire = (end = 30) => JSON.stringify({ IntroStart: 10, IntroEnd: end, ShowSkipPromptAt: 5, HideSkipPromptAt: 25, Note: '中文' });
+const introRows = count => Array.from({ length: count }, (_, i) => ({ id: 'ep-' + i, segment: { ...introSegment }, touched: i + 1 }));
+function introCache() { const client = h.activate(); client.intro = () => ticket({ ...introSegment }); return { client, local: A.local, repo: new IntroRepository(), file: path.join(A.local.directory, 'intros.json') }; }
+const loadIntro = (env, id = 'new', offline = false) => env.repo.load(env.client, env.local, id, offline, () => true).result;
+async function seedIntros(env, rows) { await fixture('seed-intro', () => fs.writeFileSync(env.file, JSON.stringify(rows))); }
+async function healthyIntro() { await fixture('intro-io', () => assert.deepEqual(ioErrors, [])); }
+for (const length of [16383, 16384, 16385]) test(`intro response code units ${length}`, async check => {
+  const wire = introWire(), source = wire + ' '.repeat(length - wire.length);
+  await fixture('intro-input', () => { assert.equal(source.length, length); assert.ok(Buffer.byteLength(source) > length); });
+  const value = introFromJson(source); check(() => length > 16384 ? assert.equal(value === undefined, true) : assert.deepEqual(value, introSegment));
+});
+for (const end of [172799999, 172800000, 172800001]) test(`intro duration milliseconds ${end}`, check => {
+  const value = introFromJson(introWire(end / 1000)); check(() => { if (end > 172800000) assert.equal(value === undefined, true); else { assert.ok(value); assert.equal(value.end, end); } });
+});
+for (const count of [511, 512, 513]) test(`intro entries validation ${count}`, check => check(() => assert.equal(validIntroEntries(introRows(count)), count <= 512)));
+for (const count of [511, 512, 513]) test(`intro actual stored read ${count}`, async check => {
+  const env = introCache(); await seedIntros(env, introRows(count)); const rows = env.local.intros(); await healthyIntro();
+  check(() => { assert.equal(rows.length, count > 512 ? 0 : count); assert.equal(fs.existsSync(env.file), count <= 512);
+    assert.equal(fs.readdirSync(env.local.directory).filter(n => n.startsWith('intros.json.corrupt-')).length, count > 512 ? 1 : 0); });
+});
+test('intro LocalStore raw writer retains its legacy unchecked contract', async check => {
+  const env = introCache(); let error; try { env.local.saveIntros(introRows(513)); } catch (e) { error = e; } await healthyIntro();
+  check(() => { assert.ifError(error); assert.equal(JSON.parse(fs.readFileSync(env.file, 'utf8')).length, 513); });
+  const rows = env.local.intros(); check(() => { assert.equal(rows.length, 0); assert.equal(fs.existsSync(env.file), false); });
+});
+for (const total of [511, 512, 513]) test(`intro actual repository insert ${total}`, async check => {
+  Date.now = () => 1000000; const env = introCache(); await seedIntros(env, introRows(total - 1)); const calls = [], save = env.local.saveIntros.bind(env.local);
+  env.local.saveIntros = rows => { calls.push(rows.map(row => ({ id: row.id, touched: row.touched }))); return save(rows); };
+  const result = await loadIntro(env); await healthyIntro();
+  check(() => { assert.deepEqual(result, introSegment); assert.equal(calls.length, 1); assert.equal(calls[0].length, Math.min(total, 512)); assert.equal(calls[0][0].id, 'new'); });
+  const encoded = await fixture('read-intro', () => JSON.parse(fs.readFileSync(env.file, 'utf8')));
+  check(() => { assert.equal(encoded.length, Math.min(total, 512)); assert.deepEqual(Object.keys(encoded[0]), ['id', 'segment', 'touched']); assert.deepEqual(Object.keys(encoded[0].segment), ['start', 'end', 'show', 'hide']);
+    assert.equal(encoded.some(row => row.id === 'ep-0'), total <= 512); assert.ok(encoded.some(row => row.id === 'new')); });
+  const client = h.activate(), restarted = await new IntroRepository().load(client, A.local, 'new', true, () => true).result; await healthyIntro();
+  check(() => assert.deepEqual(restarted, introSegment));
+});
+test('intro cached touch preserves recency across a full cache insert', async check => {
+  let now = 1000000; Date.now = () => now; const env = introCache(); await seedIntros(env, introRows(512));
+  const cached = await loadIntro(env, 'ep-0', true); now++; await loadIntro(env); const rows = env.local.intros(); await healthyIntro();
+  check(() => { assert.deepEqual(cached, introSegment); assert.equal(rows.length, 512); assert.ok(rows.some(r => r.id === 'ep-0')); assert.ok(rows.some(r => r.id === 'new')); assert.equal(rows.some(r => r.id === 'ep-1'), false); });
+});
+test('intro actual HTTP byte budget', async check => {
+  const calls = []; let destroyed = 0; http.createHttp = () => ({ async request(url, options) { calls.push({ url, options }); return { responseCode: 200, result: introWire() }; }, destroy() { destroyed++; } });
+  const result = await h.activate().intro('episode', () => true).result;
+  check(() => { assert.deepEqual(result, introSegment); assert.equal(calls.length, 1); assert.ok(calls[0].url.endsWith('/Episode/episode/IntroTimestamps/v1')); assert.equal(calls[0].options.maxLimit, 16384); assert.equal(destroyed, 1); });
+});
+for (const failure of ['write', 'rename']) test(`intro optional ${failure} failure preserves playback and old metadata`, async check => {
+  const env = introCache(), old = introRows(1); await seedIntros(env, old);
+  if (failure === 'write') fileApi.writeSync = () => { throw Error('injected intro write'); };
+  else fileApi.renameSync = (from, to) => { if (to === env.file) throw Error('injected intro rename'); return originalRenameSync(from, to); };
+  const result = await loadIntro(env);
+  check(() => { assert.deepEqual(result, introSegment); assert.deepEqual(JSON.parse(fs.readFileSync(env.file, 'utf8')), old); assert.ok(fs.existsSync(env.file + '.tmp')); });
+});
+
 (async () => {
   const selected = process.argv[2] ? tests.filter(t => t.name === process.argv[2]) : tests;
   assert.ok(selected.length, 'No resource boundary selected');
   for (const { name, action } of selected) { await runCase(name, action, before, after); console.log('PASS ' + name); }
   console.log(`${selected.length} resource cache boundary cases passed. Real product services and temp files; no native durability, network or UI claim.`);
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().catch(error => { console.error(error.name + ': ' + String(error.message).slice(0, 240)); process.exitCode = 1; });

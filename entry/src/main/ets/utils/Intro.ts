@@ -1,3 +1,8 @@
+// Optional Intro Skipper budgets, shared by cache truncation and read validation.
+export class IntroLimits {
+  static readonly maxCacheEntries: number = 512;
+  static readonly maxResponseCodeUnits: number = 16384;
+}
 export interface IntroSegment { start: number; end: number; show: number; hide: number }
 export interface IntroEntry { id: string; segment: IntroSegment; touched: number }
 export interface IntroTicket { result: Promise<IntroSegment | undefined>; cancel: () => void }
@@ -8,7 +13,7 @@ export function validIntro(value: IntroSegment): boolean {
     value.end > value.start && value.hide > value.show && value.show < value.end;
 }
 export function introFromJson(source: string): IntroSegment | undefined {
-  if (!source || source.length > 16384) { return undefined; }
+  if (!source || source.length > IntroLimits.maxResponseCodeUnits) { return undefined; }
   try {
     const value = JSON.parse(source) as IntroWire;
     if (!value || Array.isArray(value) || [value.IntroStart, value.IntroEnd, value.ShowSkipPromptAt, value.HideSkipPromptAt].some((n: number) => typeof n !== 'number' || !Number.isFinite(n) || n < 0 || n * 1000 > maximum)) { return undefined; }
@@ -18,7 +23,7 @@ export function introFromJson(source: string): IntroSegment | undefined {
 }
 export function validIntroEntries(entries: IntroEntry[]): boolean {
   const ids = new Set<string>();
-  return Array.isArray(entries) && entries.length <= 512 && entries.every((entry: IntroEntry) => {
+  return Array.isArray(entries) && entries.length <= IntroLimits.maxCacheEntries && entries.every((entry: IntroEntry) => {
     if (!entry || typeof entry.id !== 'string' || !/^[a-zA-Z0-9-]{1,128}$/.test(entry.id) || ids.has(entry.id) || !validIntro(entry.segment) || !Number.isSafeInteger(entry.touched) || entry.touched < 0) { return false; }
     ids.add(entry.id); return true;
   });
