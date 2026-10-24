@@ -4,7 +4,7 @@ import { ApiQuery, JellyfinApi } from './generated/JellyfinApi';
 import { ImageFormat, ImageType } from './generated/Models';
 import { Session } from '../model/Models';
 import { queryString } from '../utils/Protocol';
-import { PosterTarget, PosterTransfer, posterByteLimit, rasterImage, validPosterTarget } from '../utils/PosterOptions';
+import { PosterImagePolicy, PosterTarget, PosterTransfer, posterByteLimit, rasterImage, validPosterTarget } from '../utils/PosterOptions';
 
 // Generated image routes, header authentication and bounded binary transfer. URLs contain no token.
 export class PosterTransport extends NativeHttpTransport {
@@ -29,8 +29,8 @@ export class PosterTransport extends NativeHttpTransport {
       try {
         const api = new JellyfinApi(this);
         const url = target.backdrop ? api.getItemImageByIndexUrl({ itemId: target.id, imageType: ImageType.Backdrop, imageIndex: 0,
-          maxWidth: target.width, quality: 85, format: ImageFormat.Jpg, tag: target.tag || undefined }) :
-          api.getItemImageUrl({ itemId: target.id, imageType: ImageType.Primary, maxWidth: target.width, quality: 85, format: ImageFormat.Jpg, tag: target.tag || undefined });
+          maxWidth: target.width, quality: PosterImagePolicy.jpegQuality, format: ImageFormat.Jpg, tag: target.tag || undefined }) :
+          api.getItemImageUrl({ itemId: target.id, imageType: ImageType.Primary, maxWidth: target.width, quality: PosterImagePolicy.jpegQuality, format: ImageFormat.Jpg, tag: target.tag || undefined });
         connection = http.createHttp(); timer = setTimeout(() => finish('poster_unavailable'), 10000);
         connection.request(url, { method: http.RequestMethod.GET, header: { 'Authorization': this.authorization(), 'Accept': 'image/jpeg,image/png,image/webp' },
           expectDataType: http.HttpDataType.ARRAY_BUFFER, usingCache: false, maxLimit: posterByteLimit, connectTimeout: 5000, readTimeout: 8000 }).then((response: http.HttpResponse) => {

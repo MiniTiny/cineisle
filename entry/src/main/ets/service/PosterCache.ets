@@ -20,6 +20,11 @@ class Job {
 export class PosterCache {
   private static readonly storeName: string = 'poster_options';
   private static readonly valueKey: string = 'settings_v1';
+  private static readonly maxEntries: number = 512;
+  private static readonly maxQueuedJobs: number = 64;
+  private static readonly maxConcurrentJobs: number = 3;
+  private static readonly untaggedFreshnessMs: number = 24 * 60 * 60 * 1000;
+  private static readonly maxAccountKeyCodeUnits: number = 300;
   private root: string;
   private context: common.Context;
   private options: PosterOptions = new PosterOptions();
@@ -53,7 +58,7 @@ export class PosterCache {
     } catch (e) { this.issue = 'poster_options_load_failed'; }
     await fs.mkdir(this.root, true).catch(() => {});
     let known: Entry[] = [];
-    try { const parsed = JSON.parse(await fs.readText(this.root + '/index.json')) as Index; if (Array.isArray(parsed.entries)) { known = parsed.entries.slice(0, 512); } } catch (e) { /* Reconstruct disposable files after interruption or eviction. */ }
+    try { const parsed = JSON.parse(await fs.readText(this.root + '/index.json')) as Index; if (Array.isArray(parsed.entries)) { known = parsed.entries.slice(0, PosterCache.maxEntries); } } catch (e) { /* Reconstruct disposable files after interruption or eviction. */ }
     const names = await fs.listFile(this.root);
     for (const name of names) {
       if (/^[a-f0-9]{64}\.part$/.test(name) || name === 'index.part') { await fs.unlink(this.root + '/' + name).catch(() => {}); continue; }
@@ -98,7 +103,7 @@ export class PosterCache {
   }
   private async trim(extra: number): Promise<void> {
     const sorted = [...this.entries].sort((a: Entry, b: Entry) => a.touched - b.touched || a.key.localeCompare(b.key));
-    while ((this.entries.reduce((n: number, e: Entry) => n + e.size, 0) + extra > this.options.maxMb * 1024 * 1024 || this.entries.length + (extra > 0 ? 1 : 0) > 512) && sorted.length) {
+    while ((this.entries.reduce((n: number, e: Entry) => n + e.size, 0) + extra > this.options.maxMb * 1024 * 1024 || this.entries.length + (extra > 0 ? 1 : 0) > PosterCache.maxEntries) && sorted.length) {
       await this.remove(sorted.shift()!.key);
     }
   }
@@ -118,7 +123,7 @@ export class PosterCache {
   }
   private async resolve(account: string, target: PosterTarget, lease: Lease, attach: (detach: () => void) => void): Promise<PosterData> {
     const epoch = this.epoch; await this.initialize();
-    if (!this.live(lease) || epoch !== this.epoch || !validPosterTarget(target) || !account || account.length > 300) { throw new Error('poster_cancelled'); }
+    if (!this.live(lease) || epoch !== this.epoch || !validPosterTarget(target) || !account || account.length > PosterCache.maxAccountKeyCodeUnits) { throw new Error('poster_cancelled'); }
     let key = ''; let cacheable = true;
     try {
       const md = crypto.createMd('SHA256');
@@ -132,11 +137,11 @@ export class PosterCache {
       catch (e) { await this.forget(key); }
     }
     if (!this.live(lease) || epoch !== this.epoch) { throw new Error('poster_cancelled'); }
-    if (cached && (target.tag || Date.now() - saved < 24 * 60 * 60 * 1000 || !this.online(lease))) { return { key: key, bytes: cached }; }
+    if (cached && (target.tag || Date.now() - saved < PosterCache.untaggedFreshnessMs || !this.online(lease))) { return { key: key, bytes: cached }; }
     if (!this.online(lease)) { throw new Error('poster_missing'); }
     let job = this.jobs.get(key);
     if (!job) {
-      if (this.queue.length >= 64) { throw new Error('poster_busy'); }
+      if (this.queue.length >= PosterCache.maxQueuedJobs) { throw new Error('poster_busy'); }
       job = new Job(key, epoch, cacheable); this.jobs.set(key, job); this.queue.push(job);
     }
     const joined = job; joined.leases.add(lease);
@@ -147,7 +152,7 @@ export class PosterCache {
     finally { joined.leases.delete(lease); }
   }
   private drain(): void {
-    while (this.active < 3 && this.queue.length) {
+    while (this.active < PosterCache.maxConcurrentJobs && this.queue.length) {
       const job = this.queue.shift()!;
       if (!this.valid(job)) { job.reject(new Error('poster_cancelled')); if (this.jobs.get(job.key) === job) { this.jobs.delete(job.key); } continue; }
       ++this.active; this.run(job);

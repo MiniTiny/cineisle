@@ -1,0 +1,31 @@
+const poster = 'entry/src/main/ets/service/PosterCache.ets', image = 'entry/src/main/ets/utils/PosterOptions.ts', transport = 'entry/src/main/ets/api/PosterTransport.ets';
+const probe = (id, file, old, replacement, name) => ({ id, file, old, replacement, name });
+module.exports = [
+  ...[[160, 'small'], [480, 'medium'], [1280, 'large']].map(([width, profile]) => probe(`poster-${profile}-width`, image, `${profile}WidthPx: number = ${width}`, `${profile}WidthPx: number = ${width + 1}`, `poster HTTP primary width ${width}`)),
+  probe('poster-quality-declaration', image, 'jpegQuality: number = 85', 'jpegQuality: number = 84', 'poster HTTP primary width 480'),
+  probe('poster-primary-quality-consumer', transport, 'ImageType.Primary, maxWidth: target.width, quality: PosterImagePolicy.jpegQuality', 'ImageType.Primary, maxWidth: target.width, quality: 84', 'poster HTTP primary width 480'),
+  probe('poster-backdrop-quality-consumer', transport, 'maxWidth: target.width, quality: PosterImagePolicy.jpegQuality, format: ImageFormat.Jpg, tag: target.tag || undefined }) :', 'maxWidth: target.width, quality: 84, format: ImageFormat.Jpg, tag: target.tag || undefined }) :', 'poster HTTP backdrop width 480'),
+  probe('poster-http-byte-consumer', transport, 'maxLimit: posterByteLimit', 'maxLimit: 2097153', 'poster HTTP primary width 480'),
+  probe('poster-byte-guard', poster, 'bytes.byteLength > posterByteLimit', 'false', 'poster image bytes 2097153'),
+  probe('poster-byte-comparison', poster, 'bytes.byteLength > posterByteLimit', 'bytes.byteLength >= posterByteLimit', 'poster image bytes 2097152'),
+  probe('poster-byte-declaration', image, 'posterByteLimit: number = 2 * 1024 * 1024', 'posterByteLimit: number = 2 * 1024 * 1024 + 1', 'poster image bytes 2097153'),
+  probe('poster-freshness-guard', poster, 'Date.now() - saved < PosterCache.untaggedFreshnessMs', 'true', 'poster untagged freshness 86400000'),
+  probe('poster-freshness-comparison', poster, 'Date.now() - saved < PosterCache.untaggedFreshnessMs', 'Date.now() - saved <= PosterCache.untaggedFreshnessMs', 'poster untagged freshness 86400000'),
+  probe('poster-freshness-declaration', poster, 'untaggedFreshnessMs: number = 24 * 60 * 60 * 1000', 'untaggedFreshnessMs: number = 24 * 60 * 60 * 1000 + 1', 'poster untagged freshness 86400000'),
+  probe('poster-queue-guard', poster, 'this.queue.length >= PosterCache.maxQueuedJobs', 'false', 'poster overlapping admission 68'),
+  probe('poster-queue-comparison', poster, 'this.queue.length >= PosterCache.maxQueuedJobs', 'this.queue.length > PosterCache.maxQueuedJobs', 'poster overlapping admission 68'),
+  probe('poster-queue-declaration', poster, 'maxQueuedJobs: number = 64', 'maxQueuedJobs: number = 65', 'poster overlapping admission 68'),
+  probe('poster-queue-lowered', poster, 'maxQueuedJobs: number = 64', 'maxQueuedJobs: number = 63', 'poster overlapping admission 67'),
+  probe('poster-concurrency-guard', poster, 'this.active < PosterCache.maxConcurrentJobs', 'true', 'poster overlapping admission 67'),
+  probe('poster-concurrency-comparison', poster, 'this.active < PosterCache.maxConcurrentJobs', 'this.active <= PosterCache.maxConcurrentJobs', 'poster overlapping admission 67'),
+  probe('poster-concurrency-declaration', poster, 'maxConcurrentJobs: number = 3', 'maxConcurrentJobs: number = 4', 'poster overlapping admission 67'),
+  probe('poster-concurrency-lowered', poster, 'maxConcurrentJobs: number = 3', 'maxConcurrentJobs: number = 2', 'poster overlapping admission 66'),
+  probe('poster-entry-guard', poster, 'this.entries.length + (extra > 0 ? 1 : 0) > PosterCache.maxEntries', 'false', 'poster reconstruct entries 513'),
+  probe('poster-entry-comparison', poster, 'this.entries.length + (extra > 0 ? 1 : 0) > PosterCache.maxEntries', 'this.entries.length + (extra > 0 ? 1 : 0) >= PosterCache.maxEntries', 'poster reconstruct entries 512'),
+  probe('poster-entry-declaration', poster, 'maxEntries: number = 512', 'maxEntries: number = 513', 'poster reconstruct entries 513'),
+  probe('poster-index-read-consumer', poster, 'parsed.entries.slice(0, PosterCache.maxEntries)', 'parsed.entries.slice(0, 513)', 'poster reconstruct entries 513'),
+  probe('poster-capacity-comparison', poster, '+ extra > this.options.maxMb * 1024 * 1024', '+ extra >= this.options.maxMb * 1024 * 1024', 'poster actual cache byte quota 1048576'),
+  probe('poster-capacity-consumer', poster, '+ extra > this.options.maxMb * 1024 * 1024', '+ extra > this.options.maxMb * 1024 * 1024 + 1', 'poster actual cache byte quota 1048577'),
+  probe('poster-account-comparison', poster, 'account.length > PosterCache.maxAccountKeyCodeUnits', 'account.length >= PosterCache.maxAccountKeyCodeUnits', 'poster account code units 300'),
+  probe('poster-account-declaration', poster, 'maxAccountKeyCodeUnits: number = 300', 'maxAccountKeyCodeUnits: number = 301', 'poster account code units 301')
+];
