@@ -211,6 +211,43 @@ test('bif cached minimum file uses the real read path', async check => {
   const env = bifCache(), incoming = legalBif(); await seedBifs(env, [{ name: 'fresh', bytes: incoming }]); const result = await loadBif(env, undefined, 'fresh', true); await healthyBif();
   check(() => { assert.ok(result); assert.equal(result.bytes.byteLength, 76); assert.ok(fs.existsSync(path.join(env.root, 'fresh.bif'))); });
 });
+for (const size of [75, 76, 77, 16777215, 16777216, 16777217]) test(`bif cached read bytes ${size}`, async check => {
+  const env = bifCache(), source = size === 75 ? legalBif().slice(0, 75) : size < 100 ? legalBif([size - 72]) : bifWithTotal(size);
+  await seedBifs(env, [{ name: 'fresh', bytes: source }]);
+  const file = path.join(env.root, 'fresh.bif');
+  await fixture('seed-bif-size', () => { assert.equal(source.byteLength, size); assert.equal(fs.statSync(file).size, size); });
+  const stat = fileApi.stat, open = fileApi.open, read = fileApi.read;
+  const statted = [], opened = [], allocations = []; let reads = 0, readBytes = 0, fetched = 0;
+  fileApi.stat = async (...args) => { statted.push(args[0]); return stat(...args); };
+  fileApi.open = async (...args) => {
+    opened.push(args[0]); const handle = await open(...args);
+    // An actual closed descriptor makes production read/close fail with EBADF.
+    if (process.argv[3] === '--bif-read-io-failure') await fileApi.close(handle);
+    return handle;
+  };
+  fileApi.read = async (...args) => { ++reads; const n = await read(...args); readBytes += n; return n; };
+  env.client.trickplay = () => { ++fetched; return ticket(undefined); };
+  const OriginalUint8Array = global.Uint8Array;
+  global.Uint8Array = new Proxy(OriginalUint8Array, { construct(Constructor, args) {
+    if (typeof args[0] === 'number') allocations.push(args[0]);
+    return Reflect.construct(Constructor, args);
+  } });
+  let result;
+  try { result = await env.repo.load(env.client, env.local, 'fresh', true, () => true, work => work()).result; }
+  finally { global.Uint8Array = OriginalUint8Array; }
+  await healthyBif();
+  const accepted = size >= 76 && size <= 16777216;
+  check(() => {
+    assert.deepEqual(statted, [file]); assert.equal(fetched, 0);
+    // These observations must fail even when the parser subsequently rejects the same file.
+    assert.deepEqual(opened, accepted ? [file] : []);
+    assert.deepEqual(allocations, accepted ? [size] : []);
+    assert.equal(reads > 0, accepted); assert.equal(readBytes, accepted ? size : 0);
+    assert.equal(fs.existsSync(file), accepted);
+    if (accepted) { assert.ok(result); assert.equal(Buffer.from(result.bytes).equals(Buffer.from(source)), true); }
+    else assert.equal(result === undefined, true);
+  });
+});
 for (const failure of ['zero-write', 'over-write', 'rename']) test(`bif atomic ${failure} preserves optional preview`, async check => {
   const env = bifCache(), incoming = legalBif();
   if (failure === 'zero-write') fileApi.write = async () => 0;

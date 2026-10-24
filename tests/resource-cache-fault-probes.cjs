@@ -26,10 +26,14 @@ function run(output = path.join(root, '.local/test-results/resource-probes'), se
     assert.equal(evidence.cacheOpenPositive.status, 'survived'); assert.equal(evidence.cacheOpenNegative.status, 'invalid');
     assert.equal(evidence.cacheOpenNegative.record.fixturePhase, 'cache-open'); assert.match(evidence.cacheOpenNegative.record.error.cause.message, /poster_cache_unavailable/); save();
     evidence.ioControls = [];
-    for (const [name, flag, phase] of [['bif actual cache file quota 17', '--bif-io-failure', 'bif-io'], ['intro actual repository insert 513', '--intro-io-failure', 'intro-io']]) {
-      const positive = child(name), negative = child(name, flag); persist(phase + '-positive', positive); persist(phase + '-negative', negative);
+    for (const [label, name, flag, phase, pattern] of [
+      ['bif-io', 'bif actual cache file quota 17', '--bif-io-failure', 'bif-io', /EISDIR|EPERM/],
+      ['intro-io', 'intro actual repository insert 513', '--intro-io-failure', 'intro-io', /EISDIR|EPERM/],
+      ['bif-read-io', 'bif cached read bytes 76', '--bif-read-io-failure', 'bif-io', /read:EBADF/]
+    ]) {
+      const positive = child(name), negative = child(name, flag); persist(label + '-positive', positive); persist(label + '-negative', negative);
       const normal = classify(positive, name), failed = classify(negative, name); evidence.ioControls.push({ name, normal, failed });
-      assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.fixturePhase, phase); assert.match(failed.record.error.cause.message, /EISDIR|EPERM/); save();
+      assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid'); assert.equal(failed.record.fixturePhase, phase); assert.match(failed.record.error.cause.message, pattern); save();
     }
     evidence.httpControls = [];
     for (const [label, name, flag, attempt] of [
