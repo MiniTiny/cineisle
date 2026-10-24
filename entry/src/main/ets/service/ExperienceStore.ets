@@ -3,6 +3,7 @@ import { MediaItem } from '../model/Models';
 import { rankActors } from '../utils/Protocol';
 import { validMediaItem } from '../utils/Cache';
 import { LocalStore } from './LocalStore';
+import { AppFailure } from '../utils/Failures';
 
 // Account-scoped, atomic metadata. Mutations publish only after the disk write succeeds.
 export class ExperienceStore {
@@ -45,7 +46,7 @@ export class ExperienceStore {
           if (field === undefined) { next.positions = next.positions.filter((p: PendingPosition) => p.id !== id); }
         }
       });
-    } catch (e) { throw new Error('sync_cache_write_failed'); }
+    } catch (e) { throw new AppFailure('sync_cache_write_failed', 'storage'); }
     if (pending.length || positions.length) {
       try { this.acknowledged?.(pending, positions); } catch (e) { /* All mirrors are already durable; a UI refresh cannot undo acknowledgement. */ }
     }

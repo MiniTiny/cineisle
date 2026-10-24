@@ -1,3 +1,4 @@
+import { CaptionRenderLimits } from './SubtitleLimits';
 import * as native from 'libcineisle_ass.so';
 import image from '@ohos.multimedia.image';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -19,7 +20,7 @@ export function captionArgb(value: CaptionColor): number {
 export function captionRequest(runs: SubtitleRun[], style: CaptionRenderStyle, size: number, width: number,
   maxLines: number, intrinsic: boolean, context: UIContext, metrics: SubtitleMetrics, fontScale?: number, revision: string = ''): native.NativeCaptionRequest {
   if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(size) || size <= 0 ||
-    !Number.isInteger(maxLines) || maxLines < 1 || maxLines > 1000 || (fontScale !== undefined && (!Number.isFinite(fontScale) || fontScale <= 0 || fontScale > 3))) { throw new Error('subtitle_failed'); }
+    !Number.isInteger(maxLines) || maxLines < 1 || maxLines > CaptionRenderLimits.maxLines || (fontScale !== undefined && (!Number.isFinite(fontScale) || fontScale <= 0 || fontScale > 3))) { throw new Error('subtitle_failed'); }
   return { revision: revision, width: context.vp2px(width), maxLines: maxLines, intrinsic: intrinsic,
     runs: runs.map((run: SubtitleRun): native.NativeCaptionRun => ({ text: run.text,
       family: run.family || style.family, size: style.system ? context.vp2px(size * (run.sizeScale ?? 1)) : fontScale === undefined ? context.fp2px(size * (run.sizeScale ?? 1)) : context.vp2px(size * (run.sizeScale ?? 1) * fontScale),
@@ -58,7 +59,7 @@ export class CaptionRasterizer {
           if (!this.current(job)) { continue; }
           if (![frame.width, frame.height, frame.layoutWidth, frame.layoutHeight, frame.halo].every((n: number): boolean => Number.isInteger(n) && n >= 0) ||
             !frame.layoutWidth || !frame.layoutHeight || frame.width !== frame.layoutWidth + frame.halo * 2 ||
-            frame.height !== frame.layoutHeight + frame.halo * 2 || frame.width * frame.height > 1920 * 1080 || frame.rgba.byteLength !== frame.width * frame.height * 4) { throw new Error('subtitle_failed'); }
+            frame.height !== frame.layoutHeight + frame.halo * 2 || frame.width * frame.height > CaptionRenderLimits.maxRasterPixels || frame.rgba.byteLength !== frame.width * frame.height * 4) { throw new Error('subtitle_failed'); }
           const bitmap = await image.createPixelMap(frame.rgba, { size: { width: frame.width, height: frame.height },
             srcPixelFormat: image.PixelMapFormat.RGBA_8888, pixelFormat: image.PixelMapFormat.RGBA_8888,
             alphaType: image.AlphaType.PREMUL, editable: false });

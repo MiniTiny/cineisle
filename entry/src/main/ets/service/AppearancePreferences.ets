@@ -8,6 +8,8 @@ import { AppearanceOptions, copyAppearance, validAppearance } from '../utils/App
 
 // Global visual settings; window effects and durable preferences commit before reactive publication.
 export class AppearancePreferences {
+  private static readonly storeName: string = 'appearance_options';
+  private static readonly valueKey: string = 'settings_v1';
   private static context: common.UIAbilityContext | undefined;
   private static main: window.Window | undefined;
   private static epoch: number = 0;
@@ -75,7 +77,7 @@ export class AppearancePreferences {
 
   private static async read(context: common.UIAbilityContext): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'appearance_options' }); const raw = await store.get('settings_v1', ''); AppearancePreferences.raw = raw;
+      const store = await preferences.getPreferences(context, { name: AppearancePreferences.storeName }); const raw = await store.get(AppearancePreferences.valueKey, ''); AppearancePreferences.raw = raw;
       const value = raw === '' ? new AppearanceOptions() : typeof raw === 'string' ? JSON.parse(raw) as AppearanceOptions : undefined;
       if (!value || !validAppearance(value)) { throw new Error('appearance_invalid'); }
       AppearancePreferences.value = copyAppearance(value); AppearancePreferences.store = store; AppearancePreferences.issue = '';
@@ -112,15 +114,15 @@ export class AppearancePreferences {
       const context = AppearancePreferences.context; const main = AppearancePreferences.main; const epoch = AppearancePreferences.epoch;
       if (!context || !main) { throw new Error('appearance_unavailable'); }
       if (!allowed()) { throw new Error('appearance_cancelled'); }
-      if (!AppearancePreferences.store) { AppearancePreferences.store = await preferences.getPreferences(context, { name: 'appearance_options' }); }
+      if (!AppearancePreferences.store) { AppearancePreferences.store = await preferences.getPreferences(context, { name: AppearancePreferences.storeName }); }
       const store = AppearancePreferences.store!; const previous = AppearancePreferences.raw; const old = AppearancePreferences.snapshot(); const oldColors = AppearancePreferences.colors; let colors: DynamicPalette | undefined;
       if (!allowed()) { throw new Error('appearance_cancelled'); }
       try {
-        await store.put('settings_v1', JSON.stringify(next)); await store.flush();
+        await store.put(AppearancePreferences.valueKey, JSON.stringify(next)); await store.flush();
         colors = await AppearancePreferences.resolve(next, main, epoch, allowed);
         await AppearancePreferences.native(next, main, epoch, allowed, colors);
       } catch (e) {
-        try { await store.put('settings_v1', previous); await store.flush(); if (main === AppearancePreferences.main && epoch === AppearancePreferences.epoch) { await AppearancePreferences.native(old, main, epoch, () => true, oldColors); } AppearancePreferences.store = undefined; }
+        try { await store.put(AppearancePreferences.valueKey, previous); await store.flush(); if (main === AppearancePreferences.main && epoch === AppearancePreferences.epoch) { await AppearancePreferences.native(old, main, epoch, () => true, oldColors); } AppearancePreferences.store = undefined; }
         catch (restore) { AppearancePreferences.store = undefined; AppearancePreferences.issue = 'appearance_restore_failed'; throw new Error(AppearancePreferences.issue); }
         AppearancePreferences.watch(old); AppearancePreferences.issue = (e as Error).message === 'appearance_cancelled' ? 'appearance_cancelled' : 'appearance_save_failed'; throw new Error(AppearancePreferences.issue);
       }

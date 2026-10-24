@@ -1,17 +1,19 @@
+import { SubtitleTransferLimits } from '../utils/SubtitleLimits';
 import statvfs from '@ohos.file.statvfs';
 import fs from '@ohos.file.fs';
 import { DownloadRecord } from '../model/Models';
 import { text } from '../utils/Strings';
+import { AppFailure } from '../utils/Failures';
 
 export class DownloadSpace {
   private static subtitleReservations: Map<DownloadRecord, number[]> = new Map();
   static reserveSubtitles(record: DownloadRecord, count: number): () => void {
     const claims = DownloadSpace.subtitleReservations.get(record) ?? [];
-    claims.push(count * 4 * 1024 * 1024); DownloadSpace.subtitleReservations.set(record, claims);
+    claims.push(count * SubtitleTransferLimits.maxBytes); DownloadSpace.subtitleReservations.set(record, claims);
     let released = false;
     return () => {
       if (released) { return; } released = true;
-      claims.splice(claims.indexOf(count * 4 * 1024 * 1024), 1);
+      claims.splice(claims.indexOf(count * SubtitleTransferLimits.maxBytes), 1);
       if (!claims.length) { DownloadSpace.subtitleReservations.delete(record); }
     };
   }
@@ -21,7 +23,7 @@ export class DownloadSpace {
   private static reserved(records: DownloadRecord[]): number {
     return records.reduce((sum: number, active: DownloadRecord) => {
       const video = active.state === 'downloading' ? Math.max(0, (active.expectedSize ?? 0) - DownloadSpace.bytes(active.path)) : 0;
-      const subtitles = active.subtitleState === 'pending' ? (active.subtitles ?? []).reduce((n: number, sub) => n + Math.max(0, 4 * 1024 * 1024 - DownloadSpace.bytes(sub.path)), 0) : 0;
+      const subtitles = active.subtitleState === 'pending' ? (active.subtitles ?? []).reduce((n: number, sub) => n + Math.max(0, SubtitleTransferLimits.maxBytes - DownloadSpace.bytes(sub.path)), 0) : 0;
       const reserved = Math.max(0, ...(DownloadSpace.subtitleReservations.get(active) ?? []));
       return sum + video + Math.max(subtitles, reserved);
     }, 0);
@@ -36,9 +38,10 @@ export class DownloadSpace {
     if (!Number.isSafeInteger(free) || free < 0) { throw new Error('download_space_check_failed'); }
     const reserved = DownloadSpace.reserved(records);
     const subtitles = (record.subtitles ?? []).filter((sub) => sub.state !== 'ready' || !fs.accessSync(sub.path));
-    const needed = (subtitleOnly ? 0 : record.expectedSize ?? 0) + subtitles.length * 4 * 1024 * 1024 + 8 * 1024 * 1024;
+    const needed = (subtitleOnly ? 0 : record.expectedSize ?? 0) + subtitles.length * SubtitleTransferLimits.maxBytes + 8 * 1024 * 1024;
     if (!Number.isSafeInteger(reserved + needed) || free < reserved + needed) {
-      throw new Error(text('download_space_insufficient', Math.ceil((reserved + needed) / 1048576), Math.floor(free / 1048576)));
+      const requiredMb = Math.ceil((reserved + needed) / 1048576); const availableMb = Math.floor(free / 1048576);
+      throw new AppFailure('download_space_insufficient', 'storage', text('download_space_insufficient', requiredMb, availableMb), [requiredMb, availableMb]);
     }
   }
 }

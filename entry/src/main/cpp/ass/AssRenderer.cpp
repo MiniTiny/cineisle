@@ -1,3 +1,4 @@
+#include "../caption/SubtitleLimits.h"
 #include "AssRenderer.h"
 
 #include <ass/ass.h>
@@ -8,8 +9,8 @@
 
 namespace cineisle {
 namespace {
-constexpr uint64_t MAX_PIXELS = 1920ULL * 1080ULL;
-constexpr size_t MAX_DOCUMENT = 4 * 1024 * 1024;
+constexpr uint64_t MAX_PIXELS = subtitle_limits::kMaxAssFramePixels;
+constexpr size_t MAX_DOCUMENT = subtitle_limits::kMaxAssDocumentUtf8Bytes;
 // Library diagnostics can contain subtitle/font names; never forward asset text to app logs.
 void IgnoreLibraryLog(int, const char *, va_list, void *) {}
 
@@ -39,9 +40,9 @@ void AssRenderer::Initialize(const std::string &document, const std::string &fon
     const std::string &family, const std::string &configuration)
 {
     if (document.empty() || document.size() > MAX_DOCUMENT || document.find('\0') != std::string::npos ||
-        font.empty() || font.size() > 4096 || font.find('\0') != std::string::npos ||
-        family.size() > 512 || family.find('\0') != std::string::npos ||
-        configuration.size() > 4096 || configuration.find('\0') != std::string::npos) {
+        font.empty() || font.size() > subtitle_limits::kMaxAssFontPathBytes || font.find('\0') != std::string::npos ||
+        family.size() > subtitle_limits::kMaxAssFamilyBytes || family.find('\0') != std::string::npos ||
+        configuration.size() > subtitle_limits::kMaxAssConfigPathBytes || configuration.find('\0') != std::string::npos) {
         throw std::invalid_argument("ass_input_invalid");
     }
     FILE *file = std::fopen(font.c_str(), "rb");
@@ -66,7 +67,7 @@ void AssRenderer::Initialize(const std::string &document, const std::string &fon
     ass_set_fonts(renderer_, font.c_str(), family.c_str(),
         configuration.empty() ? ASS_FONTPROVIDER_NONE : ASS_FONTPROVIDER_FONTCONFIG,
         configuration.empty() ? nullptr : configuration.c_str(), 0);
-    ass_set_cache_limits(renderer_, 1000, 16);
+    ass_set_cache_limits(renderer_, subtitle_limits::kMaxAssGlyphCacheEntries, subtitle_limits::kMaxAssBitmapCacheMiB);
     ass_set_shaper(renderer_, ASS_SHAPING_COMPLEX);
 }
 
@@ -84,9 +85,9 @@ AssFrame AssRenderer::Render(int64_t milliseconds, uint32_t width, uint32_t heig
 {
     std::lock_guard<std::mutex> guard(mutex_);
     if (!renderer_ || !track_) { throw std::runtime_error("ass_renderer_closed"); }
-    if (milliseconds < 0 || !width || !height || width > 4096 || height > 4096 ||
+    if (milliseconds < 0 || !width || !height || width > subtitle_limits::kMaxAssCanvasDimensionPx || height > subtitle_limits::kMaxAssCanvasDimensionPx ||
         uint64_t(width) * height > MAX_PIXELS || !videoWidth || !videoHeight ||
-        videoWidth > 32768 || videoHeight > 32768) { throw std::invalid_argument("ass_frame_invalid"); }
+        videoWidth > subtitle_limits::kMaxVideoDimensionPx || videoHeight > subtitle_limits::kMaxVideoDimensionPx) { throw std::invalid_argument("ass_frame_invalid"); }
     const bool resized = width != width_ || height != height_ || videoWidth != videoWidth_ || videoHeight != videoHeight_;
     if (resized) {
         ass_set_frame_size(renderer_, width, height);
@@ -102,7 +103,7 @@ AssFrame AssRenderer::Render(int64_t milliseconds, uint32_t width, uint32_t heig
     Bounds area{width, height, 0, 0};
     size_t count = 0;
     for (ASS_Image *image = images; image; image = image->next) {
-        if (++count > 100000) { throw std::runtime_error("ass_frame_too_complex"); }
+        if (++count > subtitle_limits::kMaxAssImages) { throw std::runtime_error("ass_frame_too_complex"); }
         const Bounds clipped = Clip(*image, width, height);
         if (!Visible(*image, clipped)) { continue; }
         area.left = std::min(area.left, clipped.left); area.top = std::min(area.top, clipped.top);

@@ -1,5 +1,7 @@
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
+export { connectionFailure, authorizationFailure } from './Failures';
+import { SyncRetryPolicy } from './SyncPolicy';
 
 export interface PendingEdit { id: string; field: string; value: boolean; revision: number; item?: MediaItem; localOnly?: boolean }
 export interface PendingPosition { id: string; ticks: number; revision: number; item: MediaItem }
@@ -158,19 +160,9 @@ export function discovery(items: MediaItem[], signals: MediaItem[], follows: Fol
     return { item: i, actors: names, genres: matching, score: names.length * 4 + matching.length * 2 };
   }).sort((a: Discovery, b: Discovery) => b.score - a.score || (Date.parse(b.item.DateCreated ?? '') || 0) - (Date.parse(a.item.DateCreated ?? '') || 0) || a.item.Id.localeCompare(b.item.Id)).slice(0, 30);
 }
-interface HttpError extends Error { status?: number }
-export function connectionFailure(error: Error): boolean {
-  const status = (error as HttpError).status;
-  if (status !== undefined) { return status === 408 || (status >= 500 && status <= 599); }
-  const message = error.message;
-  // Authorization, invalid DTO, cancellation and local storage failures must never become offline success.
-  if (/\b(401|403)\b/.test(message)) { return false; }
-  return /network|timeout|connection|offline|ECONN|ENET|EHOST|fetch failed|\b408\b|\b50[0-9]\b|^http_[0-9]{3}$/.test(message) && !/^http_4/.test(message);
-}
-export function authorizationFailure(error: Error): boolean { return /\b(401|403)\b|http_(401|403)|login_expired|permission_denied/.test(error.message); }
 export function validExperience(value: ExperienceState): boolean {
   if (value?.playerUi !== undefined && !validPlayerOptions(value.playerUi)) { return false; }
-  if ((value?.syncAttempts !== undefined && (!Number.isSafeInteger(value.syncAttempts) || value.syncAttempts < 0 || value.syncAttempts > 5)) ||
+  if ((value?.syncAttempts !== undefined && (!Number.isSafeInteger(value.syncAttempts) || value.syncAttempts < 0 || value.syncAttempts > SyncRetryPolicy.maxAttempts)) ||
     (value?.syncNextAt !== undefined && (!Number.isSafeInteger(value.syncNextAt) || value.syncNextAt < 0)) ||
     (value?.syncBlocked !== undefined && typeof value.syncBlocked !== 'boolean')) { return false; }
   if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||

@@ -18,6 +18,8 @@ class Job {
 
 // One UI-process cache, shared quota and opaque keys. No URL, token or account metadata is persisted.
 export class PosterCache {
+  private static readonly storeName: string = 'poster_options';
+  private static readonly valueKey: string = 'settings_v1';
   private root: string;
   private context: common.Context;
   private options: PosterOptions = new PosterOptions();
@@ -41,8 +43,8 @@ export class PosterCache {
   }
   private async boot(): Promise<void> {
     try {
-      this.store = await preferences.getPreferences(this.context, { name: 'poster_options' });
-      const raw = await this.store.get('settings_v1', ''); this.persisted = typeof raw === 'string' ? raw : '';
+      this.store = await preferences.getPreferences(this.context, { name: PosterCache.storeName });
+      const raw = await this.store.get(PosterCache.valueKey, ''); this.persisted = typeof raw === 'string' ? raw : '';
       if (raw !== '') {
         const parsed = JSON.parse(this.persisted) as PosterOptions;
         if (!validPosterOptions(parsed)) { throw new Error('invalid'); }
@@ -193,10 +195,10 @@ export class PosterCache {
     const next: PosterOptions = { enabled: value.enabled, maxMb: value.maxMb };
     const writing = this.settings.then(async () => {
       await this.initialize(); if (!allowed()) { throw new Error('poster_cancelled'); }
-      if (!this.store) { this.store = await preferences.getPreferences(this.context, { name: 'poster_options' }); }
+      if (!this.store) { this.store = await preferences.getPreferences(this.context, { name: PosterCache.storeName }); }
       if (!allowed()) { throw new Error('poster_cancelled'); } const previous = this.persisted;
-      try { const encoded = JSON.stringify(next); await this.store.put('settings_v1', encoded); await this.store.flush(); this.persisted = encoded; }
-      catch (e) { try { await this.store.put('settings_v1', previous); await this.store.flush(); } catch (restore) { this.store = undefined; throw new Error('poster_options_restore_failed'); } throw new Error('poster_options_save_failed'); }
+      try { const encoded = JSON.stringify(next); await this.store.put(PosterCache.valueKey, encoded); await this.store.flush(); this.persisted = encoded; }
+      catch (e) { try { await this.store.put(PosterCache.valueKey, previous); await this.store.flush(); } catch (restore) { this.store = undefined; throw new Error('poster_options_restore_failed'); } throw new Error('poster_options_save_failed'); }
       this.options = next; this.cancelAll(); this.issue = '';
       try { if (this.ready) { await this.disk(async () => { await this.trim(0); await this.index(); }); } } catch (e) { this.issue = 'poster_cache_trim_failed'; }
     });

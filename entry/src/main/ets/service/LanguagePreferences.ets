@@ -5,6 +5,8 @@ import { UiLanguage, validUiLanguage, effectiveUiLanguage } from '../utils/UiLan
 
 // Application-wide, independent of the active server/account. Call attach only after loadContent.
 export class LanguagePreferences {
+  private static readonly storeName: string = 'ui_language';
+  private static readonly valueKey: string = 'choice_v1';
   private static context: common.UIAbilityContext | undefined;
   private static store: preferences.Preferences | undefined;
   private static loading: Promise<void> | undefined;
@@ -27,8 +29,8 @@ export class LanguagePreferences {
   }
   private static async read(context: common.UIAbilityContext): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'ui_language' });
-      const raw = await store.get('choice_v1', '');
+      const store = await preferences.getPreferences(context, { name: LanguagePreferences.storeName });
+      const raw = await store.get(LanguagePreferences.valueKey, '');
       LanguagePreferences.persisted = raw;
       if (typeof raw !== 'string' || (raw !== '' && !validUiLanguage(raw))) { throw new Error('ui_language_invalid'); }
       LanguagePreferences.value = (raw || 'system') as UiLanguage; LanguagePreferences.store = store; LanguagePreferences.issue = '';
@@ -48,17 +50,17 @@ export class LanguagePreferences {
     const writing = LanguagePreferences.writes.then(async () => {
       const context = LanguagePreferences.context; if (!context) { throw new Error('ui_language_load_failed'); }
       if (!allowed()) { throw new Error('ui_language_cancelled'); }
-      if (!LanguagePreferences.store) { LanguagePreferences.store = await preferences.getPreferences(context, { name: 'ui_language' }); }
+      if (!LanguagePreferences.store) { LanguagePreferences.store = await preferences.getPreferences(context, { name: LanguagePreferences.storeName }); }
       const store = LanguagePreferences.store!; const previous = LanguagePreferences.persisted; const old = LanguagePreferences.value;
       if (!allowed()) { throw new Error('ui_language_cancelled'); }
       try {
-        await store.put('choice_v1', value); await store.flush();
+        await store.put(LanguagePreferences.valueKey, value); await store.flush();
         if (!allowed()) { throw new Error('ui_language_cancelled'); }
         // Native preferred language controls cold-start resources; setLanguage refreshes the current UI.
         i18n.System.setAppPreferredLanguage(value === 'system' ? 'default' : value);
         LanguagePreferences.apply(value);
       } catch (e) {
-        try { await store.put('choice_v1', previous); await store.flush(); i18n.System.setAppPreferredLanguage(old === 'system' ? 'default' : old); LanguagePreferences.applied = ''; LanguagePreferences.apply(old); if (typeof previous !== 'string' || (previous !== '' && !validUiLanguage(previous))) { LanguagePreferences.store = undefined; } }
+        try { await store.put(LanguagePreferences.valueKey, previous); await store.flush(); i18n.System.setAppPreferredLanguage(old === 'system' ? 'default' : old); LanguagePreferences.applied = ''; LanguagePreferences.apply(old); if (typeof previous !== 'string' || (previous !== '' && !validUiLanguage(previous))) { LanguagePreferences.store = undefined; } }
         catch (restore) { LanguagePreferences.issue = 'ui_language_restore_failed'; throw new Error(LanguagePreferences.issue); }
         LanguagePreferences.issue = (e as Error).message === 'ui_language_cancelled' ? 'ui_language_cancelled' : 'ui_language_save_failed'; throw new Error(LanguagePreferences.issue);
       }

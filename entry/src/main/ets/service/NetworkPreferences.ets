@@ -5,6 +5,8 @@ import { NetworkOptions, NetworkPolicy, copyNetworkOptions, validNetworkOptions 
 
 // A single application preference record; account data and credentials never enter this store.
 export class NetworkPreferences {
+  private static readonly storeName: string = 'network_options';
+  private static readonly valueKey: string = 'settings_v1';
   private static context: common.Context | undefined;
   private static store: preferences.Preferences | undefined;
   private static loading: Promise<void> | undefined;
@@ -21,8 +23,8 @@ export class NetworkPreferences {
   }
   private static async read(context: common.Context): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'network_options' });
-      const raw = await store.get('settings_v1', ''); NetworkPreferences.persisted = typeof raw === 'string' ? raw : '';
+      const store = await preferences.getPreferences(context, { name: NetworkPreferences.storeName });
+      const raw = await store.get(NetworkPreferences.valueKey, ''); NetworkPreferences.persisted = typeof raw === 'string' ? raw : '';
       const next = raw === '' ? new NetworkOptions() : JSON.parse(NetworkPreferences.persisted) as NetworkOptions;
       if (!validNetworkOptions(next)) { throw new Error('network_options_invalid'); }
       NetworkPolicy.publish(next); NetworkPreferences.store = store; NetworkPreferences.issue = '';
@@ -39,15 +41,15 @@ export class NetworkPreferences {
       if (!NetworkPreferences.store) {
         if (!NetworkPreferences.context) { throw new Error('network_options_load_failed'); }
         // Permit explicit repair of a corrupt record, while still requiring a usable platform store.
-        NetworkPreferences.store = await preferences.getPreferences(NetworkPreferences.context, { name: 'network_options' });
+        NetworkPreferences.store = await preferences.getPreferences(NetworkPreferences.context, { name: NetworkPreferences.storeName });
       }
       if (!allowed()) { throw new Error('network_options_cancelled'); }
       const store = NetworkPreferences.store!; const previous = NetworkPreferences.persisted;
       try {
-        const encoded = JSON.stringify(next); await store.put('settings_v1', encoded); await store.flush();
+        const encoded = JSON.stringify(next); await store.put(NetworkPreferences.valueKey, encoded); await store.flush();
         NetworkPreferences.persisted = encoded; NetworkPolicy.publish(next); NetworkPreferences.issue = '';
       } catch (e) {
-        try { await store.put('settings_v1', previous); await store.flush(); }
+        try { await store.put(NetworkPreferences.valueKey, previous); await store.flush(); }
         catch (restoreError) { NetworkPreferences.store = undefined; NetworkPreferences.issue = 'network_options_restore_failed'; throw new Error(NetworkPreferences.issue); }
         NetworkPreferences.issue = 'network_options_save_failed'; throw new Error(NetworkPreferences.issue);
       }

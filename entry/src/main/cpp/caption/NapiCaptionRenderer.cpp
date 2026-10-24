@@ -1,3 +1,4 @@
+#include "SubtitleLimits.h"
 #include "NapiCaptionRenderer.h"
 #include <native_drawing/drawing_text_typography.h>
 #include <native_drawing/drawing_font_collection.h>
@@ -21,8 +22,9 @@
 #include <vector>
 
 namespace {
-constexpr size_t MAX_TEXT = 4 * 1024 * 1024;
-constexpr uint64_t MAX_PIXELS = 1920ULL * 1080ULL;
+namespace limits = cineisle::subtitle_limits;
+constexpr size_t MAX_TEXT = limits::kMaxCaptionTextUtf8Bytes;
+constexpr uint64_t MAX_PIXELS = limits::kMaxCaptionFramePixels;
 template<class T, void (*D)(T*)> using Own = std::unique_ptr<T, decltype(D)>;
 struct Run {
     std::string text, family;
@@ -32,7 +34,7 @@ struct Run {
     bool bold = false, italic = false, underline = false, strike = false;
 };
 struct Shadow { uint32_t color; double x, y, radius; };
-struct Request { double width = 1; uint32_t lines = 1000; bool intrinsic = false; std::vector<Run> runs; std::vector<Shadow> shadows; };
+struct Request { double width = 1; uint32_t lines = limits::kMaxCaptionLines; bool intrinsic = false; std::vector<Run> runs; std::vector<Shadow> shadows; };
 struct Frame { uint32_t width = 0, height = 0, layoutWidth = 0, layoutHeight = 0, halo = 0; std::vector<uint8_t> rgba; };
 void Check(napi_status status) { if (status != napi_ok) { throw std::invalid_argument("caption_argument_invalid"); } }
 napi_value Field(napi_env env, napi_value object, const char *key) {
@@ -59,20 +61,20 @@ std::string String(napi_env env, napi_value value, size_t maximum, size_t *units
     return result;
 }
 Request Read(napi_env env, napi_value value) {
-    Request out; out.width = Number(env, Field(env, value, "width"), 1, 8192);
-    out.lines = Integer(env, Field(env, value, "maxLines"), 1, 1000);
+    Request out; out.width = Number(env, Field(env, value, "width"), 1, limits::kMaxCaptionLayoutWidthPx);
+    out.lines = Integer(env, Field(env, value, "maxLines"), 1, limits::kMaxCaptionLines);
     out.intrinsic = Boolean(env, Field(env, value, "intrinsic"));
     auto array = Field(env, value, "runs"); bool isArray; Check(napi_is_array(env, array, &isArray));
     uint32_t count; Check(napi_get_array_length(env, array, &count));
-    if (!isArray || !count || count > 4096) { throw std::invalid_argument("caption_runs_invalid"); }
+    if (!isArray || !count || count > limits::kMaxCaptionRuns) { throw std::invalid_argument("caption_runs_invalid"); }
     size_t bytes = 0;
     for (uint32_t i = 0; i < count; ++i) {
         napi_value entry; Check(napi_get_element(env, array, i, &entry)); Run run;
         run.text = String(env, Field(env, entry, "text"), MAX_TEXT, &run.units); bytes += run.text.size();
         if (bytes > MAX_TEXT) { throw std::invalid_argument("caption_text_too_large"); }
-        run.family = String(env, Field(env, entry, "family"), 128);
-        run.size = Number(env, Field(env, entry, "size"), 0.01, 8192);
-        run.baseline = Number(env, Field(env, entry, "baseline"), -1000000, 1000000);
+        run.family = String(env, Field(env, entry, "family"), limits::kMaxCaptionFamilyBytes);
+        run.size = Number(env, Field(env, entry, "size"), 0.01, limits::kMaxCaptionFontSizePx);
+        run.baseline = Number(env, Field(env, entry, "baseline"), -limits::kMaxCaptionBaselineOffsetPx, limits::kMaxCaptionBaselineOffsetPx);
         run.color = Integer(env, Field(env, entry, "color"), 0, UINT32_MAX);
         bool hasBackground; Check(napi_has_named_property(env, entry, "background", &hasBackground));
         if (hasBackground) { run.background = Integer(env, Field(env, entry, "background"), 0, UINT32_MAX); }
@@ -82,12 +84,12 @@ Request Read(napi_env env, napi_value value) {
     }
     if (!bytes) { throw std::invalid_argument("caption_text_empty"); }
     array = Field(env, value, "shadows"); Check(napi_is_array(env, array, &isArray)); Check(napi_get_array_length(env, array, &count));
-    if (!isArray || count > 4) { throw std::invalid_argument("caption_shadows_invalid"); }
+    if (!isArray || count > limits::kMaxCaptionShadows) { throw std::invalid_argument("caption_shadows_invalid"); }
     for (uint32_t i = 0; i < count; ++i) {
         napi_value entry; Check(napi_get_element(env, array, i, &entry));
         out.shadows.push_back({Integer(env, Field(env, entry, "color"), 0, UINT32_MAX),
-            Number(env, Field(env, entry, "x"), -128, 128), Number(env, Field(env, entry, "y"), -128, 128),
-            Number(env, Field(env, entry, "radius"), 0, 128)});
+            Number(env, Field(env, entry, "x"), -limits::kMaxShadowOffsetPx, limits::kMaxShadowOffsetPx), Number(env, Field(env, entry, "y"), -limits::kMaxShadowOffsetPx, limits::kMaxShadowOffsetPx),
+            Number(env, Field(env, entry, "radius"), 0, limits::kMaxShadowRadiusPx)});
     }
     return out;
 }
@@ -243,7 +245,7 @@ Frame Rasterize(const Request &request) {
     const double height = std::ceil(OH_Drawing_TypographyGetHeight(paragraph.text.get()));
     double halo = 2;
     for (const auto &shadow : request.shadows) { halo = std::max(halo, std::ceil(shadow.radius * 3 + std::max(std::abs(shadow.x), std::abs(shadow.y))) + 2); }
-    if (!std::isfinite(height) || height < 1 || height > 32768) { throw std::runtime_error("caption_frame_too_large"); }
+    if (!std::isfinite(height) || height < 1 || height > limits::kMaxCaptionFrameHeightPx) { throw std::runtime_error("caption_frame_too_large"); }
     Frame out; out.layoutWidth = uint32_t(std::ceil(width)); out.layoutHeight = uint32_t(height); out.halo = uint32_t(halo);
     out.width = out.layoutWidth + out.halo * 2; out.height = out.layoutHeight + out.halo * 2;
     if (uint64_t(out.width) * out.height > MAX_PIXELS) { throw std::runtime_error("caption_frame_too_large"); }
@@ -255,7 +257,7 @@ Frame Rasterize(const Request &request) {
         auto found = metrics.find(key); if (found == metrics.end()) { found = metrics.emplace(key, FontMetrics(run)).first; }
         const auto &font = found->second; auto boxes = Boxes(paragraph, paragraph.starts[i], paragraph.ends[i]);
         const size_t count = OH_Drawing_GetSizeOfTextBox(boxes.get());
-        if (lines.size() + count > 16384) { throw std::runtime_error("caption_frame_too_complex"); }
+        if (lines.size() + count > limits::kMaxCaptionLineBoxes) { throw std::runtime_error("caption_frame_too_complex"); }
         for (size_t j = 0; j < count; ++j) {
             const float left = OH_Drawing_GetLeftFromTextBox(boxes.get(), int(j)), right = OH_Drawing_GetRightFromTextBox(boxes.get(), int(j));
             if (right <= left) { continue; }

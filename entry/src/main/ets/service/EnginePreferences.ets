@@ -4,6 +4,8 @@ import { EngineChoice, validEngineChoice } from '../utils/EngineChoice';
 
 // Application-wide like Android's playerMpv preference. Publish only after durable flush.
 export class EnginePreferences {
+  private static readonly storeName: string = 'playback_engine';
+  private static readonly valueKey: string = 'choice_v1';
   private static context: common.UIAbilityContext | undefined;
   private static store: preferences.Preferences | undefined;
   private static loading: Promise<void> | undefined;
@@ -31,8 +33,8 @@ export class EnginePreferences {
   }
   private static async read(context: common.UIAbilityContext): Promise<void> {
     try {
-      const store = await preferences.getPreferences(context, { name: 'playback_engine' });
-      const raw = await store.get('choice_v1', '');
+      const store = await preferences.getPreferences(context, { name: EnginePreferences.storeName });
+      const raw = await store.get(EnginePreferences.valueKey, '');
       EnginePreferences.raw = raw; EnginePreferences.store = store;
       if (typeof raw !== 'string' || (raw !== '' && !validEngineChoice(raw))) { throw new Error('engine_invalid'); }
       EnginePreferences.value = (raw || 'native') as EngineChoice;
@@ -56,10 +58,10 @@ export class EnginePreferences {
       const store = EnginePreferences.store!; const previous = EnginePreferences.raw;
       if (!allowed()) { throw new Error('engine_cancelled'); }
       try {
-        await store.put('choice_v1', choice); await store.flush();
+        await store.put(EnginePreferences.valueKey, choice); await store.flush();
         if (!allowed()) { throw new Error('engine_cancelled'); }
       } catch (e) {
-        try { await store.put('choice_v1', previous); await store.flush(); }
+        try { await store.put(EnginePreferences.valueKey, previous); await store.flush(); }
         catch (_) { EnginePreferences.ready = false; EnginePreferences.issue = 'engine_restore_failed'; throw new Error(EnginePreferences.issue); }
         EnginePreferences.issue = (e as Error).message === 'engine_cancelled' ? 'engine_cancelled' : 'engine_save_failed';
         throw new Error(EnginePreferences.issue);

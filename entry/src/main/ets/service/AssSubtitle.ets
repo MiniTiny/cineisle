@@ -1,3 +1,4 @@
+import { AssRenderLimits } from '../utils/SubtitleLimits';
 import ass, { NativeAssFrame, NativeAssHandle } from 'libcineisle_ass.so';
 import image from '@ohos.multimedia.image';
 import { AssFonts } from './AssFonts';
@@ -28,7 +29,7 @@ export class AssSubtitle implements StyledSubtitleSession {
 
   render(milliseconds: number, videoWidth: number, videoHeight: number): void {
     if (this.closed || !Number.isFinite(milliseconds) || milliseconds < 0 ||
-      !Number.isInteger(videoWidth) || !Number.isInteger(videoHeight) || videoWidth <= 0 || videoHeight <= 0 || videoWidth > 32768 || videoHeight > 32768) { return; }
+      !Number.isInteger(videoWidth) || !Number.isInteger(videoHeight) || videoWidth <= 0 || videoHeight <= 0 || videoWidth > AssRenderLimits.maxSourceDimensionPx || videoHeight > AssRenderLimits.maxSourceDimensionPx) { return; }
     this.pending = { time: Math.floor(milliseconds), width: videoWidth, height: videoHeight, epoch: this.epoch };
     if (!this.running) { this.drain(); }
   }
@@ -47,7 +48,7 @@ export class AssSubtitle implements StyledSubtitleSession {
     try {
       while (!this.closed && this.pending) {
         const request = this.pending; this.pending = undefined;
-        const scale = Math.min(1, 1920 / request.width, 1080 / request.height);
+        const scale = Math.min(1, AssRenderLimits.targetWidthPx / request.width, AssRenderLimits.targetHeightPx / request.height);
         const width = Math.max(1, Math.floor(request.width * scale));
         const height = Math.max(1, Math.floor(request.height * scale));
         const frame = await ass.render(this.handle, request.time, width, height, request.width, request.height);

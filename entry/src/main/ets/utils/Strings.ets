@@ -6,6 +6,8 @@ export function text(name: string, ...args: Array<string | number>): string {
   try { return resources?.getStringByNameSync(name, ...args) ?? name; } catch (e) { return name; }
 }
 export function errorText(error: Error): string {
+  // Preserve captured formatted messages; only legacy resource-key messages resolve at display time.
+  // Machine classification uses Failures and never depends on this presentation rule.
   const message = error.message;
   return /^[a-z_]+$/.test(message) ? text(message) : message;
 }

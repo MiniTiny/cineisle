@@ -1,3 +1,4 @@
+#include "../caption/SubtitleLimits.h"
 #include "AssRenderer.h"
 #include "../caption/NapiCaptionRenderer.h"
 #include <napi/native_api.h>
@@ -9,6 +10,7 @@
 #include <stdexcept>
 
 namespace {
+namespace limits = cineisle::subtitle_limits;
 constexpr napi_type_tag HANDLE_TAG{0x44713cd7b8e9a065ULL, 0x83a512cb09e46f27ULL};
 struct Context {
     std::atomic<bool> closed{false};
@@ -155,11 +157,11 @@ napi_value Create(napi_env env, napi_callback_info info)
         Check(napi_get_cb_info(env, info, &count, args, nullptr, nullptr));
         if (count < 3) { throw std::invalid_argument("ass_argument_invalid"); }
         auto work = std::make_unique<Work>(); work->kind = Kind::Create; work->context = std::make_shared<Context>();
-        work->document = String(env, args[0], 4 * 1024 * 1024);
-        work->font = String(env, args[1], 4096); work->family = String(env, args[2], 512);
+        work->document = String(env, args[0], limits::kMaxAssDocumentUtf8Bytes);
+        work->font = String(env, args[1], limits::kMaxAssFontPathBytes); work->family = String(env, args[2], limits::kMaxAssFamilyBytes);
         if (count == 4) {
             napi_valuetype type; Check(napi_typeof(env, args[3], &type));
-            if (type != napi_undefined) { work->configuration = String(env, args[3], 4096); }
+            if (type != napi_undefined) { work->configuration = String(env, args[3], limits::kMaxAssConfigPathBytes); }
         }
         return Queue(env, std::move(work));
     } catch (const std::exception &error) { napi_throw_error(env, nullptr, ErrorCode(error).c_str()); return nullptr; }
@@ -174,8 +176,8 @@ napi_value Render(napi_env env, napi_callback_info info)
         if (!context || context->closed.load()) { throw std::runtime_error("ass_renderer_closed"); }
         auto work = std::make_unique<Work>(); work->kind = Kind::Render; work->context = context;
         work->time = int64_t(Integer(env, args[1], 9007199254740991ULL));
-        work->width = uint32_t(Integer(env, args[2], 4096)); work->height = uint32_t(Integer(env, args[3], 4096));
-        work->videoWidth = uint32_t(Integer(env, args[4], 32768)); work->videoHeight = uint32_t(Integer(env, args[5], 32768));
+        work->width = uint32_t(Integer(env, args[2], limits::kMaxAssCanvasDimensionPx)); work->height = uint32_t(Integer(env, args[3], limits::kMaxAssCanvasDimensionPx));
+        work->videoWidth = uint32_t(Integer(env, args[4], limits::kMaxVideoDimensionPx)); work->videoHeight = uint32_t(Integer(env, args[5], limits::kMaxVideoDimensionPx));
         return Queue(env, std::move(work));
     } catch (const std::exception &error) { napi_throw_error(env, nullptr, ErrorCode(error).c_str()); return nullptr; }
 }
