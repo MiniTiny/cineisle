@@ -12,11 +12,12 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
   assert.ok(['space', 'queue', 'persistent', 'metadata'].includes(kind));
   const { recipes, controls } = require('./download-' + kind + '-fault-cases.cjs'); assert.ok(recipes.length && controls.length);
   const frozen = fingerprint(root), temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-download-probes-')));
-  const evidence = { kind, source: frozen, complete: false, allDetected: false, baselines: [], probes: [], controls: [], selfFaults: [] };
+  const evidence = { kind, source: frozen, complete: false, allDetected: false, baselines: [], probes: [], controls: [], selfBaselines: [], selfControls: [], selfFaults: [] };
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2));
   const child = (suite, name, phase) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
+  const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   try {
     for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     const baselines = new Set();
@@ -40,6 +41,7 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
       assert.throws(() => assert.equal(result.status, 'invalid')); evidence.selfFaults.push({ id: 'platform-capture-removed', rejected: true, result });
     } finally { fs.writeFileSync(fixture, originalFixture); }
     const resultFile = path.join(temp, 'tests/resource-cache-result.cjs'), originalResult = fs.readFileSync(resultFile, 'utf8');
+    const selectedSelfCases = new Set();
     for (const [id, old, replacement] of [
       ['process-health', 'result.error || result.signal || result.status === null', 'false'],
       ['unique-result', 'rows.length !== 1', 'rows.length < 1'],
@@ -49,12 +51,23 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
       ['boundary-name', 'record.boundary !== name', 'false'],
       ['exit-code', 'result.status !== 1', 'false']
     ]) {
+      const name = ['process-health', 'unique-result'].includes(id) ? 'download classifier rejects malformed ambiguous and process failures' : 'download classifier guards are independently necessary';
+      if (!selectedSelfCases.has(name)) {
+        const raw = selfChild(name), baseline = classify(raw, name); persist('self-baseline-' + id, raw);
+        evidence.selfBaselines.push({ name, ...baseline }); save(); assert.equal(baseline.status, 'survived', 'Invalid self-check baseline: ' + id);
+        for (const [flag, phase] of [['--classifier-unrelated-failure', 'setup'], ['--classifier-worker-failure', 'classifier-worker']]) {
+          const raw = selfChild(name, flag), result = classify(raw, name); persist('self-control-' + id + flag, raw);
+          evidence.selfControls.push({ name, flag, ...result }); save();
+          assert.equal(result.status, 'invalid'); assert.equal(result.record.fixturePhase, phase); assert.equal(result.record.error.cause.code, 'ERR_ASSERTION');
+        }
+        selectedSelfCases.add(name);
+      }
       assert.equal(originalResult.split(old).length, 2);
       try {
         fs.writeFileSync(resultFile, originalResult.replace(old, replacement));
-        const raw = child('download-contract-probe-controls.test.cjs', '--classifier-only'); persist('self-fault-' + id, raw);
-        assert.equal(raw.status, 1, 'Control failed to detect its own broken ' + id); assert.match(raw.stderr, /AssertionError/);
-        evidence.selfFaults.push({ id, rejected: true });
+        const raw = selfChild(name), result = classify(raw, name); persist('self-fault-' + id, raw);
+        assert.equal(result.status, 'detected', 'Control did not reach its own selected assertion: ' + id);
+        evidence.selfFaults.push({ id, name, rejected: true, result });
       } finally { fs.writeFileSync(resultFile, originalResult); }
     }
     for (const r of recipes) {
