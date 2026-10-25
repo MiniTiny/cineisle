@@ -16,4 +16,6 @@ const controls = [
   ['queue legacy count 5', 'legacy-create'], ['queue agent count 5', 'agent-create'], ['queue agent count 5', 'agent-start'],
   ['queue legacy count 4', 'statvfs'], ['queue agent count 4', 'file-open'], ['queue legacy count 4', 'file-rename']
 ].map(([name, phase]) => ({ name, phase, suite: 'download-queue-boundaries.test.cjs' }));
+const { writeControls } = require('./download-platform-evidence.cjs');
+controls.push(...writeControls('legacy', 'initial'), ...writeControls('legacy', 'poll'));
 module.exports = { recipes, controls };

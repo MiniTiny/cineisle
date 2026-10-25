@@ -27,4 +27,6 @@ const controls = [
   ['persistent restore saves without event throttle', 'agent-show'], ['persistent restore saves without event throttle', 'agent-getTask'],
   ['persistent title x 256', 'file-open'], ['persistent title x 256', 'file-rename']
 ].map(([name, phase]) => ({ name, phase, suite: 'persistent-download-boundaries.test.cjs' }));
+const { writeControls } = require('./download-platform-evidence.cjs');
+for (const stage of ['initial', 'progress', 'restore', 'poll']) controls.push(...writeControls('agent', stage));
 module.exports = { recipes, controls };

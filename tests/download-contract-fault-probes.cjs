@@ -1,6 +1,7 @@
 // Mutations run only in a source copy; every intact source/test fingerprint is preserved.
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), crypto = require('node:crypto'), assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process'), { classify } = require('./resource-cache-result.cjs');
+const { verifyPlatformFailure } = require('./download-platform-evidence.cjs');
 const root = path.resolve(__dirname, '..');
 function fingerprint(base) {
   const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
@@ -16,19 +17,21 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2));
-  const child = (suite, name, phase) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
+  const child = (suite, name, phase, ioStage) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? ['--fault=' + phase] : []), ...(ioStage ? ['--io-stage=' + ioStage] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   try {
     for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     const baselines = new Set();
     for (const c of controls) {
-      const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase);
-      persist('control-' + c.phase + '-positive', positive); persist('control-' + c.phase + '-negative', negative);
+      const positive = child(c.suite, c.name, '', c.ioStage), negative = child(c.suite, c.name, c.phase, c.ioStage);
+      const label = 'control-' + c.phase + '-' + (c.ioStage || c.name.replace(/[^a-z0-9]+/gi, '-'));
+      persist(label + '-positive', positive); persist(label + '-negative', negative);
       const normal = classify(positive, c.name), failed = classify(negative, c.name);
       evidence.controls.push({ ...c, normal, failed }); save();
       assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid');
       assert.equal(failed.record.fixturePhase, 'download-platform'); assert.equal(failed.record.error.cause.code, 'EIO');
       assert.equal(failed.record.error.cause.message, 'injected download platform failure: ' + c.phase);
+      evidence.controls[evidence.controls.length - 1].checkpoint = verifyPlatformFailure(negative, c); save();
     }
     // Without recording the injected platform failure, a selected boundary can falsely count it as detected.
     const fixture = path.join(temp, 'tests/download-contract-fixture.cjs'), originalFixture = fs.readFileSync(fixture, 'utf8');
@@ -40,6 +43,20 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
       // Control assertion is expected to reject this broken capture path, regardless of detected/survived.
       assert.throws(() => assert.equal(result.status, 'invalid')); evidence.selfFaults.push({ id: 'platform-capture-removed', rejected: true, result });
     } finally { fs.writeFileSync(fixture, originalFixture); }
+    for (const [id, old, replacement, selected, message] of [
+      ['file-before-create', "const fileReady = !phase.startsWith('file-') || createdTasks > 0;", 'const fileReady = true;', controls.find(c => c.phase === 'file-open'), 'File fault did not reach a created task'],
+      ['file-before-stage', 'const stageReady = !requestedStage || operationStage === requestedStage;', 'const stageReady = true;', controls.find(c => c.phase === 'file-open' && c.ioStage && !c.ioStage.endsWith('-initial')), 'File fault occurred before its selected save stage']
+    ]) {
+      if (!selected) continue;
+      assert.equal(originalFixture.split(old).length, 2);
+      try {
+        fs.writeFileSync(fixture, originalFixture.replace(old, replacement));
+        const raw = child(selected.suite, selected.name, selected.phase, selected.ioStage); persist('self-fault-' + id, raw);
+        assert.equal(classify(raw, selected.name).status, 'invalid');
+        assert.throws(() => verifyPlatformFailure(raw, selected), error => error.code === 'ERR_ASSERTION' && error.message.includes(message));
+        evidence.selfFaults.push({ id, rejected: true });
+      } finally { fs.writeFileSync(fixture, originalFixture); }
+    }
     const resultFile = path.join(temp, 'tests/resource-cache-result.cjs'), originalResult = fs.readFileSync(resultFile, 'utf8');
     const selectedSelfCases = new Set();
     for (const [id, old, replacement] of [

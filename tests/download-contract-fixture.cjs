@@ -14,23 +14,42 @@ const observe = promise => Promise.resolve(promise).then(value => ({ value }), e
 const settle = async () => { for (let i = 0; i < 12; i++) await new Promise(setImmediate); };
 const item = (id = 'movie', extra = {}) => ({ ...h.film(id), CanDownload: true, ...extra });
 let errors = [], selectedFault = '', environment, expectedFailures = new Set();
-function platform(phase, fn) {
-  if (selectedFault === phase) {
+let requestedStage = '', operationStage = 'account-init', createdTasks = 0, startedTasks = 0, published = false, platformCalls = {};
+const openedFiles = new Map();
+function platform(phase, fn, details = {}) {
+  platformCalls[phase] = (platformCalls[phase] || 0) + 1;
+  const snapshot = injected => ({ version: 1, phase, stage: operationStage, createdTasks, startedTasks, calls: { ...platformCalls }, injected, ...details });
+  const fileReady = !phase.startsWith('file-') || createdTasks > 0;
+  const stageReady = !requestedStage || operationStage === requestedStage;
+  const indexFile = !phase.startsWith('file-') || /^downloads\.json(?:\.tmp)?$/.test(details.target || details.filename || '');
+  if (selectedFault === phase && fileReady && stageReady && indexFile) {
     const error = Object.assign(Error('injected download platform failure: ' + phase), { code: 'EIO' });
+    error.downloadState = snapshot(true);
     errors.push({ phase, error }); throw error;
   }
-  const failed = error => { if (!expectedFailures.has(phase)) errors.push({ phase, error }); throw error; };
+  const failed = error => { if (!expectedFailures.has(phase)) { error.downloadState = snapshot(false); errors.push({ phase, error }); } throw error; };
   try { const value = fn(); return value?.then ? value.catch(failed) : value; } catch (error) { return failed(error); }
 }
-async function healthy() { await fixture('download-platform', () => { if (errors.length) throw Object.assign(errors[0].error, { platformPhase: errors[0].phase }); }); }
+async function healthy() { await fixture('download-platform', () => {
+  if (!errors.length) return;
+  if (!published) { console.error('DOWNLOAD_PLATFORM_STATE ' + JSON.stringify(errors[0].error.downloadState)); published = true; }
+  throw Object.assign(errors[0].error, { platformPhase: errors[0].phase });
+}); }
 async function before() {
   Object.assign(io, originalIO); Date.now = originalNow;
   await settle(); h.reset(); A.mutations.clear(); A.downloadListener = undefined; D.subtitleReservations.clear();
   require('./download-platform.cjs').install(h.platform);
   strings.initializeStrings(h.context.resourceManager);
   errors = []; expectedFailures.clear(); selectedFault = (process.argv.find(s => s.startsWith('--fault=')) || '').slice(8);
-  for (const [key, phase] of [['openSync', 'file-open'], ['renameSync', 'file-rename'], ['readTextSync', 'file-read']]) {
-    io[key] = (...args) => platform(phase, () => originalIO[key](...args));
+  requestedStage = (process.argv.find(s => s.startsWith('--io-stage=')) || '').slice(11);
+  operationStage = 'account-init'; createdTasks = startedTasks = 0; published = false; platformCalls = {}; openedFiles.clear();
+  io.openSync = (...args) => {
+    const filename = path.basename(args[0]); const file = platform('file-open', () => originalIO.openSync(...args), { filename });
+    openedFiles.set(file.fd, filename); return file;
+  };
+  io.writeSync = (...args) => platform('file-write', () => originalIO.writeSync(...args), { filename: openedFiles.get(args[0]) });
+  for (const [key, phase] of [['renameSync', 'file-rename'], ['readTextSync', 'file-read']]) {
+    io[key] = (...args) => platform(phase, () => originalIO[key](...args), { filename: path.basename(args[0]), ...(key === 'renameSync' ? { target: path.basename(args[1]) } : {}) });
   }
   environment = { free: 1024 ** 4, spaceCalls: [] };
   h.platform.get('@ohos.file.statvfs').getFreeSize = async directory => platform('statvfs', () => {
@@ -43,6 +62,7 @@ function record(extra = {}) {
 }
 function backend(agent, hooks = {}) {
   const client = h.activate(), made = [], events = [], removed = [], saves = [];
+  operationStage = 'transfer';
   if (agent) h.capabilities.add('SystemCapability.Request.FileTransferAgent'); else h.capabilities.delete('SystemCapability.Request.FileTransferAgent');
   client.detail = async id => hooks.detail ? hooks.detail(id) : item(id);
   client.playbackInfo = async id => hooks.playbackInfo ? hooks.playbackInfo(id) : ({ MediaSources: [{ Id: 'source', Name: 'HD', Container: 'mp4', Size: 100 }] });
@@ -52,11 +72,11 @@ function backend(agent, hooks = {}) {
   const make = options => {
     const handlers = {}, task = { tid: String(made.length + 1), options, handlers,
       on(name, fn) { events.push('bind:' + name); handlers[name] = fn; },
-      async start() { return platform('agent-start', async () => { events.push('start'); if (hooks.start) await hooks.start(task); }); },
+      async start() { return platform('agent-start', async () => { events.push('start'); startedTasks++; if (hooks.start) await hooks.start(task); }); },
       async delete() { removed.push(task.tid); return true; },
-      async getTaskInfo() { return hooks.info ? hooks.info(task) : { downloadId: 1, downloadedBytes: 0, downloadTotalBytes: 100, status: 0 }; }
+      async getTaskInfo() { return platform('legacy-info', () => hooks.info ? hooks.info(task) : { downloadId: 1, downloadedBytes: 0, downloadTotalBytes: 100, status: 0 }); }
     };
-    made.push(task); return task;
+    made.push(task); createdTasks++; return task;
   };
   api.agent = { Action: { DOWNLOAD: 17 }, Mode: { BACKGROUND: 23 }, Network: { WIFI: 41, ANY: 37 },
     State: { COMPLETED: 64, FAILED: 65, STOPPED: 49, REMOVED: 80 },
@@ -86,11 +106,12 @@ async function run(tests, label) {
       // Check the real platform calls before allowing any target assertion to kill a mutation.
       await healthy(); if (failure) throw failure;
       assert.ok(expectations.length, 'No boundary assertion reached');
-      for (const expectation of expectations) check(expectation);
+      try { for (const expectation of expectations) check(expectation); }
+      finally { await healthy(); }
     }, before, after);
     console.log('PASS ' + name);
   }
   console.log(`${cases.length} ${label} tests passed. Harmony services are fixtures; device/background acceptance is separate.`);
 }
 module.exports = { assert, fs, path, h, A, D, P, LocalStore, strings, api, io, originalIO, originalNow, observe, settle, item, record, backend, run, classify, fixture,
-  env: () => environment, expectFailure: phase => expectedFailures.add(phase) };
+  env: () => environment, expectFailure: phase => expectedFailures.add(phase), stage: name => { operationStage = name; } };

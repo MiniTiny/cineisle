@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict'), path = require('node:path'), { spawnSync } = require('node:child_process');
 const { fixture, runCase, classify } = require('./resource-cache-result.cjs');
+const { verifyPlatformFailure } = require('./download-platform-evidence.cjs');
 const name = 'download classifier target';
 if (process.argv[2] === '--worker') {
   const mode = process.argv[3];
@@ -47,11 +48,12 @@ if (process.argv[2] === '--worker') {
     check(() => { assert.equal(positive.status, 'survived'); assert.equal(negative.status, 'invalid'); assert.equal(negative.record.fixturePhase, phase); assert.equal(negative.record.error.cause.code, 'ERR_ASSERTION'); });
   });
   for (const kind of ['space', 'queue', 'persistent', 'metadata']) for (const c of require('./download-' + kind + '-fault-cases.cjs').controls) test(`download ${kind} actual ${c.phase} failure is invalid for ${c.name}`, () => {
-    const run = fault => spawnSync(process.execPath, [path.join(__dirname, c.suite), c.name, ...(fault ? ['--fault=' + c.phase] : [])], { encoding: 'utf8', timeout: 20000 });
-    const positive = classify(run(false), c.name), negative = classify(run(true), c.name);
+    const run = fault => spawnSync(process.execPath, [path.join(__dirname, c.suite), c.name, ...(fault ? ['--fault=' + c.phase] : []), ...(c.ioStage ? ['--io-stage=' + c.ioStage] : [])], { encoding: 'utf8', timeout: 20000 });
+    const positive = classify(run(false), c.name), raw = run(true), negative = classify(raw, c.name);
     assert.equal(positive.status, 'survived'); assert.equal(negative.status, 'invalid');
     assert.equal(negative.record.fixturePhase, 'download-platform'); assert.equal(negative.record.error.cause.code, 'EIO');
     assert.equal(negative.record.error.cause.message, 'injected download platform failure: ' + c.phase);
+    verifyPlatformFailure(raw, c);
   });
   const selected = process.argv[2] === '--classifier-only' ? tests.filter(t => t.classifier && (!process.argv[3] || t.name === process.argv[3])) : tests;
   (async () => {
