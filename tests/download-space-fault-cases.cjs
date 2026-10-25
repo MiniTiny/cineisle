@@ -11,6 +11,13 @@ add('video-reservation', space, "active.state === 'downloading' ?", 'false ?', '
 add('pending-reservation', space, "active.subtitleState === 'pending' ?", 'false ?', 'space optional pending -1');
 add('claims-reservation', space, 'Math.max(0, ...(DownloadSpace.subtitleReservations.get(active) ?? []))', '0', 'space optional claim -1');
 add('claims-double-count', space, 'Math.max(subtitles, reserved)', '(subtitles + reserved)', 'space optional combined 0');
+for (const entry of ['check', 'optional']) {
+  add('cross-record-sum-' + entry, space, 'return sum + video + Math.max(subtitles, reserved);', 'return video + Math.max(subtitles, reserved);', `space multiple videos ${entry} -1`);
+  add('maximum-claim-' + entry, space, 'Math.max(0, ...(DownloadSpace.subtitleReservations.get(active) ?? []))', '((DownloadSpace.subtitleReservations.get(active) ?? [0])[0] ?? 0)', `space multiple claims ${entry} -1`);
+  for (const delta of [-1, 1]) add(`claim-budget-${entry}-${delta}`, space, 'claims.push(count * SubtitleTransferLimits.maxBytes)', `claims.push(count * SubtitleTransferLimits.maxBytes ${delta < 0 ? '-' : '+'} 1)`, `space multiple claims ${entry} ${delta < 0 ? -1 : 0}`);
+}
+add('release-idempotence', space, 'if (released) { return; } released = true;', 'released = true;', 'space composite optional release-max -1');
+add('release-claim', space, 'claims.splice(claims.indexOf(count * SubtitleTransferLimits.maxBytes), 1);', '', 'space composite check release-max 0');
 add('ready-subtitle', space, "sub.state !== 'ready' || !fs.accessSync(sub.path)", "sub.state !== 'ready'", 'space new subtitleOnly=true -1');
 add('video-budget', space, '(subtitleOnly ? 0 : record.expectedSize ?? 0)', '0', 'space video production legacy -1');
 add('required-rounding', space, 'Math.ceil((reserved + needed)', 'Math.floor((reserved + needed)', 'space display keeps ceil floor and captured language through the real Downloads retry');

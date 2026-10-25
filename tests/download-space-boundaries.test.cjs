@@ -44,6 +44,40 @@ test('space claims use max per record and sum between records with idempotent re
     check(() => { assert.equal(initial.error, undefined); assert.equal(reduced.error, undefined); assert.equal(released.error, undefined); });
   } finally { first(); second(); duplicate(); other(); }
 });
+// Fixed budgets, not values read from the implementation: exercise each entry independently.
+for (const entry of ['check', 'optional']) for (const delta of [-1, 0, 1]) {
+  test(`space multiple videos ${entry} ${delta}`, async check => {
+    const a = record({ expectedSize: 100, path: path.join(h.directory, 'a.mp4') });
+    const b = record({ expectedSize: 200, path: path.join(h.directory, 'b.mp4') });
+    fs.writeFileSync(a.path, Buffer.alloc(40)); fs.writeFileSync(b.path, Buffer.alloc(150));
+    f.env().free = 8388718 + delta; // 8MiB + (100-40) + (200-150).
+    const r = await observe(entry === 'check' ? D.check(h.directory, record(), [a, b]) : D.checkOptional(h.directory, 0, [a, b]));
+    check(() => { assert.equal(!!r.error, delta < 0); if (r.error) assert.equal(r.error.message.startsWith(entry === 'check' ? 'download_space_insufficient:' : 'download_space_check_failed'), true); });
+  });
+  test(`space multiple claims ${entry} ${delta}`, async check => {
+    const r = record({ state: 'complete' }), first = D.reserveSubtitles(r, 1), maximum = D.reserveSubtitles(r, 2), duplicate = D.reserveSubtitles(r, 1);
+    try {
+      f.env().free = 16777216 + delta; // 8MiB + max(4MiB, 8MiB, 4MiB).
+      const result = await observe(entry === 'check' ? D.check(h.directory, record(), [r]) : D.checkOptional(h.directory, 0, [r]));
+      check(() => assert.equal(!!result.error, delta < 0));
+    } finally { first(); maximum(); duplicate(); }
+  });
+}
+for (const entry of ['check', 'optional']) for (const [phase, required] of [
+  ['initial', 20971520], ['release-first', 20971520], ['release-max', 16777216], ['release-other-first', 16777216], ['released', 8388608]
+]) for (const delta of [-1, 0, 1]) test(`space composite ${entry} ${phase} ${delta}`, async check => {
+  const a = record({ state: 'complete' }), b = record({ state: 'complete' });
+  const first = D.reserveSubtitles(a, 1), maximum = D.reserveSubtitles(a, 2), duplicate = D.reserveSubtitles(a, 1), other = D.reserveSubtitles(b, 1);
+  try {
+    if (['release-first', 'release-max', 'released'].includes(phase)) { first(); first(); }
+    if (['release-max', 'released'].includes(phase)) maximum();
+    if (phase === 'release-other-first') other();
+    if (phase === 'released') { duplicate(); other(); }
+    f.env().free = required + delta;
+    const r = await observe(entry === 'check' ? D.check(h.directory, record(), [a, b]) : D.checkOptional(h.directory, 0, [a, b]));
+    check(() => { assert.equal(!!r.error, delta < 0); assert.deepEqual(f.env().spaceCalls, [h.directory]); });
+  } finally { first(); maximum(); duplicate(); other(); }
+});
 for (const free of [-1, NaN, Infinity, 8388608.5, Number.MAX_SAFE_INTEGER + 1]) for (const entry of ['check', 'optional']) test(`space invalid free ${entry} ${free}`, async check => {
   f.env().free = free;
   const r = await observe(entry === 'check' ? D.check(h.directory, record(), []) : D.checkOptional(h.directory, 0, []));
