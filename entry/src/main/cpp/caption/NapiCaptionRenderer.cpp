@@ -23,6 +23,7 @@
 
 namespace {
 namespace limits = cineisle::subtitle_limits;
+constexpr double kMinCaptionFontSizePx = 0.01;
 constexpr size_t MAX_TEXT = limits::kMaxCaptionTextUtf8Bytes;
 constexpr uint64_t MAX_PIXELS = limits::kMaxCaptionFramePixels;
 template<class T, void (*D)(T*)> using Own = std::unique_ptr<T, decltype(D)>;
@@ -73,7 +74,7 @@ Request Read(napi_env env, napi_value value) {
         run.text = String(env, Field(env, entry, "text"), MAX_TEXT, &run.units); bytes += run.text.size();
         if (bytes > MAX_TEXT) { throw std::invalid_argument("caption_text_too_large"); }
         run.family = String(env, Field(env, entry, "family"), limits::kMaxCaptionFamilyBytes);
-        run.size = Number(env, Field(env, entry, "size"), 0.01, limits::kMaxCaptionFontSizePx);
+        run.size = Number(env, Field(env, entry, "size"), kMinCaptionFontSizePx, limits::kMaxCaptionFontSizePx);
         run.baseline = Number(env, Field(env, entry, "baseline"), -limits::kMaxCaptionBaselineOffsetPx, limits::kMaxCaptionBaselineOffsetPx);
         run.color = Integer(env, Field(env, entry, "color"), 0, UINT32_MAX);
         bool hasBackground; Check(napi_has_named_property(env, entry, "background", &hasBackground));
