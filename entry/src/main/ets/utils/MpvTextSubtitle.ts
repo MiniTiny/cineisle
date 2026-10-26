@@ -1,4 +1,4 @@
-import { SubtitleContent, SubtitleRun, PositionedSubtitle } from './InlineSubtitle';
+import { SubtitleContent, SubtitleRun, PositionedSubtitle, SubtitleRunScale } from './InlineSubtitle';
 
 // These limits protect the ArkTS conversion stage, independently of native UTF-8 packet limits.
 class MpvTextSubtitleLimits {
@@ -8,8 +8,6 @@ class MpvTextSubtitleLimits {
   static readonly maximumOverrideDistanceCodeUnits: number = 2048;
   static readonly maximumRuns: number = 4096;
   static readonly maximumFamilyCodeUnits: number = 128;
-  static readonly minimumSizeScale: number = 0.125;
-  static readonly maximumSizeScale: number = 8;
 }
 
 interface ParsedText { runs: SubtitleRun[]; alignment: number }
@@ -77,7 +75,7 @@ function parseText(source: string, baseSize: number): ParsedText | undefined {
         style = new SubtitleRun('', style); style.family = family;
       } else if ((match = /^fs(\d+(?:\.\d+)?)?$/.exec(command))) {
         const scale = match[1] ? Number(match[1]) / baseSize : 1;
-        if (!Number.isFinite(scale) || scale < MpvTextSubtitleLimits.minimumSizeScale || scale > MpvTextSubtitleLimits.maximumSizeScale) { return undefined; }
+        if (!SubtitleRunScale.valid(scale)) { return undefined; }
         style = new SubtitleRun('', style); style.sizeScale = scale;
       } else if ((match = /^an([1-9])$/.exec(command))) {
         const next = Number(match[1]); if (alignment && alignment !== next) { return undefined; } alignment = next;
