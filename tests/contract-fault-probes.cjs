@@ -3,6 +3,7 @@ const fs = require('node:fs'), os = require('node:os'), path = require('node:pat
 const { spawnSync } = require('node:child_process');
 const { classify } = require('./resource-cache-result.cjs');
 const { verifyExternalFailure } = require('./contract-external.cjs');
+const { replaceLiteral } = require('./literal-mutation.cjs');
 const root = path.resolve(__dirname, '..');
 function fingerprint(base, scopes) {
   const out = {}, walk = relative => { if (fs.statSync(path.join(base, relative)).isFile()) { out[relative] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, relative))).digest('hex'); return; } for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
@@ -22,8 +23,8 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
   const child = (suite, name, phase, nativeInit = false) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? [typeof nativeInit==='number'?'--native-init-failure-at='+nativeInit:typeof nativeInit==='string'?'--native-'+nativeInit+'-init-failure':'--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   const mutate = (file, old, replacement, action) => {
-    const location = path.join(temp, file), original = fs.readFileSync(location, 'utf8'); assert.equal(original.split(old).length, 2, 'Stale or ambiguous mutation: ' + file);
-    try { fs.writeFileSync(location, original.replace(old, replacement)); return action(); } finally { fs.writeFileSync(location, original); }
+    const location = path.join(temp, file), original = fs.readFileSync(location, 'utf8'), mutated = replaceLiteral(original, old, replacement, 'Stale or ambiguous mutation: ' + file);
+    try { fs.writeFileSync(location, mutated); return action(); } finally { fs.writeFileSync(location, original); }
   };
   try {
     for (const scope of scopes) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
@@ -105,9 +106,9 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
         }
         selectedSelfCases.add(name);
       }
-      assert.equal(originalResult.split(old).length, 2);
+      const mutated = replaceLiteral(originalResult, old, replacement);
       try {
-        fs.writeFileSync(resultFile, originalResult.replace(old, replacement));
+        fs.writeFileSync(resultFile, mutated);
         const raw = selfChild(name), result = classify(raw, name); persist('self-fault-' + id, raw);
         assert.equal(result.status, 'detected', 'Control did not reach its own selected assertion: ' + id);
         evidence.selfFaults.push({ id, name, rejected: true, result });

@@ -1,6 +1,7 @@
 // Only isolated source copies are mutated. The working tree is fingerprinted.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto'), assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process'), { classify } = require('./resource-cache-result.cjs');
+const { replaceLiteral } = require('./literal-mutation.cjs');
 const recipes = require('./resource-cache-fault-cases.cjs'), root = path.resolve(__dirname, '..');
 function fingerprint() {
   const result = {};
@@ -50,8 +51,8 @@ function run(output = path.join(root, '.local/test-results/resource-probes'), se
     const cache = new Set();
     for (const r of selected) {
       if (!cache.has(r.name)) { const raw = child(r.name), result = classify(raw, r.name); persist(r.id + '-baseline', raw); evidence.baselines.push({ name: r.name, ...result }); assert.equal(result.status, 'survived', 'Invalid intact baseline: ' + r.id); cache.add(r.name); }
-      const file = path.join(temp, r.file); assert.ok(fs.realpathSync(file).startsWith(temp + path.sep)); const original = fs.readFileSync(file, 'utf8'); assert.equal(original.split(r.old).length, 2, 'Stale/ambiguous mutation: ' + r.id);
-      try { fs.writeFileSync(file, original.replace(r.old, r.replacement)); const raw = child(r.name), result = classify(raw, r.name); persist(r.id, raw); evidence.probes.push({ id: r.id, name: r.name, file: r.file, ...result }); console.log(result.status.toUpperCase() + ' ' + r.id); save(); }
+      const file = path.join(temp, r.file); assert.ok(fs.realpathSync(file).startsWith(temp + path.sep)); const original = fs.readFileSync(file, 'utf8'), mutated = replaceLiteral(original, r.old, r.replacement, 'Stale/ambiguous mutation: ' + r.id);
+      try { fs.writeFileSync(file, mutated); const raw = child(r.name), result = classify(raw, r.name); persist(r.id, raw); evidence.probes.push({ id: r.id, name: r.name, file: r.file, ...result }); console.log(result.status.toUpperCase() + ' ' + r.id); save(); }
       finally { fs.writeFileSync(file, original); }
     }
     assert.deepEqual(fingerprint(), frozen); evidence.complete = true; evidence.allDetected = evidence.probes.length === selected.length && evidence.probes.every(r => r.detected); save(); return evidence;
