@@ -10,12 +10,15 @@ struct Configuration {
     unsigned version = (2U << 16) | 5;
     int trackCount = 0, firstTrackId = 1, events = 0;
     double positionSeconds = 0;
+    double subtitleFontSize = 55, subtitleStartSeconds = -1, subtitleEndSeconds = -1;
+    bool subtitleFontAvailable = true, subtitleTracks = false;
     std::vector<int> eventIds;
     bool failInitialize = false, failInitializeOnce = false, failProperty = false, repeatTrackId = false, failSeekCommand = false;
     std::string block, plain, styled, full, language, title, codec;
 };
 struct Inspection {
     int created = 0, destroyed = 0, live = 0, blocked = 0, versionCalls = 0, eventCalls = 0;
+    int unavailableFontReads = 0;
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::string>> properties, commands;
     std::vector<std::string> propertyReads;

@@ -32,7 +32,7 @@ void Tracks(mpv_node &out) {
         auto *list = track.u.list = new mpv_node_list{6, new mpv_node[6]{}, new char *[6]{}};
         const char *keys[] = {"type", "id", "lang", "title", "codec", "selected"};
         for (int k = 0; k < 6; ++k) list->keys[k] = Copy(keys[k]);
-        Text(list->values[0], "audio"); list->values[1].format = MPV_FORMAT_INT64; list->values[1].u.int64 = config.firstTrackId + (config.repeatTrackId ? 0 : i);
+        Text(list->values[0], config.subtitleTracks ? "sub" : "audio"); list->values[1].format = MPV_FORMAT_INT64; list->values[1].u.int64 = config.firstTrackId + (config.repeatTrackId ? 0 : i);
         Text(list->values[2], config.language); Text(list->values[3], config.title); Text(list->values[4], config.codec);
         list->values[5].format = MPV_FORMAT_FLAG; list->values[5].u.flag = i == 0;
     }
@@ -106,8 +106,17 @@ int mpv_get_property(mpv_handle *handle, const char *name, mpv_format format, vo
         else if (key == "height") value = 360;
         else if (key == "speed") value = handle->speed;
         else if (key == "volume") value = handle->volume;
-        else if (key == "sub-start/full" || key == "sub-end/full") value = -1;
-        else if (key == "sub-font-size") value = 55;
+        else if (key == "sub-start/full") value = config.subtitleStartSeconds;
+        else if (key == "sub-end/full") value = config.subtitleEndSeconds;
+        else if (key == "sub-font-size") {
+            value = config.subtitleFontSize;
+            // Failed API calls need not preserve the output buffer. Poison it to
+            // distinguish the production status guard from its initial value.
+            if (!config.subtitleFontAvailable) {
+                *static_cast<double *>(data) = value; ++inspection.unavailableFontReads;
+                return MPV_ERROR_PROPERTY_UNAVAILABLE;
+            }
+        }
         *static_cast<double *>(data) = value;
     } else if (format == MPV_FORMAT_FLAG) *static_cast<int *>(data) = key == "pause" ? handle->paused : 0;
     else if (format == MPV_FORMAT_NODE) {

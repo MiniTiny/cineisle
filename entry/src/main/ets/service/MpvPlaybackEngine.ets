@@ -16,6 +16,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private static readonly startupTimeoutMs: number = 30000;
   private static readonly snapshotIntervalMs: number = 200;
   private static readonly fallbackCueDurationMs: number = 1000;
+  private static readonly initialSubtitleFontSize: number = 55;
   private nativeCaption: boolean = true;
   get nativeSubtitles(): boolean { return this.nativeCaption; }
   private wantedSubtitle: boolean = true;
@@ -54,7 +55,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private focus: MpvAudioFocus = new MpvAudioFocus(() => this.interrupted());
   private value: native.MpvState = { loaded: false, rendered: false, paused: true, ended: false, seeking: false,
     error: 0, duration: 0, position: 0, width: 0, height: 0, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, tracks: [],
-    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: 55, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0,
+    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: MpvPlaybackEngine.initialSubtitleFontSize, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0,
     hardwareDecoder: '', videoOutput: '', audioOutput: '' };
 
   static async available(): Promise<boolean> {

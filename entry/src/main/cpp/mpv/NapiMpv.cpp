@@ -23,6 +23,8 @@
 
 namespace {
 namespace limits = cineisle::mpv_limits;
+// MPV's subtitle font-size reference when the property is unavailable.
+constexpr double kDefaultSubtitleFontSize = 55;
 std::atomic<unsigned> active{0};
 void Require(bool value, const char *code) { if (!value) throw std::runtime_error(code); }
 void Check(napi_status value) { Require(value == napi_ok, "mpv_argument_invalid"); }
@@ -63,7 +65,7 @@ struct State {
     std::string subtitleText, subtitleAss, subtitleEvents;
     std::string hardwareDecoder, videoOutput, audioOutput;
     double subtitleStart = -1, subtitleEnd = -1;
-    double subtitleFontSize = 55;
+    double subtitleFontSize = kDefaultSubtitleFontSize;
     double surfaceWidth = 0, surfaceHeight = 0;
     bool subtitleOverflow = false;
     std::vector<Track> tracks;
@@ -244,7 +246,7 @@ struct Session : std::enable_shared_from_this<Session> {
         state.subtitleAss = api.get_property(handle, "sub-text/ass", MPV_FORMAT_NODE, &styled.value) >= 0 ? Text(styled.value, limits::kMaxSubtitleAssUtf8Bytes) : "";
         state.subtitleStart = Number("sub-start/full", -1) * 1000;
         state.subtitleEnd = Number("sub-end/full", -1) * 1000;
-        state.subtitleFontSize = Number("sub-font-size", 55);
+        state.subtitleFontSize = Number("sub-font-size", kDefaultSubtitleFontSize);
         state.subtitleEvents.clear(); state.subtitleOverflow = false;
         if (api.get_property(handle, "sub-text/ass-full", MPV_FORMAT_NODE, &events.value) >= 0) {
             state.subtitleOverflow = events.value.format == MPV_FORMAT_STRING && events.value.u.string && std::strlen(events.value.u.string) > limits::kMaxSubtitleEventsUtf8Bytes;
