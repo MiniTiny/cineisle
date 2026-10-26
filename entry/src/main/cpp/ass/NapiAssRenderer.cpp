@@ -12,6 +12,8 @@
 namespace {
 namespace limits = cineisle::subtitle_limits;
 constexpr size_t kErrorCodeUtf8BytesLimit = 64;
+// The bridge receives milliseconds as a JS Number: largest exact integer (2^53 - 1).
+constexpr uint64_t kMaxExactTimestampMs = 9007199254740991ULL;
 constexpr napi_type_tag HANDLE_TAG{0x44713cd7b8e9a065ULL, 0x83a512cb09e46f27ULL};
 struct Context {
     std::atomic<bool> closed{false};
@@ -176,7 +178,7 @@ napi_value Render(napi_env env, napi_callback_info info)
         auto context = Unwrap(env, args[0])->context;
         if (!context || context->closed.load()) { throw std::runtime_error("ass_renderer_closed"); }
         auto work = std::make_unique<Work>(); work->kind = Kind::Render; work->context = context;
-        work->time = int64_t(Integer(env, args[1], 9007199254740991ULL));
+        work->time = int64_t(Integer(env, args[1], kMaxExactTimestampMs));
         work->width = uint32_t(Integer(env, args[2], limits::kMaxAssCanvasDimensionPx)); work->height = uint32_t(Integer(env, args[3], limits::kMaxAssCanvasDimensionPx));
         work->videoWidth = uint32_t(Integer(env, args[4], limits::kMaxVideoDimensionPx)); work->videoHeight = uint32_t(Integer(env, args[5], limits::kMaxVideoDimensionPx));
         return Queue(env, std::move(work));

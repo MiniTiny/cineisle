@@ -1,7 +1,7 @@
 // Host compile of production entrypoints. No production source rewriting or copied validation logic.
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawnSync}=require('node:child_process');
-exports.build=({core=false,captionLayout=false,assErrors=false}={})=>{
+exports.build=({core=false,captionLayout=false,assErrors=false,assTimestamp=false}={})=>{
   const root=path.resolve(__dirname,'..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'cineisle-native-entry-'));
   const cleanup=()=>fs.rmSync(directory,{recursive:true,force:true});
   process.on('exit',cleanup);
@@ -20,8 +20,8 @@ exports.build=({core=false,captionLayout=false,assErrors=false}={})=>{
     const result=spawnSync(command,args,{cwd:root,encoding:'utf8'});
     assert.equal(result.status,0,result.stderr||result.error?.message||command+' failed');return result.stdout;
   };
-  const sources=[assErrors?'tests/native-entry-fixture/ass-errors-entry.cpp':'entry/src/main/cpp/ass/NapiAssRenderer.cpp','entry/src/main/cpp/ass/AssRenderer.cpp',
-    captionLayout?'tests/native-entry-fixture/caption-layout.cpp':'tests/native-entry-fixture/caption.cpp',assErrors?'tests/native-entry-fixture/ass-errors-engine.cpp':'tests/native-entry-fixture/ass-engine.cpp'];
+  const sources=[assTimestamp?'tests/native-entry-fixture/ass-timestamp-entry.cpp':assErrors?'tests/native-entry-fixture/ass-errors-entry.cpp':'entry/src/main/cpp/ass/NapiAssRenderer.cpp','entry/src/main/cpp/ass/AssRenderer.cpp',
+    captionLayout?'tests/native-entry-fixture/caption-layout.cpp':'tests/native-entry-fixture/caption.cpp',assTimestamp?'tests/native-entry-fixture/ass-timestamp-engine.cpp':assErrors?'tests/native-entry-fixture/ass-errors-engine.cpp':'tests/native-entry-fixture/ass-engine.cpp'];
   if(captionLayout)sources.push('tests/native-entry-fixture/drawing-layout.cpp');
   const objects=sources.map((source,i)=>{
     const object=path.join(directory,i+'.o');run(compiler,[...common,'-c',source,'-o',object]);return object;
