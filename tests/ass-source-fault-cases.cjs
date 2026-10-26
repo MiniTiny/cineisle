@@ -257,7 +257,7 @@ module.exports = {
       "id": "manifest-body-observer-remove",
       "phase": "manifest-write",
       "file": "tests/source_preparation_fixture.py",
-      "old": "return self.tracker.call('manifest-write', body)",
+      "old": "return self.tracker.call('manifest-write', body, {'filename': path.name})",
       "replacement": "return body()",
       "status": "detected"
     }

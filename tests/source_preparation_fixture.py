@@ -79,6 +79,11 @@ def native_failure(phase, operation):
         raise error from cause
 
 
+class DeclaredTarFailure:
+    def __init__(self, error):
+        self.error = error
+
+
 class Archive:
     def __init__(self, owner, base=None, members=None):
         self.owner, self.base, self.members = owner, base, members
@@ -102,7 +107,12 @@ class Archive:
                 if '--native-member-extract-init-failure' in sys.argv:
                     target = owner.directory / 'blocked-extract-target'
                     target.write_bytes(b'not a directory')
-                return native_failure('member-extract', lambda: self.base.extract(member, target, **kwargs))
+                try:
+                    return native_failure('member-extract', lambda: self.base.extract(member, target, **kwargs))
+                except tarfile.FilterError as error:
+                    if owner.expected_tar_filter_error:
+                        return DeclaredTarFailure(error)
+                    raise
             # Synthetic TarInfo sizes exercise only the production metadata budget.
             # This stand-in does not claim to allocate/extract a GiB payload.
             target = Path(destination) / member.name
@@ -111,7 +121,10 @@ class Archive:
             else:
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(b'explicit metadata-only payload fixture')
-        return owner.tracker.call('member-extract', body, {'member': member.name})
+        result = owner.tracker.call('member-extract', body, {'member': member.name})
+        if isinstance(result, DeclaredTarFailure):
+            raise result.error
+        return result
 
 
 def member(name, size=0, kind=tarfile.REGTYPE):
@@ -138,13 +151,14 @@ class SourceFixture:
             value = member('package/file.txt', len(b'actual small source fixture'))
             archive.addfile(value, io.BytesIO(b'actual small source fixture'))
         self.payload_hash = hashlib.sha256(self.payload.read_bytes()).hexdigest()
-        self.record = {'name': 'libass', 'sha256': self.payload_hash, 'url': 'https://fixture.invalid/source.tar.gz'}
+        self.record = {'name': 'libass' if script == 'prepare-native-ass.py' else 'mpv', 'sha256': self.payload_hash, 'url': 'https://fixture.invalid/source.tar.gz'}
         self.environment = {**os.environ, 'PATH': str(self.bin), 'CINEISLE_TEST_CURL_PAYLOAD': str(self.payload), 'CINEISLE_TEST_CURL_CAPTURE': str(self.capture)}
         self.curl = self.bin / 'curl'
         self.curl.write_text('#!' + sys.executable + '\nimport os, sys, json\nfrom pathlib import Path\nargs=sys.argv[1:]\nPath(os.environ["CINEISLE_TEST_CURL_CAPTURE"]).write_text(json.dumps(args))\nPath(args[args.index("--output")+1]).write_bytes(Path(os.environ["CINEISLE_TEST_CURL_PAYLOAD"]).read_bytes())\n')
         self.curl.chmod(0o755)
         self.script, self.module = script, None
         self.synthetic, self.extracted, self.argv, self.hashes = None, [], [], []
+        self.manifests, self.expected_tar_filter_error = [], False
         if '--fault=setup' in sys.argv:
             raise AssertionError('unrelated source preparation fixture setup')
 
@@ -187,12 +201,13 @@ class SourceFixture:
                 return Archive(self, base=base)
             return self.tracker.call('tar-open', body)
         def write_text(path, *args, **kwargs):
-            if path.name != '.source-files.json':
+            if path.name not in ('.source-files.json', '.source-files.json.tmp'):
                 return _REAL_WRITE_TEXT(path, *args, **kwargs)
             def body():
+                self.manifests.append(path.name)
                 target = path.parent if '--native-manifest-write-init-failure' in sys.argv else path
                 return native_failure('manifest-write', lambda: _REAL_WRITE_TEXT(target, *args, **kwargs))
-            return self.tracker.call('manifest-write', body)
+            return self.tracker.call('manifest-write', body, {'filename': path.name})
         subprocess.run, tarfile.open, Path.write_text = curl_run, opening, write_text
 
     def begin(self):
@@ -205,10 +220,11 @@ class SourceFixture:
         return self.module.source(self.record, offline, self.environment)
 
     def archive_path(self):
-        return self.cache / 'archives' / (self.record['sha256'] + '.tar.gz')
+        suffix = '.tar.xz' if self.script == 'build-native-mpv.py' and self.record['url'].endswith('.tar.xz') else '.tar.gz'
+        return self.cache / 'archives' / (self.record['sha256'] + suffix)
 
     def snapshot(self):
-        return {'calls': dict(self.tracker.calls), 'events': list(self.tracker.events), 'extracted': list(self.extracted), 'argv': list(self.argv), 'hashes': list(self.hashes), 'capture': json.loads(self.capture.read_text()) if self.capture.exists() else None}
+        return {'calls': dict(self.tracker.calls), 'events': list(self.tracker.events), 'extracted': list(self.extracted), 'argv': list(self.argv), 'hashes': list(self.hashes), 'manifests': list(self.manifests), 'capture': json.loads(self.capture.read_text()) if self.capture.exists() else None}
 
     def close(self):
         subprocess.run, tarfile.open, Path.write_text = _REAL_RUN, _REAL_TAR_OPEN, _REAL_WRITE_TEXT
