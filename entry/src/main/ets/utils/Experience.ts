@@ -1,3 +1,4 @@
+import { SearchHistoryRules } from './SearchHistory';
 import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from './FavoriteOptions';
 import { librarySortFields } from './Browse';
 import { actorOrders, ActorOrderChoice, defaultActorOrder } from './ActorOrder';
@@ -172,7 +173,7 @@ export function validExperience(value: ExperienceState): boolean {
     (value?.syncBlocked !== undefined && typeof value.syncBlocked !== 'boolean')) { return false; }
   if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||
     (value?.downloadRoaming !== undefined && typeof value.downloadRoaming !== 'boolean')) { return false; }
-  return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= 20 && value.searches.every((s: string) => typeof s === 'string') &&
+  return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= SearchHistoryRules.maxEntries && value.searches.every((s: string) => typeof s === 'string') &&
     (value.librarySort === undefined || librarySortFields.includes(value.librarySort)) &&
     (value.libraryDescending === undefined || typeof value.libraryDescending === 'boolean') &&
     (value.autoNextMode === undefined || ['server', 'on', 'off'].includes(value.autoNextMode)) &&

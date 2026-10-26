@@ -1,3 +1,4 @@
+import { SearchHistoryRules } from '../utils/SearchHistory';
 import { ExperienceState, PendingEdit, PendingPosition, applyPending } from '../utils/Experience';
 import { MediaItem } from '../model/Models';
 import { rankActors } from '../utils/Protocol';
@@ -73,7 +74,7 @@ export class ExperienceStore {
     this.local.saveHome(sections);
   }
   search(term: string): void {
-    const value = term.trim().slice(0, 128); if (!value) { return; }
-    this.update((next: ExperienceState) => { next.searches = [value, ...next.searches.filter((s: string) => s.toLowerCase() !== value.toLowerCase())].slice(0, 20); });
+    const value = term.trim().slice(0, SearchHistoryRules.maxTermCodeUnits); if (!value) { return; }
+    this.update((next: ExperienceState) => { next.searches = [value, ...next.searches.filter((s: string) => s.toLowerCase() !== value.toLowerCase())].slice(0, SearchHistoryRules.maxEntries); });
   }
 }
