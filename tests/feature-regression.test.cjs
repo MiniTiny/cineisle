@@ -429,7 +429,7 @@ test('a failed shelf retains successful home sections and reports independent fa
   const p = page(); await p.load(); assert.ok(p.homeFailures.some(f => f.message === 'latest-failed')); assert.ok(p.homeSections.some(s => s.id === 'resume')); assert.ok(p.homeSections.some(s => s.id === 'nextup')); assert.equal(p.busy, false);
 });
 
-module.exports = { capabilities, assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
+module.exports = { ts, capabilities, assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
 if (require.main === module) (async () => {
   try {
     for (const [name, fn] of tests) { reset(); await fn(); console.log('PASS ' + name); }
