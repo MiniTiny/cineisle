@@ -36,9 +36,12 @@ import { ExperienceState } from '../utils/Experience';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
 
-// Page persistence and control visibility have independent timing policies.
+// Persistence, control visibility and interaction parameters remain independent.
 const offlineProgressSaveIntervalMs: number = 10000;
 const controlsHideDelayMs: number = 3000;
+const fullWidthSeekSpanMs: number = 90000;
+const speedHoldTriggerMs: number = 500;
+const seekSliderStepMs: number = 1000;
 
 @Entry
 @Component
@@ -417,7 +420,7 @@ struct Player {
   private previewSeek(offset: number): void {
     if (!this.canGesture()) { this.cancelGesture(); return; }
     if (this.seekAnchor < 0 || !Number.isFinite(offset)) { return; }
-    this.seekPreview = Math.max(0, Math.min(this.duration, this.seekAnchor + offset * 90000 / Math.max(1, this.surfaceWidth)));
+    this.seekPreview = Math.max(0, Math.min(this.duration, this.seekAnchor + offset * fullWidthSeekSpanMs / Math.max(1, this.surfaceWidth)));
     this.gestureHint = text('gesture_seek_preview', this.clock(this.seekPreview)); this.clearHide(); this.showThumbnail(this.seekPreview);
   }
   private endSeek(): void {
@@ -550,7 +553,7 @@ struct Player {
             Column() {}.width('100%').height('100%')
             .gesture(GestureGroup(GestureMode.Exclusive,
               PinchGesture({ fingers: 2 }).onActionStart(() => this.cancelGesture()).onActionUpdate((event: GestureEvent) => this.pinch(event.scale)),
-              LongPressGesture({ fingers: 1, duration: 500 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
+              LongPressGesture({ fingers: 1, duration: speedHoldTriggerMs }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
                 .onActionEnd(() => this.cancelGesture()).onActionCancel(() => this.cancelGesture()),
               PanGesture({ fingers: 1, direction: PanDirection.All, distance: 12 })
                 .onActionStart((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.beginPan(finger.localX - event.offsetX, finger.localY - event.offsetY); this.updatePan(event.offsetX, event.offsetY); } })
@@ -646,7 +649,7 @@ struct Player {
             if (this.state !== 'error') {
             Row({ space: 8 }) {
               Text(this.clock(this.playbackPosition)).fontColor(this.palette.muted).fontSize(12).flexShrink(0)
-              Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
+              Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: seekSliderStepMs })
                 .layoutWeight(1).selectedColor(this.palette.accent).trackColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
                 .blockColor(this.palette.accent).enabled(!this.busy && this.duration > 0)
                 .accessibilityText($r('app.string.player_seek'))
