@@ -32,7 +32,7 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
       const normal = classify(positive, c.name), failed = classify(negative, c.name);
       evidence.controls.push({ ...c, normal, failed }); save();
       assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid');
-      assert.equal(failed.record.fixturePhase, c.phase === 'setup' ? 'setup' : profile.scope + '-external');
+      assert.equal(failed.record.fixturePhase, c.phase === 'setup' ? 'setup' : (c.scope || profile.scope) + '-external');
       assert.equal(failed.record.error.cause.code, c.phase === 'setup' ? 'ERR_ASSERTION' : 'EIO');
       if (c.phase !== 'setup') evidence.controls.at(-1).checkpoint = verifyExternalFailure(negative, c); save();
     }

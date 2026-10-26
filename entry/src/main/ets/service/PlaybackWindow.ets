@@ -1,5 +1,6 @@
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
+import { PlayerOptionRules } from '../utils/PlayerOptions';
 
 export interface PlaybackWindowState { visible: boolean; playing: boolean; immersive: boolean; locked: boolean; pip: boolean }
 
@@ -16,7 +17,7 @@ export class PlaybackWindow {
   private appliedBars: boolean | undefined;
   private appliedKeep: boolean | undefined;
   private appliedBrightness: number | undefined;
-  private requestedBrightness: number = -1;
+  private requestedBrightness: number = PlayerOptionRules.systemBrightness;
   private state: PlaybackWindowState = { visible: false, playing: false, immersive: false, locked: false, pip: false };
   private hidden: boolean = false;
   private locked: boolean = false;
@@ -31,7 +32,7 @@ export class PlaybackWindow {
     this.previous = PlaybackWindow.current; PlaybackWindow.current = this;
   }
   get brightness(): number {
-    const value = this.appliedBrightness ?? this.original?.brightness ?? -1;
+    const value = this.appliedBrightness ?? this.original?.brightness ?? PlayerOptionRules.systemBrightness;
     return value >= 0 ? value : 0.5;
   }
   update(state: PlaybackWindowState): Promise<void> { if (!this.closed) { this.state = state; } return this.schedule(); }
@@ -39,7 +40,7 @@ export class PlaybackWindow {
   foreground(): Promise<void> { this.hidden = false; return this.schedule(); }
   setLocked(locked: boolean): Promise<void> { this.locked = locked; return this.schedule(); }
   async setBrightness(value: number): Promise<boolean> {
-    if (this.closed || !Number.isFinite(value) || (value !== -1 && (value < 0.05 || value > 1))) { return false; }
+    if (this.closed || !Number.isFinite(value) || !PlayerOptionRules.validBrightness(value)) { return false; }
     this.requestedBrightness = value; await this.schedule();
     return !this.closed && this.appliedBrightness === value;
   }

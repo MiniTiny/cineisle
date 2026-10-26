@@ -19,7 +19,7 @@ import { PlaybackRoute, MediaSource } from '../model/Models';
 import { TrackChoice } from '../utils/Playback';
 import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
-import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
+import { PlayerOptionRules, PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController, PlaybackStatus } from '../service/PlaybackController';
 import { PlaybackSurface } from '../service/PlaybackSurface';
 import { SystemCaptions } from '../service/SystemCaptions';
@@ -96,7 +96,7 @@ struct Player {
   @State immersive: boolean = false;
   @State controlsVisible: boolean = true;
   @State night: boolean = false;
-  @State dimOpacity: number = 0.6;
+  @State dimOpacity: number = PlayerOptionRules.defaultDimOpacity;
   @State windowBrightness: number = 0.5;
   @State volume: number = 1;
   private window: PlaybackWindow | undefined;
@@ -148,9 +148,9 @@ struct Player {
     this.watchCaptions();
     this.ownerClient = AppService.client; this.immersive = true;
     this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.introEnabled = this.ui.introSkipper ?? true; this.trickplayEnabled = this.ui.trickplay ?? true; this.zoomed = this.ui.startMaximized;
-    this.dimOpacity = this.ui.dimOpacity ?? 0.6;
+    this.dimOpacity = this.ui.dimOpacity ?? PlayerOptionRules.defaultDimOpacity;
     this.window = new PlaybackWindow(getContext(this) as common.UIAbilityContext, (code: string) => { if (this.alive) { this.message = text(code); this.showControls(); } });
-    if (this.ui.rememberBrightness && (this.ui.brightness ?? -1) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
+    if (this.ui.rememberBrightness && (this.ui.brightness ?? PlayerOptionRules.systemBrightness) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
     this.syncWindow();
     if (this.route.item.Type === 'Episode') { this.restoreAutoNext(); }
     this.showPreferences(AppService.playbackPreferences.snapshot());
@@ -476,7 +476,7 @@ struct Player {
       }
     }
     if (this.panMode === 'seek') { this.previewSeek(dx); }
-    else if (this.panMode === 'brightness') { this.changeBrightness(Math.max(0.05, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
+    else if (this.panMode === 'brightness') { this.changeBrightness(Math.max(PlayerOptionRules.minBrightness, Math.min(PlayerOptionRules.maxBrightness, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
     else if (this.panMode === 'volume') { this.changeVolume(Math.max(0, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
   }
   private endPan(): void {
@@ -496,7 +496,7 @@ struct Player {
   }
   private async changeBrightness(value: number, remember: boolean = false): Promise<void> {
     if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.controlsLocked || this.pipActive || !Number.isFinite(value)) { return; }
-    value = Math.max(0.05, Math.min(1, value)); this.brightnessTarget = value; const revision = ++this.brightnessRevision;
+    value = Math.max(PlayerOptionRules.minBrightness, Math.min(PlayerOptionRules.maxBrightness, value)); this.brightnessTarget = value; const revision = ++this.brightnessRevision;
     if (!await this.window?.setBrightness(value) || !this.alive || this.locked || this.ownerClient !== AppService.client || revision !== this.brightnessRevision) { return; }
     this.windowBrightness = value;
     if (this.panMode === 'brightness') { this.gestureHint = text('player_brightness_value', Math.round(value * 100)); }
@@ -507,7 +507,7 @@ struct Player {
     value = Math.max(0, Math.min(1, value));
     if (this.controller?.setVolume(value)) { this.volume = value; if (this.panMode === 'volume') { this.gestureHint = text('player_volume_value', Math.round(value * 100)); } }
   }
-  private changeDim(value: number): void { if (!this.locked && !this.controlsLocked && Number.isFinite(value)) { this.dimOpacity = Math.max(0.1, Math.min(0.9, value)); this.saveDisplay(false, this.dimOpacity); } }
+  private changeDim(value: number): void { if (!this.locked && !this.controlsLocked && Number.isFinite(value)) { this.dimOpacity = Math.max(PlayerOptionRules.minDimOpacity, Math.min(PlayerOptionRules.maxDimOpacity, value)); this.saveDisplay(false, this.dimOpacity); } }
 
   build() {
     Column() {

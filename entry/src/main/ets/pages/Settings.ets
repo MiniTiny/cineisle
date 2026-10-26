@@ -18,7 +18,7 @@ import { ExperienceState } from '../utils/Experience';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
 import { deviceNameValue } from '../utils/DeviceOptions';
-import { PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
+import { PlayerOptionRules, PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
 import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
 import { PosterCache } from '../service/PosterCache';
@@ -302,7 +302,7 @@ struct Settings {
     else if (key === 'trickplay') { next.trickplay = enabled; }
     else if (key === 'intro') { next.introSkipper = enabled; }
     else if (key === 'vertical') { next.vertical = enabled; }
-    else if (key === 'brightness') { next.rememberBrightness = enabled; if (!enabled) { next.brightness = -1; } }
+    else if (key === 'brightness') { next.rememberBrightness = enabled; if (!enabled) { next.brightness = PlayerOptionRules.systemBrightness; } }
     else { next.back = Number(this.seekBack) * 1000; next.forward = Number(this.seekForward) * 1000; }
     if (!validPlayerOptions(next)) { this.message = getContext(this).resourceManager.getStringSync($r('app.string.player_steps_invalid').id); return; }
     try {
