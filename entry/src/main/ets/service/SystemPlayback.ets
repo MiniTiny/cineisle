@@ -30,6 +30,7 @@ export class SystemPlayback {
   private static readonly publicationIntervalMs: number = 1000;
   private static readonly autoPiPWaitMs: number = 1200;
   private static readonly autoPiPRetryMs: number = 30000;
+  private static readonly defaultSkipMs: number = 15000;
   static current: SystemPlayback | undefined = undefined;
   private static sessionHandoff: Promise<void> = Promise.resolve();
   private autoPiP: () => boolean;
@@ -126,8 +127,8 @@ export class SystemPlayback {
       session.on('pause', () => { this.pause(); });
       session.on('stop', () => { this.stop(); });
       session.on('seek', (position: number) => { if (!this.disposed) { this.controller.seek(position); this.sync(true); } });
-      session.on('fastForward', (amount?: number) => { this.skip(amount ?? 15000); });
-      session.on('rewind', (amount?: number) => { this.skip(-(amount ?? 15000)); });
+        session.on('fastForward', (amount?: number) => { this.skip(amount ?? SystemPlayback.defaultSkipMs); });
+        session.on('rewind', (amount?: number) => { this.skip(-(amount ?? SystemPlayback.defaultSkipMs)); });
       session.on('setSpeed', (speed: number) => {
         if (this.disposed) { return; }
         if (!isPlaybackRate(speed)) { this.view.error(text('speed_failed')); return; }
@@ -389,8 +390,8 @@ export class SystemPlayback {
       if (event === 'playbackStateChanged') { if (status === PiPWindow.PiPControlStatus.PLAY) { this.play(); } else { this.pause(); } }
       else if (event === 'nextVideo') { this.next(); }
       else if (event === 'previousVideo') { this.previous(); }
-      else if (event === 'fastForward') { this.skip(15000); }
-      else if (event === 'fastBackward') { this.skip(-15000); }
+      else if (event === 'fastForward') { this.skip(SystemPlayback.defaultSkipMs); }
+      else if (event === 'fastBackward') { this.skip(-SystemPlayback.defaultSkipMs); }
     });
     if (status.route.item.Type === 'Episode') {
       pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_NEXT, true);
