@@ -22,5 +22,7 @@ export class AppLockPolicy {
   static readonly maxFailures: number = 5;
   static readonly failureDelayMs: number = 30000;
   static readonly backgroundGraceMs: number = 15 * 60 * 1000;
-  static readonly pinPattern: RegExp = /^\d{6,12}$/;
+  static readonly minPinDigits: number = 6;
+  static readonly maxPinDigits: number = 12;
+  static readonly pinPattern: RegExp = new RegExp(`^\\d{${AppLockPolicy.minPinDigits},${AppLockPolicy.maxPinDigits}}$`);
 }

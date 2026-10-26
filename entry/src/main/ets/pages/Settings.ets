@@ -1,3 +1,4 @@
+import { AppLockPolicy } from '../utils/LockPolicy';
 import { AppRoutes } from '../utils/Navigation';
 import { SettingsToggle } from '../components/SettingsToggle';
 import { UiPalette } from '../utils/UiPalette';
@@ -558,13 +559,13 @@ struct Settings {
                 Text($r('app.string.lock_policy')).fontColor(this.palette.muted).fontSize(12).width('100%')
                 if (this.protected) {
                   this.fieldCaption($r('app.string.lock_current_pin'))
-                  TextInput({ text: this.currentPin, placeholder: $r('app.string.lock_current_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.currentPin = v; })
+                  TextInput({ text: this.currentPin, placeholder: $r('app.string.lock_current_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(AppLockPolicy.maxPinDigits).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.currentPin = v; })
                 }
                 this.fieldCaption($r('app.string.lock_new_pin'))
-                TextInput({ text: this.nextPin, placeholder: $r('app.string.lock_new_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.nextPin = v; })
+                TextInput({ text: this.nextPin, placeholder: $r('app.string.lock_new_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(AppLockPolicy.maxPinDigits).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.nextPin = v; })
                 this.fieldCaption($r('app.string.lock_confirm_pin'))
-                TextInput({ text: this.confirmation, placeholder: $r('app.string.lock_confirm_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(12).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.confirmation = v; })
-                BrandButton({ label: $r('app.string.lock_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.busy && this.nextPin.length >= 6, onSelect: () => this.changeLock() })
+                TextInput({ text: this.confirmation, placeholder: $r('app.string.lock_confirm_pin') }).height(UiLayout.buttonHeight(this.fontScale)).type(InputType.NUMBER_PASSWORD).maxLength(AppLockPolicy.maxPinDigits).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy).onChange((v: string) => { this.confirmation = v; })
+                BrandButton({ label: $r('app.string.lock_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.busy && this.nextPin.length >= AppLockPolicy.minPinDigits, onSelect: () => this.changeLock() })
                 if (this.protected) {
                   BrandButton({ label: $r('app.string.lock_now'), icon: $r('app.media.menu_lock'), onSelect: () => AppLock.lock() })
                   BrandButton({ label: $r('app.string.lock_disable'), icon: $r('app.media.menu_unlock'), available: !this.busy, onSelect: () => this.changeLock(true) })
