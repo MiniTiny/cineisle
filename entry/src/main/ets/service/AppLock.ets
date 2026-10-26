@@ -30,7 +30,7 @@ export class AppLock {
       if (!LockSecretV1.valid(secret)) { throw new Error('lock_storage_failed'); }
       AppLock.secret = secret; AppLock.enabled = true; AppLock.fault = false; AppLock.initialized = true; AppLock.publish(true);
     } catch (e) {
-      if ((e as BusinessError).code === 24000002) { AppLock.secret = undefined; AppLock.enabled = false; AppLock.fault = false; AppLock.initialized = true; AppLock.publish(false); return; }
+      if ((e as BusinessError).code === asset.ErrorCode.NOT_FOUND) { AppLock.secret = undefined; AppLock.enabled = false; AppLock.fault = false; AppLock.initialized = true; AppLock.publish(false); return; }
       AppLock.fault = true; AppLock.publish(true); throw new Error('lock_storage_failed');
     }
   }
@@ -60,7 +60,7 @@ export class AppLock {
     if (next && !AppLockPolicy.pinPattern.test(next)) { throw new Error('lock_pin_format'); }
     const attrs: asset.AssetMap = new Map(); attrs.set(asset.Tag.ALIAS, AppLock.alias());
     if (!next) {
-      try { await asset.remove(attrs); } catch (e) { if ((e as BusinessError).code !== 24000002) { throw new Error('lock_storage_failed'); } }
+      try { await asset.remove(attrs); } catch (e) { if ((e as BusinessError).code !== asset.ErrorCode.NOT_FOUND) { throw new Error('lock_storage_failed'); } }
       AppLock.secret = undefined; AppLock.enabled = false;
     } else {
       const random = await crypto.createRandom().generateRandom(LockSecretV1.saltBytes); const salt = Array.from(random.data);

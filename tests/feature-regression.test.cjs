@@ -38,7 +38,7 @@ platform.set('@ohos.util', { generateRandomUUID: () => require('node:crypto').ra
   TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } },
   TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 platform.set('@ohos.security.asset', { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return', ACCESSIBILITY: 'access', CONFLICT_RESOLUTION: 'conflict' },
-  ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
+  ErrorCode: { NOT_FOUND: 24000002 }, ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
   query: async attrs => { const value = assets.get(new TextDecoder().decode(attrs.get('alias'))); return value ? [new Map([['secret', value]])] : []; },
   add: async attrs => { const bytes = attrs.get('secret'); assert.ok(bytes.length <= 1024); assets.set(new TextDecoder().decode(attrs.get('alias')), bytes); }, remove: async attrs => { assets.delete(new TextDecoder().decode(attrs.get('alias'))); } });
 platform.set('@ohos.net.http', { RequestMethod: { GET: 'GET', POST: 'POST', DELETE: 'DELETE' }, HttpDataType: { STRING: 'STRING' },

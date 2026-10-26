@@ -28,7 +28,7 @@ systemPlatform.context.filesDir = directory; systemPlatform.context.cacheDir = d
 const windowPlatform = require('./window-platform.cjs'); windowPlatform.install(platform);
 const preferencesPlatform = require('./preferences-platform.cjs').install(platform, directory);
 platform.set('@ohos.util', { generateRandomUUID: () => 'device', TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } }, TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
-Object.assign(platform.get('@ohos.security.asset'), { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return' }, ReturnType: { ALL: 1 }, query: async () => [] });
+Object.assign(platform.get('@ohos.security.asset'), { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return' }, ErrorCode: { NOT_FOUND: 24000002 }, ReturnType: { ALL: 1 }, query: async () => [] });
 platform.set('@ohos.router', { getParams: () => routeParams, back() {} });
 platform.set('@ohos.net.http', { RequestMethod: { GET: 'GET', POST: 'POST', DELETE: 'DELETE' }, HttpDataType: { STRING: 0 },
   createHttp: () => ({ async request(url, options) { requests.push({ url, options }); const value = httpQueue.shift(); assert.ok(value, 'explicit HTTP fixture required'); if (value instanceof Error) throw value; return value; }, destroy() {} }) });
