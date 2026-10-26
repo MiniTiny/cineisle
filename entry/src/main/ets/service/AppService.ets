@@ -1,3 +1,4 @@
+import { JellyfinTime } from '../utils/JellyfinTime';
 import { TrickplayRepository } from './TrickplayRepository';
 import { NextUpRequests } from '../utils/FeedRequests';
 import { BrowseRequestLimits } from '../utils/Browse';
@@ -693,7 +694,7 @@ export class AppService {
     const store = AppService.experience; const local = AppService.local; if (!store || !local || !Number.isFinite(position) || position < 0) { return; }
     const pending = store.snapshot();
     const copy = applyPending([JSON.parse(JSON.stringify(AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item)) as MediaItem], pending.pending, pending.positions)[0];
-    copy.UserData = copy.UserData ?? {}; const ticks = Math.round(position * 10000); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
+    copy.UserData = copy.UserData ?? {}; const ticks = Math.round(position * JellyfinTime.ticksPerMillisecond); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
     copy.UserData.PlaybackPositionTicks = ticks; copy.UserData.LastPlayedDate = new Date().toISOString();
     if (played !== undefined) { copy.UserData.Played = played; }
     const revision = AppService.editRevision = Math.max(Date.now(), AppService.editRevision + 1);

@@ -1,3 +1,4 @@
+import { JellyfinTime } from './JellyfinTime';
 import { ActorSummary, MediaItem, QueryParam } from '../model/Models';
 import { RewatchRules } from './RewatchRules';
 
@@ -14,7 +15,7 @@ export function queryString(params: QueryParam[]): string {
 }
 
 export function secondsToTicks(seconds: number): number {
-  return Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds * 10000000) : 0;
+  return Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds * JellyfinTime.ticksPerSecond) : 0;
 }
 
 export function accountKey(serverId: string, userId: string): string {

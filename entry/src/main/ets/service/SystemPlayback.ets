@@ -1,3 +1,4 @@
+import { JellyfinTime } from '../utils/JellyfinTime';
 import { isPlaybackRate } from '../utils/PlaybackRate';
 import { BackgroundLease } from './BackgroundLease';
 import { AppLock } from './AppLock';
@@ -71,7 +72,7 @@ export class SystemPlayback {
   constructor(context: common.UIAbilityContext, controller: PlaybackController, surface: XComponentController, route: PlaybackRoute, view: SystemPlayerView, autoPiP: () => boolean = () => false) {
     this.autoPiP = autoPiP;
     this.context = context; this.controller = controller; this.surface = surface; this.view = view;
-    this.latest = { route: route, state: 'loading', position: 0, duration: (route.item.RunTimeTicks ?? 0) / 10000, speed: 1, width: 0, height: 0 };
+    this.latest = { route: route, state: 'loading', position: 0, duration: (route.item.RunTimeTicks ?? 0) / JellyfinTime.ticksPerMillisecond, speed: 1, width: 0, height: 0 };
     try { this.pipSupported = canIUse('SystemCapability.Window.SessionManager') && PiPWindow.isPiPEnabled(); } catch (e) { this.pipSupported = false; }
     this.emit();
   }

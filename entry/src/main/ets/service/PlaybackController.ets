@@ -1,3 +1,4 @@
+import { JellyfinTime } from '../utils/JellyfinTime';
 import { PlaybackRate, normalizePlaybackRate } from '../utils/PlaybackRate';
 import { nativePlaybackSpeed } from './PlaybackSpeedAdapter';
 import media from '@ohos.multimedia.media';
@@ -108,7 +109,7 @@ export class PlaybackController {
     // Capture identity before enqueueing, so old stop/progress cannot be attributed to a new source.
     this.reports = this.reports.then(async () => {
       if (event === 'Progress') { this.pendingProgress.delete(generation); }
-      try { await client.report(event, report.route.item.Id, report.route.mediaSourceId, report.route.playSessionId, report.position / 1000, report.paused);
+      try { await client.report(event, report.route.item.Id, report.route.mediaSourceId, report.route.playSessionId, report.position / JellyfinTime.millisecondsPerSecond, report.paused);
         if (generation === this.generation) { this.view.reportError(false); }
       } catch (e) { if (generation === this.generation) { this.view.reportError(true); } }
     });
@@ -172,7 +173,7 @@ export class PlaybackController {
     this.paused = paused; this.started = false; this.subtitleEnded = false;
     this.audio = []; this.subtitles = []; this.audioKey = ''; this.subtitleKey = ''; this.lastReport = 0;
     this.view.tracks([], [], '', ''); this.view.time(0, 0); this.view.state('loading');
-    const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / 10000;
+    const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / JellyfinTime.ticksPerMillisecond;
     this.retryPosition = Number.isFinite(resume) && resume >= 0 ? resume : 0;
     try {
       const player = await this.engineFactory();
