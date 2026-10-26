@@ -7,6 +7,7 @@ export interface PlaybackWindowState { visible: boolean; playing: boolean; immer
 // Window mutations are serialized. A late native response must be followed by the latest
 // desired state (including restoration), never by an obsolete foreground request.
 export class PlaybackWindow {
+  private static readonly fallbackBrightness: number = 0.5;
   static current: PlaybackWindow | undefined;
   private previous: PlaybackWindow | undefined;
   private main: window.Window | undefined;
@@ -33,7 +34,7 @@ export class PlaybackWindow {
   }
   get brightness(): number {
     const value = this.appliedBrightness ?? this.original?.brightness ?? PlayerOptionRules.systemBrightness;
-    return value >= 0 ? value : 0.5;
+    return value >= 0 ? value : PlaybackWindow.fallbackBrightness;
   }
   update(state: PlaybackWindowState): Promise<void> { if (!this.closed) { this.state = state; } return this.schedule(); }
   background(): Promise<void> { this.hidden = true; return this.schedule(); }
