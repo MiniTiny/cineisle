@@ -9,7 +9,7 @@ function fingerprint(base) {
   const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
     const name = path.join(relative, e.name); if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
   } };
-  for (const scope of ['entry/src/main/ets', 'tests']) walk(scope); return out;
+  for (const scope of ['entry/src/main/ets', 'tests', 'config']) walk(scope); return out;
 }
 function run(output = path.join(root, '.local/test-results/rewatch-probes')) {
   const frozen = fingerprint(root), temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-rewatch-probes-')));
@@ -24,7 +24,7 @@ function run(output = path.join(root, '.local/test-results/rewatch-probes')) {
     try { fs.writeFileSync(location, original.replace(old, replacement)); return action(); } finally { fs.writeFileSync(location, original); }
   };
   try {
-    for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
+    for (const scope of ['entry/src/main/ets', 'tests', 'config']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     for (const c of controls) {
       const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase, c.nativeInit), id = 'control-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
       persist(id + '-positive', positive); persist(id + '-negative', negative);

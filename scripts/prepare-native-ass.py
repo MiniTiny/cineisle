@@ -5,6 +5,7 @@ import fcntl
 import hashlib
 import json
 import os
+import runpy
 from pathlib import Path
 import shutil
 import subprocess
@@ -117,8 +118,8 @@ def main():
     records = {record['name']: record for record in metadata['sources']}
     if set(records) != NAMES or len(metadata['sources']) != len(NAMES):
         raise RuntimeError('native source manifest is incomplete')
-    sdk_home = os.environ.get('DEVECO_SDK_HOME',
-        os.environ.get('DEVECO_CONTENTS', '/Applications/DevEco-Studio.app/Contents') + '/sdk')
+    toolchain = runpy.run_path(str(ROOT / 'scripts/deveco-runtime.py'))
+    sdk_home = toolchain['resolve_deveco'](empty_is_default=False)['sdkHome']
     sdk = Path(os.environ.get('OHOS_NDK_HOME', sdk_home + '/default/openharmony/native')).resolve()
     cmake = sdk / 'build-tools/cmake/bin/cmake'
     ninja = sdk / 'build-tools/cmake/bin/ninja'

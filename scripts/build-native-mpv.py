@@ -9,6 +9,7 @@ import fcntl
 import hashlib
 import json
 import os
+import runpy
 from pathlib import Path, PurePosixPath
 import platform
 import re
@@ -440,7 +441,8 @@ def build(offline=False, check=False):
         raise RuntimeError('native MPV client header fingerprint mismatch')
     if digest(ROOT / 'docs/native-ass-sources.json') != metadata['nativeAssManifestSha256']:
         raise RuntimeError('native MPV font dependency source manifest changed')
-    sdk_home = os.environ.get('DEVECO_SDK_HOME', os.environ.get('DEVECO_CONTENTS', '/Applications/DevEco-Studio.app/Contents') + '/sdk')
+    toolchain = runpy.run_path(str(ROOT / 'scripts/deveco-runtime.py'))
+    sdk_home = toolchain['resolve_deveco'](empty_is_default=False)['sdkHome']
     sdk = Path(os.environ.get('OHOS_NDK_HOME', sdk_home + '/default/openharmony/native')).resolve()
     for name, checksum in metadata['sdkHeaders'].items():
         if digest(sdk / 'sysroot/usr/include' / relative(name)) != checksum:

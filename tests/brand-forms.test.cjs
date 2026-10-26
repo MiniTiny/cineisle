@@ -1,6 +1,6 @@
 // Actual ArkUI compiler and product page callbacks. Native geometry uses a separate gate.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(__dirname,'..'),loader='/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/ets/build-tools/ets-loader';
+const root=path.resolve(__dirname,'..'),loader=require('./deveco-runtime.cjs').etsLoader;
 const ts=require(loader+'/node_modules/typescript'),ui=require(loader+'/lib/process_ui_syntax'),main=require(loader+'/main'),utils=require(loader+'/lib/utils'),validation=require(loader+'/lib/validate_ui_syntax'),pre=require(loader+'/lib/pre_define');
 const files=['NativeCaption','RichCaption','PositionedCaption','BrandState','BrandButton','BrandHeading','SettingsToggle','BrandHeader','CachedImage','PlayerChoice','BrandChoice','HomeShelf','DetailAction','DetailMetadataPanel','CompactDialog','PinGate','PublicUserPicker','ServerDiscoveryPicker'].map(n=>['components/'+(n==='DetailMetadataPanel'?'DetailMetadata':n)+'.ets',n]).concat([['pages/Accounts.ets','Accounts'],['pages/Settings.ets','Settings'],['pages/Favorites.ets','Favorites'],['pages/Downloads.ets','Downloads'],['pages/Index.ets','Index'],['pages/Player.ets','Player'],['pages/Actor.ets','Actor'],['pages/Detail.ets','Detail'],['pages/Collection.ets','Collection']]);
 const options={...JSON.parse(fs.readFileSync(loader+'/tsconfig.json')).compilerOptions,target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.CommonJS};

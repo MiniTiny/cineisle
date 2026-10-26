@@ -6,14 +6,14 @@ const { verifyExternalFailure } = require('./contract-external.cjs');
 const root = path.resolve(__dirname, '..');
 function fingerprint(base, scopes) {
   const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
-    const name = path.join(relative, e.name); if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
+    const name = path.join(relative, e.name); if (e.name === '__pycache__') continue; if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
   } };
   for (const scope of scopes) walk(scope); return out;
 }
 function run(kind, output = path.join(root, '.local/test-results/' + kind + '-probes')) {
   const profile = require('./' + kind + '-fault-cases.cjs'), { recipes, controls } = profile;
   assert.ok(recipes.length && controls.length);
-  const scopes = ['entry/src/main/ets', 'tests', ...(profile.extraScopes || [])];
+  const scopes = ['entry/src/main/ets', 'tests', 'config', ...(profile.extraScopes || [])];
   const frozen = fingerprint(root, scopes), temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-rewatch-probes-')));
   const evidence = { source: frozen, complete: false, allDetected: false, baselines: [], probes: [], controls: [], selfBaselines: [], selfControls: [], selfFaults: [] };
   fs.mkdirSync(output, { recursive: true });

@@ -1,7 +1,7 @@
 // Actual ArkUI compiler + construction tree: verifies icon/label share the hit target.
 // Native geometry is separately checked over captured layouts, not inferred here.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(__dirname,'..'),loader='/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/ets/build-tools/ets-loader';
+const root=path.resolve(__dirname,'..'),loader=require('./deveco-runtime.cjs').etsLoader;
 const ts=require(loader+'/node_modules/typescript'),ui=require(loader+'/lib/process_ui_syntax'),main=require(loader+'/main'),utils=require(loader+'/lib/utils'),validation=require(loader+'/lib/validate_ui_syntax'),pre=require(loader+'/lib/pre_define');
 const options={...JSON.parse(fs.readFileSync(loader+'/tsconfig.json')).compilerOptions,target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.CommonJS};
 const file=path.join(root,'entry/src/main/ets/pages/Index.ets'),src=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.ETS,options);

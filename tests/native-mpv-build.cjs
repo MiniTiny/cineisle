@@ -5,7 +5,7 @@ exports.build = () => {
   const root = path.resolve(__dirname, '..'), directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-mpv-entry-'));
   const cleanup = () => fs.rmSync(directory, { recursive: true, force: true });
   process.on('exit', cleanup);
-  const sdk = process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents';
+  const sdk = require('./deveco-runtime.cjs').contents;
   const candidates = [process.env.CINEISLE_NODE_INCLUDE, path.resolve(process.execPath, '../../include/node'), path.join(sdk, 'tools/node/include/node')].filter(Boolean);
   const nodeInclude = candidates.find(p => fs.existsSync(path.join(p, 'node_api.h')));
   assert.ok(nodeInclude, 'Node N-API headers required; set CINEISLE_NODE_INCLUDE');

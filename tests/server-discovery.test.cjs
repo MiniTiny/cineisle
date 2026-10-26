@@ -1,7 +1,7 @@
 // Real parser, UDP worker, cancellation controller and anonymous probe with native API fixtures.
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 const h = require('./feature-regression.test.cjs');
-const ts = require('/Applications/DevEco-Studio.app/Contents/tools/hvigor/hvigor/node_modules/typescript');
+const ts = require(require('./deveco-runtime.cjs').typescript);
 h.platform.set('@ohos.url', { URL });
 const util = h.platform.get('@ohos.util');
 util.TextDecoder = class { constructor(encoding, options) { this.decoder = new TextDecoder(encoding, options); } decodeToString(bytes) { return this.decoder.decode(bytes); } };

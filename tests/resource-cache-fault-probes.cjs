@@ -5,7 +5,7 @@ const recipes = require('./resource-cache-fault-cases.cjs'), root = path.resolve
 function fingerprint() {
   const result = {};
   const visit = dir => { for (const e of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) { const file = path.join(dir, e.name); if (e.isDirectory()) visit(file); else if (e.isFile()) result[file] = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex'); } };
-  for (const scope of ['entry/src/main/ets', 'tests']) visit(scope); return result;
+  for (const scope of ['entry/src/main/ets', 'tests', 'config']) visit(scope); return result;
 }
 function run(output = path.join(root, '.local/test-results/resource-probes'), select = '') {
   const selected = recipes.filter(r => !select || r.id.startsWith(select)); assert.ok(selected.length);
@@ -15,7 +15,7 @@ function run(output = path.join(root, '.local/test-results/resource-probes'), se
   const persist = (id, value) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(value, null, 2));
   const child = (name, fault = '') => spawnSync(process.execPath, [path.join(temp, 'tests/resource-cache-boundaries.test.cjs'), name, ...(fault ? [fault] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 4 * 1024 * 1024 });
   try {
-    for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
+    for (const scope of ['entry/src/main/ets', 'tests', 'config']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     const name = selected[0].name, positive = child(name), negative = child(name, '--fixture-failure'); persist('intact-control', positive); persist('fixture-control', negative);
     evidence.positiveControl = classify(positive, name); evidence.negativeControl = classify(negative, name);
     assert.equal(evidence.positiveControl.status, 'survived'); assert.equal(evidence.negativeControl.status, 'invalid');

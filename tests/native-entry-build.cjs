@@ -5,7 +5,7 @@ exports.build=({core=false,captionLayout=false}={})=>{
   const root=path.resolve(__dirname,'..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'cineisle-native-entry-'));
   const cleanup=()=>fs.rmSync(directory,{recursive:true,force:true});
   process.on('exit',cleanup);
-  const sdk=process.env.DEVECO_CONTENTS||'/Applications/DevEco-Studio.app/Contents';
+  const sdk=require('./deveco-runtime.cjs').contents;
   const nodeCandidates=[process.env.CINEISLE_NODE_INCLUDE,path.resolve(process.execPath,'../../include/node'),path.join(sdk,'tools/node/include/node')].filter(Boolean);
   const nodeInclude=nodeCandidates.find(p=>fs.existsSync(path.join(p,'node_api.h')));
   assert.ok(nodeInclude,'Node N-API headers required; set CINEISLE_NODE_INCLUDE');
@@ -13,7 +13,7 @@ exports.build=({core=false,captionLayout=false}={})=>{
   assert.ok(fs.existsSync(path.join(prefix,'include/ass/ass.h')),'Prepare the pinned native ASS headers with scripts/build.sh');
   const include=path.join(directory,'include');fs.mkdirSync(path.join(include,'napi'),{recursive:true});
   fs.writeFileSync(path.join(include,'napi/native_api.h'),'#include <node_api.h>\n');
-  for(const name of ['native_drawing','info'])fs.symlinkSync(path.join(sdk,'sdk/default/openharmony/native/sysroot/usr/include',name),path.join(include,name),'dir');
+  for(const name of ['native_drawing','info'])fs.symlinkSync(path.join(require('./deveco-runtime.cjs').resolveDeveco().nativeHome,'sysroot/usr/include',name),path.join(include,name),'dir');
   const compiler=process.env.CXX||'clang++';
   const common=['-std=c++17','-fPIC','-I'+include,'-I'+nodeInclude,'-I'+path.join(prefix,'include')];
   const run=(command,args)=>{

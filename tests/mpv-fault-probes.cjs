@@ -12,7 +12,7 @@ function fingerprint() {
       else if (entry.isFile()) values[file] = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex');
     }
   }
-  for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests']) visit(scope);
+  for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests', 'config']) visit(scope);
   return values;
 }
 function run({ output = path.join(root, '.local/test-results/mpv-probes'), select = '' } = {}) {
@@ -24,7 +24,7 @@ function run({ output = path.join(root, '.local/test-results/mpv-probes'), selec
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2) + '\n');
   let baseline;
   try {
-    for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(isolated, scope), { recursive: true });
+    for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests', 'config']) fs.cpSync(path.join(root, scope), path.join(isolated, scope), { recursive: true });
     baseline = require(path.join(isolated, 'tests/native-mpv-build.cjs')).build();
     const native = require(path.join(isolated, 'tests/native-mpv-run.cjs'));
     const active = { name: 'native execute admits four overlapping opens and rejects the fifth without leaking reservation', error: { code: 'ERR_ASSERTION' } };
