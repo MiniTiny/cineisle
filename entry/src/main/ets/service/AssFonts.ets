@@ -5,6 +5,8 @@ import { assFontConfiguration } from '../utils/AssFontConfig';
 export interface AssFontSetup { path: string; family: string; configuration: string }
 
 export class AssFonts {
+  // Existing cache files are bounded in bytes before reading; XML generation has a separate code-unit budget.
+  private static readonly maximumCachedConfigurationReadBytes: number = 1024 * 1024;
   static prepare(cacheDirectory: string): AssFontSetup {
     const config = font.getUIFontConfig();
     const directory = `${cacheDirectory}/ass-fonts`;
@@ -26,7 +28,7 @@ export class AssFonts {
     if (!fs.accessSync(directory)) { fs.mkdirSync(directory); }
     if (!fs.accessSync(cache)) { fs.mkdirSync(cache); }
     const configuration = `${directory}/fonts.conf`;
-    if (!fs.accessSync(configuration) || fs.statSync(configuration).size > 1024 * 1024 || fs.readTextSync(configuration) !== content) {
+    if (!fs.accessSync(configuration) || fs.statSync(configuration).size > AssFonts.maximumCachedConfigurationReadBytes || fs.readTextSync(configuration) !== content) {
       const file = fs.openSync(configuration + '.tmp', fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNC);
       try { fs.writeSync(file.fd, content); fs.fsyncSync(file.fd); } finally { fs.closeSync(file); }
       fs.renameSync(configuration + '.tmp', configuration);
