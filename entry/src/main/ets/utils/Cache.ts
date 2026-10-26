@@ -1,4 +1,4 @@
-import { downloadStem } from './DownloadIdentity';
+import { DownloadMetadataLimits, downloadStem } from './DownloadIdentity';
 import { ActorSummary, DownloadRecord, DownloadSubtitle, LibrarySnapshot, MediaItem, MediaLink, MediaSource, MediaStream, Person } from '../model/Models';
 
 function validPerson(person: Person): boolean {
@@ -91,7 +91,7 @@ export function validDownloads(records: DownloadRecord[], directory: string): bo
       if (typeof record.fileId !== 'string' || !/^[a-f0-9]{32}$/.test(record.fileId) || files.has(record.fileId)) { return false; }
       files.add(record.fileId);
     }
-    if (record.sourceName !== undefined && (typeof record.sourceName !== 'string' || record.sourceName.length > 256)) { return false; }
+    if (record.sourceName !== undefined && (typeof record.sourceName !== 'string' || record.sourceName.length > DownloadMetadataLimits.maxSourceNameCodeUnits)) { return false; }
     const stem = downloadStem(record); if (stems.has(stem)) { return false; } stems.add(stem);
     const identity = JSON.stringify([record.id, record.mediaSourceId ?? '']);
     if (paths.has(record.path) || sources.has(identity)) { return false; }

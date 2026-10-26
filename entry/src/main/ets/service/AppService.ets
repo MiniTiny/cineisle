@@ -1,9 +1,9 @@
 import { TrickplayRepository } from './TrickplayRepository';
 import { TrickplayNetwork } from './TrickplayNetwork';
-import { BifTicket } from '../utils/Bif';
+import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
 import util from '@ohos.util';
-import { downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
+import { DownloadMetadataLimits, downloadKey, downloadStem, sameDownload } from '../utils/DownloadIdentity';
 import background from '@ohos.resourceschedule.backgroundTaskManager';
 import { BackgroundLease } from './BackgroundLease';
 import common from '@ohos.app.ability.common';
@@ -40,6 +40,8 @@ import { ExperienceState, PendingEdit, PendingPosition, applyPending, connection
 
 interface PreparedAccount { local: LocalStore; snapshot: LibrarySnapshot; records: DownloadRecord[]; experience: ExperienceStore }
 export class AppService {
+  // Applies to queue pumping only; direct single downloads retain their own admission path.
+  private static readonly maxQueuedActiveDownloads: number = 4;
   static posters: PosterCache | undefined;
   static trickplays: TrickplayRepository | undefined;
   static intros: IntroRepository | undefined;
@@ -384,7 +386,7 @@ export class AppService {
     const owned = (): boolean => client === AppService.client && local === AppService.local && allowed();
     return AppService.trickplays?.load(client, local, id, offline, owned, (work: () => Promise<void>) => AppService.mutation('download-admission', async () => {
       if (!local || !owned()) { return; }
-      await DownloadSpace.checkOptional(local.directory, 16 * 1048576, AppService.downloads);
+      await DownloadSpace.checkOptional(local.directory, BIF_LIMIT, AppService.downloads);
       if (owned()) { await work(); }
     }));
   }
@@ -418,7 +420,7 @@ export class AppService {
     const record = new DownloadRecord(); record.id = item.Id; record.item = JSON.parse(JSON.stringify(item)) as MediaItem; record.item.MediaSources = info.MediaSources; record.mediaSourceId = source.Id;
     record.fileId = util.generateRandomUUID().replace(/-/g, '').toLowerCase();
     if (!/^[a-f0-9]{32}$/.test(record.fileId)) { throw new Error('download_create_failed'); }
-    record.sourceName = (source.Name || source.Container || '').slice(0, 256);
+    record.sourceName = (source.Name || source.Container || '').slice(0, DownloadMetadataLimits.maxSourceNameCodeUnits);
     record.network = network ?? downloadNetwork(preference?.downloadMobile, preference?.downloadRoaming);
     record.expectedSize = Number.isSafeInteger(source.Size) && (source.Size ?? 0) > 0 ? source.Size : undefined;
     const extension = /^[a-zA-Z0-9]+$/.test(source.Container ?? '') ? source.Container : 'media';
@@ -591,7 +593,7 @@ export class AppService {
     if (AppService.accountBusy || AppService.pumping || !AppService.client) { return; } AppService.pumping = true;
     const client = AppService.client; const local = AppService.local;
     try {
-      while (client === AppService.client && AppService.downloads.filter((r: DownloadRecord) => r.state === 'downloading').length < 4) {
+      while (client === AppService.client && AppService.downloads.filter((r: DownloadRecord) => r.state === 'downloading').length < AppService.maxQueuedActiveDownloads) {
         const record = AppService.downloads.find((r: DownloadRecord) => r.state === 'queued'); if (!record) { return; }
         try {
           const latest = await client.detail(record.id);
