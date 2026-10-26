@@ -27,6 +27,9 @@ export interface SystemPlayerView {
 
 // One owner per UIAbility. Page exit and ability destruction tear down the same resources.
 export class SystemPlayback {
+  private static readonly publicationIntervalMs: number = 1000;
+  private static readonly autoPiPWaitMs: number = 1200;
+  private static readonly autoPiPRetryMs: number = 30000;
   static current: SystemPlayback | undefined = undefined;
   private static sessionHandoff: Promise<void> = Promise.resolve();
   private autoPiP: () => boolean;
@@ -186,7 +189,7 @@ export class SystemPlayback {
       } catch (e) { this.view.error(text('pip_failed')); }
     }
     this.refreshAutoPiP();
-    if (!this.ready || (!force && !changed && Date.now() - this.lastPublication < 1000)) { return; }
+    if (!this.ready || (!force && !changed && Date.now() - this.lastPublication < SystemPlayback.publicationIntervalMs)) { return; }
     this.lastPublication = Date.now(); this.pending = status;
     if (!this.publication) { this.publication = this.publish().finally(() => {
       this.publication = undefined;
@@ -325,7 +328,7 @@ export class SystemPlayback {
           if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); }
         }
       } catch (e) {
-        this.autoRetryAt = Date.now() + 30000;
+        this.autoRetryAt = Date.now() + SystemPlayback.autoPiPRetryMs;
         if (!this.disposed) { this.setAutoStart(false); this.view.error(text('auto_pip_failed'));
           if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); } }
       }
@@ -341,7 +344,7 @@ export class SystemPlayback {
     if (this.wantsAutoPiP() && this.autoArmed && !this.pipActive && !this.pipStarting) {
       this.pipStarting = true;
       let timer: number = -1;
-      await new Promise<void>((resolve) => { this.autoWait = resolve; timer = setTimeout(resolve, 1200); });
+      await new Promise<void>((resolve) => { this.autoWait = resolve; timer = setTimeout(resolve, SystemPlayback.autoPiPWaitMs); });
       if (timer >= 0) { clearTimeout(timer); } this.autoWait = undefined;
       if (!this.pipActive) {
         this.pipStarting = false;

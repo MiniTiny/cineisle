@@ -40,6 +40,8 @@ export interface PlaybackStatus {
 
 // Owns the native player and its FD. Every asynchronous callback is tied to one load.
 export class PlaybackController {
+  private static readonly progressReportIntervalMs: number = 10000;
+  private static readonly styledRenderIntervalMs: number = 50;
   private player: PlaybackEngine | undefined = undefined;
   private nativeContent: SubtitleContent | undefined;
   private surfacePixelWidth: number = 0;
@@ -214,7 +216,7 @@ export class PlaybackController {
           if (this.started || position > 0) { this.retryPosition = position; }
         }
         this.view.time(position, player.duration); this.renderSubtitle();
-        if (this.started && !this.paused && Date.now() - this.lastReport >= 10000) { this.lastReport = Date.now(); this.send('Progress'); }
+        if (this.started && !this.paused && Date.now() - this.lastReport >= PlaybackController.progressReportIntervalMs) { this.lastReport = Date.now(); this.send('Progress'); }
       }, seek: (position: number) => {
         if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
         this.seeking = false; this.position = position; this.retryPosition = position; this.confirmPosition(position, player.duration);
@@ -335,7 +337,7 @@ export class PlaybackController {
     if (!this.styled) { return; }
     if (!this.styledVisible || this.closed || this.failed || this.subtitleEnded || this.seeking || !this.player) { this.styled.clear(); return; }
     this.renderStyled();
-    if (this.player.state === 'playing' && !this.paused) { this.styledTimer = setInterval(() => { this.renderStyled(); }, 50); }
+    if (this.player.state === 'playing' && !this.paused) { this.styledTimer = setInterval(() => { this.renderStyled(); }, PlaybackController.styledRenderIntervalMs); }
   }
 
   private renderStyled(): void {

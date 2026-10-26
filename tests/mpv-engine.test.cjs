@@ -22,7 +22,7 @@ const initial = () => ({ loaded: true, rendered: true, paused: true, ended: fals
   duration: 9000, position: 0, width: 640, height: 360, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, surfaceWidth: 0, surfaceHeight: 0, hardwareDecoder: 'no', videoOutput: 'gpu-next', audioOutput: 'ohaudio',
   tracks: [{ index: 0, id: 1, kind: 'audio', language: 'eng', title: 'English', selected: true },
     { index: 1, id: 1, kind: 'sub', language: 'zho', title: 'Chinese', selected: true }] });
-function rig(api = 26, speedValues = {}) {
+function rig(api = 26, speedValues = {}, timing) {
   const timers = new Map(), calls = [], events = [], pending = [], device = { sdkApiVersion: api };
   let next = 0, value = initial(); const handle = {};
   const bridge = {
@@ -70,8 +70,8 @@ function rig(api = 26, speedValues = {}) {
     vm.runInNewContext(code, { module: child, exports: child.exports, require: name => dependency(name, path.dirname(file)) }); return child.exports;
   };
   vm.runInNewContext(js, { module, exports: module.exports, require: dependency,
-    setInterval(fn) { const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { timers.delete(id); },
-    setTimeout(fn) { const id = ++next; timers.set(id, fn); return id; }, clearTimeout(id) { timers.delete(id); } });
+    setInterval(fn, ms) { if (timing) return timing.setInterval(fn, ms); const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { if (timing) timing.clearInterval(id); else timers.delete(id); },
+    setTimeout(fn, ms) { if (timing) return timing.setTimeout(fn, ms); const id = ++next; timers.set(id, fn); return id; }, clearTimeout(id) { if (timing) timing.clearTimeout(id); else timers.delete(id); } });
   const Engine = module.exports.MpvPlaybackEngine;
   const eventSink = Object.fromEntries(['state', 'time', 'seek', 'subtitle', 'frame', 'error', 'interrupt'].map(name => [name, (...args) => events.push([name, ...args])]));
   async function open(width = 0, height = 0) { const player = await Engine.create('/cache'); if (width) player.setSurfaceSize(width, height); player.bind(eventSink); player.url = 'https://example.invalid/synthetic'; await settle(); player.surfaceId = '123'; await player.prepare(); return player; }

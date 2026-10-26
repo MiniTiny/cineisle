@@ -13,6 +13,8 @@ import { MpvBridgeLimits } from '../utils/MpvLimits';
 
 // The shim is safe to import on API12; the optional library is loaded only inside capability/create.
 export class MpvPlaybackEngine implements PlaybackEngine {
+  private static readonly startupTimeoutMs: number = 30000;
+  private static readonly snapshotIntervalMs: number = 200;
   private nativeCaption: boolean = true;
   get nativeSubtitles(): boolean { return this.nativeCaption; }
   private wantedSubtitle: boolean = true;
@@ -110,12 +112,12 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     const pending = new Promise<void>((resolve, reject) => { this.ready = resolve; this.rejectReady = reject; });
     // Attach the rejection immediately, including when release happens while native creation is pending.
     pending.catch(() => {});
-    this.timeout = setTimeout(() => { this.fail(); }, 30000);
+    this.timeout = setTimeout(() => { this.fail(); }, MpvPlaybackEngine.startupTimeoutMs);
     try {
       const handle = await native.create({ api: deviceInfo.sdkApiVersion, source: this.source, surface: this.surface!, fontConfiguration: this.fontConfiguration,
         hardwareDecoder: this.options.hwdec, videoOutput: this.options.vo });
       if (this.released || this.failed) { await native.release(handle); return; }
-      this.handle = handle; this.timer = setInterval(() => { this.refresh(); }, 200);
+      this.handle = handle; this.timer = setInterval(() => { this.refresh(); }, MpvPlaybackEngine.snapshotIntervalMs);
       await this.refresh(); await pending;
     } catch (e) { if (!this.released) { this.fail(); throw new Error('mpv_playback_failed'); } }
   }

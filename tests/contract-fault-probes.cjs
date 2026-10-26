@@ -18,7 +18,7 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2));
-  const child = (suite, name, phase, nativeInit = false) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? [typeof nativeInit==='number'?'--native-init-failure-at='+nativeInit:'--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
+  const child = (suite, name, phase, nativeInit = false) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? [typeof nativeInit==='number'?'--native-init-failure-at='+nativeInit:typeof nativeInit==='string'?'--native-'+nativeInit+'-init-failure':'--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   const mutate = (file, old, replacement, action) => {
     const location = path.join(temp, file), original = fs.readFileSync(location, 'utf8'); assert.equal(original.split(old).length, 2, 'Stale or ambiguous mutation: ' + file);

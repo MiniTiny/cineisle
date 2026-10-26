@@ -36,6 +36,10 @@ import { ExperienceState } from '../utils/Experience';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
 
+// Page persistence and control visibility have independent timing policies.
+const offlineProgressSaveIntervalMs: number = 10000;
+const controlsHideDelayMs: number = 3000;
+
 @Entry
 @Component
 struct Player {
@@ -155,7 +159,7 @@ struct Player {
       state: (state: string) => { if (this.alive) { this.state = state; this.syncBackend(this.controller?.snapshot()); if (state === 'error') { this.options = false; this.clearIntro(); this.clearTrickplay(); this.system?.stopPiP(); } if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
       frame: (ready: boolean) => { if (this.alive) { this.frameReady = ready; } },
       closed: (status: PlaybackStatus) => { this.finishOffline(status); },
-      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.syncBackend(status); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
+      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.syncBackend(status); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > offlineProgressSaveIntervalMs) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
@@ -447,7 +451,7 @@ struct Player {
   private showControls(): void {
     this.clearHide(); this.controlsVisible = true;
     if (this.alive && this.visible && this.immersive && !this.controlsLocked && !this.locked && !this.options && !this.busy && !this.message && this.state === 'playing') {
-      this.hideTimer = setTimeout(() => { this.hideTimer = -1; if (this.alive && this.visible && this.immersive && !this.locked && !this.busy && !this.message && !this.options && !this.controlsLocked && this.state === 'playing') { this.controlsVisible = false; } }, 3000);
+      this.hideTimer = setTimeout(() => { this.hideTimer = -1; if (this.alive && this.visible && this.immersive && !this.locked && !this.busy && !this.message && !this.options && !this.controlsLocked && this.state === 'playing') { this.controlsVisible = false; } }, controlsHideDelayMs);
     }
   }
   private singleTap(): void {
