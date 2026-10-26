@@ -22,7 +22,7 @@ import { MediaCard } from '../components/MediaCard';
 import { HomeShelf } from '../components/HomeShelf';
 import { cachedHome } from '../service/HomeFeed';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { browseParams, cachedItems, librarySortFields, searchTypes, searchPage } from '../utils/Browse';
+import { BrowseRequestLimits, browseParams, cachedItems, librarySortFields, searchTypes, searchPage } from '../utils/Browse';
 
 import { ProgressiveHome, HomeFailure, HomeUpdate } from '../service/ProgressiveHome';
 import { ActorProfile, ActorTag, Discovery, ExperienceState, actorProfiles, sortActors, discovery, applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
@@ -228,7 +228,7 @@ struct Index {
       }
       if (this.mode || this.parentId || this.personId) {
         const start = more ? this.items.length : 0;
-        const result = await client.items([...this.params(), { key: 'StartIndex', value: start.toString() }, { key: 'Limit', value: '60' }]);
+        const result = await client.items([...this.params(), { key: 'StartIndex', value: start.toString() }, { key: 'Limit', value: String(BrowseRequestLimits.pageItems) }]);
         if (this.current(version, client)) {
             this.items = this.mode === 'search' ? searchPage(more ? this.items : [], result.Items ?? [], result.TotalRecordCount, this.searchType) : more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
         }

@@ -1,5 +1,6 @@
 import { TrickplayRepository } from './TrickplayRepository';
 import { NextUpRequests } from '../utils/FeedRequests';
+import { BrowseRequestLimits } from '../utils/Browse';
 import { TrickplayNetwork } from './TrickplayNetwork';
 import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
@@ -616,7 +617,7 @@ export class AppService {
   static async allItems(params: QueryParam[], onPage?: (items: MediaItem[]) => void): Promise<MediaItem[]> {
     const client = AppService.requireClient(); const items: MediaItem[] = []; const seen = new Set<string>(); let total = -1;
     while (true) {
-      const page = await client.items([...params, { key: 'StartIndex', value: String(items.length) }, { key: 'Limit', value: '200' }]);
+      const page = await client.items([...params, { key: 'StartIndex', value: String(items.length) }, { key: 'Limit', value: String(BrowseRequestLimits.allItemsPageItems) }]);
       if (client !== AppService.client) { throw new Error('login_required'); }
       if (!page || !Array.isArray(page.Items) || !Number.isSafeInteger(page.TotalRecordCount) || page.TotalRecordCount < 0) { throw new Error('sync_incomplete'); }
       if (total >= 0 && page.TotalRecordCount !== total) { throw new Error('sync_incomplete'); } total = page.TotalRecordCount;

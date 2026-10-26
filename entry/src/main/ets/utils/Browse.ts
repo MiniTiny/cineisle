@@ -1,5 +1,10 @@
 import { LibrarySnapshot, MediaItem, QueryParam } from '../model/Models';
 
+export class BrowseRequestLimits {
+  static readonly pageItems: number = 60;
+  static readonly allItemsPageItems: number = 200;
+}
+
 export const librarySortFields: string[] = ['SortName', 'CommunityRating', 'CriticRating', 'DateCreated', 'DatePlayed', 'PremiereDate'];
 export const searchTypes: string[] = ['', 'Movie', 'Series', 'Episode'];
 // Reject broken pages instead of changing the offset or duplicating ArkUI card identities.
