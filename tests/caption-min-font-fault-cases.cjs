@@ -87,6 +87,40 @@ module.exports = {
       "suite": "caption-min-font-contract.test.cjs"
     },
     {
+      "phase": "font-collection",
+      "name": "N-API caption font at",
+      "suite": "caption-min-font-contract.test.cjs",
+      "scope": "caption-min-font",
+      "nativeInit": "font",
+      "requiredCalls": {
+        "entry": 1,
+        "native-caption": 1
+      },
+      "details": {
+        "fontCalls": 1,
+        "fontFailures": 1,
+        "actualError": "caption_memory_unavailable"
+      }
+    },
+    {
+      "phase": "drawing-result",
+      "name": "N-API caption font at",
+      "suite": "caption-min-font-contract.test.cjs",
+      "scope": "caption-min-font",
+      "nativeInit": "style",
+      "requiredCalls": {
+        "entry": 1,
+        "native-caption": 1
+      },
+      "details": {
+        "fontCalls": 1,
+        "fontFailures": 0,
+        "styleCalls": 1,
+        "styleFailures": 1,
+        "actualError": "caption_memory_unavailable"
+      }
+    },
+    {
       "phase": "native-caption",
       "name": "N-API caption font at",
       "requiredCalls": {
@@ -127,6 +161,38 @@ module.exports = {
       "file": "tests/caption-min-font-fixture.cjs",
       "old": "trace.call(layer === 'lower' ? 'core-read' : 'native-caption', async () => {",
       "replacement": "((phase, operation) => operation())(layer === 'lower' ? 'core-read' : 'native-caption', async () => {",
+      "status": "detected"
+    },
+    {
+      "id": "font-body-observer-remove",
+      "phase": "font-collection",
+      "file": "tests/native-entry-fixture/drawing-layout.cpp",
+      "old": "++fontFailures; return nullptr;",
+      "replacement": "return nullptr;",
+      "status": "invalid"
+    },
+    {
+      "id": "font-origin-observer-remove",
+      "phase": "font-collection",
+      "file": "tests/caption-min-font-fixture.cjs",
+      "old": "trace.call('font-collection', () => {",
+      "replacement": "((phase, operation) => operation())('font-collection', () => {",
+      "status": "invalid"
+    },
+    {
+      "id": "style-body-observer-remove",
+      "phase": "drawing-result",
+      "file": "tests/native-entry-fixture/drawing-layout.cpp",
+      "old": "++styleFailures; return nullptr;",
+      "replacement": "return nullptr;",
+      "status": "invalid"
+    },
+    {
+      "id": "unexpected-drawing-result-guard-remove",
+      "phase": "drawing-result",
+      "file": "tests/caption-min-font-fixture.cjs",
+      "old": "if (result.error && !['caption_argument_invalid', 'caption_fixture_budget_admitted'].includes(result.error))",
+      "replacement": "if (false)",
       "status": "detected"
     }
   ]
