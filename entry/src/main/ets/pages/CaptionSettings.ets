@@ -7,11 +7,11 @@ import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { AppLock } from '../service/AppLock';
 import { SystemCaptions } from '../service/SystemCaptions';
-import { CaptionConfig, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionPreset, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
+import { CaptionConfig, CaptionFamilyChoice, CaptionEdgeChoice, CAPTION_FAMILY_CHOICES, CAPTION_EDGE_CHOICES, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionPreset, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { errorText, text } from '../utils/Strings';
-const FAMILY_LABELS: string[] = ['caption_family_default', 'caption_family_mono_serif', 'caption_family_serif', 'caption_family_mono_sans', 'caption_family_sans', 'caption_family_casual', 'caption_family_cursive', 'caption_family_small_caps'];
-const EDGE_LABELS: string[] = ['caption_edge_none', 'caption_edge_raised', 'caption_edge_depressed', 'caption_edge_uniform', 'caption_edge_shadow'];
+const FAMILY_LABELS: string[] = CAPTION_FAMILY_CHOICES.map((choice: CaptionFamilyChoice): string => choice.caption);
+const EDGE_LABELS: string[] = CAPTION_EDGE_CHOICES.map((choice: CaptionEdgeChoice): string => choice.caption);
 @Entry
 @Component
 struct CaptionSettings {

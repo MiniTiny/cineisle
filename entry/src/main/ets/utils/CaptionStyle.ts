@@ -37,8 +37,28 @@ export class CaptionRenderStyle {
   family: string = 'sans-serif';
   edge: string = 'none';
 }
-export const CAPTION_FAMILIES: string[] = ['default', 'monospacedSerif', 'serif', 'monospacedSansSerif', 'sansSerif', 'casual', 'cursive', 'smallCapitals'];
-export const CAPTION_EDGES: string[] = ['none', 'raised', 'depressed', 'uniform', 'dropShadow'];
+// Native values, display resources and render font aliases form one ordered choice contract.
+export interface CaptionFamilyChoice { value: string; caption: string; renderFamily: string }
+export interface CaptionEdgeChoice { value: string; caption: string }
+export const CAPTION_FAMILY_CHOICES: CaptionFamilyChoice[] = [
+  { value: 'default', caption: 'caption_family_default', renderFamily: 'sans-serif' },
+  { value: 'monospacedSerif', caption: 'caption_family_mono_serif', renderFamily: 'serif-monospace' },
+  { value: 'serif', caption: 'caption_family_serif', renderFamily: 'serif' },
+  { value: 'monospacedSansSerif', caption: 'caption_family_mono_sans', renderFamily: 'monospace' },
+  { value: 'sansSerif', caption: 'caption_family_sans', renderFamily: 'sans-serif' },
+  { value: 'casual', caption: 'caption_family_casual', renderFamily: 'casual' },
+  { value: 'cursive', caption: 'caption_family_cursive', renderFamily: 'cursive' },
+  { value: 'smallCapitals', caption: 'caption_family_small_caps', renderFamily: 'sans-serif-smallcaps' },
+];
+export const CAPTION_EDGE_CHOICES: CaptionEdgeChoice[] = [
+  { value: 'none', caption: 'caption_edge_none' },
+  { value: 'raised', caption: 'caption_edge_raised' },
+  { value: 'depressed', caption: 'caption_edge_depressed' },
+  { value: 'uniform', caption: 'caption_edge_uniform' },
+  { value: 'dropShadow', caption: 'caption_edge_shadow' },
+];
+export const CAPTION_FAMILIES: string[] = CAPTION_FAMILY_CHOICES.map((choice: CaptionFamilyChoice): string => choice.value);
+export const CAPTION_EDGES: string[] = CAPTION_EDGE_CHOICES.map((choice: CaptionEdgeChoice): string => choice.value);
 // Native caption getters return ArkUI color strings. Preserve their channel order; do not convert them as CSS RGBA.
 export function captionColor(value: CaptionColor): string | undefined {
   if (typeof value === 'number') {
@@ -67,6 +87,6 @@ export function captionRenderStyle(config: CaptionConfig, background: string = d
   style.system = true;
   style.scale = config.fontScale / 100; style.foreground = captionColor(config.foreground)!; style.background = captionColor(config.background)!;
   style.window = captionColor(config.window)!; style.edge = config.edge;
-  const families: string[] = ['sans-serif', 'serif-monospace', 'serif', 'monospace', 'sans-serif', 'casual', 'cursive', 'sans-serif-smallcaps'];
+  const families: string[] = CAPTION_FAMILY_CHOICES.map((choice: CaptionFamilyChoice): string => choice.renderFamily);
   style.family = families[CAPTION_FAMILIES.indexOf(config.family)]; return style;
 }
