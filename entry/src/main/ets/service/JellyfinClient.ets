@@ -24,6 +24,9 @@ export class JellyfinClient {
   private static readonly maximumPublicUsers: number = 1000;
   private static readonly maximumPublicNameCodeUnits: number = 256;
   private static readonly maximumDeviceResponseNameCodeUnits: number = 1024;
+  private static readonly defaultPrimaryImageWidthPx: number = 360;
+  private static readonly defaultBackdropImageWidthPx: number = 960;
+  private static readonly defaultImageQuality: number = 85;
   session: Session;
   private transport: NativeHttpTransport;
   private api: JellyfinApi;
@@ -236,9 +239,9 @@ export class JellyfinClient {
 
   image(id: string, tag: string = '', backdrop: boolean = false): string {
     if (backdrop) {
-      return this.api.getItemImageByIndexUrl({ itemId: id, imageType: ImageType.Backdrop, imageIndex: 0, maxWidth: 960, quality: 85, tag: tag || undefined });
+      return this.api.getItemImageByIndexUrl({ itemId: id, imageType: ImageType.Backdrop, imageIndex: 0, maxWidth: JellyfinClient.defaultBackdropImageWidthPx, quality: JellyfinClient.defaultImageQuality, tag: tag || undefined });
     }
-    return this.api.getItemImageUrl({ itemId: id, imageType: ImageType.Primary, maxWidth: 360, quality: 85, tag: tag || undefined });
+    return this.api.getItemImageUrl({ itemId: id, imageType: ImageType.Primary, maxWidth: JellyfinClient.defaultPrimaryImageWidthPx, quality: JellyfinClient.defaultImageQuality, tag: tag || undefined });
   }
 
   poster(target: PosterTarget, allowed: () => boolean): PosterTransfer { return new PosterTransport(this.session).fetch(target, allowed); }
