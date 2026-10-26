@@ -591,7 +591,7 @@ struct Player {
             .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
           if (!this.immersive) { this.playbackControls() }
           }.width('100%').layoutWeight(1)
-        }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+        }.width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
       this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
@@ -618,22 +618,22 @@ struct Player {
     Row({ space: 12 }) {
       Button({ type: ButtonType.Normal }) {
         Image($r('app.media.menu_back')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => this.goBack())
-      Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
+      Text(this.route.item.Name).fontColor(this.palette.foreground).fontSize(18).fontWeight(FontWeight.Medium)
         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
       Button({ type: ButtonType.Normal }) {
         Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined))
           .width(24).height(24).accessibilityLevel('no')
       }.width(44).height(44).padding(0).borderRadius(14)
-        .backgroundColor(this.controlsLocked ? this.palette.action : (this.amoled ? '#000000' : this.palette.surface))
+        .backgroundColor(this.controlsLocked ? this.palette.action : (this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
         .onClick(() => this.lockControls())
       Button({ type: ButtonType.Normal }) {
         Image(this.immersive ? $r('app.media.player_exit_fullscreen') : $r('app.media.player_fullscreen')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(!this.controlsLocked)
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).enabled(!this.controlsLocked)
         .accessibilityText(this.immersive ? $r('app.string.player_exit_fullscreen') : $r('app.string.player_fullscreen')).onClick(() => this.toggleImmersive())
-    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : (this.amoled ? '#000000' : this.palette.background))
+    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : (this.amoled ? this.palette.amoledBackground : this.palette.background))
   }
 
   @Builder
@@ -647,7 +647,7 @@ struct Player {
             Row({ space: 8 }) {
               Text(this.clock(this.playbackPosition)).fontColor(this.palette.muted).fontSize(12).flexShrink(0)
               Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
-                .layoutWeight(1).selectedColor(this.palette.accent).trackColor((this.amoled ? '#000000' : this.palette.surface))
+                .layoutWeight(1).selectedColor(this.palette.accent).trackColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
                 .blockColor(this.palette.accent).enabled(!this.busy && this.duration > 0)
                 .accessibilityText($r('app.string.player_seek'))
                 .onChange((value: number, mode: SliderChangeMode) => this.sliderSeek(value, mode))
@@ -666,7 +666,7 @@ struct Player {
                   onSelect: () => { this.options = !this.options; this.showControls(); } })
               }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
             }.width('100%')
-          }.width('100%').padding(12).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+          }.width('100%').padding(12).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
           if (this.options) {
             this.displayOptions()
             this.systemOptions()
@@ -705,13 +705,13 @@ struct Player {
         onSelect: () => { if (this.pipActive) { this.system?.stopPiP(); } else { this.system?.startPiP(); } } })
       if (!this.pipSupported) { Text($r('app.string.pip_unavailable')).fontColor(this.palette.muted).fontSize(12) }
       Row({ space: 12 }) {
-        Text($r('app.string.background_playback')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.background_playback')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.backgroundEnabled }).enabled(this.systemReady)
           .selectedColor(this.palette.action).switchPointColor(this.palette.accent)
           .accessibilityText($r('app.string.background_playback')).onChange((value: boolean) => { this.system?.setBackground(value); })
       }.width('100%')
       Text($r('app.string.background_playback_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -719,13 +719,13 @@ struct Player {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_media_group'), icon: $r('app.media.nav_library_active') })
       Row({ space: 12 }) {
-        Text($r('app.string.player_intro_skipper')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_intro_skipper')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Checkbox().select(this.introEnabled).enabled(!this.busy && !this.settingsBusy).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_intro_skipper')).onChange((enabled: boolean) => this.changeIntro(enabled))
       }.width('100%')
       Text($r('app.string.player_intro_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 8 }) {
-        Text($r('app.string.player_trickplay')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_trickplay')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Checkbox().select(this.trickplayEnabled).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_trickplay')).onChange((enabled: boolean) => this.changeTrickplay(enabled))
       }.width('100%')
@@ -750,7 +750,7 @@ struct Player {
         selected: this.subtitles.findIndex((track: TrackChoice) => track.key === this.subtitleKey) + 1,
         available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(index === 0 ? '' : this.subtitles[index - 1].key, false); } })
       Text($r('app.string.subtitle_format_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -759,16 +759,16 @@ struct Player {
       BrandHeading({ label: $r('app.string.playback_language_preferences'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.preferred_audio_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy).onChange((value: string) => { this.audioLanguage = value; })
       Text($r('app.string.preferred_subtitle_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
       Row({ space: 12 }) {
-        Text($r('app.string.preferred_subtitles_off')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.preferred_subtitles_off')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.subtitlesOff }).enabled(!this.settingsBusy && !this.busy)
           .selectedColor(this.palette.action).switchPointColor(this.palette.accent)
           .accessibilityText($r('app.string.preferred_subtitles_off')).onChange((value: boolean) => { this.subtitlesOff = value; })
@@ -786,29 +786,29 @@ struct Player {
       Text($r('app.string.playback_preferences_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       if (this.settingsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.settingsMessage) { Text(this.settingsMessage).fontColor(this.palette.warm).fontSize(12).width('100%') }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
   private displayOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_display_group'), icon: $r('app.media.menu_settings') })
-      Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
+      Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
       Slider({ value: this.windowBrightness * 100, min: 5, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_window_brightness')).onChange((value: number, mode: SliderChangeMode) => { this.changeBrightness(value / 100, mode === SliderChangeMode.End || mode === SliderChangeMode.Click); })
-      Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
+      Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
       Slider({ value: this.volume * 100, min: 0, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_relative_volume')).onChange((value: number) => this.changeVolume(value / 100))
       Text($r('app.string.player_relative_volume_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 12 }) {
-        Text($r('app.string.player_night_mode')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_night_mode')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.night }).selectedColor(this.palette.action).accessibilityText($r('app.string.player_night_mode'))
           .onChange((value: boolean) => { this.night = value; this.showControls(); })
       }.width('100%')
       Text($r('app.string.player_dim_value', Math.round(this.dimOpacity * 100))).fontColor(this.palette.muted).fontSize(12).width('100%')
       Slider({ value: this.dimOpacity * 100, min: 10, max: 90, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_dim_opacity')).onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.changeDim(value / 100); } })
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -819,16 +819,16 @@ struct Player {
       Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
         ForEach(playbackRates(), (speed: number) => {
           Column() {
-            Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
+            Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor(this.palette.foreground)
               .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)
-              .backgroundColor(this.speed === speed ? this.palette.action : (this.amoled ? '#000000' : this.palette.surface))
+              .backgroundColor(this.speed === speed ? this.palette.action : (this.amoled ? this.palette.amoledBackground : this.palette.surface))
               .accessibilityText(`${speed}×`).onClick(() => this.changeSpeed(speed))
           }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '31%' : '48%').margin({ bottom: 8 })
         })
       }.width('100%')
       if (this.route.item.Type === 'Episode') {
         Row({ space: 12 }) {
-          Text($r('app.string.auto_next')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+          Text($r('app.string.auto_next')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
           Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).selectedColor(this.palette.action)
             .switchPointColor(this.palette.accent).accessibilityText($r('app.string.auto_next'))
             .enabled(this.autoNextReady).onChange((value: boolean) => { this.changeAutoNext(value ? 'on' : 'off'); })
@@ -841,6 +841,6 @@ struct Player {
         BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
           available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
       }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 }

@@ -26,11 +26,11 @@ export struct BrandButton {
         Image(this.icon).colorFilter(this.palette.filter(this.iconTint())).width(this.compact ? 20 : 22).height(this.compact ? 20 : 22).flexShrink(0).accessibilityLevel('no')
         Text(this.label).fontSize(14).fontWeight(FontWeight.Medium).layoutWeight(1).maxLines(2)
           .textAlign(TextAlign.Start).textOverflow({ overflow: TextOverflow.Ellipsis })
-          .fontColor(this.destructive ? this.palette.danger : '#F2F3FA')
+          .fontColor(this.destructive ? this.palette.danger : this.primary ? this.palette.onAction : this.palette.foreground)
       }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 })
         .padding({ left: this.compact ? 10 : 14, right: this.compact ? 10 : 14, top: 8, bottom: 8 }).hitTestBehavior(HitTestMode.None)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 }).padding(0).borderRadius(16)
-      .backgroundColor(this.primary ? this.palette.action : (this.amoled ? '#000000' : this.palette.surface))
+      .backgroundColor(this.primary ? this.palette.action : (this.amoled ? this.palette.amoledBackground : this.palette.surface))
       // API 12 declares separate string/Resource overloads; both are native accepted captions.
       .defaultFocus(this.focus).enabled(this.available).opacity(this.available ? 1 : 0.5).accessibilityText(this.label as Resource).onClick(this.onSelect)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 })

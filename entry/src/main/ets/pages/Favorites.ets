@@ -103,7 +103,7 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
       } }] }, this.viewportWidth, this.viewportHeight);
@@ -137,10 +137,10 @@ struct Favorites {
         selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
         onSelect: (i: number) => { this.genre = i ? this.genres[i - 1] : ''; this.filter(); } })
       Text($r('app.string.favorite_search')).fontSize(12).fontColor(this.palette.muted)
-      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
+      TextInput({ text: this.query, placeholder: text('favorite_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).onChange((v: string) => { this.query = v; this.filter(); })
       Flex({ wrap: FlexWrap.Wrap }) {
         Row({ space: 12 }) {
-          Text($r('app.string.unwatched_only')).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+          Text($r('app.string.unwatched_only')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
           Checkbox().select(this.unwatched).selectedColor(this.palette.action).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
         }.width('100%').margin({ bottom: 8 })
         BrandChoice({ label: $r('app.string.favorite_order'), icon: $r('app.media.menu_settings'),
@@ -165,7 +165,7 @@ struct Favorites {
       if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(12) }
       if (!this.visibleItems.length && !this.busy) { BrandState({ label: this.all.length ? $r('app.string.no_matches') : $r('app.string.no_favorites'), icon: $r('app.media.detail_heart') }) }
-      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).width('100%').alignItems(HorizontalAlign.Start)
+      }.padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).width('100%').alignItems(HorizontalAlign.Start)
   }
   @Builder
   grid() {
@@ -192,7 +192,7 @@ struct Favorites {
         Scroll() { this.filtersPanel() }.width('100%').height(UiLayout.filters(this.viewportHeight, this.fontScale)).align(Alignment.TopStart)
       }
       this.grid()
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

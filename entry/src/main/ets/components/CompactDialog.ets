@@ -39,21 +39,21 @@ export struct CompactDialog {
   build() {
     Column({ space: 12 }) {
       if (this.data.width >= 600) {
-        Text(this.data.title).fontSize(16).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+        Text(this.data.title).fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
         Scroll() { Text(this.data.message).fontSize(14).lineHeight(22).fontColor(this.palette.muted).width('100%') }
           .width('100%').layoutWeight(1).align(Alignment.TopStart)
         this.actions()
       } else {
         Scroll() {
           Column({ space: 12 }) {
-            Text(this.data.title).fontSize(16).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+            Text(this.data.title).fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
             Text(this.data.message).fontSize(14).lineHeight(22).fontColor(this.palette.muted).width('100%')
             this.actions()
           }.width('100%')
         }.width('100%').layoutWeight(1).align(Alignment.TopStart)
       }
     }.width(Math.min(720, this.data.width - 32)).height(this.data.height * 0.9).padding(16)
-      .backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20).id('CineIsleCompactDialog')
+      .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(20).id('CineIsleCompactDialog')
   }
 }
 @Builder

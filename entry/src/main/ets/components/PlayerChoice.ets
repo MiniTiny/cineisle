@@ -19,8 +19,8 @@ export struct PlayerChoice {
       }.width('100%')
       Select(this.choices).selected(this.selected).value(this.choices[this.selected]?.value ?? text('player_no_selection'))
         .width('100%').constraintSize({ minHeight: 40 * this.fontScale }).font({ size: 14 })
-        .fontColor('#F2F3FA').backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(14)
-        .optionBgColor((this.amoled ? '#000000' : this.palette.surface)).optionFontColor('#F2F3FA')
+        .fontColor(this.palette.foreground).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(14)
+        .optionBgColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).optionFontColor(this.palette.foreground)
         .selectedOptionBgColor(this.palette.selected).selectedOptionFontColor(this.palette.accent)
         .enabled(this.available).accessibilityText(this.label).onSelect((index: number) => {
           if (this.available && Number.isInteger(index) && index >= 0 && index < this.choices.length) { this.onSelect(index); }

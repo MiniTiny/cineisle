@@ -99,11 +99,11 @@ struct Actor {
       BrandHeading({ label: $r('app.string.actor_profile'), icon: $r('app.media.nav_user_active') })
       BrandButton({ label: this.followed ? $r('app.string.unfollow') : $r('app.string.follow'), icon: this.followed ? $r('app.media.detail_heart_filled') : $r('app.media.detail_heart'), primary: this.followed, onSelect: () => this.follow() })
       if (this.biographyLoading) { BrandState({ label: $r('app.string.biography_loading'), loading: true }) }
-      if (this.overview) { Text(this.overview).fontColor('#F2F3FA').fontSize(14).width('100%') }
+      if (this.overview) { Text(this.overview).fontColor(this.palette.foreground).fontSize(14).width('100%') }
       BrandHeading({ label: $r('app.string.actor_credits'), icon: $r('app.media.nav_library_active') })
       Row({ space: 8 }) {
         Checkbox().select(this.unwatched).selectedColor(this.palette.action).onChange((v: boolean) => { this.unwatched = v; })
-        Text($r('app.string.unwatched_only')).fontColor('#F2F3FA').layoutWeight(1)
+        Text($r('app.string.unwatched_only')).fontColor(this.palette.foreground).layoutWeight(1)
       }.width('100%')
       BrandChoice({ label: $r('app.string.actor_tags'), icon: $r('app.media.nav_star_active'),
         choices: [{ value: text('all_tags') }, ...(this.profile?.tags ?? []).map((t: ActorTag): SelectOption => ({ value: this.tagName(t) }))],
@@ -115,7 +115,7 @@ struct Actor {
       Text($r('app.string.actor_tag_boundary')).fontColor(this.palette.muted).fontSize(11)
       if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(12) }
       if (this.busy && !this.biographyLoading) { BrandState({ label: $r('app.string.loading'), loading: true }) }
-      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
   }
   @Builder
   credits() {
@@ -140,7 +140,7 @@ struct Actor {
     Column({ space: 10 }) {
       BrandHeader({ label: this.person.Name, onBack: () => router.back() })
       this.credits()
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }
