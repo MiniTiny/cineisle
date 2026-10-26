@@ -17,7 +17,7 @@ function run(output = path.join(root, '.local/test-results/rewatch-probes')) {
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2));
-  const child = (suite, name, phase) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
+  const child = (suite, name, phase, nativeInit = false) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? ['--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   const mutate = (file, old, replacement, action) => {
     const location = path.join(temp, file), original = fs.readFileSync(location, 'utf8'); assert.equal(original.split(old).length, 2, 'Stale or ambiguous mutation: ' + file);
@@ -26,7 +26,7 @@ function run(output = path.join(root, '.local/test-results/rewatch-probes')) {
   try {
     for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     for (const c of controls) {
-      const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase), id = 'control-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
+      const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase, c.nativeInit), id = 'control-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
       persist(id + '-positive', positive); persist(id + '-negative', negative);
       const normal = classify(positive, c.name), failed = classify(negative, c.name);
       evidence.controls.push({ ...c, normal, failed }); save();
@@ -42,6 +42,12 @@ function run(output = path.join(root, '.local/test-results/rewatch-probes')) {
       evidence.selfFaults.push({ id: 'external-capture', rejected: true, result });
     });
     const later = controls.find(c => c.phase === 'random' && c.requiredCalls);
+    const native = controls.find(c => c.nativeInit);
+    mutate('tests/rewatch-fixture.cjs', "external('http-create', () => {", "((phase, operation) => operation())('http-create', () => {", () => {
+      const raw = child(native.suite, native.name, native.phase, true), result = classify(raw, native.name); persist('self-fault-native-init-capture', raw);
+      assert.equal(result.status, 'detected'); assert.throws(() => verifyExternalFailure(raw, native), { code: 'ERR_ASSERTION' });
+      evidence.selfFaults.push({ id: 'native-init-capture', rejected: true, result });
+    });
     mutate('tests/rewatch-fixture.cjs', 'const active = h.activate();', 'Math.random(); const active = h.activate();', () => {
       const raw = child(later.suite, later.name, later.phase), result = classify(raw, later.name); persist('self-fault-before-requests', raw);
       assert.equal(result.status, 'invalid');

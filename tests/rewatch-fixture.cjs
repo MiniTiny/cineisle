@@ -12,13 +12,14 @@ const observed = promise => Promise.resolve(promise).then(value => ({ value }), 
 const ids = items => items.map(item => item.Id);
 const movie = (id, played = true, extra = {}) => ({ ...h.film(String(id)), UserData: { Played: played }, ...extra });
 function external(phase, operation, details = {}) {
-  calls[phase] = (calls[phase] || 0) + 1; trace.push(phase);
+  calls[phase] = (calls[phase] || 0) + 1; if (phase !== 'http-create') trace.push(phase);
+  const snapshot = injected => ({ version: 1, phase, calls: { ...calls }, randomCalls, injected, ...details });
   if (selectedFault === phase) {
     const error = Object.assign(Error('injected rewatch external failure: ' + phase), { code: 'EIO' });
-    error.rewatchState = { version: 1, phase, calls: { ...calls }, randomCalls, injected: true, ...details };
+    error.rewatchState = snapshot(true);
     errors.push({ phase, error }); throw error;
   }
-  const failed = error => { errors.push({ phase, error }); throw error; };
+  const failed = error => { error.rewatchState = snapshot(phase === 'http-create' && process.argv.includes('--native-init-failure')); errors.push({ phase, error }); throw error; };
   try { const result = operation(); return result?.then ? result.catch(failed) : result; } catch (error) { return failed(error); }
 }
 async function healthy() { await fixture('rewatch-external', () => {
@@ -31,14 +32,15 @@ async function before() {
   errors = []; calls = {}; trace = []; randomCalls = 0; randomSource = () => 0; published = false;
   selectedFault = (process.argv.find(arg => arg.startsWith('--fault=')) || '').slice(8);
   if (selectedFault === 'setup') assert.fail('injected unrelated rewatch setup assertion');
-  http.createHttp = () => {
+  http.createHttp = () => external('http-create', () => {
+    if (process.argv.includes('--native-init-failure')) throw Object.assign(Error('injected native HTTP initializer failure'), { code: 'EIO' });
     const connection = originalCreate();
     return { ...connection, request(url, options) {
       const pathname = new URL(url).pathname;
       const phase = pathname.endsWith('/System/Info/Public') ? 'version' : pathname.endsWith('/Movies/Recommendations') ? 'plugin' : 'fallback';
       return external(phase, () => connection.request(url, options), { pathname });
     } };
-  };
+  });
   Math.random = () => external('random', () => { randomCalls++; return randomSource(randomCalls - 1); });
 }
 async function after() { http.createHttp = originalCreate; Math.random = originalRandom; }

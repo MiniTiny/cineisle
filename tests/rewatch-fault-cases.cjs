@@ -33,6 +33,8 @@ const controls = [
   { name: 'rewatch fallback size 16', phase: 'random' },
   { name: fallback, phase: 'random', requiredCalls: { plugin: 1, fallback: 1 } },
   { name: 'rewatch Index load uses production facade and fallback', phase: 'plugin', pathname: '/jellyfin/Movies/Recommendations' },
+  { name: 'rewatch real facade preserves uncapped plugin groups', phase: 'http-create', nativeInit: true },
+  { name: 'rewatch Index load uses production facade and fallback', phase: 'http-create', nativeInit: true },
   { name: 'rewatch fallback size 16', phase: 'setup' }
 ].map(c => ({ ...c, suite: 'rewatch-boundaries.test.cjs' }));
 module.exports = { recipes, controls };

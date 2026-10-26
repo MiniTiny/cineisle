@@ -3,7 +3,7 @@ const { runCase, classify } = require('./resource-cache-result.cjs');
 const { verifyExternalFailure } = require('./rewatch-external-evidence.cjs');
 const tests = [], test = (name, fn) => tests.push({ name, fn });
 for (const c of require('./rewatch-fault-cases.cjs').controls) test(`rewatch ${c.phase} unrelated failure is invalid for ${c.name}`, check => {
-  const child = phase => spawnSync(process.execPath, [path.join(__dirname, c.suite), c.name, ...(phase ? ['--fault=' + phase] : [])], { encoding: 'utf8', timeout: 20000 });
+  const child = phase => spawnSync(process.execPath, [path.join(__dirname, c.suite), c.name, ...(phase ? c.nativeInit ? ['--native-init-failure'] : ['--fault=' + phase] : [])], { encoding: 'utf8', timeout: 20000 });
   const positive = classify(child(''), c.name), raw = child(c.phase), negative = classify(raw, c.name);
   check(() => {
     assert.equal(positive.status, 'survived'); assert.equal(negative.status, 'invalid');
