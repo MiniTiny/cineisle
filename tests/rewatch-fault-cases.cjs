@@ -6,7 +6,7 @@ for (const [key, value, name] of [['categoryLimit', 5, plugin], ['itemsPerCatego
   add(`${key}-${delta}`, usecase, `private static readonly ${key}: number = ${value};`, `private static readonly ${key}: number = ${value + delta};`, name);
 }
 for (const [key, replacement] of [['categoryLimit', '4'], ['itemLimit', '7']]) add('adapter-bypass-' + key, adapter, `${key}: ${key},`, `${key}: ${replacement},`, plugin);
-add('adapter-bypass-fallback', adapter, "{ key: 'Limit', value: String(limit) }", "{ key: 'Limit', value: '99' }", fallback);
+add('adapter-bypass-fallback', adapter, "{ key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: String(limit) }", "{ key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: '99' }", fallback);
 for (const value of [14, 16]) add('output-limit-' + value, rules, 'maxFallbackItems: number = 15;', `maxFallbackItems: number = ${value};`, 'rewatch fallback size 16');
 add('remove-output-limit', rules, 'return pool.slice(0, RewatchRules.maxFallbackItems);', 'return pool;', 'rewatch fallback size 16');
 add('remove-watched-filter', rules, 'item.UserData?.Played === true', 'true', 'rewatch strict watched filtering precedes stable deduplication');
