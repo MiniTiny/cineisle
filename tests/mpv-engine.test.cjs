@@ -76,6 +76,7 @@ function rig(api = 26, speedValues = {}, timing) {
   const eventSink = Object.fromEntries(['state', 'time', 'seek', 'subtitle', 'frame', 'error', 'interrupt'].map(name => [name, (...args) => events.push([name, ...args])]));
   async function open(width = 0, height = 0) { const player = await Engine.create('/cache'); if (width) player.setSurfaceSize(width, height); player.bind(eventSink); player.url = 'https://example.invalid/synthetic'; await settle(); player.surfaceId = '123'; await player.prepare(); return player; }
   return { Engine, bridge, fonts, media, calls, events, pending, timers, device, handle, open, eventSink, session, listeners,
+    subtitleFormatter: platform['../utils/MpvTextSubtitle'], subtitleTypes: pure(path.join(__dirname, '../entry/src/main/ets/utils/InlineSubtitle.ts')),
     get value() { return value; }, set value(v) { value = v; }, async tick() { for (const fn of [...timers.values()]) { await fn(); } await settle(); } };
 }
 const cases = [];

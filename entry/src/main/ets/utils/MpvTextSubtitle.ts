@@ -1,15 +1,27 @@
 import { SubtitleContent, SubtitleRun, PositionedSubtitle } from './InlineSubtitle';
 
+// These limits protect the ArkTS conversion stage, independently of native UTF-8 packet limits.
+class MpvTextSubtitleLimits {
+  static readonly maximumEventCodeUnits: number = 65536;
+  static readonly maximumDialogueLines: number = 64;
+  // Closing brace offset minus opening brace offset, including the opening brace.
+  static readonly maximumOverrideDistanceCodeUnits: number = 2048;
+  static readonly maximumRuns: number = 4096;
+  static readonly maximumFamilyCodeUnits: number = 128;
+  static readonly minimumSizeScale: number = 0.125;
+  static readonly maximumSizeScale: number = 8;
+}
+
 interface ParsedText { runs: SubtitleRun[]; alignment: number }
 // Only converted plain-text tracks use ArkUI. Unrepresentable ASS effects retain
 // the native renderer; never discard authoring merely to force a shared overlay.
 export function mpvTextSubtitle(codec: string, events: string, fontSize: number, overflow: boolean): SubtitleContent | undefined {
-  if (!['subrip', 'srt'].includes(codec) || overflow || events.length > 65536 ||
+  if (!['subrip', 'srt'].includes(codec) || overflow || events.length > MpvTextSubtitleLimits.maximumEventCodeUnits ||
     !Number.isFinite(fontSize) || fontSize <= 0) { return undefined; }
   const all: SubtitleRun[][] = []; const flow: SubtitleRun[][] = []; const positioned: PositionedSubtitle[] = [];
   if (events.trim()) {
     const lines = events.split(/\r?\n/).filter((line: string) => !!line.trim());
-    if (lines.length > 64) { return undefined; }
+    if (lines.length > MpvTextSubtitleLimits.maximumDialogueLines) { return undefined; }
     for (const line of lines) {
       if (!line.startsWith('Dialogue:')) { return undefined; }
       let begin = line.indexOf(':') + 1;
@@ -45,10 +57,10 @@ function parseText(source: string, baseSize: number): ParsedText | undefined {
       }
     }
     if (c !== '{') { text += c; ++i; continue; }
-    const end = source.indexOf('}', i + 1); if (end < 0 || end - i > 2048) { return undefined; }
+    const end = source.indexOf('}', i + 1); if (end < 0 || end - i > MpvTextSubtitleLimits.maximumOverrideDistanceCodeUnits) { return undefined; }
     const block = source.slice(i + 1, end); i = end + 1;
     if (!block.includes('\\')) { continue; } // ASS comments are not visible text.
-    flush(); if (runs.length > 4096) { return undefined; }
+    flush(); if (runs.length > MpvTextSubtitleLimits.maximumRuns) { return undefined; }
     for (const command of block.split('\\').slice(1)) {
       let match: RegExpExecArray | null;
       if ((match = /^([bius])(-?1|0)$/.exec(command))) {
@@ -61,11 +73,11 @@ function parseText(source: string, baseSize: number): ParsedText | undefined {
         style.color = bgr ? '#FF' + bgr.slice(4, 6) + bgr.slice(2, 4) + bgr.slice(0, 2) : '';
       } else if (command.startsWith('fn')) {
         const family = command.slice(2).trim();
-        if (family.length > 128 || /["'<>\\/\u0000-\u001f]/.test(family)) { return undefined; }
+        if (family.length > MpvTextSubtitleLimits.maximumFamilyCodeUnits || /["'<>\\/\u0000-\u001f]/.test(family)) { return undefined; }
         style = new SubtitleRun('', style); style.family = family;
       } else if ((match = /^fs(\d+(?:\.\d+)?)?$/.exec(command))) {
         const scale = match[1] ? Number(match[1]) / baseSize : 1;
-        if (!Number.isFinite(scale) || scale < 0.125 || scale > 8) { return undefined; }
+        if (!Number.isFinite(scale) || scale < MpvTextSubtitleLimits.minimumSizeScale || scale > MpvTextSubtitleLimits.maximumSizeScale) { return undefined; }
         style = new SubtitleRun('', style); style.sizeScale = scale;
       } else if ((match = /^an([1-9])$/.exec(command))) {
         const next = Number(match[1]); if (alignment && alignment !== next) { return undefined; } alignment = next;
@@ -73,5 +85,5 @@ function parseText(source: string, baseSize: number): ParsedText | undefined {
       else { return undefined; }
     }
   }
-  flush(); if (runs.length > 4096) { return undefined; } return { runs: runs, alignment: alignment };
+  flush(); if (runs.length > MpvTextSubtitleLimits.maximumRuns) { return undefined; } return { runs: runs, alignment: alignment };
 }
