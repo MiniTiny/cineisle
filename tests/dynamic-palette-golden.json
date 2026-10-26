@@ -1,0 +1,154 @@
+[
+  {
+    "rgb": [
+      0,
+      0,
+      0
+    ],
+    "expected": {
+      "seed": "#000000",
+      "background": "#080D11",
+      "surface": "#0E1115",
+      "raised": "#0E1419",
+      "selected": "#0C0E12",
+      "accent": "#B8B8B8",
+      "action": "#040B0C",
+      "muted": "#A3A8AA",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      255,
+      255,
+      255
+    ],
+    "expected": {
+      "seed": "#FFFFFF",
+      "background": "#11151A",
+      "surface": "#282B2E",
+      "raised": "#1D2329",
+      "selected": "#484B4D",
+      "accent": "#FFFFFF",
+      "action": "#434749",
+      "muted": "#D4DADB",
+      "warm": "#F4CF8B",
+      "danger": "#FFABAB"
+    }
+  },
+  {
+    "rgb": [
+      255,
+      0,
+      0
+    ],
+    "expected": {
+      "seed": "#FF0000",
+      "background": "#110D11",
+      "surface": "#281115",
+      "raised": "#1D1419",
+      "selected": "#480E12",
+      "accent": "#FFB8B8",
+      "action": "#560B0C",
+      "muted": "#D4A8AA",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "expected": {
+      "seed": "#00FF00",
+      "background": "#081511",
+      "surface": "#0E2B15",
+      "raised": "#0E2319",
+      "selected": "#0C4B12",
+      "accent": "#B8FFB8",
+      "action": "#04510B",
+      "muted": "#A3DAAA",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      0,
+      0,
+      255
+    ],
+    "expected": {
+      "seed": "#0000FF",
+      "background": "#080D1A",
+      "surface": "#0E112E",
+      "raised": "#0E1429",
+      "selected": "#0C0E4D",
+      "accent": "#B8B8FF",
+      "action": "#040B5E",
+      "muted": "#A3A8DB",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      30,
+      120,
+      200
+    ],
+    "expected": {
+      "seed": "#1E78C8",
+      "background": "#091118",
+      "surface": "#111D29",
+      "raised": "#101B25",
+      "selected": "#132B41",
+      "accent": "#C0D9F0",
+      "action": "#0E314C",
+      "muted": "#A8BFD1",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      123,
+      17,
+      245
+    ],
+    "expected": {
+      "seed": "#7B11F5",
+      "background": "#0C0D1A",
+      "surface": "#1B132D",
+      "raised": "#151528",
+      "selected": "#29134B",
+      "accent": "#DABCFC",
+      "action": "#2B105B",
+      "muted": "#BBABD9",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  },
+  {
+    "rgb": [
+      1,
+      2,
+      3
+    ],
+    "expected": {
+      "seed": "#010203",
+      "background": "#080D11",
+      "surface": "#0F1115",
+      "raised": "#0E141A",
+      "selected": "#0D0F12",
+      "accent": "#B8B8B8",
+      "action": "#040C0D",
+      "muted": "#A3A8AA",
+      "warm": "#F4CF8B",
+      "danger": "#FF9F9F"
+    }
+  }
+]
