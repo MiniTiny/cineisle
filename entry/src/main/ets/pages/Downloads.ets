@@ -14,6 +14,8 @@ import { AppService } from '../service/AppService';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
 
+const pagePollIntervalMs: number = 1000;
+
 @Entry
 @Component
 struct Downloads {
@@ -36,7 +38,7 @@ struct Downloads {
     if (this.client && this.client !== AppService.client) { this.records = []; router.back(); return; }
     AppService.subscribeDownloads(this.changed); this.changed();
     if (this.timer >= 0) { clearInterval(this.timer); }
-    this.timer = setInterval(() => { AppService.pollDownloads(); }, 1000);
+    this.timer = setInterval(() => { AppService.pollDownloads(); }, pagePollIntervalMs);
   }
   onPageHide(): void { AppService.unsubscribeDownloads(this.changed); if (this.timer >= 0) { clearInterval(this.timer); this.timer = -1; } }
   aboutToDisappear(): void { this.onPageHide(); }
