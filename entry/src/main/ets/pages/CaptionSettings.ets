@@ -7,7 +7,7 @@ import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { AppLock } from '../service/AppLock';
 import { SystemCaptions } from '../service/SystemCaptions';
-import { CaptionConfig, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
+import { CaptionConfig, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionPreset, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { errorText, text } from '../utils/Strings';
 const FAMILY_LABELS: string[] = ['caption_family_default', 'caption_family_mono_serif', 'caption_family_serif', 'caption_family_mono_sans', 'caption_family_sans', 'caption_family_casual', 'caption_family_cursive', 'caption_family_small_caps'];
@@ -20,13 +20,13 @@ struct CaptionSettings {
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @StorageLink('cineIsleLocked') @Watch('lockChanged') locked: boolean = true;
   @State state: CaptionSnapshot = new CaptionSnapshot();
-  @State captionEnabled: boolean = false;
-  @State scaleDraft: string = '100';
-  @State family: number = 0;
-  @State edge: number = 0;
-  @State foreground: string = '#FFFFFFFF';
-  @State backgroundDraft: string = '#99000000';
-  @State windowColor: string = '#00000000';
+  @State captionEnabled: boolean = new CaptionConfig().enabled;
+  @State scaleDraft: string = new CaptionConfig().fontScale.toString();
+  @State family: number = CAPTION_FAMILIES.indexOf(new CaptionConfig().family);
+  @State edge: number = CAPTION_EDGES.indexOf(new CaptionConfig().edge);
+  @State foreground: string = String(new CaptionConfig().foreground);
+  @State backgroundDraft: string = String(new CaptionConfig().background);
+  @State windowColor: string = String(new CaptionConfig().window);
   @State preview: CaptionRenderStyle = new CaptionRenderStyle();
   @State dirty: boolean = false;
   @State busy: boolean = false;
@@ -76,8 +76,9 @@ struct CaptionSettings {
   private changed(): void { if (!this.visible || !this.state.available || this.busy || this.locked || !AppLock.permit()) { return; } const config = this.draft(); this.dirty = true; this.valid = validCaptionConfig(config); this.preview = captionRenderStyle(config); this.message = this.valid ? '' : text('caption_invalid'); }
   private preset(yellow: boolean): void {
     if (!this.visible || !this.state.available || this.busy || this.locked || !AppLock.permit()) { return; }
-    this.captionEnabled = true; this.scaleDraft = '100'; this.family = 0; this.edge = 0; this.foreground = yellow ? '#FFFFFF00' : '#FFFFFFFF';
-    this.backgroundDraft = '#99000000'; this.windowColor = '#00000000'; this.changed();
+    const config = captionPreset(yellow);
+    this.captionEnabled = config.enabled; this.scaleDraft = config.fontScale.toString(); this.family = CAPTION_FAMILIES.indexOf(config.family); this.edge = CAPTION_EDGES.indexOf(config.edge);
+    this.foreground = String(config.foreground); this.backgroundDraft = String(config.background); this.windowColor = String(config.window); this.changed();
   }
   private reload(): void { if (!this.visible || this.busy || this.locked || !AppLock.permit()) { return; } const state = SystemCaptions.read(); this.state = state; if (state.available) { this.load(state.config); } else { this.message = text(state.issue); } }
   private async apply(): Promise<void> {
@@ -118,7 +119,7 @@ struct CaptionSettings {
             }.width('100%').padding(16).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.raised).borderRadius(20)
             Column({ space: 12 }) {
               this.label($r('app.string.caption_scale'))
-              TextInput({ text: this.scaleDraft, placeholder: '100' }).type(InputType.Number).maxLength(6).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface)
+              TextInput({ text: this.scaleDraft, placeholder: new CaptionConfig().fontScale.toString() }).type(InputType.Number).maxLength(6).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface)
                 .enabled(this.state.available && !this.busy).accessibilityText($r('app.string.caption_scale')).onChange((value: string) => this.edit('scale', value))
               this.label($r('app.string.caption_family'))
               Select(FAMILY_LABELS.map((key: string): SelectOption => ({ value: text(key) }))).selected(this.family).value(text(FAMILY_LABELS[this.family])).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).width('100%')
