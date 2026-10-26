@@ -68,6 +68,19 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
       const raw = child('contract-probe-controls.test.cjs', checkpointName), result = classify(raw, checkpointName); persist('self-fault-' + id, raw);
       assert.equal(result.status, 'detected'); evidence.selfFaults.push({ id, rejected: true, result });
     });
+    const originName = 'contract checkpoint preserves originating nested native failure';
+    const originChild = flag => spawnSync(process.execPath, [path.join(temp, 'tests/contract-probe-controls.test.cjs'), originName, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
+    const originBaseline = originChild(); persist('self-baseline-origin', originBaseline);
+    assert.equal(classify(originBaseline, originName).status, 'survived'); evidence.selfBaselines.push({ name: originName, ...classify(originBaseline, originName) });
+    for (const [flag, phase] of [['--origin-unrelated-failure', 'setup'], ['--origin-scenario-failure', 'origin-scenario']]) {
+      const raw = originChild(flag), result = classify(raw, originName); persist('self-control-origin' + flag, raw);
+      assert.equal(result.status, 'invalid'); assert.equal(result.record.fixturePhase, phase); assert.equal(result.record.error.cause.code, 'ERR_ASSERTION');
+      evidence.selfControls.push({ name: originName, flag, ...result });
+    }
+    mutate('tests/contract-external.cjs', 'if (!states.has(error))', 'if (true)', () => {
+      const raw = originChild(), result = classify(raw, originName); persist('self-fault-origin', raw);
+      assert.equal(result.status, 'detected'); evidence.selfFaults.push({ id: 'origin-preservation', rejected: true, result });
+    });
     const resultFile = path.join(temp, 'tests/resource-cache-result.cjs'), originalResult = fs.readFileSync(resultFile, 'utf8');
     const selectedSelfCases = new Set();
     for (const [id, old, replacement] of [

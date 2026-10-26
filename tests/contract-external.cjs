@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const { fixture, runCase } = require('./resource-cache-result.cjs');
 const prefix = 'CONTRACT_EXTERNAL_STATE ';
 function external(scope, fault) {
-  const errors = [], calls = {}, events = []; let published = false;
+  const errors = [], states = new Map(), calls = {}, events = []; let published = false;
   const snapshot = (phase, injected, details) => ({ version: 1, scope, phase, injected, calls: { ...calls }, ...details });
   return {
     calls, events,
@@ -10,15 +10,19 @@ function external(scope, fault) {
       calls[phase] = (calls[phase] || 0) + 1; events.push(phase);
       if (fault === phase) {
         const error = Object.assign(Error('injected ' + scope + ' external failure: ' + phase), { code: 'EIO' });
-        error.contractState = snapshot(phase, true, details);
+        states.set(error, snapshot(phase, true, details));
         errors.push(error); throw error;
       }
-      const failed = error => { error.contractState = snapshot(phase, error.contractInjected === true, details); errors.push(error); throw error; };
+      const failed = error => {
+        // A propagated failure must keep the first observation in this tracker.
+        if (!states.has(error)) { states.set(error, snapshot(phase, error?.contractInjected === true, details)); errors.push(error); }
+        throw error;
+      };
       try { const value = operation(); return value?.then ? value.catch(failed) : value; } catch (error) { return failed(error); }
     },
     async healthy() { await fixture(scope + '-external', () => {
       if (!errors.length) return;
-      if (!published) { console.error(prefix + JSON.stringify(errors[0].contractState)); published = true; }
+      if (!published) { console.error(prefix + JSON.stringify(states.get(errors[0]))); published = true; }
       throw errors[0];
     }); }
   };
