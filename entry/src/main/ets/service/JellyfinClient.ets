@@ -8,7 +8,7 @@ import { addresses } from '../utils/Accounts';
 import { deviceNameValue } from '../utils/DeviceOptions';
 import { normalizeServer, secondsToTicks } from '../utils/Protocol';
 import { RewatchRecommendations } from './RewatchRecommendations';
-import { HomeFeedRequests, NextUpRequests } from '../utils/FeedRequests';
+import { HomeFeedRequests, NextUpRequests, EpisodeQueueRequests } from '../utils/FeedRequests';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { PosterTransport } from '../api/PosterTransport';
 import { PosterTarget, PosterTransfer } from '../utils/PosterOptions';
@@ -246,7 +246,7 @@ export class JellyfinClient {
 
   async episodePage(seriesId: string, start: number): Promise<ItemsResult> {
     await this.ready();
-    return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: 200 }));
+    return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: EpisodeQueueRequests.pageItems }));
   }
 
   async subtitle(id: string, sourceId: string, index: number, transfer?: ApiTransport, format: string = 'srt'): Promise<string> {

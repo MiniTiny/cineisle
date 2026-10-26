@@ -18,3 +18,8 @@ export class NextUpRequests {
     return seriesId ? NextUpRequests.seriesLimit : NextUpRequests.feedLimit;
   }
 }
+
+// Complete episode queues page independently of home shelves and catalog synchronization.
+export class EpisodeQueueRequests {
+  static readonly pageItems: number = 200;
+}
