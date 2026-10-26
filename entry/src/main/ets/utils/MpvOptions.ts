@@ -1,3 +1,6 @@
+// Preferences admission uses UTF-16 code units, independently of native option byte budgets.
+const maximumSerializedOptionsCodeUnits: number = 1024;
+
 export type MpvHardware = 'no' | 'ohcodec' | 'ohcodec-copy';
 export type MpvVideo = 'gpu-next' | 'gpu';
 export interface MpvOptions { hwdec: MpvHardware; vo: MpvVideo }
@@ -12,7 +15,7 @@ export function validMpvOptions(value: MpvOptions): boolean {
 export function copyMpvOptions(value: MpvOptions): MpvOptions { return { hwdec: value.hwdec, vo: value.vo }; }
 export function decodeMpvOptions(raw: string): MpvOptions | undefined {
   if (raw === '') { return defaultMpvOptions(); }
-  if (raw.length > 1024) { return undefined; }
+  if (raw.length > maximumSerializedOptionsCodeUnits) { return undefined; }
   try { const value = JSON.parse(raw) as MpvOptions; return validMpvOptions(value) ? copyMpvOptions(value) : undefined; }
   catch (_) { return undefined; }
 }
