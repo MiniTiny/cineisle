@@ -40,6 +40,7 @@ function render(name,overrides={},scale=1){
  AppService.posters=overrides.posterCache||{snapshot:()=>({enabled:true,maxMb:20}),usage:async()=>({bytes:0,files:0,issue:''}),save:async(value,allowed)=>{if(!allowed())throw Error('poster_cancelled');events.push(['posterSave',JSON.parse(JSON.stringify(value))]);return value},clear:async allowed=>{if(!allowed())throw Error('poster_cancelled');events.push(['posterClear']);return {bytes:0,files:0,issue:''}}};
  let networkModule; let paletteModule;
  c.require=id=>{
+  if(id.endsWith('/FavoriteOptions')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/FavoriteOptions.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/ActorOrder')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/ActorOrder.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/SubtitlePosition'))return require('./player-regression.test.cjs').load('utils/SubtitlePosition.ts');
   if(id.endsWith('/InlineSubtitle')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/InlineSubtitle.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}

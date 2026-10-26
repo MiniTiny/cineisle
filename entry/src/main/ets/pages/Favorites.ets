@@ -1,3 +1,4 @@
+import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from '../utils/FavoriteOptions';
 import { UiPalette } from '../utils/UiPalette';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandChoice } from '../components/BrandChoice';
@@ -29,11 +30,11 @@ struct Favorites {
   @State all: MediaItem[] = [];
   @State visibleItems: MediaItem[] = [];
   @State genres: string[] = [];
-  @State category: string = '';
+  @State category: string = defaultFavoriteCategory;
   @State genre: string = '';
   @State query: string = '';
   @State unwatched: boolean = false;
-  @State order: string = 'name';
+  @State order: string = defaultFavoriteOrder;
   @State busy: boolean = false;
   @State selection: boolean = false;
   @State selected: string[] = [];
@@ -128,9 +129,9 @@ struct Favorites {
       Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.favorite_filters'), icon: $r('app.media.menu_settings') })
       BrandChoice({ label: $r('app.string.favorite_type'), icon: $r('app.media.detail_film'),
-        choices: [{ value: text('all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
-        selected: ['', 'Movie', 'Series', 'Episode'].indexOf(this.category),
-        onSelect: (i: number) => { this.category = ['', 'Movie', 'Series', 'Episode'][i]; this.genre = ''; this.filter(); } })
+        choices: favoriteCategories.map((choice: FavoriteChoice): SelectOption => ({ value: text(choice.caption) })),
+        selected: favoriteCategories.findIndex((choice: FavoriteChoice) => choice.value === this.category),
+        onSelect: (i: number) => { this.category = favoriteCategories[i]?.value; this.genre = ''; this.filter(); } })
       BrandChoice({ label: $r('app.string.favorite_genre'), icon: $r('app.media.nav_star_active'),
         choices: [{ value: text('all_genres') }, ...this.genres.map((g: string): SelectOption => ({ value: g }))],
         selected: this.genres.indexOf(this.genre) + 1, available: this.genres.length > 0,
@@ -143,13 +144,13 @@ struct Favorites {
           Checkbox().select(this.unwatched).selectedColor(this.palette.action).onChange((v: boolean) => { this.unwatched = v; this.filter(); })
         }.width('100%').margin({ bottom: 8 })
         BrandChoice({ label: $r('app.string.favorite_order'), icon: $r('app.media.menu_settings'),
-          choices: [{ value: text('name_ascending') }, { value: text('name_descending') }, { value: text('continue_first') }],
-          selected: ['name', 'nameDesc', 'continue'].indexOf(this.order),
-          onSelect: (i: number) => { this.order = ['name', 'nameDesc', 'continue'][i]; this.filter(); } })
+          choices: favoriteOrders.map((choice: FavoriteChoice): SelectOption => ({ value: text(choice.caption) })),
+          selected: favoriteOrders.findIndex((choice: FavoriteChoice) => choice.value === this.order),
+          onSelect: (i: number) => { this.order = favoriteOrders[i]?.value; this.filter(); } })
       }
       Flex({ wrap: FlexWrap.Wrap }) {
         Text(this.preview ? $r('app.string.favorites_loaded', this.visibleItems.length, this.all.length) : $r('app.string.favorites_count', this.visibleItems.length, this.all.length)).fontColor(this.palette.muted).width('100%')
-        Column() { BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_reset'), onSelect: () => { this.category = ''; this.genre = ''; this.query = ''; this.unwatched = false; this.order = 'name'; this.filter(); } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
+        Column() { BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_reset'), onSelect: () => { this.category = defaultFavoriteCategory; this.genre = ''; this.query = ''; this.unwatched = false; this.order = defaultFavoriteOrder; this.filter(); } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
         Column() {
           if (this.selection) { BrandButton({ label: $r('app.string.cancel'), icon: $r('app.media.menu_cancel'), available: !this.busy, onSelect: () => { this.selection = false; this.selected = []; } }) }
           else { BrandButton({ label: $r('app.string.select_items'), icon: $r('app.media.nav_check_active'), available: !this.busy, onSelect: () => { this.selection = true; this.selected = []; } }) }

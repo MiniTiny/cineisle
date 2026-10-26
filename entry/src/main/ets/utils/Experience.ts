@@ -1,3 +1,4 @@
+import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from './FavoriteOptions';
 import { librarySortFields } from './Browse';
 import { actorOrders, ActorOrderChoice, defaultActorOrder } from './ActorOrder';
 import { DiscoveryRules } from './DiscoveryRules';
@@ -33,11 +34,11 @@ export class ExperienceState {
   positions: PendingPosition[] = [];
   sourcePreference: string = '';
   rememberDownloadSource: boolean = true;
-  favoriteCategory: string = '';
+  favoriteCategory: string = defaultFavoriteCategory;
   favoriteGenre: string = '';
   favoriteQuery: string = '';
   favoriteUnwatched: boolean = false;
-  favoriteOrder: string = 'name';
+  favoriteOrder: string = defaultFavoriteOrder;
 }
 export interface ActorTag { key: string; title: string; theme: boolean; works: MediaItem[] }
 export interface ActorProfile {
@@ -178,7 +179,7 @@ export function validExperience(value: ExperienceState): boolean {
     (value.serverAutoNext === undefined || typeof value.serverAutoNext === 'boolean') &&
     [0, 1, 3, 4].includes(value.tab) && actorOrders.some((choice: ActorOrderChoice) => choice.value === value.actorOrder) &&
     typeof value.offline === 'boolean' && typeof value.showTags === 'boolean' && typeof value.followedOnly === 'boolean' && typeof value.sourcePreference === 'string' && typeof value.rememberDownloadSource === 'boolean' &&
-    typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && ['', 'Movie', 'Series', 'Episode'].includes(value.favoriteCategory) && ['name', 'nameDesc', 'continue'].includes(value.favoriteOrder) &&
+    typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && favoriteCategories.some((choice: FavoriteChoice) => choice.value === value.favoriteCategory) && favoriteOrders.some((choice: FavoriteChoice) => choice.value === value.favoriteOrder) &&
     Array.isArray(value.follows) && value.follows.every((f: Follow) => !!f && typeof f.id === 'string' && Array.isArray(f.acknowledged) && f.acknowledged.every((id: string) => typeof id === 'string')) &&
     Array.isArray(value.positions) && value.positions.every((p: PendingPosition) => !!p && typeof p.id === 'string' && Number.isSafeInteger(p.ticks) && p.ticks >= 0 && Number.isSafeInteger(p.revision) && !!p.item && p.item.Id === p.id) &&
     Array.isArray(value.pending) && value.pending.every((e: PendingEdit) => !!e && typeof e.id === 'string' && ['favorite', 'played'].includes(e.field) && typeof e.value === 'boolean' && (e.localOnly === undefined || typeof e.localOnly === 'boolean') && Number.isSafeInteger(e.revision) && (e.item === undefined || (!!e.item && e.item.Id === e.id && typeof e.item.Name === 'string' && typeof e.item.Type === 'string')));
