@@ -17,3 +17,11 @@ export class SyncSchedule {
   static readonly continuationDelayMs: number = 1000;
   static readonly repeatCycleMs: number = 20 * 60 * 1000;
 }
+
+// Catalog scope and pagination belong to offline synchronization, independently of browsing.
+export class SyncCatalogPolicy {
+  static readonly pageItems: number = 200;
+  static supportsLibrary(collectionType?: string): boolean {
+    return !collectionType || ['movies', 'tvshows'].includes(collectionType);
+  }
+}

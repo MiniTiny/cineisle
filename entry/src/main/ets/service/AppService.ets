@@ -26,7 +26,7 @@ import { DownloadNetworkGuard } from './DownloadNetworkGuard';
 import { DownloadNetwork, downloadNetwork } from '../utils/Downloads';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
-import { SyncRetryPolicy } from '../utils/SyncPolicy';
+import { SyncRetryPolicy, SyncCatalogPolicy } from '../utils/SyncPolicy';
 import { initializeStrings, text } from '../utils/Strings';
 import { validMediaItem } from '../utils/Cache';
 import { followingEpisode, precedingEpisode } from '../utils/Playback';
@@ -243,7 +243,7 @@ export class AppService {
       const views = await client.libraries();
       if (revision !== AppService.syncRevision || client !== AppService.client) { throw new Error('sync_cancelled'); }
       if (!Array.isArray(views) || !views.every(validMediaItem)) { throw new Error('sync_incomplete'); }
-      const libraries = uniqueItems(views.filter((view: MediaItem) => !view.CollectionType || ['movies', 'tvshows'].includes(view.CollectionType)));
+      const libraries = uniqueItems(views.filter((view: MediaItem) => SyncCatalogPolicy.supportsLibrary(view.CollectionType)));
       const items: MediaItem[] = [];
       const memberships: LibraryMembership[] = [];
       for (const library of libraries) {
@@ -272,7 +272,7 @@ export class AppService {
     while (true) {
       const page = await client.items([{ key: 'IncludeItemTypes', value: 'Movie,Series,Season,Episode' },
         { key: 'SortBy', value: 'SortName' }, { key: 'SortOrder', value: 'Ascending' }, ...scope,
-        { key: 'StartIndex', value: items.length.toString() }, { key: 'Limit', value: '200' }]);
+        { key: 'StartIndex', value: items.length.toString() }, { key: 'Limit', value: String(SyncCatalogPolicy.pageItems) }]);
       if (!page || !Array.isArray(page.Items) || !Number.isSafeInteger(page.TotalRecordCount) || page.TotalRecordCount < 0 ||
         (total >= 0 && total !== page.TotalRecordCount)) { throw new Error('sync_incomplete'); }
       total = page.TotalRecordCount;

@@ -19,8 +19,8 @@ function make(scope){
     return trace.call(phase,()=>provider(url,options),{pathname:url.pathname});
    }};
   });
-  const file=(phase,filename,operation)=>stage==='account-init'?operation():trace.call(targets(filename)?phase:'other-'+phase,operation,{filename,stage});
-  io.openSync=(...args)=>{const filename=path.basename(args[0]),value=file('file-open',filename,()=>originalIO.openSync(...args));opened.set(value.fd,filename);return value;};
+  const file=(phase,filename,operation)=>stage==='account-init'?operation():trace.call(targets(filename,phase)?phase:'other-'+phase,operation,{filename,stage});
+  io.openSync=(...args)=>{const filename=path.basename(args[0]),value=file('file-open',filename,()=>originalIO.openSync(...args));opened.set(value.fd,filename);for(const method of ['tryLock','lock'])if(typeof value[method]==='function'){const original=value[method].bind(value);value[method]=(...args)=>file('file-'+method,filename,()=>original(...args));}return value;};
   io.writeSync=(...args)=>file('file-write',opened.get(args[0]),()=>originalIO.writeSync(...args));
   io.renameSync=(...args)=>file('file-rename',path.basename(args[1]),()=>originalIO.renameSync(...args));
   io.readTextSync=(...args)=>file('file-read',path.basename(args[0]),()=>originalIO.readTextSync(...args));
