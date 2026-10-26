@@ -6,7 +6,8 @@ import util from '@ohos.util';
 import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../model/Models';
 import { addresses } from '../utils/Accounts';
 import { deviceNameValue } from '../utils/DeviceOptions';
-import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
+import { normalizeServer, secondsToTicks } from '../utils/Protocol';
+import { RewatchRecommendations } from './RewatchRecommendations';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { PosterTransport } from '../api/PosterTransport';
 import { PosterTarget, PosterTransfer } from '../utils/PosterOptions';
@@ -187,19 +188,20 @@ export class JellyfinClient {
 
   async recommend(): Promise<MediaItem[]> {
     await this.ready();
-    const candidates: MediaItem[] = [];
-    try {
-      const groups = await this.api.getMovieRecommendations({ userId: this.session.userId, categoryLimit: 5, itemLimit: 8, fields: [ItemFields.People] });
-      if (!Array.isArray(groups)) { throw new Error('api_response_invalid'); }
-      groups.forEach((group: RecommendationDto) => candidates.push(...mediaItems(group?.Items ?? [])));
-    } catch (e) {
-      // Recommendation plugins are optional; fallback still requires a successful media request.
-      candidates.length = 0;
-    }
-    if (candidates.some((item: MediaItem) => item.UserData?.Played === true)) { return playedRecommendations(candidates, []); }
-    const fallback = await this.items([{ key: 'IncludeItemTypes', value: 'Movie' }, { key: 'IsPlayed', value: 'true' },
-      { key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: '100' }]);
-    return playedRecommendations([], fallback.Items ?? []);
+    return RewatchRecommendations.load({
+      recommendations: async (categoryLimit: number, itemLimit: number): Promise<MediaItem[]> => {
+        const groups = await this.api.getMovieRecommendations({ userId: this.session.userId, categoryLimit: categoryLimit, itemLimit: itemLimit, fields: [ItemFields.People] });
+        if (!Array.isArray(groups)) { throw new Error('api_response_invalid'); }
+        const candidates: MediaItem[] = [];
+        groups.forEach((group: RecommendationDto) => candidates.push(...mediaItems(group?.Items ?? [])));
+        return candidates;
+      },
+      watchedMovies: async (limit: number): Promise<MediaItem[]> => {
+        const fallback = await this.items([{ key: 'IncludeItemTypes', value: 'Movie' }, { key: 'IsPlayed', value: 'true' },
+          { key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: String(limit) }]);
+        return fallback.Items ?? [];
+      }
+    });
   }
 
   async children(item: MediaItem): Promise<MediaItem[]> {

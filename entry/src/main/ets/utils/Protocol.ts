@@ -1,4 +1,5 @@
 import { ActorSummary, MediaItem, QueryParam } from '../model/Models';
+import { RewatchRules } from './RewatchRules';
 
 export function normalizeServer(input: string): string {
   const value = input.trim().replace(/\/+$/, '');
@@ -39,14 +40,7 @@ export function uniqueItems(items: MediaItem[]): MediaItem[] {
 }
 
 export function playedRecommendations(groups: MediaItem[], fallback: MediaItem[]): MediaItem[] {
-  const played = uniqueItems(groups.filter((item: MediaItem) => item.UserData?.Played === true));
-  if (played.length > 0) { return played; }
-  const pool = uniqueItems(fallback.filter((item: MediaItem) => item.UserData?.Played === true));
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const item = pool[i]; pool[i] = pool[j]; pool[j] = item;
-  }
-  return pool.slice(0, 15);
+  return RewatchRules.select(groups, fallback);
 }
 
 export function rankActors(items: MediaItem[]): ActorSummary[] {
