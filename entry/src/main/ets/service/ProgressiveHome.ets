@@ -2,6 +2,8 @@ import { HomeSection, MediaItem } from '../model/Models';
 import { JellyfinClient } from './JellyfinClient';
 import { NetworkPolicy } from '../utils/NetworkOptions';
 import { authorizationFailure } from '../utils/Experience';
+import { supportsHomeLibrary } from './HomeFeed';
+import { HomeFeedRequests, NextUpRequests } from '../utils/FeedRequests';
 
 export interface HomeFailure { id: string; name: string; message: string }
 export interface HomeUpdate { sections: HomeSection[]; failures: HomeFailure[]; busy: boolean; cached: boolean }
@@ -9,6 +11,7 @@ interface HomeRequest { collectionType?: string; id: string; kind: string; name:
 
 // One account/page owns this loader. Four shared slots include independent retries.
 export class ProgressiveHome {
+  private static readonly maxActiveRequests: number = 4;
   private requests: HomeRequest[] = [];
   private sections: Map<string, HomeSection> = new Map();
   private errors: Map<string, HomeFailure> = new Map();
@@ -32,13 +35,13 @@ export class ProgressiveHome {
     if (!NetworkPolicy.cacheAllowed()) { preview = []; }
     const finished = new Promise<void>((resolve) => { this.complete = resolve; });
     this.requests = [
-      { id: 'resume', kind: 'resume', name: '', libraryId: '', fetch: () => this.client.resume() },
-      { id: 'nextup', kind: 'nextup', name: '', libraryId: '', fetch: () => this.client.nextUp() },
+      { id: 'resume', kind: 'resume', name: '', libraryId: '', fetch: () => this.client.resume(HomeFeedRequests.resumeLimit) },
+      { id: 'nextup', kind: 'nextup', name: '', libraryId: '', fetch: () => this.client.nextUp('', NextUpRequests.feedLimit) },
       { id: 'libraries', kind: '', name: '', libraryId: '', fetch: () => this.client.libraries() }
     ];
     preview.forEach((section: HomeSection) => this.sections.set(section.id, section));
     // Cached latest shelves keep their position until the current views response establishes order.
-    preview.filter((s: HomeSection) => s.libraryId).forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: s.libraryId, collectionType: s.collectionType, fetch: () => this.client.latest(s.libraryId) }));
+    preview.filter((s: HomeSection) => s.libraryId).forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: s.libraryId, collectionType: s.collectionType, fetch: () => this.client.latest(s.libraryId, HomeFeedRequests.latestLimit(s.libraryId)) }));
     preview.filter((s: HomeSection) => s.id === 'cached').forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: '', fetch: async () => [] }));
     this.cached = preview.length > 0; this.emit();
     this.requests.slice(0, 3).forEach((r: HomeRequest) => this.enqueue(r));
@@ -52,7 +55,7 @@ export class ProgressiveHome {
     this.pending.add(request.id); this.queue.push(request); this.emit(); this.drain();
   }
   private drain(): void {
-    while (this.alive && this.active < 4 && this.queue.length) {
+    while (this.alive && this.active < ProgressiveHome.maxActiveRequests && this.queue.length) {
       const request = this.queue.shift()!; ++this.active; this.run(request);
     }
   }
@@ -60,12 +63,12 @@ export class ProgressiveHome {
     try {
       const items = await request.fetch(); if (!this.alive) { return; }
       if (request.id === 'libraries') {
-        const libraries = items.filter((i: MediaItem) => !i.CollectionType || ['movies', 'tvshows', 'boxsets'].includes(i.CollectionType));
+        const libraries = items.filter(supportsHomeLibrary);
         const ids = new Set(libraries.map((i: MediaItem) => 'library-' + i.Id));
         this.sections.forEach((s: HomeSection, id: string) => { if (s.libraryId && !ids.has(id)) { this.sections.delete(id); } });
         this.requests = this.requests.slice(0, 3);
         libraries.forEach((i: MediaItem) => {
-          const next: HomeRequest = { id: 'library-' + i.Id, kind: 'latest', name: i.Name, libraryId: i.Id, collectionType: i.CollectionType, fetch: () => this.client.latest(i.Id) };
+          const next: HomeRequest = { id: 'library-' + i.Id, kind: 'latest', name: i.Name, libraryId: i.Id, collectionType: i.CollectionType, fetch: () => this.client.latest(i.Id, HomeFeedRequests.latestLimit(i.Id)) };
           this.requests.push(next); this.enqueue(next);
         });
       } else if (items.length) {

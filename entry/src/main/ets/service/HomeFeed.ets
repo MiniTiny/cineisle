@@ -1,17 +1,18 @@
 import { HomeSection, LibrarySnapshot, MediaItem } from '../model/Models';
 import { JellyfinClient } from './JellyfinClient';
 import { cachedItems } from '../utils/Browse';
+import { HomeFeedRequests, NextUpRequests } from '../utils/FeedRequests';
 
-function supported(library: MediaItem): boolean {
+export function supportsHomeLibrary(library: MediaItem): boolean {
   return !library.CollectionType || ['movies', 'tvshows', 'boxsets'].includes(library.CollectionType);
 }
 
 // Match the phone Android feed: resume, next up, then non-empty latest shelves per library.
 export async function loadHome(client: JellyfinClient): Promise<HomeSection[]> {
-  const results = await Promise.all([client.resume(), client.nextUp(), client.libraries()]);
+  const results = await Promise.all([client.resume(HomeFeedRequests.resumeLimit), client.nextUp('', NextUpRequests.feedLimit), client.libraries()]);
   const resume = results;
-  const libraries = results[2].filter(supported);
-  const latest = await Promise.all(libraries.map((library: MediaItem) => client.latest(library.Id)));
+  const libraries = results[2].filter(supportsHomeLibrary);
+  const latest = await Promise.all(libraries.map((library: MediaItem) => client.latest(library.Id, HomeFeedRequests.latestLimit(library.Id))));
   const sections: HomeSection[] = [];
   if (resume[0].length) { sections.push({ id: 'resume', kind: 'resume', name: '', libraryId: '', items: resume[0] }); }
   if (resume[1].length) { sections.push({ id: 'nextup', kind: 'nextup', name: '', libraryId: '', items: resume[1] }); }
@@ -29,7 +30,7 @@ export function cachedHome(snapshot: LibrarySnapshot): HomeSection[] {
     return items.length ? [{ id: 'cached', kind: 'cached', name: '', libraryId: '', items: items }] : [];
   }
   const sections: HomeSection[] = [];
-  snapshot.libraries.filter(supported).forEach((library: MediaItem) => {
+  snapshot.libraries.filter(supportsHomeLibrary).forEach((library: MediaItem) => {
     const items = cachedItems(snapshot, 'library', '', library.Id, '');
     if (items.length) { sections.push({ id: 'library-' + library.Id, kind: 'cached', name: library.Name, libraryId: library.Id, collectionType: library.CollectionType, items: items }); }
   });

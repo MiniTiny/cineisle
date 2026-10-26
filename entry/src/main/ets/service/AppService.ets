@@ -1,4 +1,5 @@
 import { TrickplayRepository } from './TrickplayRepository';
+import { NextUpRequests } from '../utils/FeedRequests';
 import { TrickplayNetwork } from './TrickplayNetwork';
 import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
@@ -341,7 +342,7 @@ export class AppService {
     if (item.Type === 'Series' || item.Type === 'Season') {
       const seriesId = item.Type === 'Series' ? item.Id : item.SeriesId ?? '';
       if (!seriesId) { throw new Error('episode_order_unknown'); }
-      const next = !offline && item.Type === 'Series' ? await AppService.requireClient().nextUp(seriesId) : [];
+      const next = !offline && item.Type === 'Series' ? await AppService.requireClient().nextUp(seriesId, NextUpRequests.limit(seriesId)) : [];
       if (client !== AppService.client) { throw new Error('login_required'); }
       if (next.length && (next[0].Type !== 'Episode' || next[0].SeriesId !== seriesId)) { throw new Error('episode_queue_failed'); }
       target = next[0] ?? firstEpisode(offline ? AppService.snapshot.items : await AppService.seriesEpisodes(seriesId), seriesId, item.Type === 'Season' ? item.Id : '')!;

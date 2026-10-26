@@ -8,6 +8,7 @@ import { addresses } from '../utils/Accounts';
 import { deviceNameValue } from '../utils/DeviceOptions';
 import { normalizeServer, secondsToTicks } from '../utils/Protocol';
 import { RewatchRecommendations } from './RewatchRecommendations';
+import { HomeFeedRequests, NextUpRequests } from '../utils/FeedRequests';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { PosterTransport } from '../api/PosterTransport';
 import { PosterTarget, PosterTransfer } from '../utils/PosterOptions';
@@ -170,20 +171,20 @@ export class JellyfinClient {
     return mediaItem(await this.api.getItem({ itemId: id, userId: this.session.userId }));
   }
 
-  async resume(): Promise<MediaItem[]> {
+  async resume(limit: number = HomeFeedRequests.resumeLimit): Promise<MediaItem[]> {
     await this.ready();
-    const result = await this.api.getResumeItems({ userId: this.session.userId, limit: 20, mediaTypes: [MediaType.Video] });
+    const result = await this.api.getResumeItems({ userId: this.session.userId, limit: limit, mediaTypes: [MediaType.Video] });
     return listItems(result);
   }
 
-  async latest(parentId: string = ''): Promise<MediaItem[]> {
+  async latest(parentId: string = '', limit: number = HomeFeedRequests.latestLimit(parentId)): Promise<MediaItem[]> {
     await this.ready();
-    return mediaItems(await this.api.getLatestMedia({ userId: this.session.userId, parentId: parentId || undefined, limit: parentId ? 12 : 30, includeItemTypes: parentId ? undefined : [BaseItemKind.Movie, BaseItemKind.Series], enableUserData: true }));
+    return mediaItems(await this.api.getLatestMedia({ userId: this.session.userId, parentId: parentId || undefined, limit: limit, includeItemTypes: parentId ? undefined : [BaseItemKind.Movie, BaseItemKind.Series], enableUserData: true }));
   }
 
-  async nextUp(seriesId: string = ''): Promise<MediaItem[]> {
+  async nextUp(seriesId: string = '', limit: number = NextUpRequests.limit(seriesId)): Promise<MediaItem[]> {
     await this.ready();
-    return listItems(await this.api.getNextUp({ userId: this.session.userId, seriesId: seriesId || undefined, limit: seriesId ? 1 : 9, enableUserData: true }));
+    return listItems(await this.api.getNextUp({ userId: this.session.userId, seriesId: seriesId || undefined, limit: limit, enableUserData: true }));
   }
 
   async recommend(): Promise<MediaItem[]> {
