@@ -1,11 +1,16 @@
 import { JellyfinTime } from './JellyfinTime';
 export interface OfflineStopState { position: number; played: boolean }
 
+class OfflineStopRules {
+  static readonly minimumResumePercentage: number = 10;
+  static readonly maximumResumePercentage: number = 90;
+}
+
 export function offlineStopState(position: number, duration: number): OfflineStopState | undefined {
   if (!Number.isFinite(position) || position < 0 || !Number.isFinite(duration) || duration < 1) { return undefined; }
   if (!Number.isSafeInteger(Math.round(position * JellyfinTime.ticksPerMillisecond)) || !Number.isSafeInteger(Math.round(duration * JellyfinTime.ticksPerMillisecond))) { return undefined; }
   // Match the frozen Android Long / Float expression, including integer truncation at 90.x%.
   const percentage = Math.trunc(Math.fround(Math.fround(Math.fround(position) / Math.fround(duration)) * 100));
   if (!Number.isFinite(percentage)) { return undefined; }
-  return { position: percentage < 10 || percentage > 90 ? 0 : position, played: percentage > 90 };
+  return { position: percentage < OfflineStopRules.minimumResumePercentage || percentage > OfflineStopRules.maximumResumePercentage ? 0 : position, played: percentage > OfflineStopRules.maximumResumePercentage };
 }
