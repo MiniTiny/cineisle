@@ -20,7 +20,7 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2));
-  const child = (suite, name, phase, nativeInit = false) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? [typeof nativeInit==='number'?'--native-init-failure-at='+nativeInit:typeof nativeInit==='string'?'--native-'+nativeInit+'-init-failure':'--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
+  const child = (suite, name, phase, nativeInit = false) => spawnSync(suite.endsWith('.py') ? (process.env.PYTHON || 'python3') : process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? nativeInit ? [typeof nativeInit==='number'?'--native-init-failure-at='+nativeInit:typeof nativeInit==='string'?'--native-'+nativeInit+'-init-failure':'--native-init-failure'] : ['--fault=' + phase] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   const mutate = (file, old, replacement, action) => {
     const location = path.join(temp, file), original = fs.readFileSync(location, 'utf8'), mutated = replaceLiteral(original, old, replacement, 'Stale or ambiguous mutation: ' + file);
@@ -40,7 +40,8 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
       if (c.phase !== 'setup') evidence.controls.at(-1).checkpoint = verifyExternalFailure(negative, c); save();
     }
     const selected = controls.find(c => c.phase !== 'setup');
-    mutate('tests/contract-external.cjs', '        errors.push(error); throw error;\n      }', '        throw error;\n      }', () => {
+    const capture = profile.externalCapture || { file: 'tests/contract-external.cjs', old: '        errors.push(error); throw error;\n      }', replacement: '        throw error;\n      }' };
+    mutate(capture.file, capture.old, capture.replacement, () => {
       const raw = child(selected.suite, selected.name, selected.phase), result = classify(raw, selected.name); persist('self-fault-capture', raw);
       assert.throws(() => verifyExternalFailure(raw, selected), error => error.code === 'ERR_ASSERTION' && error.message.includes('Missing or ambiguous'));
       evidence.selfFaults.push({ id: 'external-capture', rejected: true, result });
