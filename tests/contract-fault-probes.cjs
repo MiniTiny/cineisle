@@ -5,7 +5,7 @@ const { classify } = require('./resource-cache-result.cjs');
 const { verifyExternalFailure } = require('./contract-external.cjs');
 const root = path.resolve(__dirname, '..');
 function fingerprint(base, scopes) {
-  const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
+  const out = {}, walk = relative => { if (fs.statSync(path.join(base, relative)).isFile()) { out[relative] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, relative))).digest('hex'); return; } for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
     const name = path.join(relative, e.name); if (e.name === '__pycache__') continue; if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
   } };
   for (const scope of scopes) walk(scope); return out;
