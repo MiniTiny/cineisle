@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -100,7 +101,7 @@ struct Downloads {
                 Column({ space: 8 }) {
                   if (record.state === 'complete') {
                     BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: !this.busy, onSelect: async () => {
-                      try { await router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
+                      try { await router.pushUrl({ url: AppRoutes.player, params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
                     } })
                     if (record.subtitleState !== 'ready') {
                       Text(record.subtitleState === 'pending' ? $r('app.string.offline_subtitles_pending') : $r('app.string.offline_subtitles_incomplete')).fontColor(this.palette.warm).fontSize(12).width('100%')

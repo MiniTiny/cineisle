@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { BrandState } from '../components/BrandState';
 import { BrandHeader } from '../components/BrandHeader';
@@ -126,7 +127,7 @@ struct Actor {
       ForEach(this.shown(), (item: MediaItem) => {
         ListItem() {
           Column({ space: 8 }) {
-            MediaCard({ item: item, wide: true, onSelect: (selected: MediaItem) => router.pushUrl({ url: 'pages/Detail', params: { item: selected } }) })
+            MediaCard({ item: item, wide: true, onSelect: (selected: MediaItem) => router.pushUrl({ url: AppRoutes.detail, params: { item: selected } }) })
             if (this.role(item)) { Text($r('app.string.credit_role', this.role(item))).fontColor(this.palette.muted).fontSize(13) }
           }
         }

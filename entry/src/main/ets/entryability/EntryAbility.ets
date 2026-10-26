@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { AppearancePreferences } from '../service/AppearancePreferences';
 import { LanguagePreferences } from '../service/LanguagePreferences';
 import { Configuration } from '@ohos.app.ability.Configuration';
@@ -20,7 +21,7 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(stage: window.WindowStage): void {
     this.onConfigurationUpdated(this.context.config);
     AppService.closePlayback = async () => { await SystemPlayback.current?.dispose(); await PlaybackWindow.current?.dispose(); };
-    stage.loadContent('pages/Index', (error) => {
+    stage.loadContent(AppRoutes.index, (error) => {
       if (error.code) { console.warn('CineIsle window content unavailable'); return; }
       LanguagePreferences.attach(this.context).catch(() => { console.warn('CineIsle application language unavailable'); });
       this.configureWindow(stage);

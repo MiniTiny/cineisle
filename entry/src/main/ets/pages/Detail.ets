@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -122,7 +123,7 @@ struct Detail {
     const client = AppService.requireClient(); const token = this.generation; this.busy = true; this.message = '';
     try {
       const route = await AppService.detailPlayback(this.item, this.usingCache ? '' : this.sourceId, this.usingCache, restart, this.usingCache ? this.record()?.path ?? '' : '');
-      if (this.current(token, client)) { await router.pushUrl({ url: 'pages/Player', params: route }); }
+      if (this.current(token, client)) { await router.pushUrl({ url: AppRoutes.player, params: route }); }
     } catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
     finally { if (this.current(token, client)) { this.busy = false; } }
   }
@@ -184,10 +185,10 @@ struct Detail {
     }, this.viewportWidth, this.viewportHeight);
   }
   private openChild(item: MediaItem): void {
-    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
+    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: AppRoutes.detail, params: { item: item } }); }
   }
   private openPerson(person: Person): void {
-    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: 'pages/Actor', params: { personId: person.Id, personName: person.Name } }); }
+    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: AppRoutes.actor, params: { personId: person.Id, personName: person.Name } }); }
   }
 
   private batchEpisodes(): void {

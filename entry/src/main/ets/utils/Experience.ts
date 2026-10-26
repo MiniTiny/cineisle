@@ -1,3 +1,4 @@
+import { MainTab, persistedTabs } from './Navigation';
 import { SearchHistoryRules } from './SearchHistory';
 import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from './FavoriteOptions';
 import { librarySortFields } from './Browse';
@@ -25,7 +26,7 @@ export class ExperienceState {
   serverAutoNext?: boolean;
   version: number = 1;
   searches: string[] = [];
-  tab: number = 1;
+  tab: number = MainTab.Home;
   offline: boolean = false;
   actorOrder: string = defaultActorOrder;
   showTags: boolean = true;
@@ -178,7 +179,7 @@ export function validExperience(value: ExperienceState): boolean {
     (value.libraryDescending === undefined || typeof value.libraryDescending === 'boolean') &&
     (value.autoNextMode === undefined || ['server', 'on', 'off'].includes(value.autoNextMode)) &&
     (value.serverAutoNext === undefined || typeof value.serverAutoNext === 'boolean') &&
-    [0, 1, 3, 4].includes(value.tab) && actorOrders.some((choice: ActorOrderChoice) => choice.value === value.actorOrder) &&
+    persistedTabs.includes(value.tab) && actorOrders.some((choice: ActorOrderChoice) => choice.value === value.actorOrder) &&
     typeof value.offline === 'boolean' && typeof value.showTags === 'boolean' && typeof value.followedOnly === 'boolean' && typeof value.sourcePreference === 'string' && typeof value.rememberDownloadSource === 'boolean' &&
     typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && favoriteCategories.some((choice: FavoriteChoice) => choice.value === value.favoriteCategory) && favoriteOrders.some((choice: FavoriteChoice) => choice.value === value.favoriteOrder) &&
     Array.isArray(value.follows) && value.follows.every((f: Follow) => !!f && typeof f.id === 'string' && Array.isArray(f.acknowledged) && f.acknowledged.every((id: string) => typeof id === 'string')) &&

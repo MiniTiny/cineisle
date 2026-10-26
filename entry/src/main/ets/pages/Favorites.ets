@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from '../utils/FavoriteOptions';
 import { UiPalette } from '../utils/UiPalette';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -93,7 +94,7 @@ struct Favorites {
     } finally { if (this.current(revision)) { this.busy = false; } }
   }
   private choose(item: MediaItem): void {
-    if (!this.selection) { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); return; }
+    if (!this.selection) { router.pushUrl({ url: AppRoutes.detail, params: { item: item } }); return; }
     this.selected = this.selected.includes(item.Id) ? this.selected.filter((id: string) => id !== item.Id) : [...this.selected, item.Id];
   }
   private select(id: string, value: boolean): void {

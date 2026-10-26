@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { showBrandDialog } from '../components/CompactDialog';
 import { BrandState } from '../components/BrandState';
@@ -62,7 +63,7 @@ struct Accounts {
     try { const accounts = await SessionStore.list(); const servers = await SessionStore.servers(); if (revision === this.revision) { this.accounts = accounts; this.servers = servers; } }
     catch (e) { this.message = errorText(e as Error); }
   }
-  private async openHome(): Promise<void> { await router.replaceUrl({ url: 'pages/Index' }); router.clear(); }
+  private async openHome(): Promise<void> { await router.replaceUrl({ url: AppRoutes.index }); router.clear(); }
   private async login(): Promise<void> {
     if (this.busy || this.quickCode) { return; } this.busy = true; this.message = ''; const revision = this.revision;
     try { await AppService.login(this.server, this.username, this.password, () => this.visible && revision === this.revision && !this.locked, this.discoveredId); if (revision === this.revision && this.visible) { await this.openHome(); } }
