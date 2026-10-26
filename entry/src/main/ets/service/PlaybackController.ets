@@ -1,3 +1,4 @@
+import { SurfaceGeometry } from '../utils/SurfaceGeometry';
 import { JellyfinTime } from '../utils/JellyfinTime';
 import { PlaybackRate, normalizePlaybackRate } from '../utils/PlaybackRate';
 import { nativePlaybackSpeed } from './PlaybackSpeedAdapter';
@@ -302,7 +303,7 @@ export class PlaybackController {
 
   get relativeVolume(): number { return this.volume; }
   setSurfaceSize(width: number, height: number): void {
-    if (![width, height].every((value: number): boolean => Number.isSafeInteger(value) && value > 0 && value <= 8192)) { return; }
+    if (!SurfaceGeometry.valid(width, height)) { return; }
     this.surfacePixelWidth = width; this.surfacePixelHeight = height;
     if (this.player && !this.closed && !this.failed) { this.player.setSurfaceSize(width, height); }
   }
