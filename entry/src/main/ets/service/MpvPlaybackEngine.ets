@@ -15,6 +15,7 @@ import { MpvBridgeLimits } from '../utils/MpvLimits';
 export class MpvPlaybackEngine implements PlaybackEngine {
   private static readonly startupTimeoutMs: number = 30000;
   private static readonly snapshotIntervalMs: number = 200;
+  private static readonly fallbackCueDurationMs: number = 1000;
   private nativeCaption: boolean = true;
   get nativeSubtitles(): boolean { return this.nativeCaption; }
   private wantedSubtitle: boolean = true;
@@ -201,7 +202,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private publishSubtitle(state: native.MpvState, seeking: boolean): void {
     const content = this.wantedSubtitle && !seeking ? this.subtitleContent : undefined;
     const start = Number.isFinite(state.subtitleStart) && state.subtitleStart >= 0 ? Math.round(state.subtitleStart) : state.position;
-    const end = Number.isFinite(state.subtitleEnd) && state.subtitleEnd > start ? Math.round(state.subtitleEnd) : start + 1000;
+    const end = Number.isFinite(state.subtitleEnd) && state.subtitleEnd > start ? Math.round(state.subtitleEnd) : start + MpvPlaybackEngine.fallbackCueDurationMs;
     const identity = content ? `${this.subtitleCacheKey}/${start}/${end}` : 'hidden';
     if (identity === this.subtitlePublished) { return; } this.subtitlePublished = identity;
     this.events?.subtitle({ text: content?.text ?? '', startTime: start, duration: end - start, content: content });
