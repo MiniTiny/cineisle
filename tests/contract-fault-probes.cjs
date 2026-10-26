@@ -4,16 +4,17 @@ const { spawnSync } = require('node:child_process');
 const { classify } = require('./resource-cache-result.cjs');
 const { verifyExternalFailure } = require('./contract-external.cjs');
 const root = path.resolve(__dirname, '..');
-function fingerprint(base) {
+function fingerprint(base, scopes) {
   const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
     const name = path.join(relative, e.name); if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
   } };
-  for (const scope of ['entry/src/main/ets', 'tests']) walk(scope); return out;
+  for (const scope of scopes) walk(scope); return out;
 }
 function run(kind, output = path.join(root, '.local/test-results/' + kind + '-probes')) {
   const profile = require('./' + kind + '-fault-cases.cjs'), { recipes, controls } = profile;
   assert.ok(recipes.length && controls.length);
-  const frozen = fingerprint(root), temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-rewatch-probes-')));
+  const scopes = ['entry/src/main/ets', 'tests', ...(profile.extraScopes || [])];
+  const frozen = fingerprint(root, scopes), temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-rewatch-probes-')));
   const evidence = { source: frozen, complete: false, allDetected: false, baselines: [], probes: [], controls: [], selfBaselines: [], selfControls: [], selfFaults: [] };
   fs.mkdirSync(output, { recursive: true });
   const save = () => fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
@@ -25,7 +26,7 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
     try { fs.writeFileSync(location, original.replace(old, replacement)); return action(); } finally { fs.writeFileSync(location, original); }
   };
   try {
-    for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
+    for (const scope of scopes) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     for (const c of controls) {
       const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase, c.nativeInit), id = 'control-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
       persist(id + '-positive', positive); persist(id + '-negative', negative);
@@ -123,7 +124,7 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
         evidence.probes.push({ id: r.id, name: r.name, file: r.file, ...result }); save(); console.log(result.status.toUpperCase() + ' ' + r.id);
       });
     }
-    assert.deepEqual(fingerprint(root), frozen); assert.deepEqual(fingerprint(temp), frozen);
+    assert.deepEqual(fingerprint(root, scopes), frozen); assert.deepEqual(fingerprint(temp, scopes), frozen);
     evidence.complete = true; evidence.allDetected = evidence.probes.length === recipes.length && evidence.probes.every(p => p.detected); save(); return evidence;
   } catch (error) { evidence.runnerError = error.stack; save(); throw error; }
   finally { fs.rmSync(temp, { recursive: true, force: true }); }

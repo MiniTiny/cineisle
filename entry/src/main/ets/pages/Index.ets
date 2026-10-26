@@ -1,3 +1,4 @@
+import { actorOrders, ActorOrderChoice, defaultActorOrder } from '../utils/ActorOrder';
 import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
@@ -70,7 +71,7 @@ struct Index {
   @State profiles: ActorProfile[] = [];
   @State actorQuery: string = '';
   @State actorTag: string = '';
-  @State actorOrder: string = 'playCount';
+  @State actorOrder: string = defaultActorOrder;
   @State followedOnly: boolean = false;
   @State showTags: boolean = true;
   @State homeFailures: HomeFailure[] = [];
@@ -169,7 +170,7 @@ struct Index {
     this.generation++; this.sessionClient = AppService.client; this.signedIn = this.sessionClient !== undefined;
     const state = AppService.experience?.snapshot();
     this.librarySort = state?.librarySort ?? 'SortName'; this.libraryDescending = state?.libraryDescending ?? false;
-    this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
+    this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? defaultActorOrder; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
     this.mode = ''; this.search = ''; this.searchQuery = ''; this.searchType = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
     this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
@@ -548,9 +549,9 @@ struct Index {
       TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(14).width('100%')
         .onChange((value: string) => { this.actorQuery = value; this.refreshActors(); })
       BrandChoice({ label: $r('app.string.actor_sort'), icon: $r('app.media.menu_settings'),
-        choices: [{ value: text('actor_order_play') }, { value: text('actor_order_watched') }, { value: text('actor_order_unplayed') }, { value: text('actor_order_works') }, { value: text('actor_order_recent') }, { value: text('actor_order_name') }, { value: text('actor_order_recommended') }],
-        selected: Math.max(0, ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder)),
-        onSelect: (index: number) => { this.actorOrder = ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'][index]; this.actorSettings(); } })
+        choices: actorOrders.map((choice: ActorOrderChoice): SelectOption => ({ value: text(choice.caption) })),
+        selected: Math.max(0, actorOrders.findIndex((choice: ActorOrderChoice) => choice.value === this.actorOrder)),
+        onSelect: (index: number) => { this.actorOrder = actorOrders[index]?.value; this.actorSettings(); } })
       Row({ space: 8 }) {
         Checkbox().select(this.followedOnly).selectedColor(this.palette.action).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
         Text($r('app.string.followed_only')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)

@@ -1,3 +1,4 @@
+import { actorOrders, ActorOrderChoice, defaultActorOrder } from './ActorOrder';
 import { DiscoveryRules } from './DiscoveryRules';
 import { ActorProfileRules } from './ActorProfileRules';
 import { MediaItem, Person, UserData } from '../model/Models';
@@ -23,7 +24,7 @@ export class ExperienceState {
   searches: string[] = [];
   tab: number = 1;
   offline: boolean = false;
-  actorOrder: string = 'playCount';
+  actorOrder: string = defaultActorOrder;
   showTags: boolean = true;
   followedOnly: boolean = false;
   follows: Follow[] = [];
@@ -174,7 +175,7 @@ export function validExperience(value: ExperienceState): boolean {
     (value.libraryDescending === undefined || typeof value.libraryDescending === 'boolean') &&
     (value.autoNextMode === undefined || ['server', 'on', 'off'].includes(value.autoNextMode)) &&
     (value.serverAutoNext === undefined || typeof value.serverAutoNext === 'boolean') &&
-    [0, 1, 3, 4].includes(value.tab) && ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].includes(value.actorOrder) &&
+    [0, 1, 3, 4].includes(value.tab) && actorOrders.some((choice: ActorOrderChoice) => choice.value === value.actorOrder) &&
     typeof value.offline === 'boolean' && typeof value.showTags === 'boolean' && typeof value.followedOnly === 'boolean' && typeof value.sourcePreference === 'string' && typeof value.rememberDownloadSource === 'boolean' &&
     typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && ['', 'Movie', 'Series', 'Episode'].includes(value.favoriteCategory) && ['name', 'nameDesc', 'continue'].includes(value.favoriteOrder) &&
     Array.isArray(value.follows) && value.follows.every((f: Follow) => !!f && typeof f.id === 'string' && Array.isArray(f.acknowledged) && f.acknowledged.every((id: string) => typeof id === 'string')) &&
