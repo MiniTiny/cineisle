@@ -1,3 +1,4 @@
+import { ActorProfileRules } from './ActorProfileRules';
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
 export { connectionFailure, authorizationFailure } from './Failures';
@@ -106,9 +107,9 @@ export function actorProfiles(items: MediaItem[], follows: Follow[] = []): Actor
       });
       themes.forEach((rule: ThemeRule) => { if (rule.expression.test(work.Overview ?? '')) { add('theme:' + rule.key, rule.key, true); } });
     });
-    const minimum = Math.max(3, Math.ceil(actor.works.length * 0.35));
+    const minimum = ActorProfileRules.minimumSupport(actor.works.length);
     actor.tags = Array.from(supporting.values()).filter((tag: ActorTag) => tag.works.length >= minimum)
-      .sort((a: ActorTag, b: ActorTag) => b.works.length - a.works.length || a.key.localeCompare(b.key)).slice(0, 5);
+      .sort((a: ActorTag, b: ActorTag) => b.works.length - a.works.length || a.key.localeCompare(b.key)).slice(0, ActorProfileRules.maximumTags);
     const follow = follows.find((f: Follow) => f.id === actor.person.Id); actor.followed = !!follow;
     actor.newCount = follow ? actor.works.filter((w: MediaItem) => !follow.acknowledged.includes(w.Id)).length : 0;
   });
@@ -121,7 +122,7 @@ export function sortActors(actors: ActorProfile[], order: string, query: string,
       case 'unplayed': return actor.unplayed;
       case 'works': return actor.works.length;
       case 'recent': return actor.lastViewed;
-      case 'recommended': return actor.unplayed ? actor.favorite * 3 + actor.watched * 2 : 0;
+      case 'recommended': return ActorProfileRules.recommendationScore(actor.favorite, actor.watched, actor.unplayed);
       default: return actor.playCount;
     }
   };
