@@ -11,13 +11,16 @@ import { JellyfinClient } from './JellyfinClient';
 // Cache convertible text tracks, including embedded tracks unsupported by the native decoder.
 // Preserve ASS styles in their original document. Authenticated delivery URLs never enter JSON.
 export class OfflineSubtitles {
+  private static readonly maximumTitleCodeUnits: number = 256;
+  private static readonly maximumLanguageCodeUnits: number = 63;
+
   static plan(record: DownloadRecord, source: MediaSource, directory: string): DownloadSubtitle[] {
     const seen = new Set<number>();
     return (source.MediaStreams ?? []).filter((stream) => {
       if (!textSubtitle(stream) || seen.has(stream.Index)) { return false; }
       seen.add(stream.Index); return true;
-    }).map((stream): DownloadSubtitle => ({ index: stream.Index, title: (stream.DisplayTitle || stream.Language || stream.Codec || '').slice(0, 256),
-      language: (stream.Language ?? '').slice(0, 63), format: subtitleFormat(stream),
+    }).map((stream): DownloadSubtitle => ({ index: stream.Index, title: (stream.DisplayTitle || stream.Language || stream.Codec || '').slice(0, OfflineSubtitles.maximumTitleCodeUnits),
+      language: (stream.Language ?? '').slice(0, OfflineSubtitles.maximumLanguageCodeUnits), format: subtitleFormat(stream),
       path: `${directory}/${downloadStem(record)}.subtitle-${stream.Index}.${subtitleFormat(stream)}`, state: 'pending' }));
   }
 
