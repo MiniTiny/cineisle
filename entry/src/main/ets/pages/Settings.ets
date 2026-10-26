@@ -1,3 +1,4 @@
+import { SettingsToggle } from '../components/SettingsToggle';
 import { UiPalette } from '../utils/UiPalette';
 import { AppearancePreferences } from '../service/AppearancePreferences';
 import { AppearanceOptions } from '../utils/Appearance';
@@ -337,24 +338,15 @@ struct Settings {
   private appearanceSettings() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.appearance_group'), icon: $r('app.media.menu_settings') })
-      Row({ space: 12 }) {
-        Text($r('app.string.dynamic_colors')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
-        Checkbox().select(this.appearance.dynamicColors ?? true).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.dynamic_colors')).onChange((value: boolean) => this.saveAppearance(this.appearance.amoled, this.appearance.extraInfo, value))
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.dynamic_colors'), selected: this.appearance.dynamicColors ?? true, available: !this.appearanceBusy,
+        onChange: (value: boolean) => this.saveAppearance(this.appearance.amoled, this.appearance.extraInfo, value) })
       Text($r('app.string.dynamic_colors_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       Text(text(this.paletteStatus)).fontSize(12).fontColor(this.palette.warm).width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.appearance_amoled')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
-        Checkbox().select(this.appearance.amoled).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.appearance_amoled')).onChange((value: boolean) => this.saveAppearance(value, this.appearance.extraInfo))
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.appearance_amoled'), selected: this.appearance.amoled, available: !this.appearanceBusy,
+        onChange: (value: boolean) => this.saveAppearance(value, this.appearance.extraInfo) })
       Text($r('app.string.appearance_amoled_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.appearance_extra_info')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
-        Checkbox().select(this.appearance.extraInfo).enabled(!this.appearanceBusy).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.appearance_extra_info')).onChange((value: boolean) => this.saveAppearance(this.appearance.amoled, value))
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.appearance_extra_info'), selected: this.appearance.extraInfo, available: !this.appearanceBusy,
+        onChange: (value: boolean) => this.saveAppearance(this.appearance.amoled, value) })
       Text($r('app.string.appearance_extra_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       if (this.appearanceBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.appearanceMessage) { Text(this.appearanceMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
@@ -383,11 +375,8 @@ struct Settings {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.poster_cache_group'), icon: $r('app.media.menu_offline') })
       Text($r('app.string.poster_cache_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.poster_cache_enabled')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
-        Checkbox().select(this.posterEnabled).enabled(!this.posterBusy).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.poster_cache_enabled')).onChange((v: boolean) => { this.posterEnabled = v; })
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.poster_cache_enabled'), selected: this.posterEnabled, available: !this.posterBusy,
+        onChange: (v: boolean) => { this.posterEnabled = v; } })
       this.fieldCaption($r('app.string.poster_cache_capacity'))
       TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
@@ -415,11 +404,8 @@ struct Settings {
       this.networkField($r('app.string.network_request_seconds'), 0)
       this.networkField($r('app.string.network_connect_seconds'), 1)
       this.networkField($r('app.string.network_read_seconds'), 2)
-      Row({ space: 12 }) {
-        Text($r('app.string.network_auto_cache')).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
-        Checkbox().select(this.autoCache).enabled(!this.networkBusy && !this.locked).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.network_auto_cache')).onChange((v: boolean) => { this.autoCache = v; })
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.network_auto_cache'), selected: this.autoCache, available: !this.networkBusy && !this.locked,
+        onChange: (v: boolean) => { this.autoCache = v; } })
       Text($r('app.string.network_cache_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
       BrandButton({ label: $r('app.string.network_options_save'), icon: $r('app.media.menu_save'), primary: true, available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork() })
       BrandButton({ label: $r('app.string.network_options_reset'), icon: $r('app.media.menu_reset'), available: !this.networkBusy && !this.locked, onSelect: () => this.saveApiNetwork(true) })
@@ -487,36 +473,18 @@ struct Settings {
       if (this.engineMessage) { Text(this.engineMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
         if (this.engineKnown && this.engineChoice === 'mpv' && this.mpvOffered) { this.mpvSettings(); }
       BrandHeading({ label: $r('app.string.player_gesture_preferences'), icon: $r('app.media.player_speed') })
-      Row({ space: 12 }) {
-        Text($r('app.string.player_gestures_enabled')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.gestures).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_gestures_enabled')).onChange((value: boolean) => this.savePlayer('gestures', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_seek_gesture')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.seek).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_seek_gesture')).onChange((value: boolean) => this.savePlayer('seek', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_zoom_gesture')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.zoom).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_zoom_gesture')).onChange((value: boolean) => this.savePlayer('zoom', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_start_maximized')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.startMaximized).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_start_maximized')).onChange((value: boolean) => this.savePlayer('maximized', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_vertical_gesture')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.vertical ?? true).enabled(this.playerUi.gestures).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_vertical_gesture')).onChange((value: boolean) => this.savePlayer('vertical', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_remember_brightness')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.rememberBrightness ?? false).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_remember_brightness')).onChange((value: boolean) => this.savePlayer('brightness', value))
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.player_gestures_enabled'), selected: this.playerUi.gestures,
+        onChange: (value: boolean) => this.savePlayer('gestures', value) })
+      SettingsToggle({ label: $r('app.string.player_seek_gesture'), selected: this.playerUi.seek, available: this.playerUi.gestures,
+        onChange: (value: boolean) => this.savePlayer('seek', value) })
+      SettingsToggle({ label: $r('app.string.player_zoom_gesture'), selected: this.playerUi.zoom, available: this.playerUi.gestures,
+        onChange: (value: boolean) => this.savePlayer('zoom', value) })
+      SettingsToggle({ label: $r('app.string.player_start_maximized'), selected: this.playerUi.startMaximized,
+        onChange: (value: boolean) => this.savePlayer('maximized', value) })
+      SettingsToggle({ label: $r('app.string.player_vertical_gesture'), selected: this.playerUi.vertical ?? true, available: this.playerUi.gestures,
+        onChange: (value: boolean) => this.savePlayer('vertical', value) })
+      SettingsToggle({ label: $r('app.string.player_remember_brightness'), selected: this.playerUi.rememberBrightness ?? false,
+        onChange: (value: boolean) => this.savePlayer('brightness', value) })
       this.fieldCaption($r('app.string.player_back_seconds'))
       TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
@@ -524,16 +492,10 @@ struct Settings {
       TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
       BrandButton({ label: $r('app.string.player_save_steps'), icon: $r('app.media.menu_save'), onSelect: () => this.savePlayer() })
-      Row({ space: 12 }) {
-        Text($r('app.string.player_auto_pip')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.autoPiP).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_auto_pip')).onChange((value: boolean) => this.savePlayer('pip', value))
-      }.width('100%')
-      Row({ space: 12 }) {
-        Text($r('app.string.player_intro_skipper')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
-        Checkbox().select(this.playerUi.introSkipper ?? true).selectedColor(this.palette.action)
-          .accessibilityText($r('app.string.player_intro_skipper')).onChange((value: boolean) => this.savePlayer('intro', value))
-      }.width('100%')
+      SettingsToggle({ label: $r('app.string.player_auto_pip'), selected: this.playerUi.autoPiP,
+        onChange: (value: boolean) => this.savePlayer('pip', value) })
+      SettingsToggle({ label: $r('app.string.player_intro_skipper'), selected: this.playerUi.introSkipper ?? true,
+        onChange: (value: boolean) => this.savePlayer('intro', value) })
       Text($r('app.string.player_intro_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 8 }) {
         Text($r('app.string.player_trickplay')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
