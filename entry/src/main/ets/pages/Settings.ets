@@ -82,10 +82,10 @@ struct Settings {
   @State deviceLoaded: boolean = false;
   @State deviceBusy: boolean = false;
   @State deviceMessage: string = '';
-  @State requestSeconds: string = '30';
-  @State connectSeconds: string = '6';
-  @State readSeconds: string = '10';
-  @State autoCache: boolean = true;
+  @State requestSeconds: string = (new NetworkOptions().requestMs / 1000).toString();
+  @State connectSeconds: string = (new NetworkOptions().connectMs / 1000).toString();
+  @State readSeconds: string = (new NetworkOptions().readMs / 1000).toString();
+  @State autoCache: boolean = new NetworkOptions().autoCache;
   @State networkBusy: boolean = false;
   @State networkMessage: string = '';
   @State posterEnabled: boolean = true;
