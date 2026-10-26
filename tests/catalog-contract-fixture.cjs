@@ -6,14 +6,15 @@ const {AppService:A}=h.load('service/AppService.ets'),{JellyfinClient}=h.load('s
 const http=h.platform.get('@ohos.net.http'),originalCreate=http.createHttp,io=h.platform.get('@ohos.file.fs');
 const originalIO=Object.fromEntries(['openSync','writeSync','renameSync','readTextSync','fsyncSync','closeSync','accessSync','statSync','mkdirSync','unlinkSync'].filter(key=>typeof io[key]==='function').map(key=>[key,io[key]]));
 function make(scope){
- let trace,requests,provider,stage,targets,opened,requestPhase;
+ let trace,requests,provider,stage,targets,opened,requestPhase,nativeCreateCount;
  async function before(){
-  Object.assign(io,originalIO);h.reset();strings.initializeStrings(h.context.resourceManager);stage='account-init';targets=()=>true;opened=new Map();requests=[];requestPhase=()=> 'request';
+  Object.assign(io,originalIO);h.reset();strings.initializeStrings(h.context.resourceManager);stage='account-init';nativeCreateCount=0;targets=()=>true;opened=new Map();requests=[];requestPhase=()=> 'request';
   const fault=(process.argv.find(a=>a.startsWith('--fault='))||'').slice(8);trace=common.external(scope,fault);
   if(fault==='setup')assert.fail('unrelated '+scope+' initialization assertion');
   provider=()=>{throw Error('Missing catalog HTTP fixture');};
   http.createHttp=()=>trace.call('http-create',()=>{
-   if(process.argv.includes('--native-init-failure')||trace.calls['http-create']===Number((process.argv.find(a=>a.startsWith('--native-init-failure-at='))||'').split('=')[1]))throw Object.assign(Error('injected native HTTP initializer failure'),{code:'EIO',contractInjected:true});
+   ++nativeCreateCount;
+   if(process.argv.includes('--native-init-failure')||nativeCreateCount===Number((process.argv.find(a=>a.startsWith('--native-init-failure-at='))||'').split('=')[1]))throw Object.assign(Error('injected native HTTP initializer failure'),{code:'EIO',contractInjected:true});
    const connection=originalCreate();return {...connection,async request(address,options){
     const url=trace.call('parse-url',()=>new URL(address)),phase=url.pathname.endsWith('/System/Info/Public')?'version':requestPhase(url);requests.push({url,options,phase});
     return trace.call(phase,()=>provider(url,options),{pathname:url.pathname});

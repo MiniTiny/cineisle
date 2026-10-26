@@ -21,6 +21,8 @@ export interface PublicUser { id: string; name: string }
 
 // Core wire operations use pinned OpenAPI; optional plugin adapters keep their own explicit contracts.
 export class JellyfinClient {
+  private static readonly maximumPublicUsers: number = 1000;
+  private static readonly maximumPublicNameCodeUnits: number = 256;
   session: Session;
   private transport: NativeHttpTransport;
   private api: JellyfinApi;
@@ -113,11 +115,11 @@ export class JellyfinClient {
   async publicUsers(): Promise<PublicUser[]> {
     if (this.session.token) { throw new Error('api_session_invalid'); }
     const users = await this.api.getPublicUsers();
-    if (!Array.isArray(users) || users.length > 1000) { throw new Error('public_users_invalid'); }
+    if (!Array.isArray(users) || users.length > JellyfinClient.maximumPublicUsers) { throw new Error('public_users_invalid'); }
     const result: PublicUser[] = [];
     for (const user of users) {
       if (typeof user?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(user.Id) || typeof user.Name !== 'string' ||
-        !user.Name.trim() || user.Name.length > 256 || (user.ServerId != null && user.ServerId !== this.session.serverId)) { throw new Error('public_users_invalid'); }
+        !user.Name.trim() || user.Name.length > JellyfinClient.maximumPublicNameCodeUnits || (user.ServerId != null && user.ServerId !== this.session.serverId)) { throw new Error('public_users_invalid'); }
       if (!result.some((value: PublicUser) => value.id === user.Id)) { result.push({ id: user.Id, name: user.Name }); }
     }
     return result;
