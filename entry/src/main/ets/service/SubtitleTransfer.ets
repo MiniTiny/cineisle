@@ -8,6 +8,8 @@ import { DownloadNetwork } from '../utils/Downloads';
 
 // The generated client still owns the subtitle route. The OS enforces download network constraints.
 export class SubtitleTransfer implements ApiTransport {
+  private static readonly completionTimeoutMs: number = 30000;
+  private static readonly ownershipPollIntervalMs: number = 500;
   private base: ApiTransport;
   private context: common.UIAbilityContext;
   private path: string;
@@ -58,7 +60,7 @@ export class SubtitleTransfer implements ApiTransport {
             task.on('progress', (received: number) => { if (!this.owned() || received > SubtitleTransferLimits.maxBytes) { finish(true); } });
             if (!this.owned()) { await finish(true); return; }
           }
-          if (!finished) { timer = setTimeout(() => { finish(true); }, 30000); watch = setInterval(() => { if (!this.owned()) { finish(true); } }, 500); }
+          if (!finished) { timer = setTimeout(() => { finish(true); }, SubtitleTransfer.completionTimeoutMs); watch = setInterval(() => { if (!this.owned()) { finish(true); } }, SubtitleTransfer.ownershipPollIntervalMs); }
         } catch (e) { await finish(true); }
       };
       start();
