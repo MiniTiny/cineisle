@@ -27,11 +27,12 @@ function run(kind, output = path.join(root, '.local/test-results/' + kind + '-pr
   };
   try {
     for (const scope of scopes) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
-    for (const c of controls) {
-      const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase, c.nativeInit), id = 'control-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
+    for (const [index, c] of controls.entries()) {
+      const positive = child(c.suite, c.name), negative = child(c.suite, c.name, c.phase, c.nativeInit), id = 'control-' + (index + 1) + '-' + c.phase + '-' + c.name.replace(/[^a-z0-9]+/gi, '-');
+      const artifacts = { positive: id + '-positive.json', negative: id + '-negative.json' };
       persist(id + '-positive', positive); persist(id + '-negative', negative);
       const normal = classify(positive, c.name), failed = classify(negative, c.name);
-      evidence.controls.push({ ...c, normal, failed }); save();
+      evidence.controls.push({ ...c, artifacts, normal, failed }); save();
       assert.equal(normal.status, 'survived'); assert.equal(failed.status, 'invalid');
       assert.equal(failed.record.fixturePhase, c.phase === 'setup' ? 'setup' : (c.scope || profile.scope) + '-external');
       assert.equal(failed.record.error.cause.code, c.phase === 'setup' ? 'ERR_ASSERTION' : 'EIO');
