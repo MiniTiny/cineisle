@@ -23,6 +23,7 @@ export interface PublicUser { id: string; name: string }
 export class JellyfinClient {
   private static readonly maximumPublicUsers: number = 1000;
   private static readonly maximumPublicNameCodeUnits: number = 256;
+  private static readonly maximumDeviceResponseNameCodeUnits: number = 1024;
   session: Session;
   private transport: NativeHttpTransport;
   private api: JellyfinApi;
@@ -69,7 +70,7 @@ export class JellyfinClient {
     const id = this.session.deviceId; await this.ready(); this.deviceAdmission(id, permit);
     const value = await this.api.getDeviceOptions({ id: id });
     if (!value || typeof value !== 'object' || Array.isArray(value) || (value.DeviceId != null && value.DeviceId !== id) ||
-      (value.CustomName != null && (typeof value.CustomName !== 'string' || value.CustomName.length > 1024 || /[\u0000-\u001f\u007f]/.test(value.CustomName)))) { throw new Error('api_response_invalid'); }
+      (value.CustomName != null && (typeof value.CustomName !== 'string' || value.CustomName.length > JellyfinClient.maximumDeviceResponseNameCodeUnits || /[\u0000-\u001f\u007f]/.test(value.CustomName)))) { throw new Error('api_response_invalid'); }
     return value.CustomName ?? '';
   }
   async updateDeviceName(name: string, permit: () => boolean): Promise<void> {
