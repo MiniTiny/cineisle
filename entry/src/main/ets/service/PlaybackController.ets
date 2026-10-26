@@ -1,3 +1,5 @@
+import { PlaybackRate, normalizePlaybackRate } from '../utils/PlaybackRate';
+import { nativePlaybackSpeed } from './PlaybackSpeedAdapter';
 import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import fs from '@ohos.file.fs';
@@ -78,7 +80,7 @@ export class PlaybackController {
   private hidden: boolean = false;
   private lastReport: number = 0;
   private speed: media.PlaybackSpeed = media.PlaybackSpeed.SPEED_FORWARD_1_00_X;
-  private rate: number = 1;
+  private rate: number = PlaybackRate.Normal;
   private volume: number = 1;
   private reports: Promise<void> = Promise.resolve();
   private pendingProgress: Map<number, PendingReport> = new Map();
@@ -467,13 +469,8 @@ export class PlaybackController {
     } catch (e) { this.seeking = priorSeeking; this.view.error(text('play_error')); }
   }
   setSpeed(speed: number): void {
-    this.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed) ? speed : 1;
-    const speeds: Map<number, media.PlaybackSpeed> = new Map([
-      [0.5, media.PlaybackSpeed.SPEED_FORWARD_0_50_X], [0.75, media.PlaybackSpeed.SPEED_FORWARD_0_75_X],
-      [1, media.PlaybackSpeed.SPEED_FORWARD_1_00_X], [1.25, media.PlaybackSpeed.SPEED_FORWARD_1_25_X],
-      [1.5, media.PlaybackSpeed.SPEED_FORWARD_1_50_X], [1.75, media.PlaybackSpeed.SPEED_FORWARD_1_75_X], [2, media.PlaybackSpeed.SPEED_FORWARD_2_00_X]
-    ]);
-    this.speed = speeds.get(this.rate)!;
+    this.rate = normalizePlaybackRate(speed);
+    this.speed = nativePlaybackSpeed(this.rate)!;
     try { if (this.player && ['prepared', 'playing', 'paused'].includes(this.player.state)) { this.player.setSpeed(this.speed); } }
     catch (e) { this.view.error(text('speed_failed')); }
   }

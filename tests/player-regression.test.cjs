@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
-const ts = require(path.join(process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents', 'tools/hvigor/hvigor/node_modules/typescript'));
+const sdk = process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents';
+const ts = require(path.join(sdk, 'tools/hvigor/hvigor/node_modules/typescript'));
 const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-player-'));
 process.on('exit', () => fs.rmSync(directory, { recursive: true, force: true }));
@@ -284,5 +285,5 @@ test('exiting during source request cannot restore a route or create a new playe
   const original = AppService.playback, pending = deferred(); AppService.playback = () => pending.promise;
   try { routeParams = route(); const p = new Player(); p.aboutToAppear(); const switching = p.source(1); p.aboutToDisappear(); pending.resolve(route(episode('e1', 1, 1), 'source-b')); await switching; assert.equal(p.route.mediaSourceId, 'source-a'); assert.equal(nativePlayers.length, 0); } finally { AppService.playback = original; }
 });
-module.exports = { load, platform, preferencesPlatform, directory, NativePlayer, nativePlayers, nativeQueue, route, episode, deferred, settle, rig, reset, AppService, Player, systemPlatform, setRoute: value => { routeParams = value; } };
+module.exports = { sdk, ts, load, platform, preferencesPlatform, directory, NativePlayer, nativePlayers, nativeQueue, route, episode, deferred, settle, rig, reset, AppService, Player, systemPlatform, setRoute: value => { routeParams = value; } };
 if (require.main === module) (async () => { for (const [name, fn] of tests) { reset(); await fn(); await settle(); console.log('PASS ' + name); } console.log(`${tests.length} player regression tests passed. AVPlayer mocks do not prove device decoding or rendered UI.`); })().catch(e => { console.error(e); process.exitCode = 1; });

@@ -1,3 +1,4 @@
+import { PlaybackRate, playbackRates } from '../utils/PlaybackRate';
 import { UiPalette } from '../utils/UiPalette';
 import image from '@ohos.multimedia.image';
 import { AssSubtitle } from '../service/AssSubtitle';
@@ -51,7 +52,7 @@ struct Player {
   @State route: PlaybackRoute = new PlaybackRoute();
   @State message: string = '';
   @State reportMessage: string = '';
-  @State speed: number = 1;
+  @State speed: number = PlaybackRate.Normal;
   @State state: string = 'loading';
   @State frameReady: boolean = false;
   @State playbackPosition: number = 0;
@@ -421,7 +422,7 @@ struct Player {
   }
   private holdSpeed(x: number, y: number): void {
     if (!this.canGesture() || !this.insideGesture(x, y) || this.state !== 'playing' || this.heldSpeed > 0) { return; }
-    this.cancelGesture(); this.heldSpeed = this.speed; this.speed = 2; this.controller?.setSpeed(2); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
+    this.cancelGesture(); this.heldSpeed = this.speed; this.speed = PlaybackRate.Double; this.controller?.setSpeed(PlaybackRate.Double); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
   }
   private pinch(scale: number): void {
     if (!this.ui.zoom) { return; }
@@ -812,7 +813,7 @@ struct Player {
       BrandHeading({ label: $r('app.string.player_queue_group'), icon: $r('app.media.player_speed') })
       Text($r('app.string.gesture_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-        ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
+        ForEach(playbackRates(), (speed: number) => {
           Column() {
             Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
               .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)

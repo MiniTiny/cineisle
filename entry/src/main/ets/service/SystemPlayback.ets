@@ -1,3 +1,4 @@
+import { isPlaybackRate } from '../utils/PlaybackRate';
 import { BackgroundLease } from './BackgroundLease';
 import { AppLock } from './AppLock';
 import common from '@ohos.app.ability.common';
@@ -125,7 +126,7 @@ export class SystemPlayback {
       session.on('rewind', (amount?: number) => { this.skip(-(amount ?? 15000)); });
       session.on('setSpeed', (speed: number) => {
         if (this.disposed) { return; }
-        if (![0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed)) { this.view.error(text('speed_failed')); return; }
+        if (!isPlaybackRate(speed)) { this.view.error(text('speed_failed')); return; }
         this.controller.setSpeed(speed); this.sync(true);
       });
       if (this.latest.route.item.Type === 'Episode') {

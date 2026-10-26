@@ -1,3 +1,4 @@
+import { playbackRateFromNative } from './PlaybackSpeedAdapter';
 import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import deviceInfo from '@ohos.deviceInfo';
@@ -248,11 +249,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     ++this.wantedSeek; this.dispatch('seek', position);
   }
   setSpeed(speed: media.PlaybackSpeed): void {
-    const rates = new Map<media.PlaybackSpeed, number>([[media.PlaybackSpeed.SPEED_FORWARD_0_50_X, 0.5],
-      [media.PlaybackSpeed.SPEED_FORWARD_0_75_X, 0.75], [media.PlaybackSpeed.SPEED_FORWARD_1_00_X, 1],
-      [media.PlaybackSpeed.SPEED_FORWARD_1_25_X, 1.25], [media.PlaybackSpeed.SPEED_FORWARD_1_50_X, 1.5],
-      [media.PlaybackSpeed.SPEED_FORWARD_1_75_X, 1.75], [media.PlaybackSpeed.SPEED_FORWARD_2_00_X, 2]]);
-    const value = rates.get(speed); if (value === undefined) { throw new Error('mpv_speed_invalid'); } this.dispatch('speed', value);
+    const value = playbackRateFromNative(speed); if (value === undefined) { throw new Error('mpv_speed_invalid'); } this.dispatch('speed', value);
   }
   setVolume(value: number): void { if (!Number.isFinite(value) || value < 0 || value > 1) { throw new Error('mpv_volume_invalid'); } this.dispatch('volume', value); }
   setSurfaceSize(width: number, height: number): void {
