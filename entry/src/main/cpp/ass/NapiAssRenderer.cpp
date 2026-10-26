@@ -11,6 +11,7 @@
 
 namespace {
 namespace limits = cineisle::subtitle_limits;
+constexpr size_t kErrorCodeUtf8BytesLimit = 64;
 constexpr napi_type_tag HANDLE_TAG{0x44713cd7b8e9a065ULL, 0x83a512cb09e46f27ULL};
 struct Context {
     std::atomic<bool> closed{false};
@@ -73,7 +74,7 @@ napi_value Error(napi_env env, const char *code)
 std::string ErrorCode(const std::exception &error)
 {
     const std::string value = error.what();
-    if (value.size() < 64 && value.rfind("ass_", 0) == 0 &&
+    if (value.size() < kErrorCodeUtf8BytesLimit && value.rfind("ass_", 0) == 0 &&
         value.find_first_not_of("abcdefghijklmnopqrstuvwxyz_") == std::string::npos) { return value; }
     return "ass_native_failed";
 }
