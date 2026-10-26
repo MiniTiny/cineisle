@@ -19,7 +19,7 @@ import { AppLock } from '../service/AppLock';
 import { ExperienceState } from '../utils/Experience';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
-import { deviceNameValue } from '../utils/DeviceOptions';
+import { deviceNameValue, DeviceNameRules } from '../utils/DeviceOptions';
 import { PlayerOptionRules, PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
 import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
@@ -422,7 +422,7 @@ struct Settings {
       if (this.deviceLoaded) { Text($r('app.string.device_name_current', this.deviceSaved || text('device_name_default'))).fontSize(14).fontColor(this.palette.foreground).width('100%') }
       else { Text($r('app.string.device_name_unknown')).fontSize(12).fontColor(this.palette.warm).width('100%') }
       this.fieldCaption($r('app.string.device_name_label'))
-      TextInput({ text: this.deviceDraft, placeholder: $r('app.string.device_name_default') }).type(InputType.Normal).maxLength(64)
+      TextInput({ text: this.deviceDraft, placeholder: $r('app.string.device_name_default') }).type(InputType.Normal).maxLength(DeviceNameRules.maximumInputCodeUnits)
         .height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12)
         .enabled(this.deviceLoaded && !this.deviceBusy && !this.offline).accessibilityText($r('app.string.device_name_label'))
         .onChange((value: string) => { if (this.deviceLoaded && !this.deviceBusy && !this.offline && !this.locked && AppLock.permit()) { this.deviceDraft = value; this.deviceMessage = ''; } })
