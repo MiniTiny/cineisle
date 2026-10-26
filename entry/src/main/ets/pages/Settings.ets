@@ -88,8 +88,8 @@ struct Settings {
   @State autoCache: boolean = new NetworkOptions().autoCache;
   @State networkBusy: boolean = false;
   @State networkMessage: string = '';
-  @State posterEnabled: boolean = true;
-  @State posterCapacity: string = '20';
+  @State posterEnabled: boolean = new PosterOptions().enabled;
+  @State posterCapacity: string = new PosterOptions().maxMb.toString();
   @State posterBytes: number = 0;
   @State posterFiles: number = 0;
   @State posterKnown: boolean = false;

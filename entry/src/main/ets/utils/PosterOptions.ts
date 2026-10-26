@@ -1,20 +1,26 @@
 export class PosterOptions { enabled: boolean = true; maxMb: number = 20; }
+// User-selected disk capacity, independent of image/HTTP byte budgets.
+export class PosterOptionRules {
+  static readonly minimumCapacityMb: number = 1;
+  static readonly maximumCapacityMb: number = 200;
+}
 // Supported image request profiles, independent of the user's disk capacity.
 export class PosterImagePolicy {
   static readonly smallWidthPx: number = 160;
   static readonly mediumWidthPx: number = 480;
   static readonly largeWidthPx: number = 1280;
   static readonly jpegQuality: number = 85;
+  static readonly maximumTagCodeUnits: number = 256;
 }
 export interface PosterTarget { id: string; tag?: string; backdrop: boolean; width: number }
 export interface PosterData { key: string; bytes: ArrayBuffer }
 export interface PosterTicket { result: Promise<PosterData>; cancel: () => void }
 export interface PosterTransfer { result: Promise<ArrayBuffer>; cancel: () => void }
 export function validPosterOptions(value: PosterOptions): boolean {
-  return !!value && typeof value.enabled === 'boolean' && Number.isInteger(value.maxMb) && value.maxMb >= 1 && value.maxMb <= 200;
+  return !!value && typeof value.enabled === 'boolean' && Number.isInteger(value.maxMb) && value.maxMb >= PosterOptionRules.minimumCapacityMb && value.maxMb <= PosterOptionRules.maximumCapacityMb;
 }
 export function validPosterTarget(value: PosterTarget): boolean {
-  return /^[a-zA-Z0-9-]{1,128}$/.test(value.id) && (value.tag === undefined || (typeof value.tag === 'string' && value.tag.length <= 256 && !/[\u0000-\u001f]/.test(value.tag))) &&
+  return /^[a-zA-Z0-9-]{1,128}$/.test(value.id) && (value.tag === undefined || (typeof value.tag === 'string' && value.tag.length <= PosterImagePolicy.maximumTagCodeUnits && !/[\u0000-\u001f]/.test(value.tag))) &&
     [PosterImagePolicy.smallWidthPx, PosterImagePolicy.mediumWidthPx, PosterImagePolicy.largeWidthPx].includes(value.width) && typeof value.backdrop === 'boolean';
 }
 export function rasterImage(bytes: ArrayBuffer): boolean {
