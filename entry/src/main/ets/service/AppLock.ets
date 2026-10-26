@@ -6,6 +6,9 @@ import { BusinessError } from '@ohos.base';
 
 // Device-wide private gate. The Asset contains a random salt and PBKDF2 hash; never the PIN.
 export class AppLock {
+  // Literal StorageLink subscribers are checked against this publisher contract.
+  private static readonly lockedStateKey: string = 'cineIsleLocked';
+
   static locked: boolean = true;
   static enabled: boolean = false;
   static fault: boolean = false;
@@ -16,7 +19,7 @@ export class AppLock {
   private static blockedUntil: number = 0;
   private static failures: number = 0;
   static changed: (() => void) | undefined = undefined;
-  private static publish(value: boolean): void { AppLock.locked = value; AppStorage.setOrCreate('cineIsleLocked', value); AppLock.changed?.(); }
+  private static publish(value: boolean): void { AppLock.locked = value; AppStorage.setOrCreate(AppLock.lockedStateKey, value); AppLock.changed?.(); }
   private static alias(): Uint8Array { return new util.TextEncoder().encodeInto(LockSecretV1.assetAlias); }
   static async initialize(): Promise<void> {
     AppLock.initialized = false; AppLock.publish(true); const query: asset.AssetMap = new Map(); query.set(asset.Tag.ALIAS, AppLock.alias()); query.set(asset.Tag.RETURN_TYPE, asset.ReturnType.ALL);

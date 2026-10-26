@@ -17,6 +17,9 @@ export interface SyncOwner { client: JellyfinClient; local: LocalStore; store: E
 interface ItemSyncIntent { id: string; position?: PendingPosition; played?: PendingEdit; favorite?: PendingEdit }
 // The OS stores only a fixed job identity. Credentials remain in Asset, intents in account-private files.
 export class PendingSync {
+  // Literal StorageLink subscribers are checked against this publisher contract.
+  private static readonly issueStateKey: string = 'cineIsleSyncIssue';
+
   static get busy(): boolean { return !!PendingSync.running; }
   static readonly WORK_ID: number = 1701;
   static readonly ABILITY: string = 'PendingSyncAbility';
@@ -29,7 +32,7 @@ export class PendingSync {
   private static timer: number = -1;
   private static net: connection.NetConnection | undefined = undefined;
   private static jobs: Promise<void> = Promise.resolve();
-  private static state(issue: string): void { PendingSync.issue = issue; AppStorage.setOrCreate('cineIsleSyncIssue', issue); }
+  private static state(issue: string): void { PendingSync.issue = issue; AppStorage.setOrCreate(PendingSync.issueStateKey, issue); }
   static deferred(error: Error): void { PendingSync.state(connectionFailure(error) ? 'sync_retry_waiting' : 'sync_auth_required'); }
   static configure(context: common.Context, owner?: () => SyncOwner | undefined): void {
     PendingSync.context = context;

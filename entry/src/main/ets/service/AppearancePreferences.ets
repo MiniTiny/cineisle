@@ -8,6 +8,12 @@ import { AppearanceOptions, copyAppearance, validAppearance } from '../utils/App
 
 // Global visual settings; window effects and durable preferences commit before reactive publication.
 export class AppearancePreferences {
+  // Literal StorageLink subscribers are checked against this publisher contract.
+  private static readonly paletteStateKey: string = 'cineIslePalette';
+  private static readonly paletteStatusStateKey: string = 'cineIslePaletteStatus';
+  private static readonly amoledStateKey: string = 'cineIsleAmoled';
+  private static readonly extraInfoStateKey: string = 'cineIsleExtraInfo';
+
   private static readonly storeName: string = 'appearance_options';
   private static readonly valueKey: string = 'settings_v1';
   private static context: common.UIAbilityContext | undefined;
@@ -72,7 +78,7 @@ export class AppearancePreferences {
     catch (e) { issue = 'appearance_restore_failed'; }
     if (main !== AppearancePreferences.main || epoch !== AppearancePreferences.epoch) { return; }
     AppearancePreferences.issue = issue;
-    AppStorage.setOrCreate('cineIslePaletteStatus', 'dynamic_colors_update_failed');
+    AppStorage.setOrCreate(AppearancePreferences.paletteStatusStateKey, 'dynamic_colors_update_failed');
   }
 
   private static async read(context: common.UIAbilityContext): Promise<void> {
@@ -98,8 +104,8 @@ export class AppearancePreferences {
     AppearancePreferences.writes = loading.catch(() => {}); await loading;
   }
   private static publish(value: AppearanceOptions, colors?: DynamicPalette): void {
-    AppStorage.setOrCreate('cineIslePalette', uiPalette(colors)); AppStorage.setOrCreate('cineIslePaletteStatus', !(value.dynamicColors ?? true) ? 'dynamic_colors_off' : colors ? 'dynamic_colors_active' : 'dynamic_colors_fallback');
-    AppStorage.setOrCreate('cineIsleAmoled', value.amoled); AppStorage.setOrCreate('cineIsleExtraInfo', value.extraInfo);
+    AppStorage.setOrCreate(AppearancePreferences.paletteStateKey, uiPalette(colors)); AppStorage.setOrCreate(AppearancePreferences.paletteStatusStateKey, !(value.dynamicColors ?? true) ? 'dynamic_colors_off' : colors ? 'dynamic_colors_active' : 'dynamic_colors_fallback');
+    AppStorage.setOrCreate(AppearancePreferences.amoledStateKey, value.amoled); AppStorage.setOrCreate(AppearancePreferences.extraInfoStateKey, value.extraInfo);
   }
   private static async native(value: AppearanceOptions, main: window.Window, epoch: number, allowed: () => boolean, colors?: DynamicPalette): Promise<void> {
     const current = (): boolean => main === AppearancePreferences.main && epoch === AppearancePreferences.epoch && allowed();
