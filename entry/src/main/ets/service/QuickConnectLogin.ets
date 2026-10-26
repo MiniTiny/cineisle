@@ -4,6 +4,7 @@ import { JellyfinClient } from './JellyfinClient';
 interface QuickHttpError extends Error { status?: number }
 export class QuickConnectLogin {
   private static readonly validityMs: number = 5 * 60 * 1000;
+  private static readonly maximumSecretCodeUnits: number = 512;
   static readonly pollIntervalMs: number = 5000;
   private client: JellyfinClient | undefined = undefined;
   private secret: string = '';
@@ -23,7 +24,7 @@ export class QuickConnectLogin {
     try { state = await client.quickInitiate(); }
     catch (e) { if (['login_expired', 'permission_denied'].includes((e as Error).message)) { throw new Error('quick_connect_disabled'); } throw e as Error; }
     if (revision !== this.revision) { throw new Error('quick_connect_cancelled'); }
-    if (typeof state?.Code !== 'string' || !/^[A-Za-z0-9]{6}$/.test(state.Code) || typeof state.Secret !== 'string' || !state.Secret || state.Secret.length > 512 || typeof state.Authenticated !== 'boolean') { throw new Error('api_response_invalid'); }
+    if (typeof state?.Code !== 'string' || !/^[A-Za-z0-9]{6}$/.test(state.Code) || typeof state.Secret !== 'string' || !state.Secret || state.Secret.length > QuickConnectLogin.maximumSecretCodeUnits || typeof state.Authenticated !== 'boolean') { throw new Error('api_response_invalid'); }
     this.client = client; this.secret = state.Secret; this.code = state.Code; this.expires = Date.now() + QuickConnectLogin.validityMs; return this.code;
   }
   async poll(): Promise<JellyfinClient | undefined> {
