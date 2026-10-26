@@ -12,6 +12,7 @@ interface HomeRequest { collectionType?: string; id: string; kind: string; name:
 // One account/page owns this loader. Four shared slots include independent retries.
 export class ProgressiveHome {
   private static readonly maxActiveRequests: number = 4;
+  private initialRequests: HomeRequest[] = [];
   private requests: HomeRequest[] = [];
   private sections: Map<string, HomeSection> = new Map();
   private errors: Map<string, HomeFailure> = new Map();
@@ -34,17 +35,18 @@ export class ProgressiveHome {
   start(preview: HomeSection[]): Promise<void> {
     if (!NetworkPolicy.cacheAllowed()) { preview = []; }
     const finished = new Promise<void>((resolve) => { this.complete = resolve; });
-    this.requests = [
+    this.initialRequests = [
       { id: 'resume', kind: 'resume', name: '', libraryId: '', fetch: () => this.client.resume(HomeFeedRequests.resumeLimit) },
       { id: 'nextup', kind: 'nextup', name: '', libraryId: '', fetch: () => this.client.nextUp('', NextUpRequests.feedLimit) },
       { id: 'libraries', kind: '', name: '', libraryId: '', fetch: () => this.client.libraries() }
     ];
+    this.requests = [...this.initialRequests];
     preview.forEach((section: HomeSection) => this.sections.set(section.id, section));
     // Cached latest shelves keep their position until the current views response establishes order.
     preview.filter((s: HomeSection) => s.libraryId).forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: s.libraryId, collectionType: s.collectionType, fetch: () => this.client.latest(s.libraryId, HomeFeedRequests.latestLimit(s.libraryId)) }));
     preview.filter((s: HomeSection) => s.id === 'cached').forEach((s: HomeSection) => this.requests.push({ id: s.id, kind: s.kind, name: s.name, libraryId: '', fetch: async () => [] }));
     this.cached = preview.length > 0; this.emit();
-    this.requests.slice(0, 3).forEach((r: HomeRequest) => this.enqueue(r));
+    this.initialRequests.forEach((r: HomeRequest) => this.enqueue(r));
     return finished;
   }
   retry(id: string): void {
@@ -66,7 +68,7 @@ export class ProgressiveHome {
         const libraries = items.filter(supportsHomeLibrary);
         const ids = new Set(libraries.map((i: MediaItem) => 'library-' + i.Id));
         this.sections.forEach((s: HomeSection, id: string) => { if (s.libraryId && !ids.has(id)) { this.sections.delete(id); } });
-        this.requests = this.requests.slice(0, 3);
+        this.requests = [...this.initialRequests];
         libraries.forEach((i: MediaItem) => {
           const next: HomeRequest = { id: 'library-' + i.Id, kind: 'latest', name: i.Name, libraryId: i.Id, collectionType: i.CollectionType, fetch: () => this.client.latest(i.Id, HomeFeedRequests.latestLimit(i.Id)) };
           this.requests.push(next); this.enqueue(next);
