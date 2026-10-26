@@ -794,7 +794,7 @@ struct Player {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_display_group'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
-      Slider({ value: this.windowBrightness * 100, min: 5, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
+      Slider({ value: this.windowBrightness * 100, min: PlayerOptionRules.minBrightness * 100, max: PlayerOptionRules.maxBrightness * 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_window_brightness')).onChange((value: number, mode: SliderChangeMode) => { this.changeBrightness(value / 100, mode === SliderChangeMode.End || mode === SliderChangeMode.Click); })
       Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
       Slider({ value: this.volume * 100, min: 0, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
@@ -806,7 +806,7 @@ struct Player {
           .onChange((value: boolean) => { this.night = value; this.showControls(); })
       }.width('100%')
       Text($r('app.string.player_dim_value', Math.round(this.dimOpacity * 100))).fontColor(this.palette.muted).fontSize(12).width('100%')
-      Slider({ value: this.dimOpacity * 100, min: 10, max: 90, step: 1 }).width('100%').selectedColor(this.palette.accent)
+      Slider({ value: this.dimOpacity * 100, min: PlayerOptionRules.minDimOpacity * 100, max: PlayerOptionRules.maxDimOpacity * 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_dim_opacity')).onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.changeDim(value / 100); } })
     }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }

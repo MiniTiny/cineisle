@@ -29,7 +29,7 @@ import { EngineChoice, engineChoiceCaption } from '../utils/EngineChoice';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
 import { MpvPreferences } from '../service/MpvPreferences';
-import { MpvHardware, MpvVideo, MPV_HARDWARE_MODES, MPV_VIDEO_OUTPUTS, mpvHardwareCaption } from '../utils/MpvOptions';
+import { MpvHardware, MpvVideo, MPV_HARDWARE_MODES, MPV_VIDEO_OUTPUTS, defaultMpvOptions, mpvHardwareCaption } from '../utils/MpvOptions';
 @Entry
 @Component
 struct Settings {
@@ -61,16 +61,16 @@ struct Settings {
   @State engineMessage: string = '';
   @State mpvOffered: boolean = false;
   private engineRevision: number = 0;
-  @State mpvHardware: MpvHardware = 'ohcodec';
-  @State mpvVideo: MpvVideo = 'gpu-next';
-  @State mpvSavedHardware: MpvHardware = 'ohcodec';
-  @State mpvSavedVideo: MpvVideo = 'gpu-next';
+  @State mpvHardware: MpvHardware = defaultMpvOptions().hwdec;
+  @State mpvVideo: MpvVideo = defaultMpvOptions().vo;
+  @State mpvSavedHardware: MpvHardware = defaultMpvOptions().hwdec;
+  @State mpvSavedVideo: MpvVideo = defaultMpvOptions().vo;
   @State mpvOptionsKnown: boolean = false;
   @State mpvOptionsBusy: boolean = false;
   @State mpvOptionsMessage: string = '';
   private mpvOptionsRevision: number = 0;
-  @State seekBack: string = '5';
-  @State seekForward: string = '15';
+  @State seekBack: string = (new PlayerOptions().back / 1000).toString();
+  @State seekForward: string = (new PlayerOptions().forward / 1000).toString();
   @State currentPin: string = '';
   @State nextPin: string = '';
   @State confirmation: string = '';
