@@ -20,7 +20,7 @@ export function captionArgb(value: CaptionColor): number {
 export function captionRequest(runs: SubtitleRun[], style: CaptionRenderStyle, size: number, width: number,
   maxLines: number, intrinsic: boolean, context: UIContext, metrics: SubtitleMetrics, fontScale?: number, revision: string = ''): native.NativeCaptionRequest {
   if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(size) || size <= 0 ||
-    !Number.isInteger(maxLines) || maxLines < 1 || maxLines > CaptionRenderLimits.maxLines || (fontScale !== undefined && (!Number.isFinite(fontScale) || fontScale <= 0 || fontScale > 3))) { throw new Error('subtitle_failed'); }
+    !Number.isInteger(maxLines) || maxLines < 1 || maxLines > CaptionRenderLimits.maxLines || (fontScale !== undefined && (!Number.isFinite(fontScale) || fontScale <= 0 || fontScale > CaptionRenderLimits.maximumExplicitFontScale))) { throw new Error('subtitle_failed'); }
   return { revision: revision, width: context.vp2px(width), maxLines: maxLines, intrinsic: intrinsic,
     runs: runs.map((run: SubtitleRun): native.NativeCaptionRun => ({ text: run.text,
       family: run.family || style.family, size: style.system ? context.vp2px(size * (run.sizeScale ?? 1)) : fontScale === undefined ? context.fp2px(size * (run.sizeScale ?? 1)) : context.vp2px(size * (run.sizeScale ?? 1) * fontScale),
