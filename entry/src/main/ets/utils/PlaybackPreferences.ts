@@ -7,6 +7,14 @@ export class PlaybackPreferences {
   subtitlesOff: boolean = false;
 }
 
+class PlaybackLanguageRules {
+  static readonly maximumTagCodeUnits: number = 63;
+  static readonly exactScore: number = 100;
+  static readonly compatibleScriptScore: number = 80;
+  static readonly regionalFallbackScore: number = 40;
+  static readonly baseFallbackScore: number = 50;
+}
+
 const aliases: Record<string, string> = {
   eng: 'en', zho: 'zh', chi: 'zh', jpn: 'ja', kor: 'ko', fra: 'fr', fre: 'fr', deu: 'de', ger: 'de',
   spa: 'es', ita: 'it', por: 'pt', rus: 'ru', ara: 'ar', hin: 'hi', tha: 'th', vie: 'vi', ind: 'id',
@@ -18,7 +26,7 @@ const aliases: Record<string, string> = {
 export function normalizeLanguage(value: string): string {
   if (typeof value !== 'string') { return ''; }
   const tag = value.trim().toLowerCase().replace(/_/g, '-');
-  if (tag.length > 63 || !/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/.test(tag)) { return ''; }
+  if (tag.length > PlaybackLanguageRules.maximumTagCodeUnits || !/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/.test(tag)) { return ''; }
   const parts = tag.split('-');
   if (parts[0] === 'und' || parts[0] === 'zxx' || parts[0] === 'mul') { return ''; }
   parts[0] = aliases[parts[0]] ?? parts[0];
@@ -53,11 +61,11 @@ function script(tag: string): string {
 
 function languageScore(wanted: string, available: string): number {
   if (!available || wanted.split('-')[0] !== available.split('-')[0]) { return 0; }
-  if (wanted === available) { return 100; }
+  if (wanted === available) { return PlaybackLanguageRules.exactScore; }
   const wantedScript = script(wanted); const actualScript = script(available);
   if (wantedScript && actualScript && wantedScript !== actualScript) { return 0; }
-  if (wantedScript && wantedScript === actualScript) { return 80; }
-  return available.includes('-') ? 40 : 50;
+  if (wantedScript && wantedScript === actualScript) { return PlaybackLanguageRules.compatibleScriptScore; }
+  return available.includes('-') ? PlaybackLanguageRules.regionalFallbackScore : PlaybackLanguageRules.baseFallbackScore;
 }
 
 export function preferredTrack(tracks: TrackChoice[], language: string, selected: string): string | undefined {
@@ -66,6 +74,7 @@ export function preferredTrack(tracks: TrackChoice[], language: string, selected
   let key: string | undefined = undefined; let best = 0;
   for (const track of tracks) {
     const score = languageScore(wanted, normalizeLanguage(track.language ?? ''));
+    // The low bit retains the selected track only when the language scores tie.
     const ranked = score ? score * 2 + (track.key === selected ? 1 : 0) : 0;
     if (ranked > best) { best = ranked; key = track.key; }
   }
