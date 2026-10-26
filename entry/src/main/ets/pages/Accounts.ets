@@ -75,7 +75,7 @@ struct Accounts {
     catch (e) { if (revision === this.revision && (e as Error).message !== 'quick_connect_cancelled') { this.message = errorText(e as Error); } }
     finally { if (revision === this.revision) { this.busy = false; } }
   }
-  private schedule(): void { if (this.timer >= 0) { clearTimeout(this.timer); } if (this.visible && this.quickCode) { this.timer = setTimeout(() => this.checkQuick(), 5000); } }
+  private schedule(): void { if (this.timer >= 0) { clearTimeout(this.timer); } if (this.visible && this.quickCode) { this.timer = setTimeout(() => this.checkQuick(), QuickConnectLogin.pollIntervalMs); } }
   private cancelQuick(): void { if (this.timer >= 0) { clearTimeout(this.timer); this.timer = -1; } this.quick.cancel(); this.quickCode = ''; }
   private async checkQuick(): Promise<void> {
     if (!this.quickCode || this.busy || !this.visible || this.locked) { this.schedule(); return; }

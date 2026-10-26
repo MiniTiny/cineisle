@@ -3,6 +3,8 @@ import { JellyfinClient } from './JellyfinClient';
 // Only the display code leaves this controller. Secret and token never enter UI state or disk.
 interface QuickHttpError extends Error { status?: number }
 export class QuickConnectLogin {
+  private static readonly validityMs: number = 5 * 60 * 1000;
+  static readonly pollIntervalMs: number = 5000;
   private client: JellyfinClient | undefined = undefined;
   private secret: string = '';
   private code: string = '';
@@ -22,13 +24,13 @@ export class QuickConnectLogin {
     catch (e) { if (['login_expired', 'permission_denied'].includes((e as Error).message)) { throw new Error('quick_connect_disabled'); } throw e as Error; }
     if (revision !== this.revision) { throw new Error('quick_connect_cancelled'); }
     if (typeof state?.Code !== 'string' || !/^[A-Za-z0-9]{6}$/.test(state.Code) || typeof state.Secret !== 'string' || !state.Secret || state.Secret.length > 512 || typeof state.Authenticated !== 'boolean') { throw new Error('api_response_invalid'); }
-    this.client = client; this.secret = state.Secret; this.code = state.Code; this.expires = Date.now() + 5 * 60 * 1000; return this.code;
+    this.client = client; this.secret = state.Secret; this.code = state.Code; this.expires = Date.now() + QuickConnectLogin.validityMs; return this.code;
   }
   async poll(): Promise<JellyfinClient | undefined> {
     const client = this.client; const revision = this.revision;
     if (!client || !this.secret) { throw new Error('quick_connect_cancelled'); }
     if (Date.now() >= this.expires) { this.cancel(); throw new Error('quick_connect_expired'); }
-    if (this.checking || (this.lastPoll && Date.now() - this.lastPoll < 5000)) { return undefined; }
+    if (this.checking || (this.lastPoll && Date.now() - this.lastPoll < QuickConnectLogin.pollIntervalMs)) { return undefined; }
     this.checking = true; this.lastPoll = Date.now();
     try {
       const state = await client.quickState(this.secret);
