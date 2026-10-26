@@ -33,6 +33,8 @@ import { ActorProfile, ActorTag, Discovery, ExperienceState, actorProfiles, sort
 
 interface PersonRoute { personId?: string; personName?: string }
 
+const actorSummaryTagLimit: number = 3;
+
 @Entry
 @Component
 struct Index {
@@ -594,7 +596,7 @@ struct Index {
             if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor(this.palette.accent).fontSize(12).width('100%') }
             if (this.showTags) {
               Flex({ wrap: FlexWrap.Wrap }) {
-                ForEach(actor.tags.slice(0, 3), (tag: ActorTag) => {
+                ForEach(actor.tags.slice(0, actorSummaryTagLimit), (tag: ActorTag) => {
                   Column() { BrandButton({ label: tag.theme ? $r('app.string.theme_' + tag.title) : tag.title, icon: $r('app.media.nav_star_active'), compact: true, primary: this.actorTag === tag.key, onSelect: () => { this.actorTag = tag.key; this.refreshActors(); } }) }
                     .width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '48%').margin({ right: 4, bottom: 8 })
                 }, (tag: ActorTag) => tag.key)

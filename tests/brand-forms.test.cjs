@@ -46,6 +46,7 @@ function render(name,overrides={},scale=1){
   if(id.endsWith('/SearchHistory')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/SearchHistory.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/FavoriteOptions')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/FavoriteOptions.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/ActorOrder')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/ActorOrder.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
+  if(id.endsWith('/ActorProfileRules')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/ActorProfileRules.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/SubtitlePosition'))return require('./player-regression.test.cjs').load('utils/SubtitlePosition.ts');
   if(id.endsWith('/InlineSubtitle')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/InlineSubtitle.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/StyledSubtitle')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/StyledSubtitle.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
