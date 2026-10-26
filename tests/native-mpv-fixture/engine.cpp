@@ -78,7 +78,8 @@ int mpv_set_option(mpv_handle *, const char *name, mpv_format format, void *data
 }
 int mpv_command(mpv_handle *, const char **args) {
     std::unique_lock<std::mutex> lock(mutex); Barrier(lock, std::string("command:") + args[0]);
-    inspection.commands.emplace_back(args[0], args[1] ? args[1] : ""); return 0;
+    inspection.commands.emplace_back(args[0], args[1] ? args[1] : "");
+    return config.failSeekCommand && std::strcmp(args[0], "seek") == 0 ? MPV_ERROR_GENERIC : 0;
 }
 int mpv_set_property(mpv_handle *handle, const char *name, mpv_format format, void *data) {
     std::unique_lock<std::mutex> lock(mutex); Barrier(lock, std::string("set:") + name);
@@ -96,9 +97,11 @@ int mpv_set_property(mpv_handle *handle, const char *name, mpv_format format, vo
 }
 int mpv_get_property(mpv_handle *handle, const char *name, mpv_format format, void *data) {
     std::lock_guard<std::mutex> lock(mutex); const std::string key(name);
+    inspection.propertyReads.push_back(key);
     if (format == MPV_FORMAT_DOUBLE) {
         double value = 0;
         if (key == "duration") value = 10;
+        else if (key == "time-pos") value = config.positionSeconds;
         else if (key == "width") value = 640;
         else if (key == "height") value = 360;
         else if (key == "speed") value = handle->speed;
@@ -123,8 +126,12 @@ int mpv_get_property(mpv_handle *handle, const char *name, mpv_format format, vo
 mpv_event *mpv_wait_event(mpv_handle *, double) {
     std::lock_guard<std::mutex> lock(mutex); ++inspection.eventCalls;
     static thread_local mpv_event event; event = {};
-    event.event_id = config.events > 0 ? MPV_EVENT_FILE_LOADED : MPV_EVENT_NONE;
-    if (config.events > 0) --config.events;
+    if (!config.eventIds.empty()) { event.event_id = mpv_event_id(config.eventIds.front()); config.eventIds.erase(config.eventIds.begin()); }
+    else {
+        event.event_id = config.events > 0 ? MPV_EVENT_FILE_LOADED : MPV_EVENT_NONE;
+        if (config.events > 0) --config.events;
+    }
+    inspection.deliveredEvents.push_back(int(event.event_id));
     return &event;
 }
 void mpv_free_node_contents(mpv_node *node) { Free(*node); }

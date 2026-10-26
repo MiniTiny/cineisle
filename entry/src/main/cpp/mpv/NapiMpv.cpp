@@ -216,7 +216,7 @@ struct Session : std::enable_shared_from_this<Session> {
         state.ended = Flag("eof-reached", state.ended);
         state.hardwareDecoder = PropertyText("hwdec-current");
         state.videoOutput = PropertyText("current-vo"); state.audioOutput = PropertyText("current-ao");
-        if (restartedAfterSeek && std::abs(state.position - seekTarget) <= 1000) {
+        if (restartedAfterSeek && std::abs(state.position - seekTarget) <= limits::kSeekConfirmationToleranceMs) {
             state.seekDone = state.seekRevision; state.seeking = false; seekObserved = false; restartedAfterSeek = false;
         }
         Node node(api);

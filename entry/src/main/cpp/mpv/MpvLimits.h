@@ -17,6 +17,7 @@ inline constexpr std::size_t kMaxCommandTypeUtf8Bytes = 32;
 inline constexpr double kMinNativeSpeed = 0.25;
 inline constexpr double kMaxNativeSpeed = 4;
 inline constexpr double kMaxSeekMs = 1e12;
+inline constexpr double kSeekConfirmationToleranceMs = 1000;
 
 // These native budgets are not user preferences or global network/cache policy.
 inline constexpr unsigned kMaxActiveSessions = 4;
