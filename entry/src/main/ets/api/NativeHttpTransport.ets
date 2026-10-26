@@ -19,6 +19,9 @@ class HttpFailure extends AppFailure {
   constructor(status: number) { super('http_failed', 'response', text('http_failed', status), [status], status); }
 }
 // The generated client owns wire routes/types; this adapter owns native HTTP and credentials.
+const minimumNativeNetworkErrorCode: number = 2300000;
+const exclusiveNativeNetworkErrorCodeLimit: number = 2400000;
+
 export class NativeHttpTransport implements ApiTransport {
   private session: Session;
   private recovery: Promise<string> | undefined = undefined;
@@ -119,7 +122,7 @@ export class NativeHttpTransport implements ApiTransport {
       return response.result;
     } catch (e) {
       const code = (e as BusinessError).code;
-      if (code !== undefined && code >= 2300000 && code < 2400000) { throw new AppFailure('network_failed', 'network'); }
+      if (code !== undefined && code >= minimumNativeNetworkErrorCode && code < exclusiveNativeNetworkErrorCodeLimit) { throw new AppFailure('network_failed', 'network'); }
       throw e as Error;
     } finally { connection.destroy(); }
   }
