@@ -1,3 +1,4 @@
+import { BrowseChoice, librarySortChoices, searchTypeChoices } from '../utils/Browse';
 import { actorOrders, ActorOrderChoice, defaultActorOrder } from '../utils/ActorOrder';
 import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { UiPalette } from '../utils/UiPalette';
@@ -380,7 +381,7 @@ struct Index {
           BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
           BrandButton({ label: $r('app.string.close_search'), icon: $r('app.media.menu_cancel'), onSelect: () => this.switchTab(this.tab) })
           BrandChoice({ label: $r('app.string.search_type'), icon: $r('app.media.nav_library_active'), available: !this.busy,
-            choices: [{ value: text('search_type_all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
+            choices: searchTypeChoices.map((choice: BrowseChoice): SelectOption => ({ value: text(choice.caption) })),
             selected: Math.max(0, searchTypes.indexOf(this.searchType)), onSelect: (index: number) => this.changeSearchType(index) })
           if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           if (this.message) { Text(this.message).fontSize(12).fontColor(this.palette.danger).width('100%') }
@@ -454,7 +455,7 @@ struct Index {
   private libraryFilters() {
     Column({ space: 12 }) {
       BrandChoice({ label: $r('app.string.library_sort'), icon: $r('app.media.menu_sync'), available: !this.busy,
-        choices: [{ value: text('sort_name') }, { value: text('sort_rating') }, { value: text('sort_critic') }, { value: text('sort_added') }, { value: text('sort_played') }, { value: text('sort_premiere') }],
+        choices: librarySortChoices.map((choice: BrowseChoice): SelectOption => ({ value: text(choice.caption) })),
         selected: Math.max(0, librarySortFields.indexOf(this.librarySort)), onSelect: (index: number) => this.changeLibrarySort(index) })
       BrandChoice({ label: $r('app.string.library_order'), icon: $r('app.media.menu_sync'), available: !this.busy,
         choices: [{ value: text('sort_ascending') }, { value: text('sort_descending') }], selected: this.libraryDescending ? 1 : 0,
