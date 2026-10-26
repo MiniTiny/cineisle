@@ -4,6 +4,7 @@ import { DynamicPalette, wallpaperPalette } from '../utils/DynamicPalette';
 export interface PaletteTicket { result: Promise<DynamicPalette | undefined>; cancel: () => void }
 // No wallpaper files or permissions: read only bounded RGB metadata, at most one native RPC at a time.
 export class WallpaperColors {
+  private static readonly readTimeoutMs: number = 1500;
   private pending: Promise<wallpaper.RgbaColor[]> | undefined;
   private pendingRevision: number = 0;
   private revision: number = 0;
@@ -45,7 +46,7 @@ export class WallpaperColors {
           const request = wallpaper.getColors(wallpaper.WallpaperType.WALLPAPER_SYSTEM); this.pending = request;
           request.then(() => { if (this.pending === request) { this.pending = undefined; } }, () => { if (this.pending === request) { this.pending = undefined; } });
         }
-        const revision = this.revision; timer = setTimeout(() => finish(), 1500);
+          const revision = this.revision; timer = setTimeout(() => finish(), WallpaperColors.readTimeoutMs);
         this.pending.then((colors: wallpaper.RgbaColor[]) => { try { if (allowed() && revision === this.revision) { finish(wallpaperPalette(colors)); } else { finish(); } } catch (e) { finish(); } }).catch(() => finish());
       } catch (e) { finish(); }
     });
