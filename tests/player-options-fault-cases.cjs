@@ -226,8 +226,8 @@ const recipes=[
   {
     "id": "window-read-comparison",
     "file": "entry/src/main/ets/service/PlaybackWindow.ets",
-    "old": "value >= 0 ? value : 0.5",
-    "replacement": "value > 0 ? value : 0.5",
+    "old": "return value >= 0 ? value",
+    "replacement": "return value > 0 ? value",
     "name": "player display independent window read 0",
     "suite": "player-display-contract.test.cjs"
   },
