@@ -4,6 +4,8 @@ function captionStyleChanged(_style: accessibility.CaptionsStyle): void { System
 function captionEnableChanged(_enabled: boolean): void { SystemCaptions.read(); }
 // System-wide preferences, independent of the signed-in Jellyfin account. Product code writes only on explicit Apply.
 export class SystemCaptions {
+  private static readonly verificationAttempts: number = 6;
+  private static readonly verificationIntervalMs: number = 100;
   private static manager: accessibility.CaptionsManager | undefined = undefined;
   private static styleHook: boolean = false;
   private static enableHook: boolean = false;
@@ -53,7 +55,7 @@ export class SystemCaptions {
     if (!SystemCaptions.styleHook && !SystemCaptions.enableHook) { SystemCaptions.manager = undefined; }
   }
   private static async verified(config: CaptionConfig): Promise<CaptionSnapshot | undefined> {
-    for (let n = 0; n < 6; n++) { const state = SystemCaptions.read(); if (state.available && sameCaptionConfig(state.config, config)) { return state; } if (n < 5) { await new Promise<void>((resolve) => setTimeout(resolve, 100)); } }
+    for (let n = 0; n < SystemCaptions.verificationAttempts; n++) { const state = SystemCaptions.read(); if (state.available && sameCaptionConfig(state.config, config)) { return state; } if (n + 1 < SystemCaptions.verificationAttempts) { await new Promise<void>((resolve) => setTimeout(resolve, SystemCaptions.verificationIntervalMs)); } }
     return undefined;
   }
   static save(expected: CaptionConfig, draft: CaptionConfig): Promise<CaptionSnapshot> {
