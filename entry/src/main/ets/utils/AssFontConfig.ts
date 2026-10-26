@@ -1,26 +1,38 @@
 import font from '@ohos.font';
 
+// Platform metadata and generated XML use UTF-16 code units here, not native byte quotas.
+class AssFontConfigLimits {
+  static readonly maximumDirectoryCodeUnits: number = 4096;
+  static readonly maximumDirectories: number = 32;
+  static readonly maximumGenericFamilies: number = 128;
+  static readonly maximumFamilyCodeUnits: number = 512;
+  static readonly maximumAliasesPerFamily: number = 128;
+  static readonly maximumFallbackGroups: number = 64;
+  static readonly maximumFallbacksPerGroup: number = 512;
+  static readonly maximumConfigurationCodeUnits: number = 128 * 1024;
+}
+
 function xml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
 function directory(value: string): string {
-  if (!value || value.length > 4096 || !value.startsWith('/') || /[\u0000-\u001f]/.test(value) || /(^|\/)\.\.?($|\/)/.test(value)) {
+  if (!value || value.length > AssFontConfigLimits.maximumDirectoryCodeUnits || !value.startsWith('/') || /[\u0000-\u001f]/.test(value) || /(^|\/)\.\.?($|\/)/.test(value)) {
     throw new Error('ass_font_configuration_invalid');
   }
   return xml(value);
 }
 
 function family(value: string): string {
-  if (!value || value.length > 512 || /[\u0000-\u001f]/.test(value)) { throw new Error('ass_font_configuration_invalid'); }
+  if (!value || value.length > AssFontConfigLimits.maximumFamilyCodeUnits || /[\u0000-\u001f]/.test(value)) { throw new Error('ass_font_configuration_invalid'); }
   return `<family>${xml(value)}</family>`;
 }
 
 // Only public platform metadata and an app-private cache directory enter the configuration.
 // Subtitle contents never become XML, font directories, or include paths.
 export function assFontConfiguration(config: font.UIFontConfig, cacheDirectory: string): string {
-  if (!config?.fontDir?.length || config.fontDir.length > 32 || !config.generic?.length || config.generic.length > 128) {
+  if (!config?.fontDir?.length || config.fontDir.length > AssFontConfigLimits.maximumDirectories || !config.generic?.length || config.generic.length > AssFontConfigLimits.maximumGenericFamilies) {
     throw new Error('ass_font_configuration_invalid');
   }
   const lines: string[] = ['<?xml version="1.0"?>', '<fontconfig>'];
@@ -29,11 +41,11 @@ export function assFontConfiguration(config: font.UIFontConfig, cacheDirectory: 
   lines.push('<config><rescan><int>0</int></rescan></config>');
   const aliases = new Set<string>();
   for (const generic of config.generic) {
-    if (!generic.family || generic.family.length > 512 || /[\u0000-\u001f]/.test(generic.family) || generic.alias.length > 128) {
+    if (!generic.family || generic.family.length > AssFontConfigLimits.maximumFamilyCodeUnits || /[\u0000-\u001f]/.test(generic.family) || generic.alias.length > AssFontConfigLimits.maximumAliasesPerFamily) {
       throw new Error('ass_font_configuration_invalid');
     }
     for (const alias of generic.alias) {
-      if (!alias.name || alias.name.length > 512 || /[\u0000-\u001f]/.test(alias.name)) { throw new Error('ass_font_configuration_invalid'); }
+      if (!alias.name || alias.name.length > AssFontConfigLimits.maximumFamilyCodeUnits || /[\u0000-\u001f]/.test(alias.name)) { throw new Error('ass_font_configuration_invalid'); }
       if (alias.name === generic.family || aliases.has(alias.name)) { continue; }
       aliases.add(alias.name);
       lines.push(`<alias><family>${xml(alias.name)}</family><prefer><family>${xml(generic.family)}</family></prefer></alias>`);
@@ -42,9 +54,9 @@ export function assFontConfiguration(config: font.UIFontConfig, cacheDirectory: 
   // Fontconfig chooses missing glyphs from the actual scanned character coverage.
   // A fallback directory is not copied wholesale into the renderer's embedded-font heap.
   const fallbacks: string[] = [];
-  if (!Array.isArray(config.fallbackGroups) || config.fallbackGroups.length > 64) { throw new Error('ass_font_configuration_invalid'); }
+  if (!Array.isArray(config.fallbackGroups) || config.fallbackGroups.length > AssFontConfigLimits.maximumFallbackGroups) { throw new Error('ass_font_configuration_invalid'); }
   for (const group of config.fallbackGroups) {
-    if (!Array.isArray(group.fallback) || group.fallback.length > 512) { throw new Error('ass_font_configuration_invalid'); }
+    if (!Array.isArray(group.fallback) || group.fallback.length > AssFontConfigLimits.maximumFallbacksPerGroup) { throw new Error('ass_font_configuration_invalid'); }
     const names = Array.from(new Set<string>(group.fallback.map((fallback) => fallback.family)));
     if (group.fontSetName) {
       lines.push(`<alias>${family(group.fontSetName)}<accept>${names.map((name: string) => family(name)).join('')}</accept></alias>`);
@@ -56,6 +68,6 @@ export function assFontConfiguration(config: font.UIFontConfig, cacheDirectory: 
   lines.push(`<alias><family>sans-serif</family><prefer>${preferred.map((name: string) => family(name)).join('')}</prefer></alias>`);
   lines.push('</fontconfig>');
   const result = lines.join('\n');
-  if (result.length > 128 * 1024) { throw new Error('ass_font_configuration_invalid'); }
+  if (result.length > AssFontConfigLimits.maximumConfigurationCodeUnits) { throw new Error('ass_font_configuration_invalid'); }
   return result;
 }
