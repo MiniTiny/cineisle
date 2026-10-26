@@ -71,7 +71,7 @@ function render(name,overrides={},scale=1){
   if(id.endsWith('/PublicUsers'))return {loadPublicUsers:address=>overrides.publicRequest?overrides.publicRequest(address):Promise.resolve([])};
   if(id.includes('PlayerOptions')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/PlayerOptions.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/CaptionRasterizer'))return require('./caption-raster-fixture.cjs').rasterFixture(overrides.captionRaster||{},events);
-  if(id.endsWith('/SubtitleMetrics'))return require('./subtitle-metrics-fixture.cjs').metricFixture(overrides.metricAscent,events);
+  if(id.endsWith('/SubtitleMetrics'))return overrides.metricService||require('./subtitle-metrics-fixture.cjs').metricFixture(overrides.metricAscent,events);
   if(id==='@ohos.arkui.node')return {LengthMetrics:{px:value=>({value,unit:'px'})},ComponentContent:class{constructor(ui,builder,data){this.data=data;this.builder=builder}dispose(){events.push(['disposeDialog'])}}};
   if((id.startsWith('../components/')||id.startsWith('./Brand')||id==='./MediaCard'||id==='./CachedImage'||id==='./RichCaption'||id==='./NativeCaption'||id==='./PositionedCaption'))return {...c.Components,MediaCard:class{constructor(_,props){this.props=props}initialRender(){events.push(['card',this.props.item.Id])}}};
   if(id.includes('Models'))return {PlaybackRoute:class{constructor(){this.item={Id:'a',Name:'Island',Type:'Episode'};this.sources=[];this.offline=false}}};if(id.includes('PlaybackPreferences'))return {PlaybackPreferences:class{constructor(){this.version=1;this.audioLanguage='';this.subtitleLanguage='';this.subtitlesOff=false}}};
