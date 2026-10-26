@@ -6,16 +6,16 @@ const {AppService:A}=h.load('service/AppService.ets'),{JellyfinClient}=h.load('s
 const http=h.platform.get('@ohos.net.http'),originalCreate=http.createHttp,io=h.platform.get('@ohos.file.fs');
 const originalIO=Object.fromEntries(['openSync','writeSync','renameSync','readTextSync','fsyncSync','closeSync','accessSync','statSync','mkdirSync','unlinkSync'].filter(key=>typeof io[key]==='function').map(key=>[key,io[key]]));
 function make(scope){
- let trace,requests,provider,stage,targets,opened;
+ let trace,requests,provider,stage,targets,opened,requestPhase;
  async function before(){
-  Object.assign(io,originalIO);h.reset();strings.initializeStrings(h.context.resourceManager);stage='account-init';targets=()=>true;opened=new Map();requests=[];
+  Object.assign(io,originalIO);h.reset();strings.initializeStrings(h.context.resourceManager);stage='account-init';targets=()=>true;opened=new Map();requests=[];requestPhase=()=> 'request';
   const fault=(process.argv.find(a=>a.startsWith('--fault='))||'').slice(8);trace=common.external(scope,fault);
   if(fault==='setup')assert.fail('unrelated '+scope+' initialization assertion');
   provider=()=>{throw Error('Missing catalog HTTP fixture');};
   http.createHttp=()=>trace.call('http-create',()=>{
-   if(process.argv.includes('--native-init-failure'))throw Object.assign(Error('injected native HTTP initializer failure'),{code:'EIO',contractInjected:true});
+   if(process.argv.includes('--native-init-failure')||trace.calls['http-create']===Number((process.argv.find(a=>a.startsWith('--native-init-failure-at='))||'').split('=')[1]))throw Object.assign(Error('injected native HTTP initializer failure'),{code:'EIO',contractInjected:true});
    const connection=originalCreate();return {...connection,async request(address,options){
-    const url=trace.call('parse-url',()=>new URL(address)),phase=url.pathname.endsWith('/System/Info/Public')?'version':'request';requests.push({url,options,phase});
+    const url=trace.call('parse-url',()=>new URL(address)),phase=url.pathname.endsWith('/System/Info/Public')?'version':requestPhase(url);requests.push({url,options,phase});
     return trace.call(phase,()=>provider(url,options),{pathname:url.pathname});
    }};
   });
@@ -35,7 +35,7 @@ function make(scope){
  const response=(value,status=200)=>({responseCode:status,result:JSON.stringify(value)}),page=(items,total=items.length)=>({Items:items,TotalRecordCount:total});
  const observed=promise=>Promise.resolve(promise).then(value=>({value}),error=>({error}));
  return {assert,h,A,strings,client,response,page,observed,movie:(id,extra={})=>({...h.film(String(id)),...extra}),
-  provider:fn=>{provider=fn;},requests:()=>requests,trace:()=>trace,stage:value=>{stage=value;},fileTargets:fn=>{targets=fn;},
+  phaseFor:fn=>{requestPhase=fn;},provider:fn=>{provider=fn;},requests:()=>requests,trace:()=>trace,stage:value=>{stage=value;},fileTargets:fn=>{targets=fn;},
   settle:async()=>{for(let i=0;i<12;i++)await new Promise(setImmediate);},
   run:tests=>common.run(tests,scope,before,after,()=>trace.healthy())};
 }

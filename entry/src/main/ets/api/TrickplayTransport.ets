@@ -6,6 +6,12 @@ import { BIF_LIMIT, BifTransfer, bifWidth } from '../utils/Bif';
 
 // Optional Jellyscrub plugin routes, separate from the core Jellyfin OpenAPI contract.
 export class TrickplayTransport extends NativeHttpTransport {
+  private static readonly manifestTimeoutMs: number = 3000;
+  private static readonly binaryTimeoutMs: number = 8000;
+  private static readonly connectTimeoutMs: number = 3000;
+  private static readonly manifestReadTimeoutMs: number = 2000;
+  private static readonly binaryReadTimeoutMs: number = 6000;
+  private static readonly ownerCheckMs: number = 250;
   // HTTP bytes and manifest string code units are independent limits.
   private static readonly maxManifestResponseBytes: number = 16384;
   private owner: Session;
@@ -21,15 +27,15 @@ export class TrickplayTransport extends NativeHttpTransport {
         if (!/^[a-zA-Z0-9-]{1,128}$/.test(id) || !allowed() || !this.owner.token || NetworkPolicy.cacheRequired()) { finish(); return; }
         const token = this.owner.token; const user = this.owner.userId; const server = this.owner.serverId; const endpoint = this.owner.server;
         const current = (): boolean => !settled && allowed() && token === this.owner.token && user === this.owner.userId && server === this.owner.serverId && endpoint === this.owner.server && !NetworkPolicy.cacheRequired();
-        watch = setInterval(() => { try { if (!current()) { finish(); } } catch (e) { finish(); } }, 250);
+        watch = setInterval(() => { try { if (!current()) { finish(); } } catch (e) { finish(); } }, TrickplayTransport.ownerCheckMs);
         const policy = NetworkPolicy.snapshot();
         const request = (path: string, binary: boolean): void => {
           if (!current()) { finish(); return; }
-          close(); connection = http.createHttp(); timer = setTimeout(() => finish(), Math.min(policy.requestMs, binary ? 8000 : 3000));
+          close(); connection = http.createHttp(); timer = setTimeout(() => finish(), Math.min(policy.requestMs, binary ? TrickplayTransport.binaryTimeoutMs : TrickplayTransport.manifestTimeoutMs));
           connection.request(endpoint + '/Trickplay/' + encodeURIComponent(id) + path, {
             method: http.RequestMethod.GET, header: { 'Authorization': this.authorization(), 'Accept': binary ? 'application/octet-stream' : 'application/json' },
             expectDataType: binary ? http.HttpDataType.ARRAY_BUFFER : http.HttpDataType.STRING, usingCache: false, maxLimit: binary ? BIF_LIMIT : TrickplayTransport.maxManifestResponseBytes,
-            connectTimeout: Math.min(policy.connectMs, 3000), readTimeout: Math.min(policy.readMs, binary ? 6000 : 2000)
+            connectTimeout: Math.min(policy.connectMs, TrickplayTransport.connectTimeoutMs), readTimeout: Math.min(policy.readMs, binary ? TrickplayTransport.binaryReadTimeoutMs : TrickplayTransport.manifestReadTimeoutMs)
           }).then((response: http.HttpResponse) => {
             if (settled) { return; }
             try {
