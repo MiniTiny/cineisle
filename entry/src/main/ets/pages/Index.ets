@@ -1,3 +1,4 @@
+import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -233,7 +234,7 @@ struct Index {
             this.items = this.mode === 'search' ? searchPage(more ? this.items : [], result.Items ?? [], result.TotalRecordCount, this.searchType) : more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
         }
       } else if (this.tab === 0) {
-        const candidates = this.discover ? await client.discoveryCandidates() : await client.recommend();
+        const candidates = this.discover ? await client.discoveryCandidates(DiscoveryRules.candidateLimit) : await client.recommend();
         this.discoveries = discovery(applyPending(candidates, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []), AppService.snapshot.items, AppService.experience?.snapshot().follows ?? []);
         const items = this.discover ? this.discoveries.map((d: Discovery) => d.item) : candidates;
         if (this.current(version, client)) { this.items = items; this.total = items.length; }

@@ -1,3 +1,4 @@
+import { DiscoveryRules } from './DiscoveryRules';
 import { ActorProfileRules } from './ActorProfileRules';
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
@@ -158,8 +159,8 @@ export function discovery(items: MediaItem[], signals: MediaItem[], follows: Fol
     const people = (i.People ?? []).filter((p: Person) => p.Type === 'Actor' && followed.has(p.Id));
     const matching = Array.from(new Set((i.Genres ?? []).filter((g: string) => genres.has(genreKey(g)))));
     const names = Array.from(new Set(people.map((p: Person) => p.Name)));
-    return { item: i, actors: names, genres: matching, score: names.length * 4 + matching.length * 2 };
-  }).sort((a: Discovery, b: Discovery) => b.score - a.score || (Date.parse(b.item.DateCreated ?? '') || 0) - (Date.parse(a.item.DateCreated ?? '') || 0) || a.item.Id.localeCompare(b.item.Id)).slice(0, 30);
+    return { item: i, actors: names, genres: matching, score: DiscoveryRules.score(names.length, matching.length) };
+  }).sort((a: Discovery, b: Discovery) => b.score - a.score || (Date.parse(b.item.DateCreated ?? '') || 0) - (Date.parse(a.item.DateCreated ?? '') || 0) || a.item.Id.localeCompare(b.item.Id)).slice(0, DiscoveryRules.maximumResults);
 }
 export function validExperience(value: ExperienceState): boolean {
   if (value?.playerUi !== undefined && !validPlayerOptions(value.playerUi)) { return false; }

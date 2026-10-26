@@ -1,3 +1,4 @@
+import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { TrickplayTransport } from '../api/TrickplayTransport';
 import { BifTransfer } from '../utils/Bif';
 import { IntroTransport } from '../api/IntroTransport';
@@ -144,9 +145,9 @@ export class JellyfinClient {
     return enabled !== false;
   }
 
-  async discoveryCandidates(): Promise<MediaItem[]> {
+  async discoveryCandidates(limit: number = DiscoveryRules.candidateLimit): Promise<MediaItem[]> {
     return (await this.items([{ key: 'IncludeItemTypes', value: 'Movie,Series' }, { key: 'Filters', value: 'IsUnplayed' },
-      { key: 'Limit', value: '200' }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
+      { key: 'Limit', value: String(limit) }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
   }
 
   async libraries(): Promise<MediaItem[]> {
