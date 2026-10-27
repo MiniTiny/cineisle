@@ -166,9 +166,139 @@ module.exports = {
       "id": "numeric-read-observer-remove",
       "phase": "core-integer",
       "file": "tests/native-entry-fixture/ass-timestamp-entry.cpp",
-      "old": "doubleReads.push_back(status); return status;",
+      "old": "doubleReads.push_back({typeStatus, originalType, status}); return status;",
       "replacement": "return status;",
       "status": "detected"
+    }
+  ],
+  "unannouncedControls": [
+    {
+      "suite": "ass-timestamp-contract.test.cjs",
+      "scope": "ass-timestamp",
+      "id": "library-create",
+      "name": "N-API exact timestamp 9007199254740991",
+      "phase": "native-create",
+      "requiredCalls": {
+        "entry": 1
+      },
+      "details": {
+        "libraryFailures": 1,
+        "reads": 0,
+        "numberFailures": 0,
+        "unexpectedNumberFailures": 0,
+        "actualError": "ass_memory_unavailable"
+      },
+      "fault": {
+        "file": "tests/native-entry-fixture/ass-timestamp-engine.cpp",
+        "old": "if (failLibrary) return nullptr;",
+        "replacement": "return nullptr;"
+      },
+      "observer": {
+        "file": "tests/native-entry-fixture/ass-timestamp-engine.cpp",
+        "old": "if (!library) ++libraryFailures;",
+        "replacement": "(void) library;"
+      },
+      "quarantine": {
+        "file": "tests/ass-timestamp-fixture.cjs",
+        "old": "if (state.libraryFailures > 0 || state.unexpectedNumberFailures > 0)",
+        "replacement": "if (false)"
+      },
+      "protection": {
+        "file": "entry/src/main/cpp/ass/NapiAssRenderer.cpp",
+        "old": "Integer(env, args[1], kMaxExactTimestampMs)",
+        "replacement": "Integer(env, args[1], UINT64_MAX)"
+      }
+    },
+    {
+      "suite": "ass-timestamp-contract.test.cjs",
+      "scope": "ass-timestamp",
+      "id": "read-lower",
+      "name": "lower exact timestamp 9007199254740991",
+      "phase": "core-integer",
+      "requiredCalls": {
+        "entry": 1
+      },
+      "details": {
+        "reads": 1,
+        "numberFailures": 1,
+        "unexpectedNumberFailures": 1,
+        "originalNumberReads": 1,
+        "libraryFailures": 0,
+        "actualError": "ass_argument_invalid"
+      },
+      "fault": {
+        "file": "tests/native-entry-fixture/ass-timestamp-entry.cpp",
+        "old": "if (readFailure) napi_get_undefined(env, &value);",
+        "replacement": "napi_get_undefined(env, &value);"
+      },
+      "observer": {
+        "file": "tests/native-entry-fixture/ass-timestamp-entry.cpp",
+        "old": "doubleReads.push_back({typeStatus, originalType, status}); return status;",
+        "replacement": "return status;"
+      },
+      "quarantine": {
+        "file": "tests/ass-timestamp-fixture.cjs",
+        "old": "if (state.libraryFailures > 0 || state.unexpectedNumberFailures > 0)",
+        "replacement": "if (false)"
+      },
+      "protection": {
+        "file": "entry/src/main/cpp/ass/NapiAssRenderer.cpp",
+        "old": "napi_get_value_double(env, value, &number) != napi_ok",
+        "replacement": "(napi_get_value_double(env, value, &number), false)"
+      },
+      "coupledDetails": {
+        "reads": 1,
+        "numberFailures": 1,
+        "unexpectedNumberFailures": 1,
+        "originalNumberReads": 1,
+        "libraryFailures": 0
+      }
+    },
+    {
+      "suite": "ass-timestamp-contract.test.cjs",
+      "scope": "ass-timestamp",
+      "id": "read-N-API",
+      "name": "N-API exact timestamp 9007199254740991",
+      "phase": "native-render",
+      "requiredCalls": {
+        "entry": 1,
+        "native-create": 1
+      },
+      "details": {
+        "reads": 1,
+        "numberFailures": 1,
+        "unexpectedNumberFailures": 1,
+        "originalNumberReads": 1,
+        "libraryFailures": 0,
+        "actualError": "ass_argument_invalid"
+      },
+      "fault": {
+        "file": "tests/native-entry-fixture/ass-timestamp-entry.cpp",
+        "old": "if (readFailure) napi_get_undefined(env, &value);",
+        "replacement": "napi_get_undefined(env, &value);"
+      },
+      "observer": {
+        "file": "tests/native-entry-fixture/ass-timestamp-entry.cpp",
+        "old": "doubleReads.push_back({typeStatus, originalType, status}); return status;",
+        "replacement": "return status;"
+      },
+      "quarantine": {
+        "file": "tests/ass-timestamp-fixture.cjs",
+        "old": "if (state.libraryFailures > 0 || state.unexpectedNumberFailures > 0)",
+        "replacement": "if (false)"
+      },
+      "protection": {
+        "file": "entry/src/main/cpp/ass/NapiAssRenderer.cpp",
+        "old": "napi_get_value_double(env, value, &number) != napi_ok",
+        "replacement": "(napi_get_value_double(env, value, &number), false)"
+      },
+      "coupledDetails": {
+        "reads": 5,
+        "numberFailures": 5,
+        "unexpectedNumberFailures": 5,
+        "originalNumberReads": 5,
+        "libraryFailures": 0
+      }
     }
   ]
 };

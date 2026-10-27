@@ -3,13 +3,19 @@
 #include <vector>
 #include "ass-timestamp-engine.h"
 static bool readFailure = false;
-static std::vector<napi_status> doubleReads;
-static napi_status ObserveDouble(napi_env env, napi_value value, double *number) {
+struct DoubleRead { napi_status typeStatus; napi_valuetype originalType; napi_status status; };
+static std::vector<DoubleRead> doubleReads;
+static napi_status DoubleReadBody(napi_env env, napi_value value, double *number) {
     // Execute a real N-API type failure inside the dependency body. Production
     // still receives/handles the status through its unchanged Integer function.
     if (readFailure) napi_get_undefined(env, &value);
-    const auto status = napi_get_value_double(env, value, number);
-    doubleReads.push_back(status); return status;
+    return napi_get_value_double(env, value, number);
+}
+static napi_status ObserveDouble(napi_env env, napi_value value, double *number) {
+    napi_valuetype originalType = napi_undefined;
+    const auto typeStatus = napi_typeof(env, value, &originalType);
+    const auto status = DoubleReadBody(env, value, number);
+    doubleReads.push_back({typeStatus, originalType, status}); return status;
 }
 static napi_value FixtureInit(napi_env, napi_value);
 static void FixtureRegister(napi_module *original) {
@@ -42,7 +48,11 @@ napi_value TimestampState(napi_env env, napi_callback_info) {
     Check(napi_set_named_property(env, out, "times", times));
     Number(env, out, "libraryFailures", ass_timestamp_fixture::LibraryFailures());
     Number(env, out, "reads", uint32_t(doubleReads.size()));
-    Number(env, out, "numberFailures", uint32_t(std::count(doubleReads.begin(), doubleReads.end(), napi_number_expected)));
+    Number(env, out, "numberFailures", uint32_t(std::count_if(doubleReads.begin(), doubleReads.end(), [](const auto &r) { return r.status == napi_number_expected; })));
+    Number(env, out, "originalNumberReads", uint32_t(std::count_if(doubleReads.begin(), doubleReads.end(), [](const auto &r) { return r.originalType == napi_number; })));
+    Number(env, out, "unexpectedNumberFailures", uint32_t(std::count_if(doubleReads.begin(), doubleReads.end(), [](const auto &r) {
+        return r.typeStatus != napi_ok || (r.status != napi_ok && (r.originalType == napi_number || r.status != napi_number_expected));
+    })));
     return out;
 }
 }

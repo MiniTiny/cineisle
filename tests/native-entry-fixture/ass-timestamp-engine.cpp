@@ -11,6 +11,10 @@ std::mutex timestampMutex;
 bool failLibrary = false;
 unsigned libraryFailures = 0;
 std::vector<long long> renderTimes;
+ASS_Library *LibraryInitBody() {
+    if (failLibrary) return nullptr;
+    return OriginalAssLibraryInit();
+}
 }
 namespace ass_timestamp_fixture {
 void Configure(bool fail) { std::lock_guard<std::mutex> lock(timestampMutex); failLibrary = fail; libraryFailures = 0; renderTimes.clear(); }
@@ -20,8 +24,9 @@ unsigned LibraryFailures() { std::lock_guard<std::mutex> lock(timestampMutex); r
 extern "C" {
 ASS_Library *ass_library_init(void) {
     std::lock_guard<std::mutex> lock(timestampMutex);
-    if (failLibrary) { ++libraryFailures; return nullptr; }
-    return OriginalAssLibraryInit();
+    auto *library = LibraryInitBody();
+    if (!library) ++libraryFailures;
+    return library;
 }
 ASS_Image *ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, long long time, int *changed) {
     { std::lock_guard<std::mutex> lock(timestampMutex); renderTimes.push_back(time); }

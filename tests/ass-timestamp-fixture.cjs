@@ -6,11 +6,12 @@ exports.make = () => {
     let result;
     try { result = { value: await operation() }; } catch (error) { result = { error: error.message }; }
     const state = n.timestampState();
-    Object.assign(details, { reads: state.reads, numberFailures: state.numberFailures, libraryFailures: state.libraryFailures, actualError: result.error || '' });
-    if ((initFailure && state.libraryFailures > 0) || (readFailure && state.numberFailures > 0)) {
+    Object.assign(details, { reads: state.reads, numberFailures: state.numberFailures, unexpectedNumberFailures: state.unexpectedNumberFailures,
+      originalNumberReads: state.originalNumberReads, libraryFailures: state.libraryFailures, actualError: result.error || '' });
+    if (state.libraryFailures > 0 || state.unexpectedNumberFailures > 0) {
       // The independent API body observation remains invalid even if a product
       // guard is removed and the unrelated dependency failure is swallowed.
-      throw Object.assign(Error('actual ASS API failure: ' + (result.error || 'status swallowed')), { code: 'EIO', contractInjected: true });
+      throw Object.assign(Error('actual ASS API failure: ' + (result.error || 'status swallowed')), { code: 'EIO', contractInjected: initFailure || readFailure });
     }
     return result;
   };
