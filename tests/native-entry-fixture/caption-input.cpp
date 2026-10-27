@@ -3,11 +3,19 @@
 namespace drawing_layout_fixture { void Configure(bool, bool); unsigned Calls(); unsigned Failures(); unsigned StyleCalls(); unsigned StyleFailures(); }
 static bool failRead = false;
 static unsigned invalidReads = 0;
+static unsigned unexpectedNumberFailures = 0, originalNumberReads = 0;
 static std::vector<double> readValues;
-static napi_status ObserveCaptionNumber(napi_env env, napi_value value, double *number) {
+static napi_status CaptionNumberBody(napi_env env, napi_value value, double *number) {
     if (failRead) napi_get_undefined(env, &value);
-    const auto status = napi_get_value_double(env, value, number);
+    return napi_get_value_double(env, value, number);
+}
+static napi_status ObserveCaptionNumber(napi_env env, napi_value value, double *number) {
+    napi_valuetype originalType = napi_undefined;
+    const auto typeStatus = napi_typeof(env, value, &originalType);
+    const auto status = CaptionNumberBody(env, value, number);
+    if (originalType == napi_number) ++originalNumberReads;
     if (status == napi_number_expected) ++invalidReads;
+    if (typeStatus != napi_ok || (status != napi_ok && (originalType == napi_number || status != napi_number_expected))) ++unexpectedNumberFailures;
     if (status == napi_ok) readValues.push_back(*number);
     return status;
 }
@@ -21,7 +29,8 @@ napi_value ConfigureCaptionInput(napi_env env, napi_callback_info info) {
     if (count > 1) Check(napi_get_value_bool(env, args[1], &failFont));
     if (count > 2) Check(napi_get_value_bool(env, args[2], &failStyle));
     drawing_layout_fixture::Configure(failFont, failStyle);
-    invalidReads = 0; readValues.clear(); Check(napi_get_undefined(env, &out)); return out;
+    invalidReads = 0; unexpectedNumberFailures = 0; originalNumberReads = 0;
+    readValues.clear(); Check(napi_get_undefined(env, &out)); return out;
 }
 napi_value ReadCaptionInput(napi_env env, napi_callback_info info) {
     try {
@@ -31,6 +40,8 @@ napi_value ReadCaptionInput(napi_env env, napi_callback_info info) {
 }
 napi_value CaptionInputState(napi_env env, napi_callback_info) {
     napi_value out, failed; Check(napi_create_object(env, &out)); Check(napi_create_uint32(env, invalidReads, &failed)); Check(napi_set_named_property(env, out, "invalidReads", failed));
+    Check(napi_create_uint32(env, unexpectedNumberFailures, &failed)); Check(napi_set_named_property(env, out, "unexpectedNumberFailures", failed));
+    Check(napi_create_uint32(env, originalNumberReads, &failed)); Check(napi_set_named_property(env, out, "originalNumberReads", failed));
     napi_value values; Check(napi_create_array_with_length(env, readValues.size(), &values));
     for (size_t i = 0; i < readValues.size(); ++i) { napi_value value; Check(napi_create_double(env, readValues[i], &value)); Check(napi_set_element(env, values, i, value)); }
     Check(napi_set_named_property(env, out, "readValues", values));

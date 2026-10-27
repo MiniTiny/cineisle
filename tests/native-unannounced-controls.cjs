@@ -55,8 +55,14 @@ function run(kind, output = path.join(root, process.env.CINEISLE_TEST_OUTPUT_DIR
           mutate(recipe, () => {
             const sample = child(control, control.id + '-' + name + '-removed');
             assert.equal(sample.result.status, control.selfStatus?.[name] || 'detected');
+            let counterProof;
+            if (sample.result.status === 'invalid') {
+              const expected = control.selfProof?.[name];
+              assert.ok(expected, 'Missing independent checkpoint for invalid self-fault');
+              counterProof = invalid(sample, { ...control, ...expected }, { ...control.details, ...expected.details });
+            }
             assert.throws(() => invalid(sample, control), { code: 'ERR_ASSERTION' });
-            evidence.selfFaults.push({ id: control.id, kind: name, rejected: true, result: sample.result }); save();
+            evidence.selfFaults.push({ id: control.id, kind: name, rejected: true, result: sample.result, counterProof }); save();
           });
         }
         if (control.protection) mutate(control.protection, () => {
