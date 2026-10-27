@@ -5,8 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
-const sdk = process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents';
-const loader = path.join(sdk, 'sdk/default/openharmony/ets/build-tools/ets-loader');
+const sdk = require('./deveco-runtime.cjs').contents;
+const loader = require('./deveco-runtime.cjs').etsLoader;
 const ts = require(path.join(loader, 'node_modules/typescript'));
 const ui = require(path.join(loader, 'lib/process_ui_syntax'));
 const main = require(path.join(loader, 'main'));
@@ -94,7 +94,9 @@ function fixture(code) {
     if (typeof render === 'function' && !renderingListItem) { renderingListItem = true; try { render(active.id, true); } finally { renderingListItem = false; } }
   } : () => {} });
   const pe={exports:{},require:()=>({}),$r:id=>({id})};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,'entry/src/main/ets/utils/UiPalette.ets'),'utf8'),{compilerOptions:options}).outputText,pe);
-  const context = { UiPalette:pe.exports.UiPalette, UiLayout: require('./ui-layout-fixture.cjs').UiLayout, ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Column:component, Row: component, Flex:component, Button: component, Checkbox: component, Grid: component, GridItem: gridItem, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
+  const navigation = { exports: {} };
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root, 'entry/src/main/ets/utils/Navigation.ts'), 'utf8'), { compilerOptions: options }).outputText, navigation);
+  const context = { ...navigation.exports, UiPalette:pe.exports.UiPalette, UiLayout: require('./ui-layout-fixture.cjs').UiLayout, ViewStackProcessor: component, __Common__: component, ViewPU: View, ObservedPropertyObjectPU: Observed, ObservedObject: { GetRawObject: value => value }, Column:component, Row: component, Flex:component, Button: component, Checkbox: component, Grid: component, GridItem: gridItem, ForEach: component, List: component, ListItem: listItem, Text: component, If: component,
     HorizontalAlign:{Start:1},FlexWrap: { Wrap:1 }, TextOverflow:{Clip:2,Ellipsis:1},ButtonType:{Normal:1},FontWeight:{Medium:500},FlexAlign:{Center:1,SpaceBetween:2},TextAlign:{Start:1},HitTestMode:{None:1},Image:component, Axis: { Horizontal: 0 }, BarState: { Off: 0 }, ObservedPropertySimplePU: Observed, $r: id => ({ id }),
     MediaCard: class { constructor(parent, params) { this.item = params.item; } },
     BrandState: class {constructor(parent,params){}}, DetailAction: class {constructor(parent,params){}}, BrandButton: class { constructor(parent, params) {} }, BrandHeading: class { constructor(parent, params) {} },

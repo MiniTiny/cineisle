@@ -11,7 +11,9 @@ export class UiPalette {
   muted: ResourceColor = $r('app.color.brand_muted');
   warm: ResourceColor = $r('app.color.brand_warm');
   danger: ResourceColor = $r('app.color.brand_danger');
+  foreground: ResourceColor = '#F2F3FA';
   onAction: ResourceColor = '#F2F3FA';
+  amoledBackground: ResourceColor = '#000000';
   // API 12 SVG colorFilter tints strokes without filling the original outline geometry.
   filter(color?: ResourceColor): ColorFilter | undefined {
     if (!this.dynamic || typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) { return undefined; }

@@ -7,6 +7,7 @@ export class CaptionRenderLimits {
   static readonly maxSimultaneousRunWeight: number = 4096;
   static readonly maxPositionedCues: number = 256;
   static readonly maxLines: number = 1000;
+  static readonly maximumExplicitFontScale: number = 3;
   static readonly maxRasterPixels: number = 1920 * 1080;
 }
 

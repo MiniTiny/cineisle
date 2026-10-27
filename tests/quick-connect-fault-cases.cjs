@@ -1,0 +1,13 @@
+const controller='entry/src/main/ets/service/QuickConnectLogin.ets',page='entry/src/main/ets/pages/Accounts.ets',suite='quick-connect-contract.test.cjs',recipes=[];
+const add=(id,file,old,replacement,name)=>recipes.push({id,file,old,replacement,name,suite});
+for(const delta of [-1,1])add('validity-'+delta,controller,'validityMs: number = 5 * 60 * 1000;',`validityMs: number = 5 * 60 * 1000 ${delta<0?'-':'+'} 1;`,'quick connect expiry '+(delta<0?299999:300000));
+for(const delta of [-1,1])add('cadence-'+delta,controller,'pollIntervalMs: number = 5000;',`pollIntervalMs: number = ${5000+delta};`,'quick connect cadence '+(delta<0?4999:5000));
+add('expiry-remove',controller,'if (Date.now() >= this.expires)','if (false)','quick connect expiry 300000');
+add('expiry-comparison',controller,'Date.now() >= this.expires','Date.now() > this.expires','quick connect expiry 300000');
+add('cadence-remove',controller,'Date.now() - this.lastPoll < QuickConnectLogin.pollIntervalMs','false','quick connect cadence 4999');
+add('cadence-comparison',controller,'Date.now() - this.lastPoll < QuickConnectLogin.pollIntervalMs','Date.now() - this.lastPoll <= QuickConnectLogin.pollIntervalMs','quick connect cadence 5000');
+add('checking-remove',controller,'this.checking || ','','quick connect in-flight polling and cancellation');
+add('epoch-sentinel',controller,'this.lastPoll && Date.now() - this.lastPoll','Date.now() - this.lastPoll','quick connect epoch zero sentinel stays compatible');
+add('page-actual-cadence',page,'this.checkQuick(), QuickConnectLogin.pollIntervalMs','this.checkQuick(), 5001','quick connect actual page scheduling and expiry display');
+const controls=[{name:'quick connect expiry 300000',phase:'version',requiredCalls:{'http-create':1}},{name:'quick connect expiry 300000',phase:'http-create',nativeInit:true},{name:'quick connect cadence 5000',phase:'http-create',nativeInit:4,requiredCalls:{version:1,request:2}},{name:'quick connect cadence 5000',phase:'quick-state',requiredCalls:{version:1,request:2}},{name:'quick connect expiry 300000',phase:'setup'}].map(c=>({...c,scope:'quick-connect',suite}));
+module.exports={recipes,controls,scope:'quick-connect',fixture:'tests/resource-timeout-fixture.cjs',earlyPhase:'quick-state',earlyOld:'await test.action(check,time);',earlyReplacement:"f.trace().call('quick-state',()=>{}); await test.action(check,time);",selfFaults:[{id:'native-init-capture',phase:'http-create',file:'tests/catalog-contract-fixture.cjs',old:"trace.call('http-create',()=>{",replacement:"((phase,operation)=>operation())('http-create',()=>{"}]};

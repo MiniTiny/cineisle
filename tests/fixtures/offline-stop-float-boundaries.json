@@ -1,0 +1,37 @@
+{
+  "baseline": "225fba7cb5ad68865986a96e4b62d883c1d987a0",
+  "expression": "position.div(duration.toFloat()).times(100).toInt()",
+  "compiler": "Kotlin2.0.0 JVM17",
+  "oracleSource": "OfflineStopOracle.kt",
+  "oracleSourceSha256": "8dac5852f410692f8a757c0103d3034d1ad8e8dcbf7eaaa8a4deb7db392e1e3b",
+  "columns": [
+    "positionMs",
+    "durationMs",
+    "integerPercentage",
+    "savedPositionMs",
+    "played"
+  ],
+  "cases": [
+    [
+      338813,
+      372322,
+      91,
+      0,
+      true
+    ],
+    [
+      15268237,
+      16778283,
+      90,
+      15268237,
+      false
+    ],
+    [
+      16802769,
+      18464582,
+      90,
+      16802769,
+      false
+    ]
+  ]
+}

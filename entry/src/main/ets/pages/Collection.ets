@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import router from '@ohos.router';
 import { AppService } from '../service/AppService';
@@ -57,7 +58,7 @@ struct Collection {
       if (this.alive && revision === this.revision && client === AppService.client) { this.items = []; this.message = errorText(e as Error); }
     } finally { if (this.alive && revision === this.revision) { this.busy = false; } }
   }
-  private open(item: MediaItem): void { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
+  private open(item: MediaItem): void { router.pushUrl({ url: AppRoutes.detail, params: { item: item } }); }
   private label(type: string): Resource { return type === 'Movie' ? $r('app.string.media_movie') : type === 'Series' ? $r('app.string.media_series') : $r('app.string.media_episode'); }
   build() {
     Column({ space: 12 }) {
@@ -88,7 +89,7 @@ struct Collection {
           }
         }.columnsTemplate(UiLayout.columns(this.viewportWidth, this.fontScale)).columnsGap(12).rowsGap(20).width('100%').layoutWeight(1)
       }
-    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+    }.padding(16).width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       .onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); })
   }
 }

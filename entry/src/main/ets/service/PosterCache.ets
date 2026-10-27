@@ -18,6 +18,9 @@ class Job {
 
 // One UI-process cache, shared quota and opaque keys. No URL, token or account metadata is persisted.
 export class PosterCache {
+  // Literal StorageLink subscribers are checked against this publisher contract.
+  private static readonly revisionStateKey: string = 'cineIslePosterRevision';
+
   private static readonly storeName: string = 'poster_options';
   private static readonly valueKey: string = 'settings_v1';
   private static readonly maxEntries: number = 512;
@@ -114,7 +117,7 @@ export class PosterCache {
     ++this.epoch;
     this.jobs.forEach((job: Job) => { job.transfer?.cancel(); job.reject(new Error('poster_cancelled')); });
     this.jobs.clear(); this.queue = [];
-    if (notify) { AppStorage.setOrCreate('cineIslePosterRevision', this.epoch); }
+    if (notify) { AppStorage.setOrCreate(PosterCache.revisionStateKey, this.epoch); }
   }
   request(account: string, target: PosterTarget, fetch: (allowed: () => boolean) => PosterTransfer, online: () => boolean, allowed: () => boolean): PosterTicket {
     const lease: Lease = { active: true, allowed: allowed, online: online, fetch: fetch }; let detach: () => void = () => {};

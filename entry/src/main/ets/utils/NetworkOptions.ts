@@ -5,9 +5,19 @@ export class NetworkOptions {
   readMs: number = 10000;
   autoCache: boolean = true;
 }
+// User-selectable API timeout range and whole-second granularity.
+export class NetworkOptionRules {
+  static readonly minimumTimeoutMs: number = 1000;
+  static readonly maximumTimeoutMs: number = 120000;
+  static readonly timeoutStepMs: number = 1000;
+  static timeoutInRange(value: number): boolean {
+    return Number.isInteger(value) && value >= NetworkOptionRules.minimumTimeoutMs && value <= NetworkOptionRules.maximumTimeoutMs;
+  }
+  static timeoutOnStep(value: number): boolean { return value % NetworkOptionRules.timeoutStepMs === 0; }
+}
 export function validNetworkOptions(value: NetworkOptions): boolean {
   return !!value && typeof value.autoCache === 'boolean' && [value.requestMs, value.connectMs, value.readMs]
-    .every((n: number) => Number.isInteger(n) && n >= 1000 && n <= 120000 && n % 1000 === 0);
+    .every((n: number) => NetworkOptionRules.timeoutInRange(n) && NetworkOptionRules.timeoutOnStep(n));
 }
 export function copyNetworkOptions(value: NetworkOptions): NetworkOptions {
   return { requestMs: value.requestMs, connectMs: value.connectMs, readMs: value.readMs, autoCache: value.autoCache };

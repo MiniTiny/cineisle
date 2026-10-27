@@ -1,3 +1,4 @@
+import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { TrickplayTransport } from '../api/TrickplayTransport';
 import { BifTransfer } from '../utils/Bif';
 import { IntroTransport } from '../api/IntroTransport';
@@ -6,7 +7,9 @@ import util from '@ohos.util';
 import { ItemsResult, MediaItem, PlaybackInfo, QueryParam, Session } from '../model/Models';
 import { addresses } from '../utils/Accounts';
 import { deviceNameValue } from '../utils/DeviceOptions';
-import { normalizeServer, playedRecommendations, secondsToTicks } from '../utils/Protocol';
+import { normalizeServer, secondsToTicks } from '../utils/Protocol';
+import { RewatchRecommendations } from './RewatchRecommendations';
+import { HomeFeedRequests, NextUpRequests, EpisodeQueueRequests } from '../utils/FeedRequests';
 import { NativeHttpTransport } from '../api/NativeHttpTransport';
 import { PosterTransport } from '../api/PosterTransport';
 import { PosterTarget, PosterTransfer } from '../utils/PosterOptions';
@@ -18,6 +21,12 @@ export interface PublicUser { id: string; name: string }
 
 // Core wire operations use pinned OpenAPI; optional plugin adapters keep their own explicit contracts.
 export class JellyfinClient {
+  private static readonly maximumPublicUsers: number = 1000;
+  private static readonly maximumPublicNameCodeUnits: number = 256;
+  private static readonly maximumDeviceResponseNameCodeUnits: number = 1024;
+  private static readonly defaultPrimaryImageWidthPx: number = 360;
+  private static readonly defaultBackdropImageWidthPx: number = 960;
+  private static readonly defaultImageQuality: number = 85;
   session: Session;
   private transport: NativeHttpTransport;
   private api: JellyfinApi;
@@ -64,7 +73,7 @@ export class JellyfinClient {
     const id = this.session.deviceId; await this.ready(); this.deviceAdmission(id, permit);
     const value = await this.api.getDeviceOptions({ id: id });
     if (!value || typeof value !== 'object' || Array.isArray(value) || (value.DeviceId != null && value.DeviceId !== id) ||
-      (value.CustomName != null && (typeof value.CustomName !== 'string' || value.CustomName.length > 1024 || /[\u0000-\u001f\u007f]/.test(value.CustomName)))) { throw new Error('api_response_invalid'); }
+      (value.CustomName != null && (typeof value.CustomName !== 'string' || value.CustomName.length > JellyfinClient.maximumDeviceResponseNameCodeUnits || /[\u0000-\u001f\u007f]/.test(value.CustomName)))) { throw new Error('api_response_invalid'); }
     return value.CustomName ?? '';
   }
   async updateDeviceName(name: string, permit: () => boolean): Promise<void> {
@@ -110,11 +119,11 @@ export class JellyfinClient {
   async publicUsers(): Promise<PublicUser[]> {
     if (this.session.token) { throw new Error('api_session_invalid'); }
     const users = await this.api.getPublicUsers();
-    if (!Array.isArray(users) || users.length > 1000) { throw new Error('public_users_invalid'); }
+    if (!Array.isArray(users) || users.length > JellyfinClient.maximumPublicUsers) { throw new Error('public_users_invalid'); }
     const result: PublicUser[] = [];
     for (const user of users) {
       if (typeof user?.Id !== 'string' || !/^[a-zA-Z0-9-]+$/.test(user.Id) || typeof user.Name !== 'string' ||
-        !user.Name.trim() || user.Name.length > 256 || (user.ServerId != null && user.ServerId !== this.session.serverId)) { throw new Error('public_users_invalid'); }
+        !user.Name.trim() || user.Name.length > JellyfinClient.maximumPublicNameCodeUnits || (user.ServerId != null && user.ServerId !== this.session.serverId)) { throw new Error('public_users_invalid'); }
       if (!result.some((value: PublicUser) => value.id === user.Id)) { result.push({ id: user.Id, name: user.Name }); }
     }
     return result;
@@ -142,9 +151,9 @@ export class JellyfinClient {
     return enabled !== false;
   }
 
-  async discoveryCandidates(): Promise<MediaItem[]> {
+  async discoveryCandidates(limit: number = DiscoveryRules.candidateLimit): Promise<MediaItem[]> {
     return (await this.items([{ key: 'IncludeItemTypes', value: 'Movie,Series' }, { key: 'Filters', value: 'IsUnplayed' },
-      { key: 'Limit', value: '200' }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
+      { key: 'Limit', value: String(limit) }, { key: 'SortBy', value: 'DateCreated' }, { key: 'SortOrder', value: 'Descending' }])).Items;
   }
 
   async libraries(): Promise<MediaItem[]> {
@@ -169,37 +178,38 @@ export class JellyfinClient {
     return mediaItem(await this.api.getItem({ itemId: id, userId: this.session.userId }));
   }
 
-  async resume(): Promise<MediaItem[]> {
+  async resume(limit: number = HomeFeedRequests.resumeLimit): Promise<MediaItem[]> {
     await this.ready();
-    const result = await this.api.getResumeItems({ userId: this.session.userId, limit: 20, mediaTypes: [MediaType.Video] });
+    const result = await this.api.getResumeItems({ userId: this.session.userId, limit: limit, mediaTypes: [MediaType.Video] });
     return listItems(result);
   }
 
-  async latest(parentId: string = ''): Promise<MediaItem[]> {
+  async latest(parentId: string = '', limit: number = HomeFeedRequests.latestLimit(parentId)): Promise<MediaItem[]> {
     await this.ready();
-    return mediaItems(await this.api.getLatestMedia({ userId: this.session.userId, parentId: parentId || undefined, limit: parentId ? 12 : 30, includeItemTypes: parentId ? undefined : [BaseItemKind.Movie, BaseItemKind.Series], enableUserData: true }));
+    return mediaItems(await this.api.getLatestMedia({ userId: this.session.userId, parentId: parentId || undefined, limit: limit, includeItemTypes: parentId ? undefined : [BaseItemKind.Movie, BaseItemKind.Series], enableUserData: true }));
   }
 
-  async nextUp(seriesId: string = ''): Promise<MediaItem[]> {
+  async nextUp(seriesId: string = '', limit: number = NextUpRequests.limit(seriesId)): Promise<MediaItem[]> {
     await this.ready();
-    return listItems(await this.api.getNextUp({ userId: this.session.userId, seriesId: seriesId || undefined, limit: seriesId ? 1 : 9, enableUserData: true }));
+    return listItems(await this.api.getNextUp({ userId: this.session.userId, seriesId: seriesId || undefined, limit: limit, enableUserData: true }));
   }
 
   async recommend(): Promise<MediaItem[]> {
     await this.ready();
-    const candidates: MediaItem[] = [];
-    try {
-      const groups = await this.api.getMovieRecommendations({ userId: this.session.userId, categoryLimit: 5, itemLimit: 8, fields: [ItemFields.People] });
-      if (!Array.isArray(groups)) { throw new Error('api_response_invalid'); }
-      groups.forEach((group: RecommendationDto) => candidates.push(...mediaItems(group?.Items ?? [])));
-    } catch (e) {
-      // Recommendation plugins are optional; fallback still requires a successful media request.
-      candidates.length = 0;
-    }
-    if (candidates.some((item: MediaItem) => item.UserData?.Played === true)) { return playedRecommendations(candidates, []); }
-    const fallback = await this.items([{ key: 'IncludeItemTypes', value: 'Movie' }, { key: 'IsPlayed', value: 'true' },
-      { key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: '100' }]);
-    return playedRecommendations([], fallback.Items ?? []);
+    return RewatchRecommendations.load({
+      recommendations: async (categoryLimit: number, itemLimit: number): Promise<MediaItem[]> => {
+        const groups = await this.api.getMovieRecommendations({ userId: this.session.userId, categoryLimit: categoryLimit, itemLimit: itemLimit, fields: [ItemFields.People] });
+        if (!Array.isArray(groups)) { throw new Error('api_response_invalid'); }
+        const candidates: MediaItem[] = [];
+        groups.forEach((group: RecommendationDto) => candidates.push(...mediaItems(group?.Items ?? [])));
+        return candidates;
+      },
+      watchedMovies: async (limit: number): Promise<MediaItem[]> => {
+        const fallback = await this.items([{ key: 'IncludeItemTypes', value: 'Movie' }, { key: 'IsPlayed', value: 'true' },
+          { key: 'SortBy', value: 'DatePlayed' }, { key: 'SortOrder', value: 'Descending' }, { key: 'Limit', value: String(limit) }]);
+        return fallback.Items ?? [];
+      }
+    });
   }
 
   async children(item: MediaItem): Promise<MediaItem[]> {
@@ -229,9 +239,9 @@ export class JellyfinClient {
 
   image(id: string, tag: string = '', backdrop: boolean = false): string {
     if (backdrop) {
-      return this.api.getItemImageByIndexUrl({ itemId: id, imageType: ImageType.Backdrop, imageIndex: 0, maxWidth: 960, quality: 85, tag: tag || undefined });
+      return this.api.getItemImageByIndexUrl({ itemId: id, imageType: ImageType.Backdrop, imageIndex: 0, maxWidth: JellyfinClient.defaultBackdropImageWidthPx, quality: JellyfinClient.defaultImageQuality, tag: tag || undefined });
     }
-    return this.api.getItemImageUrl({ itemId: id, imageType: ImageType.Primary, maxWidth: 360, quality: 85, tag: tag || undefined });
+    return this.api.getItemImageUrl({ itemId: id, imageType: ImageType.Primary, maxWidth: JellyfinClient.defaultPrimaryImageWidthPx, quality: JellyfinClient.defaultImageQuality, tag: tag || undefined });
   }
 
   poster(target: PosterTarget, allowed: () => boolean): PosterTransfer { return new PosterTransport(this.session).fetch(target, allowed); }
@@ -243,7 +253,7 @@ export class JellyfinClient {
 
   async episodePage(seriesId: string, start: number): Promise<ItemsResult> {
     await this.ready();
-    return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: 200 }));
+    return itemPage(await this.api.getEpisodes({ seriesId: seriesId, userId: this.session.userId, fields: [ItemFields.MediaSources], isMissing: false, startIndex: start, limit: EpisodeQueueRequests.pageItems }));
   }
 
   async subtitle(id: string, sourceId: string, index: number, transfer?: ApiTransport, format: string = 'srt'): Promise<string> {

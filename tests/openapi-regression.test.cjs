@@ -8,7 +8,7 @@ const { spawnSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 const sourceRoot = path.join(root, 'entry/src/main/ets');
-const ts = require(path.join(process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents', 'tools/hvigor/hvigor/node_modules/typescript'));
+const ts = require(path.join(require('./deveco-runtime.cjs').contents, 'tools/hvigor/hvigor/node_modules/typescript'));
 const cache = new Map(), queue = [], requests = [];
 let destroyed = 0;
 const platform = new Map([

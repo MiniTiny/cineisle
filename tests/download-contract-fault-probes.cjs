@@ -7,7 +7,7 @@ function fingerprint(base) {
   const out = {}, walk = relative => { for (const e of fs.readdirSync(path.join(base, relative), { withFileTypes: true })) {
     const name = path.join(relative, e.name); if (e.isDirectory()) walk(name); else if (e.isFile()) out[name] = crypto.createHash('sha256').update(fs.readFileSync(path.join(base, name))).digest('hex');
   } };
-  for (const scope of ['entry/src/main/ets', 'tests']) walk(scope); return out;
+  for (const scope of ['entry/src/main/ets', 'tests', 'config']) walk(scope); return out;
 }
 function run(kind, output = path.join(root, '.local/test-results/download-' + kind + '-probes')) {
   assert.ok(['space', 'queue', 'persistent', 'metadata'].includes(kind));
@@ -20,7 +20,7 @@ function run(kind, output = path.join(root, '.local/test-results/download-' + ki
   const child = (suite, name, phase, ioStage) => spawnSync(process.execPath, [path.join(temp, 'tests', suite), name, ...(phase ? ['--fault=' + phase] : []), ...(ioStage ? ['--io-stage=' + ioStage] : [])], { cwd: temp, encoding: 'utf8', timeout: 20000, maxBuffer: 2 * 1024 * 1024 });
   const selfChild = (name, flag) => spawnSync(process.execPath, [path.join(temp, 'tests/download-contract-probe-controls.test.cjs'), '--classifier-only', name, ...(flag ? [flag] : [])], { cwd: temp, encoding: 'utf8', timeout: 10000 });
   try {
-    for (const scope of ['entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
+    for (const scope of ['entry/src/main/ets', 'tests', 'config']) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     const baselines = new Set();
     for (const c of controls) {
       const positive = child(c.suite, c.name, '', c.ioStage), negative = child(c.suite, c.name, c.phase, c.ioStage);

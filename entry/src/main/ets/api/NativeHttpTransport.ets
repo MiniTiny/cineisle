@@ -10,10 +10,18 @@ import { ProductIdentity } from '../utils/ProductIdentity';
 import { NetworkOptions, NetworkPolicy } from '../utils/NetworkOptions';
 import { AppFailure, endpointRecoveryFailure } from '../utils/Failures';
 
+// Shared by response decoding, outgoing JSON validation, and recovery identity checks.
+class NativeJsonLimits {
+  static readonly maximumValidationDepth: number = 128;
+}
+
 class HttpFailure extends AppFailure {
   constructor(status: number) { super('http_failed', 'response', text('http_failed', status), [status], status); }
 }
 // The generated client owns wire routes/types; this adapter owns native HTTP and credentials.
+const minimumNativeNetworkErrorCode: number = 2300000;
+const exclusiveNativeNetworkErrorCodeLimit: number = 2400000;
+
 export class NativeHttpTransport implements ApiTransport {
   private session: Session;
   private recovery: Promise<string> | undefined = undefined;
@@ -114,7 +122,7 @@ export class NativeHttpTransport implements ApiTransport {
       return response.result;
     } catch (e) {
       const code = (e as BusinessError).code;
-      if (code !== undefined && code >= 2300000 && code < 2400000) { throw new AppFailure('network_failed', 'network'); }
+      if (code !== undefined && code >= minimumNativeNetworkErrorCode && code < exclusiveNativeNetworkErrorCodeLimit) { throw new AppFailure('network_failed', 'network'); }
       throw e as Error;
     } finally { connection.destroy(); }
   }
@@ -139,7 +147,7 @@ function parseJson(source: string): Object | null {
 }
 
 function validateNumbers(value: Object | null, depth: number): void {
-  if (depth > 128) { throw new Error('api_response_invalid'); }
+  if (depth > NativeJsonLimits.maximumValidationDepth) { throw new Error('api_response_invalid'); }
   if (typeof value === 'number') {
     const number = value as number;
     if (!Number.isFinite(number) || (Number.isInteger(number) && !Number.isSafeInteger(number))) { throw new Error('api_numeric_range'); }

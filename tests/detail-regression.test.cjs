@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
-const sdk = process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents';
+const sdk = require('./deveco-runtime.cjs').contents;
 const ts = require(path.join(sdk, 'tools/hvigor/hvigor/node_modules/typescript'));
 const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-regression-'));
@@ -40,7 +40,7 @@ platform.set('@ohos.util', { generateRandomUUID: () => require('node:crypto').ra
   TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } },
   TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 platform.set('@ohos.security.asset', { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return', ACCESSIBILITY: 'access', CONFLICT_RESOLUTION: 'conflict' },
-  ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
+  ErrorCode: { NOT_FOUND: 24000002 }, ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
   query: async attrs => new TextDecoder().decode(attrs.get('alias')) === 'cineisle.app.lock.v1' ? [] : assetValue ? [new Map([['secret', assetValue]])] : [],
   add: async attrs => { assetValue = attrs.get('secret'); }, remove: async () => { assetValue = undefined; } });
 platform.set('@ohos.net.http', { RequestMethod: { GET: 'GET', POST: 'POST', DELETE: 'DELETE' }, HttpDataType: { STRING: 'STRING' },

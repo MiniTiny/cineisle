@@ -1,3 +1,10 @@
+import { MainTab, persistedTabs } from './Navigation';
+import { SearchHistoryRules } from './SearchHistory';
+import { favoriteCategories, favoriteOrders, FavoriteChoice, defaultFavoriteCategory, defaultFavoriteOrder } from './FavoriteOptions';
+import { librarySortFields } from './Browse';
+import { actorOrders, ActorOrderChoice, defaultActorOrder } from './ActorOrder';
+import { DiscoveryRules } from './DiscoveryRules';
+import { ActorProfileRules } from './ActorProfileRules';
 import { MediaItem, Person, UserData } from '../model/Models';
 import { PlayerOptions, validPlayerOptions } from './PlayerOptions';
 export { connectionFailure, authorizationFailure } from './Failures';
@@ -19,9 +26,9 @@ export class ExperienceState {
   serverAutoNext?: boolean;
   version: number = 1;
   searches: string[] = [];
-  tab: number = 1;
+  tab: number = MainTab.Home;
   offline: boolean = false;
-  actorOrder: string = 'playCount';
+  actorOrder: string = defaultActorOrder;
   showTags: boolean = true;
   followedOnly: boolean = false;
   follows: Follow[] = [];
@@ -29,11 +36,11 @@ export class ExperienceState {
   positions: PendingPosition[] = [];
   sourcePreference: string = '';
   rememberDownloadSource: boolean = true;
-  favoriteCategory: string = '';
+  favoriteCategory: string = defaultFavoriteCategory;
   favoriteGenre: string = '';
   favoriteQuery: string = '';
   favoriteUnwatched: boolean = false;
-  favoriteOrder: string = 'name';
+  favoriteOrder: string = defaultFavoriteOrder;
 }
 export interface ActorTag { key: string; title: string; theme: boolean; works: MediaItem[] }
 export interface ActorProfile {
@@ -106,9 +113,9 @@ export function actorProfiles(items: MediaItem[], follows: Follow[] = []): Actor
       });
       themes.forEach((rule: ThemeRule) => { if (rule.expression.test(work.Overview ?? '')) { add('theme:' + rule.key, rule.key, true); } });
     });
-    const minimum = Math.max(3, Math.ceil(actor.works.length * 0.35));
+    const minimum = ActorProfileRules.minimumSupport(actor.works.length);
     actor.tags = Array.from(supporting.values()).filter((tag: ActorTag) => tag.works.length >= minimum)
-      .sort((a: ActorTag, b: ActorTag) => b.works.length - a.works.length || a.key.localeCompare(b.key)).slice(0, 5);
+      .sort((a: ActorTag, b: ActorTag) => b.works.length - a.works.length || a.key.localeCompare(b.key)).slice(0, ActorProfileRules.maximumTags);
     const follow = follows.find((f: Follow) => f.id === actor.person.Id); actor.followed = !!follow;
     actor.newCount = follow ? actor.works.filter((w: MediaItem) => !follow.acknowledged.includes(w.Id)).length : 0;
   });
@@ -121,7 +128,7 @@ export function sortActors(actors: ActorProfile[], order: string, query: string,
       case 'unplayed': return actor.unplayed;
       case 'works': return actor.works.length;
       case 'recent': return actor.lastViewed;
-      case 'recommended': return actor.unplayed ? actor.favorite * 3 + actor.watched * 2 : 0;
+      case 'recommended': return ActorProfileRules.recommendationScore(actor.favorite, actor.watched, actor.unplayed);
       default: return actor.playCount;
     }
   };
@@ -157,8 +164,8 @@ export function discovery(items: MediaItem[], signals: MediaItem[], follows: Fol
     const people = (i.People ?? []).filter((p: Person) => p.Type === 'Actor' && followed.has(p.Id));
     const matching = Array.from(new Set((i.Genres ?? []).filter((g: string) => genres.has(genreKey(g)))));
     const names = Array.from(new Set(people.map((p: Person) => p.Name)));
-    return { item: i, actors: names, genres: matching, score: names.length * 4 + matching.length * 2 };
-  }).sort((a: Discovery, b: Discovery) => b.score - a.score || (Date.parse(b.item.DateCreated ?? '') || 0) - (Date.parse(a.item.DateCreated ?? '') || 0) || a.item.Id.localeCompare(b.item.Id)).slice(0, 30);
+    return { item: i, actors: names, genres: matching, score: DiscoveryRules.score(names.length, matching.length) };
+  }).sort((a: Discovery, b: Discovery) => b.score - a.score || (Date.parse(b.item.DateCreated ?? '') || 0) - (Date.parse(a.item.DateCreated ?? '') || 0) || a.item.Id.localeCompare(b.item.Id)).slice(0, DiscoveryRules.maximumResults);
 }
 export function validExperience(value: ExperienceState): boolean {
   if (value?.playerUi !== undefined && !validPlayerOptions(value.playerUi)) { return false; }
@@ -167,14 +174,14 @@ export function validExperience(value: ExperienceState): boolean {
     (value?.syncBlocked !== undefined && typeof value.syncBlocked !== 'boolean')) { return false; }
   if ((value?.downloadMobile !== undefined && typeof value.downloadMobile !== 'boolean') ||
     (value?.downloadRoaming !== undefined && typeof value.downloadRoaming !== 'boolean')) { return false; }
-  return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= 20 && value.searches.every((s: string) => typeof s === 'string') &&
-    (value.librarySort === undefined || ['SortName', 'CommunityRating', 'CriticRating', 'DateCreated', 'DatePlayed', 'PremiereDate'].includes(value.librarySort)) &&
+  return !!value && value.version === 1 && Array.isArray(value.searches) && value.searches.length <= SearchHistoryRules.maxEntries && value.searches.every((s: string) => typeof s === 'string') &&
+    (value.librarySort === undefined || librarySortFields.includes(value.librarySort)) &&
     (value.libraryDescending === undefined || typeof value.libraryDescending === 'boolean') &&
     (value.autoNextMode === undefined || ['server', 'on', 'off'].includes(value.autoNextMode)) &&
     (value.serverAutoNext === undefined || typeof value.serverAutoNext === 'boolean') &&
-    [0, 1, 3, 4].includes(value.tab) && ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].includes(value.actorOrder) &&
+    persistedTabs.includes(value.tab) && actorOrders.some((choice: ActorOrderChoice) => choice.value === value.actorOrder) &&
     typeof value.offline === 'boolean' && typeof value.showTags === 'boolean' && typeof value.followedOnly === 'boolean' && typeof value.sourcePreference === 'string' && typeof value.rememberDownloadSource === 'boolean' &&
-    typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && ['', 'Movie', 'Series', 'Episode'].includes(value.favoriteCategory) && ['name', 'nameDesc', 'continue'].includes(value.favoriteOrder) &&
+    typeof value.favoriteQuery === 'string' && typeof value.favoriteGenre === 'string' && typeof value.favoriteUnwatched === 'boolean' && favoriteCategories.some((choice: FavoriteChoice) => choice.value === value.favoriteCategory) && favoriteOrders.some((choice: FavoriteChoice) => choice.value === value.favoriteOrder) &&
     Array.isArray(value.follows) && value.follows.every((f: Follow) => !!f && typeof f.id === 'string' && Array.isArray(f.acknowledged) && f.acknowledged.every((id: string) => typeof id === 'string')) &&
     Array.isArray(value.positions) && value.positions.every((p: PendingPosition) => !!p && typeof p.id === 'string' && Number.isSafeInteger(p.ticks) && p.ticks >= 0 && Number.isSafeInteger(p.revision) && !!p.item && p.item.Id === p.id) &&
     Array.isArray(value.pending) && value.pending.every((e: PendingEdit) => !!e && typeof e.id === 'string' && ['favorite', 'played'].includes(e.field) && typeof e.value === 'boolean' && (e.localOnly === undefined || typeof e.localOnly === 'boolean') && Number.isSafeInteger(e.revision) && (e.item === undefined || (!!e.item && e.item.Id === e.id && typeof e.item.Name === 'string' && typeof e.item.Type === 'string')));

@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { AppearancePreferences } from '../service/AppearancePreferences';
 import { LanguagePreferences } from '../service/LanguagePreferences';
 import { Configuration } from '@ohos.app.ability.Configuration';
@@ -11,16 +12,20 @@ import { PendingSync } from '../service/PendingSync';
 import { SystemPlayback } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
 export default class EntryAbility extends UIAbility {
+  // Literal StorageLink subscribers are checked against this publisher contract.
+  private static readonly fontScaleStateKey: string = 'cineIsleFontScale';
+  private static readonly landscapeStateKey: string = 'cineIsleLandscape';
+
   private main: window.Window | undefined = undefined;
   onConfigurationUpdated(configuration: Configuration): void {
-    if (!configuration || configuration.fontSizeScale !== undefined) { AppStorage.setOrCreate('cineIsleFontScale', UiLayout.scale(configuration?.fontSizeScale)); }
+    if (!configuration || configuration.fontSizeScale !== undefined) { AppStorage.setOrCreate(EntryAbility.fontScaleStateKey, UiLayout.scale(configuration?.fontSizeScale)); }
     LanguagePreferences.systemChanged();
-    if (configuration?.direction !== undefined) { AppStorage.setOrCreate('cineIsleLandscape', configuration.direction === ConfigurationConstant.Direction.DIRECTION_HORIZONTAL); }
+    if (configuration?.direction !== undefined) { AppStorage.setOrCreate(EntryAbility.landscapeStateKey, configuration.direction === ConfigurationConstant.Direction.DIRECTION_HORIZONTAL); }
   }
   onWindowStageCreate(stage: window.WindowStage): void {
     this.onConfigurationUpdated(this.context.config);
     AppService.closePlayback = async () => { await SystemPlayback.current?.dispose(); await PlaybackWindow.current?.dispose(); };
-    stage.loadContent('pages/Index', (error) => {
+    stage.loadContent(AppRoutes.index, (error) => {
       if (error.code) { console.warn('CineIsle window content unavailable'); return; }
       LanguagePreferences.attach(this.context).catch(() => { console.warn('CineIsle application language unavailable'); });
       this.configureWindow(stage);

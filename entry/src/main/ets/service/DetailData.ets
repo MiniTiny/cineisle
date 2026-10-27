@@ -5,6 +5,7 @@ import { errorText } from '../utils/Strings';
 import { applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
 import { orderedChildren } from '../utils/DetailPresentation';
 import { NetworkPolicy } from '../utils/NetworkOptions';
+import { NextUpRequests } from '../utils/FeedRequests';
 
 export interface DetailContent { item: MediaItem; children: MediaItem[]; nextUp?: MediaItem; offline: boolean; warning: string }
 function cachedChildren(item: MediaItem): MediaItem[] {
@@ -49,7 +50,7 @@ export async function loadDetail(client: JellyfinClient, id: string): Promise<De
   if (client !== AppService.client) { throw new Error('login_required'); }
   if (item.Type === 'Series') {
     try {
-      const next = await client.nextUp(item.Id);
+      const next = await client.nextUp(item.Id, NextUpRequests.limit(item.Id));
       if (next.some((value: MediaItem) => value.Type !== 'Episode' || value.SeriesId !== item.Id)) { throw new Error('episode_queue_failed'); }
       result.nextUp = next[0];
     } catch (e) { if (authorizationFailure(e as Error)) { throw e as Error; } result.warning = [result.warning, errorText(e as Error)].filter((value: string) => !!value).join(' · '); }

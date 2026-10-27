@@ -2,6 +2,7 @@ import { SubtitleRun } from '../utils/InlineSubtitle';
 import { CaptionRenderStyle } from '../utils/CaptionStyle';
 import { CaptionRasterizer, CaptionPicture, captionRequest } from '../utils/CaptionRasterizer';
 import { SubtitleMetrics } from '../utils/SubtitleMetrics';
+import { CaptionRenderLimits } from '../utils/SubtitleLimits';
 import { text } from '../utils/Strings';
 
 // Each main/PiP instance owns its UIContext, measured width, asynchronous jobs and pixel-map references.
@@ -10,7 +11,7 @@ export struct NativeCaption {
   @Prop @Watch('schedule') runs: SubtitleRun[] = [];
   @Prop @Watch('schedule') captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
   @Prop @Watch('schedule') fontSize: number = 20;
-  @Prop @Watch('schedule') limit: number = 1000;
+  @Prop @Watch('schedule') limit: number = CaptionRenderLimits.maxLines;
   @Prop @Watch('schedule') availableWidth: number = 0;
   @Prop identifier: string = '';
   @Prop @Watch('schedule') revision: string = '';

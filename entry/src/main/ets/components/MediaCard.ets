@@ -59,7 +59,7 @@ export struct MediaCard {
         }
       }.width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3)
       Text(this.wide ? this.item.SeriesName ?? this.item.Name : this.item.Name)
-        .fontSize(14).fontColor('#F2F3FA').maxLines(2).height(40 * this.fontScale)
+        .fontSize(14).fontColor(this.palette.foreground).maxLines(2).height(40 * this.fontScale)
         .textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
       if (this.wide && this.item.Type === 'Episode') {
         Text(this.item.ParentIndexNumber !== undefined && this.item.IndexNumber !== undefined ?

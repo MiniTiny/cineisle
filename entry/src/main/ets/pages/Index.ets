@@ -1,3 +1,7 @@
+import { AppRoutes, MainTab, storedTab, tabSelected } from '../utils/Navigation';
+import { BrowseChoice, librarySortChoices, searchTypeChoices } from '../utils/Browse';
+import { actorOrders, ActorOrderChoice, defaultActorOrder } from '../utils/ActorOrder';
+import { DiscoveryRules } from '../utils/DiscoveryRules';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -22,12 +26,14 @@ import { MediaCard } from '../components/MediaCard';
 import { HomeShelf } from '../components/HomeShelf';
 import { cachedHome } from '../service/HomeFeed';
 import { JellyfinClient } from '../service/JellyfinClient';
-import { browseParams, cachedItems, librarySortFields, searchTypes, searchPage } from '../utils/Browse';
+import { BrowseRequestLimits, browseParams, cachedItems, librarySortFields, searchTypes, searchPage } from '../utils/Browse';
 
 import { ProgressiveHome, HomeFailure, HomeUpdate } from '../service/ProgressiveHome';
 import { ActorProfile, ActorTag, Discovery, ExperienceState, actorProfiles, sortActors, discovery, applyPending, connectionFailure, authorizationFailure } from '../utils/Experience';
 
 interface PersonRoute { personId?: string; personName?: string }
+
+const actorSummaryTagLimit: number = 3;
 
 @Entry
 @Component
@@ -49,7 +55,7 @@ struct Index {
   private loginRevision: number = 0;
   @State busy: boolean = false;
   @State message: string = '';
-  @State tab: number = 1;
+  @State tab: number = MainTab.Home;
   @State search: string = '';
   @State searchQuery: string = '';
   @State searchType: string = '';
@@ -69,7 +75,7 @@ struct Index {
   @State profiles: ActorProfile[] = [];
   @State actorQuery: string = '';
   @State actorTag: string = '';
-  @State actorOrder: string = 'playCount';
+  @State actorOrder: string = defaultActorOrder;
   @State followedOnly: boolean = false;
   @State showTags: boolean = true;
   @State homeFailures: HomeFailure[] = [];
@@ -100,7 +106,7 @@ struct Index {
       this.ready = true;
       if (this.signedIn) {
         const route = router.getParams() as PersonRoute;
-        if (route?.personId) { router.replaceUrl({ url: 'pages/Actor', params: route }); return; }
+        if (route?.personId) { router.replaceUrl({ url: AppRoutes.actor, params: route }); return; }
         await this.load();
       }
     } catch (e) { this.message = errorText(e as Error); this.ready = true; }
@@ -137,8 +143,8 @@ struct Index {
     this.server = value;
   }
   private openQuick(): void {
-    if (this.discoveredId) { router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true, expectedServerId: this.discoveredId } }); }
-    else { router.pushUrl({ url: 'pages/Accounts', params: { server: this.server, quick: true } }); }
+    if (this.discoveredId) { router.pushUrl({ url: AppRoutes.accounts, params: { server: this.server, quick: true, expectedServerId: this.discoveredId } }); }
+    else { router.pushUrl({ url: AppRoutes.accounts, params: { server: this.server, quick: true } }); }
   }
 
   private params(): QueryParam[] {
@@ -168,7 +174,7 @@ struct Index {
     this.generation++; this.sessionClient = AppService.client; this.signedIn = this.sessionClient !== undefined;
     const state = AppService.experience?.snapshot();
     this.librarySort = state?.librarySort ?? 'SortName'; this.libraryDescending = state?.libraryDescending ?? false;
-    this.tab = state?.tab ?? 1; this.offline = state?.offline ?? false; if (this.offline && this.tab === 0) { this.tab = 1; } this.actorOrder = state?.actorOrder ?? 'playCount'; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
+    this.tab = state?.tab ?? MainTab.Home; this.offline = state?.offline ?? false; if (this.offline && this.tab === MainTab.Discover) { this.tab = MainTab.Home; } this.actorOrder = state?.actorOrder ?? defaultActorOrder; this.followedOnly = state?.followedOnly ?? false; this.showTags = state?.showTags ?? true; this.recentSearches = state?.searches ?? [];
     this.mode = ''; this.search = ''; this.searchQuery = ''; this.searchType = ''; this.searchExpanded = false; this.searchFocused = false; this.parentId = ''; this.personId = ''; this.sectionTitle = '';
     this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = []; this.total = 0;
@@ -187,7 +193,7 @@ struct Index {
 
   private useCache(): void {
     if (!AppService.snapshot.syncedAt) { this.items = []; this.resume = []; this.homeSections = []; this.total = 0; return; }
-    if (this.tab === 2 && (!this.mode || this.mode === 'offline-library') && !this.parentId) {
+    if (this.tab === MainTab.Library && (!this.mode || this.mode === 'offline-library') && !this.parentId) {
       this.libraries = AppService.snapshot.libraries;
       if (this.libraries.length > 0) { this.mode = ''; this.items = []; this.total = 0; }
       else {
@@ -200,7 +206,7 @@ struct Index {
       this.total = this.items.length;
     }
     this.resume = [];
-    if (this.tab === 1 && !this.mode) { this.homeSections = cachedHome(AppService.snapshot); }
+    if (this.tab === MainTab.Home && !this.mode) { this.homeSections = cachedHome(AppService.snapshot); }
     this.usingCache = true;
     this.message += ' · ' + getContext(this).resourceManager.getStringSync($r('app.string.offline_cache').id);
   }
@@ -215,12 +221,12 @@ struct Index {
     if (!more) { this.items = []; this.resume = []; this.homeSections = []; this.total = 0; this.usingCache = false; }
     try {
       if (!client) { throw new Error('login_required'); }
-      if (this.tab === 3 && !this.mode) { this.refreshActors(); return; }
+      if (this.tab === MainTab.Actors && !this.mode) { this.refreshActors(); return; }
       this.offline = AppService.experience?.snapshot().offline ?? false;
-      if (this.offline && (this.tab === 1 || this.tab === 2 || this.mode)) { this.useCache(); return; }
+      if (this.offline && (this.tab === MainTab.Home || this.tab === MainTab.Library || this.mode)) { this.useCache(); return; }
       if (this.mode === 'downloads') { this.downloads = [...AppService.downloads]; return; }
-      if (this.tab === 4 && !this.mode) { return; }
-      if (this.tab === 2 && (!this.mode || this.mode === 'offline-library') && !this.parentId) {
+      if (this.tab === MainTab.More && !this.mode) { return; }
+      if (this.tab === MainTab.Library && (!this.mode || this.mode === 'offline-library') && !this.parentId) {
         this.libraries = [];
         const libraries = await client.libraries();
         if (this.current(version, client)) { this.libraries = libraries; this.mode = ''; }
@@ -228,12 +234,12 @@ struct Index {
       }
       if (this.mode || this.parentId || this.personId) {
         const start = more ? this.items.length : 0;
-        const result = await client.items([...this.params(), { key: 'StartIndex', value: start.toString() }, { key: 'Limit', value: '60' }]);
+        const result = await client.items([...this.params(), { key: 'StartIndex', value: start.toString() }, { key: 'Limit', value: String(BrowseRequestLimits.pageItems) }]);
         if (this.current(version, client)) {
             this.items = this.mode === 'search' ? searchPage(more ? this.items : [], result.Items ?? [], result.TotalRecordCount, this.searchType) : more ? [...this.items, ...(result.Items ?? [])] : result.Items ?? []; this.total = result.TotalRecordCount;
         }
-      } else if (this.tab === 0) {
-        const candidates = this.discover ? await client.discoveryCandidates() : await client.recommend();
+      } else if (this.tab === MainTab.Discover) {
+        const candidates = this.discover ? await client.discoveryCandidates(DiscoveryRules.candidateLimit) : await client.recommend();
         this.discoveries = discovery(applyPending(candidates, AppService.experience?.snapshot().pending ?? [], AppService.experience?.snapshot().positions ?? []), AppService.snapshot.items, AppService.experience?.snapshot().follows ?? []);
         const items = this.discover ? this.discoveries.map((d: Discovery) => d.item) : candidates;
         if (this.current(version, client)) { this.items = items; this.total = items.length; }
@@ -263,7 +269,7 @@ struct Index {
   }
 
   private switchTab(index: number): void {
-    try { AppService.experience?.update((state: ExperienceState) => { state.tab = index === 2 ? 4 : index; }); } catch (e) { this.message = errorText(e as Error); }
+    try { AppService.experience?.update((state: ExperienceState) => { state.tab = storedTab(index); }); } catch (e) { this.message = errorText(e as Error); }
     this.tab = index; this.mode = ''; this.parentId = ''; this.personId = ''; this.search = ''; this.searchQuery = ''; this.searchType = ''; this.searchExpanded = false; this.searchFocused = false;
     this.collectionType = '';
     this.items = []; this.resume = []; this.homeSections = []; this.libraries = []; this.actors = []; this.downloads = [];
@@ -281,14 +287,14 @@ struct Index {
       this.switchTab(this.tab);
       return true;
     }
-    if (!this.locked && this.signedIn && this.tab === 2) {
-      this.switchTab(this.mode ? 2 : 4);
+    if (!this.locked && this.signedIn && this.tab === MainTab.Library) {
+      this.switchTab(this.mode ? MainTab.Library : MainTab.More);
       return true;
     }
     return false;
   }
 
-  private open(item: MediaItem): void { router.pushUrl({ url: item.Type === 'BoxSet' ? 'pages/Collection' : 'pages/Detail', params: { item: item } }); }
+  private open(item: MediaItem): void { router.pushUrl({ url: item.Type === 'BoxSet' ? AppRoutes.collection : AppRoutes.detail, params: { item: item } }); }
 
   private async sync(): Promise<void> {
     this.syncing = true;
@@ -300,7 +306,7 @@ struct Index {
 
   private openLibrary(section: HomeSection): void {
     this.collectionType = section.collectionType ?? this.libraries.find((library: MediaItem) => library.Id === section.libraryId)?.CollectionType ?? '';
-    this.tab = 2; this.mode = 'library'; this.parentId = section.libraryId; this.personId = '';
+    this.tab = MainTab.Library; this.mode = 'library'; this.parentId = section.libraryId; this.personId = '';
     this.sectionTitle = section.name; this.search = ''; this.searchExpanded = false; this.searchFocused = false; this.load();
   }
 
@@ -320,37 +326,37 @@ struct Index {
       Column({ space: 18 }) {
         Column({ space: 12 }) {
           Image($r('app.media.app_icon')).width(76).height(76).borderRadius(20).accessibilityLevel('no')
-          Text($r('app.string.app_name')).fontSize(28).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+          Text($r('app.string.app_name')).fontSize(28).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
           Text($r('app.string.login_intro')).fontSize(14).fontColor(this.palette.muted).width('100%')
         }.width('100%').alignItems(HorizontalAlign.Start)
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_credentials'), icon: $r('app.media.menu_login') })
           Text($r('app.string.server_address_label')).fontSize(12).fontColor(this.palette.muted).width('100%')
           TextInput({ text: this.server, placeholder: $r('app.string.server_placeholder') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => this.changeServer(value))
-            .fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
+            .fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy)
           ServerDiscoveryPicker({ address: this.server, active: this.discoveryVisible && !this.signedIn,
             available: this.ready && !this.busy && !this.locked, onSelect: (server: DiscoveredServer) => this.selectDiscovered(server) })
           Text($r('app.string.username')).fontSize(12).fontColor(this.palette.muted).width('100%')
             PublicUserPicker({ server: this.server, available: this.ready && !this.busy && !this.locked,
               onSelect: (name: string) => { this.username = name; this.password = ''; focusControl.requestFocus('index-login-password'); } })
           TextInput({ text: this.username, placeholder: $r('app.string.username') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).onChange((value: string) => { this.username = value; })
-            .fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
+            .fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.password')).fontSize(12).fontColor(this.palette.muted).width('100%')
             TextInput({ text: this.password, placeholder: $r('app.string.password') }).id('index-login-password').height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).type(InputType.Password)
-            .onChange((value: string) => { this.password = value; }).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12).enabled(!this.busy)
+            .onChange((value: string) => { this.password = value; }).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.busy)
           Text($r('app.string.https_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
           if (this.message) { Text(this.message).fontColor(this.palette.danger).fontSize(13).width('100%') }
           if (this.busy || !this.ready) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           BrandButton({ label: this.busy ? $r('app.string.connecting') : $r('app.string.login'), icon: $r('app.media.menu_login'), primary: true,
             available: this.ready && !this.busy && !!this.server.trim() && !!this.username.trim(), onSelect: () => this.login() })
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.login_connections'), icon: $r('app.media.menu_accounts') })
           BrandButton({ label: $r('app.string.quick_connect_login'), icon: $r('app.media.menu_quick'), available: this.ready && !this.busy,
             onSelect: () => this.openQuick() })
           BrandButton({ label: $r('app.string.accounts_servers'), icon: $r('app.media.menu_accounts'), available: this.ready && !this.busy,
-            onSelect: () => router.pushUrl({ url: 'pages/Accounts' }) })
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+            onSelect: () => router.pushUrl({ url: AppRoutes.accounts }) })
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
       }.padding(20).width('100%').alignItems(HorizontalAlign.Start)
     }.width('100%').height('100%').align(Alignment.TopStart)
   }
@@ -371,19 +377,19 @@ struct Index {
         Column({ space: 12 }) {
           BrandHeading({ label: $r('app.string.search_group'), icon: $r('app.media.nav_search_active') })
           Text($r('app.string.search_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
-          TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor('#F2F3FA')
-            .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(12)
+          TextInput({ text: this.search, placeholder: $r('app.string.search_hint') }).height(UiLayout.buttonHeight(this.fontScale)).fontSize(14).fontColor(this.palette.foreground)
+            .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12)
             .enterKeyType(EnterKeyType.Search).onFocus(() => { this.searchFocused = true; }).onBlur(() => { this.searchFocused = false; })
             .onChange((value: string) => { this.search = value; }).onSubmit(() => this.performSearch())
           BrandButton({ label: $r('app.string.search_action'), icon: $r('app.media.nav_search_active'), primary: true, available: !this.busy && !!this.search.trim(), onSelect: () => this.performSearch() })
           BrandButton({ label: $r('app.string.close_search'), icon: $r('app.media.menu_cancel'), onSelect: () => this.switchTab(this.tab) })
           BrandChoice({ label: $r('app.string.search_type'), icon: $r('app.media.nav_library_active'), available: !this.busy,
-            choices: [{ value: text('search_type_all') }, { value: text('media_movie') }, { value: text('media_series') }, { value: text('media_episode') }],
+            choices: searchTypeChoices.map((choice: BrowseChoice): SelectOption => ({ value: text(choice.caption) })),
             selected: Math.max(0, searchTypes.indexOf(this.searchType)), onSelect: (index: number) => this.changeSearchType(index) })
           if (this.busy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
           if (this.message) { Text(this.message).fontSize(12).fontColor(this.palette.danger).width('100%') }
           if (this.cacheMessage) { Text(this.cacheMessage).fontSize(12).fontColor(this.palette.warm).width('100%') }
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
       }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       if (this.recentSearches.length > 0) {
         GridItem() {
@@ -395,14 +401,14 @@ struct Index {
                   .width(this.viewportWidth < 400 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
               }, (value: string) => value)
             }.width('100%')
-          }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+          }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
         }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
       if (this.mode === 'search') {
         GridItem() {
           Column({ space: 8 }) {
             BrandHeading({ label: $r('app.string.search_results'), icon: $r('app.media.detail_film') })
-            Text($r('app.string.search_results_for', this.searchQuery || this.search)).fontSize(14).fontColor('#F2F3FA').width('100%')
+            Text($r('app.string.search_results_for', this.searchQuery || this.search)).fontSize(14).fontColor(this.palette.foreground).width('100%')
             if (this.items.length > 0 || this.usingCache || (!this.busy && !this.message)) {
               Text(this.usingCache ? $r('app.string.search_cached_count', this.items.length) : $r('app.string.search_loaded_count', this.items.length, this.total))
                 .fontSize(12).fontColor(this.palette.muted).width('100%')
@@ -418,7 +424,7 @@ struct Index {
         ForEach(searchTypes.slice(1), (type: string) => {
           if (this.items.some((item: MediaItem) => item.Type === type)) {
             GridItem() { Text($r('app.string.search_group_count', text(type === 'Movie' ? 'media_movie' : type === 'Series' ? 'media_series' : 'media_episode'), this.items.filter((item: MediaItem) => item.Type === type).length))
-              .fontSize(16).fontColor('#F2F3FA').fontWeight(FontWeight.Medium).width('100%') }
+              .fontSize(16).fontColor(this.palette.foreground).fontWeight(FontWeight.Medium).width('100%') }
               .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
             ForEach(this.items.filter((item: MediaItem) => item.Type === type), (item: MediaItem) => {
               GridItem() { MediaCard({ item: item, onSelect: (selected: MediaItem) => this.open(selected) }) }
@@ -445,19 +451,19 @@ struct Index {
           .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
       }.width('100%')
       Text(this.discover ? $r('app.string.discovery_hint') : $r('app.string.recommend_hint')).fontSize(12).fontColor(this.palette.muted).width('100%')
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
   }
 
   @Builder
   private libraryFilters() {
     Column({ space: 12 }) {
       BrandChoice({ label: $r('app.string.library_sort'), icon: $r('app.media.menu_sync'), available: !this.busy,
-        choices: [{ value: text('sort_name') }, { value: text('sort_rating') }, { value: text('sort_critic') }, { value: text('sort_added') }, { value: text('sort_played') }, { value: text('sort_premiere') }],
+        choices: librarySortChoices.map((choice: BrowseChoice): SelectOption => ({ value: text(choice.caption) })),
         selected: Math.max(0, librarySortFields.indexOf(this.librarySort)), onSelect: (index: number) => this.changeLibrarySort(index) })
       BrandChoice({ label: $r('app.string.library_order'), icon: $r('app.media.menu_sync'), available: !this.busy,
         choices: [{ value: text('sort_ascending') }, { value: text('sort_descending') }], selected: this.libraryDescending ? 1 : 0,
         onSelect: (index: number) => this.changeLibrarySort(index, true) })
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
   }
 
   @Builder
@@ -467,17 +473,17 @@ struct Index {
         GridItem() { this.libraryFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
       if (this.busy || this.message || this.cacheMessage) { GridItem() { this.statusPanel() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1) }
-      if (!this.mode && this.tab === 0) {
+      if (!this.mode && this.tab === MainTab.Discover) {
         GridItem() { this.recommendFilters() }.columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
 
       if (this.items.length === 0 && !this.busy) {
-        GridItem() { BrandState({ label: $r('app.string.no_items'), icon: this.tab === 0 ? $r('app.media.nav_star_active') : $r('app.media.nav_library_active') }) }
+        GridItem() { BrandState({ label: $r('app.string.no_items'), icon: this.tab === MainTab.Discover ? $r('app.media.nav_star_active') : $r('app.media.nav_library_active') }) }
           .columnStart(0).columnEnd(UiLayout.columns(this.viewportWidth, this.fontScale).split(' ').length - 1)
       }
 
         ForEach(this.items, (item: MediaItem) => {
-        GridItem() { MediaCard({ item: item, onReason: this.tab === 0 && this.discover ? (selected: MediaItem) => this.reason(selected) : undefined, onSelect: (selected: MediaItem) => this.open(selected) }) }
+        GridItem() { MediaCard({ item: item, onReason: this.tab === MainTab.Discover && this.discover ? (selected: MediaItem) => this.reason(selected) : undefined, onSelect: (selected: MediaItem) => this.open(selected) }) }
       }, (item: MediaItem) => `${item.Id}|${JSON.stringify(item)}`)
       if (this.mode && this.items.length < this.total) {
         GridItem() { BrandButton({ label: $r('app.string.load_more'), icon: $r('app.media.menu_add'), available: !this.busy, onSelect: () => this.load(true) }) }
@@ -498,12 +504,12 @@ struct Index {
                 Image(library.CollectionType === 'movies' ? $r('app.media.detail_film') : $r('app.media.nav_library_active')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(28).height(28).accessibilityLevel('no')
               }.width(52).height(52).flexShrink(0).borderRadius(16).justifyContent(FlexAlign.Center).backgroundColor(this.palette.selected)
               Column({ space: 4 }) {
-                Text(library.Name).fontSize(18).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').width('100%')
+                Text(library.Name).fontSize(18).fontWeight(FontWeight.Medium).fontColor(this.palette.foreground).width('100%')
                 Text(library.CollectionType === 'movies' ? $r('app.string.media_movie') : library.CollectionType === 'tvshows' ? $r('app.string.media_series') : library.CollectionType === 'boxsets' ? $r('app.string.media_collection') : $r('app.string.tab_library')).fontSize(12).fontColor(this.palette.muted).width('100%')
               }.layoutWeight(1).alignItems(HorizontalAlign.Start)
               Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no')
             }.width('100%').padding({ left: 16, right: 16, top: this.landscape && this.viewportHeight < 440 ? 8 : 16, bottom: this.landscape && this.viewportHeight < 440 ? 8 : 16 }).hitTestBehavior(HitTestMode.None)
-          }.padding(0).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
+          }.padding(0).width('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(20)
             .accessibilityText(library.Name).onClick(() => { this.collectionType = library.CollectionType ?? ''; this.parentId = library.Id; this.sectionTitle = library.Name; this.mode = 'library'; this.load(); })
         }
       }, (library: MediaItem) => `${library.Id}|${library.Name}|${library.CollectionType}`)
@@ -522,7 +528,7 @@ struct Index {
     this.refreshActors();
   }
   private async quickPlay(item: MediaItem): Promise<void> {
-    try { router.pushUrl({ url: 'pages/Player', params: await AppService.detailPlayback(item, '', this.usingCache) }); }
+    try { router.pushUrl({ url: AppRoutes.player, params: await AppService.detailPlayback(item, '', this.usingCache) }); }
     catch (e) { this.message = errorText(e as Error); }
   }
   private performSearch(): void {
@@ -536,7 +542,7 @@ struct Index {
   private reason(item: MediaItem): void {
     const value = this.discoveries.find((d: Discovery) => d.item.Id === item.Id);
     if (!value) { return; }
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: this.palette.accent, action: () => {} } }, this.viewportWidth, this.viewportHeight);
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: this.palette.accent, action: () => {} } }, this.viewportWidth, this.viewportHeight);
   }
 
   @Builder
@@ -544,19 +550,19 @@ struct Index {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.actor_filters'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.actor_search')).fontSize(14).fontColor(this.palette.muted).width('100%')
-      TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).borderRadius(14).width('100%')
+      TextInput({ text: this.actorQuery, placeholder: $r('app.string.actor_search') }).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(14).width('100%')
         .onChange((value: string) => { this.actorQuery = value; this.refreshActors(); })
       BrandChoice({ label: $r('app.string.actor_sort'), icon: $r('app.media.menu_settings'),
-        choices: [{ value: text('actor_order_play') }, { value: text('actor_order_watched') }, { value: text('actor_order_unplayed') }, { value: text('actor_order_works') }, { value: text('actor_order_recent') }, { value: text('actor_order_name') }, { value: text('actor_order_recommended') }],
-        selected: Math.max(0, ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'].indexOf(this.actorOrder)),
-        onSelect: (index: number) => { this.actorOrder = ['playCount', 'watched', 'unplayed', 'works', 'recent', 'name', 'recommended'][index]; this.actorSettings(); } })
+        choices: actorOrders.map((choice: ActorOrderChoice): SelectOption => ({ value: text(choice.caption) })),
+        selected: Math.max(0, actorOrders.findIndex((choice: ActorOrderChoice) => choice.value === this.actorOrder)),
+        onSelect: (index: number) => { this.actorOrder = actorOrders[index]?.value; this.actorSettings(); } })
       Row({ space: 8 }) {
         Checkbox().select(this.followedOnly).selectedColor(this.palette.action).onChange((value: boolean) => { this.followedOnly = value; this.actorSettings(); })
-        Text($r('app.string.followed_only')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.followed_only')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
       }.width('100%')
       Row({ space: 8 }) {
         Checkbox().select(this.showTags).selectedColor(this.palette.action).onChange((value: boolean) => { this.showTags = value; this.actorSettings(); })
-        Text($r('app.string.show_actor_tags')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.show_actor_tags')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
       }.width('100%')
       if (this.actorTag || this.actorQuery || this.followedOnly) {
         BrandButton({ label: $r('app.string.clear_filters'), icon: $r('app.media.menu_cancel'), onSelect: () => { this.actorTag = ''; this.actorQuery = ''; this.followedOnly = false; this.actorSettings(); } })
@@ -565,7 +571,7 @@ struct Index {
         Text($r('app.string.actors_sync_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
         BrandButton({ label: $r('app.string.sync_library'), icon: $r('app.media.menu_sync'), primary: true, available: !this.syncing, onSelect: () => this.sync() })
       }
-    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+    }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
   }
 
   @Builder
@@ -581,22 +587,22 @@ struct Index {
             Row({ space: 14 }) {
                   CachedImage({ imageId: actor.person.Id, tag: actor.person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 28, placeholder: $r('app.media.nav_user_active') }).width(56).height(56).flexShrink(0)
               Column({ space: 6 }) {
-                Text(actor.person.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
+                Text(actor.person.Name).fontColor(this.palette.foreground).fontSize(16).width('100%')
               }.alignItems(HorizontalAlign.Start).layoutWeight(1)
               Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no')
             }.width('100%').hitTestBehavior(HitTestMode.None)
-            }.width('100%').padding(0).backgroundColor(Color.Transparent).borderRadius(14).accessibilityText(actor.person.Name).onClick(() => router.pushUrl({ url: 'pages/Actor', params: { personId: actor.person.Id, personName: actor.person.Name } }))
+            }.width('100%').padding(0).backgroundColor(Color.Transparent).borderRadius(14).accessibilityText(actor.person.Name).onClick(() => router.pushUrl({ url: AppRoutes.actor, params: { personId: actor.person.Id, personName: actor.person.Name } }))
             Text($r('app.string.actor_counts', actor.works.length, actor.watched, actor.unplayed)).fontColor(this.palette.muted).fontSize(12).width('100%')
             if (actor.followed) { Text($r('app.string.actor_new_count', actor.newCount)).fontColor(this.palette.accent).fontSize(12).width('100%') }
             if (this.showTags) {
               Flex({ wrap: FlexWrap.Wrap }) {
-                ForEach(actor.tags.slice(0, 3), (tag: ActorTag) => {
+                ForEach(actor.tags.slice(0, actorSummaryTagLimit), (tag: ActorTag) => {
                   Column() { BrandButton({ label: tag.theme ? $r('app.string.theme_' + tag.title) : tag.title, icon: $r('app.media.nav_star_active'), compact: true, primary: this.actorTag === tag.key, onSelect: () => { this.actorTag = tag.key; this.refreshActors(); } }) }
                     .width(this.fontScale > 1 || this.viewportWidth < 360 ? '100%' : '48%').margin({ right: 4, bottom: 8 })
                 }, (tag: ActorTag) => tag.key)
               }
             }
-          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
+          }.padding(16).width('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(20)
         }
       }, (actor: ActorProfile) => `${actor.person.Id}|${actor.watched}:${actor.unplayed}:${actor.playCount}:${actor.followed}:${actor.newCount}:${JSON.stringify(actor.tags)}`)
       if (this.profiles.length === 0 && !this.busy && AppService.snapshot.syncedAt) { ListItem() { BrandState({ label: $r('app.string.no_filter_matches'), icon: $r('app.media.nav_user_active') }) } }
@@ -611,24 +617,24 @@ struct Index {
       ForEach(this.downloads, (record: DownloadRecord) => {
         ListItem() {
           Column({ space: 10 }) {
-            Text(record.item.Name).fontColor('#F2F3FA').fontSize(16).width('100%')
+            Text(record.item.Name).fontColor(this.palette.foreground).fontSize(16).width('100%')
             Text(downloadVersion(record) || $r('app.string.download_legacy_version')).fontColor(this.palette.muted).fontSize(13).width('100%')
             Text(record.state === 'complete' ? $r('app.string.download_complete') : record.state === 'downloading' ?
               $r('app.string.download_progress', Math.floor(record.progress * 100)) : $r('app.string.download_interrupted'))
               .fontSize(12).fontColor(this.palette.muted)
             Flex({ wrap: FlexWrap.Wrap }) {
               Column() { BrandButton({ label: $r('app.string.play'), icon: $r('app.media.detail_play'), primary: true, available: record.state === 'complete' && !this.busy, onSelect: async () => {
-                try { router.pushUrl({ url: 'pages/Player', params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
+                try { router.pushUrl({ url: AppRoutes.player, params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
               Column() { BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => {
-                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
                   buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
                     try { await AppService.removeDownload(record); this.downloads = [...AppService.downloads]; } catch (e) { this.message = errorText(e as Error); }
                   } }]
                 }, this.viewportWidth, this.viewportHeight);
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
             }
-          }.padding(16).width('100%').backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(14)
+          }.padding(16).width('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(14)
         }
       }, (record: DownloadRecord) => record.path)
       if (this.downloads.length === 0) { ListItem() { BrandState({ label: $r('app.string.no_downloads'), icon: $r('app.media.menu_offline') }) } }
@@ -644,13 +650,13 @@ struct Index {
         }.width(compact ? 32 : 36).height(compact ? 32 : 36).justifyContent(FlexAlign.Center).borderRadius(12)
           .backgroundColor(this.palette.selected).flexShrink(0)
         Text(label).fontSize(16).fontWeight(FontWeight.Medium)
-          .fontColor(departure ? this.palette.warm : '#F2F3FA')
+          .fontColor(departure ? this.palette.warm : this.palette.foreground)
           .layoutWeight(1).textAlign(TextAlign.Start).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
         if (!compact) { Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(16).height(16).flexShrink(0).accessibilityLevel('no') }
       }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) })
         .padding({ left: compact ? 12 : 16, right: compact ? 12 : 16, top: 8, bottom: 8 }).hitTestBehavior(HitTestMode.None)
     }.width('100%').constraintSize({ minHeight: Math.max(36, 32 * this.fontScale) + 16 }).padding(0).borderRadius(18)
-      .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(enabled && (!departure || !this.syncing)).accessibilityText(label).onClick(activate)
+      .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).enabled(enabled && (!departure || !this.syncing)).accessibilityText(label).onClick(activate)
   }
 
   @Builder
@@ -668,21 +674,21 @@ struct Index {
           Image($r('app.media.app_icon')).width(48).height(48).borderRadius(14).flexShrink(0).accessibilityLevel('no')
           Column({ space: 4 }) {
             Text(AppService.client?.session.userName ?? '').fontSize(22).fontWeight(FontWeight.Medium)
-              .fontColor('#F2F3FA').width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+              .fontColor(this.palette.foreground).width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
             Text(AppService.client?.session.server ?? '').fontSize(12).fontColor(this.palette.muted)
               .width('100%').maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
           }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-        }.width('100%').padding(16).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(20)
         Column({ space: 8 }) {
           this.menuHeading($r('app.string.menu_collection'))
-          this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }))
-          this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: 'pages/Downloads' }))
-          this.menuAction($r('app.string.tab_library'), $r('app.media.nav_library_active'), () => { this.tab = 2; this.mode = ''; this.load(); })
+          this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: AppRoutes.favorites }))
+          this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: AppRoutes.downloads }))
+          this.menuAction($r('app.string.tab_library'), $r('app.media.nav_library_active'), () => { this.tab = MainTab.Library; this.mode = ''; this.load(); })
         }.width('100%')
         Column({ space: 8 }) {
           this.menuHeading($r('app.string.menu_preferences'))
-          this.menuAction($r('app.string.accounts_servers'), $r('app.media.menu_accounts'), () => router.pushUrl({ url: 'pages/Accounts' }))
-          this.menuAction($r('app.string.settings'), $r('app.media.menu_settings'), () => router.pushUrl({ url: 'pages/Settings' }))
+          this.menuAction($r('app.string.accounts_servers'), $r('app.media.menu_accounts'), () => router.pushUrl({ url: AppRoutes.accounts }))
+          this.menuAction($r('app.string.settings'), $r('app.media.menu_settings'), () => router.pushUrl({ url: AppRoutes.settings }))
         }.width('100%')
         Column({ space: 8 }) {
           this.menuHeading($r('app.string.menu_data'))
@@ -700,7 +706,7 @@ struct Index {
           if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor(this.palette.muted).width('100%') }
         }.width('100%')
         this.menuAction($r('app.string.change_account'), $r('app.media.menu_logout'), () => {
-          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
+          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
             buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.logout'), fontColor: this.palette.danger, action: async () => { await this.logout(); } }]
           }, this.viewportWidth, this.viewportHeight);
         }, true, true)
@@ -715,9 +721,9 @@ struct Index {
       if (this.busy || this.message || this.cacheMessage) { ListItem() { this.statusPanel() } }
       ListItem() { Column({ space: 8 }) {
     Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-      Column() { this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: 'pages/Favorites' }), true, false, true) }
+      Column() { this.menuAction($r('app.string.favorites'), $r('app.media.detail_heart'), () => router.pushUrl({ url: AppRoutes.favorites }), true, false, true) }
         .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
-      Column() { this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: 'pages/Downloads' }), true, false, true) }
+      Column() { this.menuAction($r('app.string.downloads'), $r('app.media.detail_download'), () => router.pushUrl({ url: AppRoutes.downloads }), true, false, true) }
         .width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8 })
     }.width('100%').padding({ left: 20, right: 20 })
     if (this.usingCache) { Text($r('app.string.offline_cache')).fontSize(12).fontColor(this.palette.muted) }
@@ -746,10 +752,10 @@ struct Index {
     Button({ type: ButtonType.Normal }) {
       Column({ space: 4 }) {
         Stack() {
-          Image((this.tab === index || (index === 4 && this.tab === 2)) ? active : muted).colorFilter(this.palette.filter(this.palette.dynamic ? ((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.accent : this.palette.muted) : undefined)).width(24).height(24)
-        }.width(56).height(30).borderRadius(15).backgroundColor((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.selected : Color.Transparent)
-        Text(label).fontSize(12).fontWeight((this.tab === index || (index === 4 && this.tab === 2)) ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor((this.tab === index || (index === 4 && this.tab === 2)) ? this.palette.accent : this.palette.muted).maxLines(1)
+          Image(tabSelected(this.tab, index) ? active : muted).colorFilter(this.palette.filter(this.palette.dynamic ? (tabSelected(this.tab, index) ? this.palette.accent : this.palette.muted) : undefined)).width(24).height(24)
+        }.width(56).height(30).borderRadius(15).backgroundColor(tabSelected(this.tab, index) ? this.palette.selected : Color.Transparent)
+        Text(label).fontSize(12).fontWeight(tabSelected(this.tab, index) ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(tabSelected(this.tab, index) ? this.palette.accent : this.palette.muted).maxLines(1)
       }.width('100%')
     }.layoutWeight(1).height(34 + 16 * this.fontScale).padding(0).backgroundColor(Color.Transparent)
       .accessibilityText(label).onClick(() => this.switchTab(index))
@@ -763,21 +769,21 @@ struct Index {
       if (!this.signedIn) { this.loginPanel() }
       else {
         if (!this.mode) {
-          if (this.tab === 2) {
+          if (this.tab === MainTab.Library) {
             Column() {
-              BrandHeader({ label: $r('app.string.tab_library'), searchable: true, onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(4) })
+              BrandHeader({ label: $r('app.string.tab_library'), searchable: true, onSearch: () => { this.searchExpanded = !this.searchExpanded; }, refreshable: true, available: !this.busy, onRefresh: () => this.load(), onBack: () => this.switchTab(MainTab.More) })
             }.width('100%').padding({ left: 16, right: 16, top: 8, bottom: 8 })
           } else {
         Row({ space: 8 }) {
-          Text(this.tabTitle()).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).fontSize(22).fontWeight(FontWeight.Medium).fontColor('#F2F3FA').layoutWeight(1)
+          Text(this.tabTitle()).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).fontSize(22).fontWeight(FontWeight.Medium).fontColor(this.palette.foreground).layoutWeight(1)
           if (this.tab !== 4 && this.mode !== 'downloads') {
             Button({ type: ButtonType.Normal }) {
               Image(this.searchExpanded ? $r('app.media.nav_search_active') : $r('app.media.nav_search_muted')).colorFilter(this.palette.filter(this.palette.dynamic ? (this.searchExpanded ? this.palette.accent : this.palette.muted) : undefined)).width(24).height(24).accessibilityLevel('no')
-            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).accessibilityText($r('app.string.search_hint'))
+            }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).accessibilityText($r('app.string.search_hint'))
               .onClick(() => { this.searchExpanded = !this.searchExpanded; })
           }
           Button({ type: ButtonType.Normal }) { Image($r('app.media.menu_sync')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no') }
-            .width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(!this.busy).accessibilityText($r('app.string.refresh')).onClick(() => this.load())
+            .width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).enabled(!this.busy).accessibilityText($r('app.string.refresh')).onClick(() => this.load())
         }.height(UiLayout.primaryHeaderHeight(this.viewportHeight, this.fontScale, this.landscape)).width('100%').padding({ left: 20, right: 12 })
           }
         }
@@ -788,13 +794,13 @@ struct Index {
         }
         if (this.searchExpanded || this.mode === 'search') { this.searchPanel() }
         else {
-        if (this.tab === 1 && !this.mode) { this.homePanel() }
+        if (this.tab === MainTab.Home && !this.mode) { this.homePanel() }
         else {
           Column({ space: 12 }) {
             if (this.mode === 'downloads') { this.downloadsPanel() }
-            else if (this.tab === 4 && !this.mode) { this.morePanel() }
-            else if (this.tab === 3 && !this.mode) { this.actorPanel() }
-            else if (this.tab === 2 && !this.mode) { this.libraryPanel() }
+            else if (this.tab === MainTab.More && !this.mode) { this.morePanel() }
+            else if (this.tab === MainTab.Actors && !this.mode) { this.actorPanel() }
+            else if (this.tab === MainTab.Library && !this.mode) { this.libraryPanel() }
             else {
               this.mediaGrid()
 
@@ -803,13 +809,13 @@ struct Index {
         }
         }
         Row() {
-          this.navItem(1, $r('app.string.tab_home'), $r('app.media.nav_home_active'), $r('app.media.nav_home_muted'))
-          if (!this.offline) { this.navItem(0, $r('app.string.tab_recommend'), $r('app.media.nav_star_active'), $r('app.media.nav_star_muted')) }
-          this.navItem(3, $r('app.string.tab_actors'), $r('app.media.nav_user_active'), $r('app.media.nav_user_muted'))
-          this.navItem(4, $r('app.string.tab_more'), $r('app.media.nav_more_active'), $r('app.media.nav_more_muted'))
-        }.width('100%').height(UiLayout.navHeight(this.fontScale)).padding({ left: 4, right: 4 }).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+          this.navItem(MainTab.Home, $r('app.string.tab_home'), $r('app.media.nav_home_active'), $r('app.media.nav_home_muted'))
+          if (!this.offline) { this.navItem(MainTab.Discover, $r('app.string.tab_recommend'), $r('app.media.nav_star_active'), $r('app.media.nav_star_muted')) }
+          this.navItem(MainTab.Actors, $r('app.string.tab_actors'), $r('app.media.nav_user_active'), $r('app.media.nav_user_muted'))
+          this.navItem(MainTab.More, $r('app.string.tab_more'), $r('app.media.nav_more_active'), $r('app.media.nav_more_muted'))
+        }.width('100%').height(UiLayout.navHeight(this.fontScale)).padding({ left: 4, right: 4 }).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
       }
-    }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+    }.width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

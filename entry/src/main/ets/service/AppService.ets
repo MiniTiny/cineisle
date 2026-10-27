@@ -1,4 +1,7 @@
+import { JellyfinTime } from '../utils/JellyfinTime';
 import { TrickplayRepository } from './TrickplayRepository';
+import { NextUpRequests } from '../utils/FeedRequests';
+import { BrowseRequestLimits } from '../utils/Browse';
 import { TrickplayNetwork } from './TrickplayNetwork';
 import { BIF_LIMIT, BifTicket } from '../utils/Bif';
 import { IntroRepository } from './IntroRepository';
@@ -24,7 +27,7 @@ import { DownloadNetworkGuard } from './DownloadNetworkGuard';
 import { DownloadNetwork, downloadNetwork } from '../utils/Downloads';
 import { SessionStore } from './SessionStore';
 import { LocalStore } from './LocalStore';
-import { SyncRetryPolicy } from '../utils/SyncPolicy';
+import { SyncRetryPolicy, SyncCatalogPolicy } from '../utils/SyncPolicy';
 import { initializeStrings, text } from '../utils/Strings';
 import { validMediaItem } from '../utils/Cache';
 import { followingEpisode, precedingEpisode } from '../utils/Playback';
@@ -241,7 +244,7 @@ export class AppService {
       const views = await client.libraries();
       if (revision !== AppService.syncRevision || client !== AppService.client) { throw new Error('sync_cancelled'); }
       if (!Array.isArray(views) || !views.every(validMediaItem)) { throw new Error('sync_incomplete'); }
-      const libraries = uniqueItems(views.filter((view: MediaItem) => !view.CollectionType || ['movies', 'tvshows'].includes(view.CollectionType)));
+      const libraries = uniqueItems(views.filter((view: MediaItem) => SyncCatalogPolicy.supportsLibrary(view.CollectionType)));
       const items: MediaItem[] = [];
       const memberships: LibraryMembership[] = [];
       for (const library of libraries) {
@@ -270,7 +273,7 @@ export class AppService {
     while (true) {
       const page = await client.items([{ key: 'IncludeItemTypes', value: 'Movie,Series,Season,Episode' },
         { key: 'SortBy', value: 'SortName' }, { key: 'SortOrder', value: 'Ascending' }, ...scope,
-        { key: 'StartIndex', value: items.length.toString() }, { key: 'Limit', value: '200' }]);
+        { key: 'StartIndex', value: items.length.toString() }, { key: 'Limit', value: String(SyncCatalogPolicy.pageItems) }]);
       if (!page || !Array.isArray(page.Items) || !Number.isSafeInteger(page.TotalRecordCount) || page.TotalRecordCount < 0 ||
         (total >= 0 && total !== page.TotalRecordCount)) { throw new Error('sync_incomplete'); }
       total = page.TotalRecordCount;
@@ -341,7 +344,7 @@ export class AppService {
     if (item.Type === 'Series' || item.Type === 'Season') {
       const seriesId = item.Type === 'Series' ? item.Id : item.SeriesId ?? '';
       if (!seriesId) { throw new Error('episode_order_unknown'); }
-      const next = !offline && item.Type === 'Series' ? await AppService.requireClient().nextUp(seriesId) : [];
+      const next = !offline && item.Type === 'Series' ? await AppService.requireClient().nextUp(seriesId, NextUpRequests.limit(seriesId)) : [];
       if (client !== AppService.client) { throw new Error('login_required'); }
       if (next.length && (next[0].Type !== 'Episode' || next[0].SeriesId !== seriesId)) { throw new Error('episode_queue_failed'); }
       target = next[0] ?? firstEpisode(offline ? AppService.snapshot.items : await AppService.seriesEpisodes(seriesId), seriesId, item.Type === 'Season' ? item.Id : '')!;
@@ -615,7 +618,7 @@ export class AppService {
   static async allItems(params: QueryParam[], onPage?: (items: MediaItem[]) => void): Promise<MediaItem[]> {
     const client = AppService.requireClient(); const items: MediaItem[] = []; const seen = new Set<string>(); let total = -1;
     while (true) {
-      const page = await client.items([...params, { key: 'StartIndex', value: String(items.length) }, { key: 'Limit', value: '200' }]);
+      const page = await client.items([...params, { key: 'StartIndex', value: String(items.length) }, { key: 'Limit', value: String(BrowseRequestLimits.allItemsPageItems) }]);
       if (client !== AppService.client) { throw new Error('login_required'); }
       if (!page || !Array.isArray(page.Items) || !Number.isSafeInteger(page.TotalRecordCount) || page.TotalRecordCount < 0) { throw new Error('sync_incomplete'); }
       if (total >= 0 && page.TotalRecordCount !== total) { throw new Error('sync_incomplete'); } total = page.TotalRecordCount;
@@ -691,7 +694,7 @@ export class AppService {
     const store = AppService.experience; const local = AppService.local; if (!store || !local || !Number.isFinite(position) || position < 0) { return; }
     const pending = store.snapshot();
     const copy = applyPending([JSON.parse(JSON.stringify(AppService.snapshot.items.find((i: MediaItem) => i.Id === item.Id) ?? item)) as MediaItem], pending.pending, pending.positions)[0];
-    copy.UserData = copy.UserData ?? {}; const ticks = Math.round(position * 10000); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
+    copy.UserData = copy.UserData ?? {}; const ticks = Math.round(position * JellyfinTime.ticksPerMillisecond); if (!Number.isSafeInteger(ticks)) { throw new Error('api_numeric_range'); }
     copy.UserData.PlaybackPositionTicks = ticks; copy.UserData.LastPlayedDate = new Date().toISOString();
     if (played !== undefined) { copy.UserData.Played = played; }
     const revision = AppService.editRevision = Math.max(Date.now(), AppService.editRevision + 1);

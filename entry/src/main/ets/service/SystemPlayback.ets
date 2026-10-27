@@ -1,3 +1,5 @@
+import { JellyfinTime } from '../utils/JellyfinTime';
+import { isPlaybackRate } from '../utils/PlaybackRate';
 import { BackgroundLease } from './BackgroundLease';
 import { AppLock } from './AppLock';
 import common from '@ohos.app.ability.common';
@@ -25,6 +27,10 @@ export interface SystemPlayerView {
 
 // One owner per UIAbility. Page exit and ability destruction tear down the same resources.
 export class SystemPlayback {
+  private static readonly publicationIntervalMs: number = 1000;
+  private static readonly autoPiPWaitMs: number = 1200;
+  private static readonly autoPiPRetryMs: number = 30000;
+  private static readonly defaultSkipMs: number = 15000;
   static current: SystemPlayback | undefined = undefined;
   private static sessionHandoff: Promise<void> = Promise.resolve();
   private autoPiP: () => boolean;
@@ -70,7 +76,7 @@ export class SystemPlayback {
   constructor(context: common.UIAbilityContext, controller: PlaybackController, surface: XComponentController, route: PlaybackRoute, view: SystemPlayerView, autoPiP: () => boolean = () => false) {
     this.autoPiP = autoPiP;
     this.context = context; this.controller = controller; this.surface = surface; this.view = view;
-    this.latest = { route: route, state: 'loading', position: 0, duration: (route.item.RunTimeTicks ?? 0) / 10000, speed: 1, width: 0, height: 0 };
+    this.latest = { route: route, state: 'loading', position: 0, duration: (route.item.RunTimeTicks ?? 0) / JellyfinTime.ticksPerMillisecond, speed: 1, width: 0, height: 0 };
     try { this.pipSupported = canIUse('SystemCapability.Window.SessionManager') && PiPWindow.isPiPEnabled(); } catch (e) { this.pipSupported = false; }
     this.emit();
   }
@@ -121,11 +127,11 @@ export class SystemPlayback {
       session.on('pause', () => { this.pause(); });
       session.on('stop', () => { this.stop(); });
       session.on('seek', (position: number) => { if (!this.disposed) { this.controller.seek(position); this.sync(true); } });
-      session.on('fastForward', (amount?: number) => { this.skip(amount ?? 15000); });
-      session.on('rewind', (amount?: number) => { this.skip(-(amount ?? 15000)); });
+        session.on('fastForward', (amount?: number) => { this.skip(amount ?? SystemPlayback.defaultSkipMs); });
+        session.on('rewind', (amount?: number) => { this.skip(-(amount ?? SystemPlayback.defaultSkipMs)); });
       session.on('setSpeed', (speed: number) => {
         if (this.disposed) { return; }
-        if (![0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed)) { this.view.error(text('speed_failed')); return; }
+        if (!isPlaybackRate(speed)) { this.view.error(text('speed_failed')); return; }
         this.controller.setSpeed(speed); this.sync(true);
       });
       if (this.latest.route.item.Type === 'Episode') {
@@ -184,7 +190,7 @@ export class SystemPlayback {
       } catch (e) { this.view.error(text('pip_failed')); }
     }
     this.refreshAutoPiP();
-    if (!this.ready || (!force && !changed && Date.now() - this.lastPublication < 1000)) { return; }
+    if (!this.ready || (!force && !changed && Date.now() - this.lastPublication < SystemPlayback.publicationIntervalMs)) { return; }
     this.lastPublication = Date.now(); this.pending = status;
     if (!this.publication) { this.publication = this.publish().finally(() => {
       this.publication = undefined;
@@ -323,7 +329,7 @@ export class SystemPlayback {
           if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); }
         }
       } catch (e) {
-        this.autoRetryAt = Date.now() + 30000;
+        this.autoRetryAt = Date.now() + SystemPlayback.autoPiPRetryMs;
         if (!this.disposed) { this.setAutoStart(false); this.view.error(text('auto_pip_failed'));
           if (!this.backgroundEnabled && !this.pipActive && !this.pipStarting) { await this.setTask(false); } }
       }
@@ -339,7 +345,7 @@ export class SystemPlayback {
     if (this.wantsAutoPiP() && this.autoArmed && !this.pipActive && !this.pipStarting) {
       this.pipStarting = true;
       let timer: number = -1;
-      await new Promise<void>((resolve) => { this.autoWait = resolve; timer = setTimeout(resolve, 1200); });
+      await new Promise<void>((resolve) => { this.autoWait = resolve; timer = setTimeout(resolve, SystemPlayback.autoPiPWaitMs); });
       if (timer >= 0) { clearTimeout(timer); } this.autoWait = undefined;
       if (!this.pipActive) {
         this.pipStarting = false;
@@ -384,8 +390,8 @@ export class SystemPlayback {
       if (event === 'playbackStateChanged') { if (status === PiPWindow.PiPControlStatus.PLAY) { this.play(); } else { this.pause(); } }
       else if (event === 'nextVideo') { this.next(); }
       else if (event === 'previousVideo') { this.previous(); }
-      else if (event === 'fastForward') { this.skip(15000); }
-      else if (event === 'fastBackward') { this.skip(-15000); }
+      else if (event === 'fastForward') { this.skip(SystemPlayback.defaultSkipMs); }
+      else if (event === 'fastBackward') { this.skip(-SystemPlayback.defaultSkipMs); }
     });
     if (status.route.item.Type === 'Episode') {
       pip.setPiPControlEnabled(PiPWindow.PiPControlType.VIDEO_NEXT, true);

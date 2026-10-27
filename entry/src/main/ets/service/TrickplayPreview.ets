@@ -4,6 +4,7 @@ import { decodePoster } from './PosterBitmap';
 
 // One decode in flight; intermediate drag positions coalesce. Never decode the entire BIF.
 export class TrickplayPreview {
+  private static readonly decodeTargetWidthPx: number = 640;
   private data: BifData | undefined;
   private revision: number = 0;
   private decoding: boolean = false;
@@ -29,7 +30,7 @@ export class TrickplayPreview {
     if (this.decoding || this.waitingRender || !this.pending || !this.data) { return; }
     const frame = this.pending; this.pending = undefined; if (this.time === frame.time) { return; }
     const revision = this.revision; const data = this.data; this.decoding = true;
-    decodePoster(data.bytes.slice(frame.offset, frame.end), 640, () => revision === this.revision && data === this.data).then((bitmap: image.PixelMap) => {
+    decodePoster(data.bytes.slice(frame.offset, frame.end), TrickplayPreview.decodeTargetWidthPx, () => revision === this.revision && data === this.data).then((bitmap: image.PixelMap) => {
       if (revision !== this.revision || data !== this.data) { bitmap.release().catch(() => {}); return; }
       if (this.current) { this.retired.push(this.current); }
       this.current = bitmap; this.time = frame.time; this.waitingRender = true; this.publish(bitmap, frame.time);

@@ -1,5 +1,14 @@
 import { MediaItem, MediaLink, MediaSource, MediaStream, Person } from '../model/Models';
 import { text } from './Strings';
+import { JellyfinTime } from './JellyfinTime';
+
+const eightKWidthThresholdPx: number = 7680;
+const eightKHeightThresholdPx: number = 4320;
+const fourKWidthThresholdPx: number = 3840;
+const fourKHeightThresholdPx: number = 2160;
+const bytesPerMiB: number = 1024 * 1024;
+const bytesPerGiB: number = bytesPerMiB * 1024;
+const runtimeTicksPerMinute: number = JellyfinTime.ticksPerSecond * 60;
 
 export interface DetailRow { key: string; label: string; value: string }
 export interface DetailMetadata { original: string; summary: string; chips: string[]; rows: DetailRow[]; actors: Person[] }
@@ -25,8 +34,8 @@ function profile(stream: MediaStream): string {
 }
 function size(bytes: number | undefined): string {
   if (!Number.isSafeInteger(bytes) || bytes! <= 0) { return ''; }
-  if (bytes! >= 1073741824) { return (bytes! / 1073741824).toFixed(2) + ' GiB'; }
-  if (bytes! >= 1048576) { return (bytes! / 1048576).toFixed(1) + ' MiB'; }
+  if (bytes! >= bytesPerGiB) { return (bytes! / bytesPerGiB).toFixed(2) + ' GiB'; }
+  if (bytes! >= bytesPerMiB) { return (bytes! / bytesPerMiB).toFixed(1) + ' MiB'; }
   return bytes!.toString() + ' B';
 }
 function description(stream: MediaStream): string {
@@ -41,7 +50,7 @@ export function detailMetadata(item: MediaItem, sourceId: string = ''): DetailMe
   const chips: string[] = [];
   if (video) {
     if ((video.Width ?? 0) > 0 && (video.Height ?? 0) > 0) {
-      chips.push(video.Width! >= 7680 || video.Height! >= 4320 ? '8K' : video.Width! >= 3840 || video.Height! >= 2160 ? '4K' : `${video.Width}×${video.Height}`);
+      chips.push(video.Width! >= eightKWidthThresholdPx || video.Height! >= eightKHeightThresholdPx ? '8K' : video.Width! >= fourKWidthThresholdPx || video.Height! >= fourKHeightThresholdPx ? '4K' : `${video.Width}×${video.Height}`);
     }
     if (codec(video)) { chips.push(codec(video)); }
     if (profile(video)) { chips.push(profile(video)); }
@@ -64,7 +73,7 @@ export function detailMetadata(item: MediaItem, sourceId: string = ''): DetailMe
   const people = item.People ?? [];
   add('directors', people.filter((person: Person) => person.Type === 'Director').map((person: Person) => person.Name).join('、'));
   add('writers', people.filter((person: Person) => person.Type === 'Writer').map((person: Person) => person.Name).join('、'));
-  const minutes = Number.isFinite(item.RunTimeTicks) && item.RunTimeTicks! > 0 ? text('runtime_minutes', Math.floor(item.RunTimeTicks! / 600000000)) : '';
+  const minutes = Number.isFinite(item.RunTimeTicks) && item.RunTimeTicks! > 0 ? text('runtime_minutes', Math.floor(item.RunTimeTicks! / runtimeTicksPerMinute)) : '';
   const rating = Number.isFinite(item.CommunityRating) ? text('community_score', item.CommunityRating!.toFixed(1)) : '';
   return { original: item.OriginalTitle?.trim() && item.OriginalTitle !== item.Name ? item.OriginalTitle : '',
     summary: [dateRange(item), minutes, item.OfficialRating?.trim(), rating].filter((value: string | undefined) => !!value).join(' · '),

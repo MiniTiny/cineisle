@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
-const sdk = process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents';
+const sdk = require('./deveco-runtime.cjs').contents;
 const ts = require(path.join(sdk, 'tools/hvigor/hvigor/node_modules/typescript'));
 const root = path.resolve(__dirname, '../entry/src/main/ets');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-regression-'));
@@ -38,7 +38,7 @@ platform.set('@ohos.util', { generateRandomUUID: () => require('node:crypto').ra
   TextEncoder: class { encodeInto(s) { return new TextEncoder().encode(s); } },
   TextDecoder: class { decodeToString(s) { return new TextDecoder().decode(s); } } });
 platform.set('@ohos.security.asset', { Tag: { ALIAS: 'alias', SECRET: 'secret', RETURN_TYPE: 'return', ACCESSIBILITY: 'access', CONFLICT_RESOLUTION: 'conflict' },
-  ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
+  ErrorCode: { NOT_FOUND: 24000002 }, ReturnType: { ALL: 1 }, Accessibility: { DEVICE_UNLOCKED: 1 }, ConflictResolution: { OVERWRITE: 1 },
   query: async attrs => { const value = assets.get(new TextDecoder().decode(attrs.get('alias'))); return value ? [new Map([['secret', value]])] : []; },
   add: async attrs => { const bytes = attrs.get('secret'); assert.ok(bytes.length <= 1024); assets.set(new TextDecoder().decode(attrs.get('alias')), bytes); }, remove: async attrs => { assets.delete(new TextDecoder().decode(attrs.get('alias'))); } });
 platform.set('@ohos.net.http', { RequestMethod: { GET: 'GET', POST: 'POST', DELETE: 'DELETE' }, HttpDataType: { STRING: 'STRING' },
@@ -429,7 +429,7 @@ test('a failed shelf retains successful home sections and reports independent fa
   const p = page(); await p.load(); assert.ok(p.homeFailures.some(f => f.message === 'latest-failed')); assert.ok(p.homeSections.some(s => s.id === 'resume')); assert.ok(p.homeSections.some(s => s.id === 'nextup')); assert.equal(p.busy, false);
 });
 
-module.exports = { capabilities, assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
+module.exports = { ts, capabilities, assets, load, platform, context, directory, activate, page, reset, deferred, film, library, snapshot, response, queue, requests, setRoute: value => { routeParams = value; } };
 if (require.main === module) (async () => {
   try {
     for (const [name, fn] of tests) { reset(); await fn(); console.log('PASS ' + name); }

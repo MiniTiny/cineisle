@@ -1,6 +1,6 @@
 // Executes the production adapter. Native rendering/decoding are explicit boundaries, not pixel evidence.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const ts=require('/Applications/DevEco-Studio.app/Contents/tools/hvigor/hvigor/node_modules/typescript');
+const ts=require(require('./deveco-runtime.cjs').typescript);
 function rasterFixture(options={},events=[]){
  const p=require('./player-regression.test.cjs'),module={exports:{}};
  const native={renderCaption:options.render||(()=>Promise.reject(Error('explicit native caption fixture required')))};

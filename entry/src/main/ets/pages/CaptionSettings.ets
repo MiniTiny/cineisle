@@ -7,11 +7,11 @@ import { PinGate } from '../components/PinGate';
 import router from '@ohos.router';
 import { AppLock } from '../service/AppLock';
 import { SystemCaptions } from '../service/SystemCaptions';
-import { CaptionConfig, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
+import { CaptionConfig, CaptionFamilyChoice, CaptionEdgeChoice, CAPTION_FAMILY_CHOICES, CAPTION_EDGE_CHOICES, CaptionSnapshot, CaptionRenderStyle, CAPTION_FAMILIES, CAPTION_EDGES, copyCaptionConfig, captionPreset, captionRenderStyle, validCaptionConfig, sameCaptionConfig } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { errorText, text } from '../utils/Strings';
-const FAMILY_LABELS: string[] = ['caption_family_default', 'caption_family_mono_serif', 'caption_family_serif', 'caption_family_mono_sans', 'caption_family_sans', 'caption_family_casual', 'caption_family_cursive', 'caption_family_small_caps'];
-const EDGE_LABELS: string[] = ['caption_edge_none', 'caption_edge_raised', 'caption_edge_depressed', 'caption_edge_uniform', 'caption_edge_shadow'];
+const FAMILY_LABELS: string[] = CAPTION_FAMILY_CHOICES.map((choice: CaptionFamilyChoice): string => choice.caption);
+const EDGE_LABELS: string[] = CAPTION_EDGE_CHOICES.map((choice: CaptionEdgeChoice): string => choice.caption);
 @Entry
 @Component
 struct CaptionSettings {
@@ -20,13 +20,13 @@ struct CaptionSettings {
   @StorageLink('cineIsleFontScale') fontScale: number = 1;
   @StorageLink('cineIsleLocked') @Watch('lockChanged') locked: boolean = true;
   @State state: CaptionSnapshot = new CaptionSnapshot();
-  @State captionEnabled: boolean = false;
-  @State scaleDraft: string = '100';
-  @State family: number = 0;
-  @State edge: number = 0;
-  @State foreground: string = '#FFFFFFFF';
-  @State backgroundDraft: string = '#99000000';
-  @State windowColor: string = '#00000000';
+  @State captionEnabled: boolean = new CaptionConfig().enabled;
+  @State scaleDraft: string = new CaptionConfig().fontScale.toString();
+  @State family: number = CAPTION_FAMILIES.indexOf(new CaptionConfig().family);
+  @State edge: number = CAPTION_EDGES.indexOf(new CaptionConfig().edge);
+  @State foreground: string = String(new CaptionConfig().foreground);
+  @State backgroundDraft: string = String(new CaptionConfig().background);
+  @State windowColor: string = String(new CaptionConfig().window);
   @State preview: CaptionRenderStyle = new CaptionRenderStyle();
   @State dirty: boolean = false;
   @State busy: boolean = false;
@@ -76,8 +76,9 @@ struct CaptionSettings {
   private changed(): void { if (!this.visible || !this.state.available || this.busy || this.locked || !AppLock.permit()) { return; } const config = this.draft(); this.dirty = true; this.valid = validCaptionConfig(config); this.preview = captionRenderStyle(config); this.message = this.valid ? '' : text('caption_invalid'); }
   private preset(yellow: boolean): void {
     if (!this.visible || !this.state.available || this.busy || this.locked || !AppLock.permit()) { return; }
-    this.captionEnabled = true; this.scaleDraft = '100'; this.family = 0; this.edge = 0; this.foreground = yellow ? '#FFFFFF00' : '#FFFFFFFF';
-    this.backgroundDraft = '#99000000'; this.windowColor = '#00000000'; this.changed();
+    const config = captionPreset(yellow);
+    this.captionEnabled = config.enabled; this.scaleDraft = config.fontScale.toString(); this.family = CAPTION_FAMILIES.indexOf(config.family); this.edge = CAPTION_EDGES.indexOf(config.edge);
+    this.foreground = String(config.foreground); this.backgroundDraft = String(config.background); this.windowColor = String(config.window); this.changed();
   }
   private reload(): void { if (!this.visible || this.busy || this.locked || !AppLock.permit()) { return; } const state = SystemCaptions.read(); this.state = state; if (state.available) { this.load(state.config); } else { this.message = text(state.issue); } }
   private async apply(): Promise<void> {
@@ -89,7 +90,7 @@ struct CaptionSettings {
     finally { if (revision === this.revision) { this.busy = false; } }
   }
   @Builder
-  private label(value: ResourceStr) { Text(value).fontSize(14).fontColor('#F2F3FA').width('100%') }
+  private label(value: ResourceStr) { Text(value).fontSize(14).fontColor(this.palette.foreground).width('100%') }
   build() {
     Stack() {
       if (this.locked) { PinGate() }
@@ -101,7 +102,7 @@ struct CaptionSettings {
             Column({ space: 12 }) {
               BrandHeading({ label: $r('app.string.caption_preview'), icon: $r('app.media.player_subtitle') })
               Row({ space: 12 }) {
-                Text($r('app.string.caption_enabled')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+                Text($r('app.string.caption_enabled')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
                 Checkbox().select(this.captionEnabled).selectedColor(this.palette.action).enabled(this.state.available && !this.busy)
                   .accessibilityText($r('app.string.caption_enabled')).onChange((value: boolean) => this.edit('enabled', value))
               }.width('100%')
@@ -115,28 +116,28 @@ struct CaptionSettings {
               }.width('100%').constraintSize({ minHeight: 100 }).justifyContent(FlexAlign.Center).backgroundColor('#000000').borderRadius(12).padding(8)
               BrandButton({ label: $r('app.string.caption_preset_light'), icon: $r('app.media.player_subtitle'), available: this.state.available && !this.busy, onSelect: () => this.preset(false) })
               BrandButton({ label: $r('app.string.caption_preset_yellow'), icon: $r('app.media.player_subtitle'), available: this.state.available && !this.busy, onSelect: () => this.preset(true) })
-            }.width('100%').padding(16).backgroundColor(this.amoled ? '#000000' : this.palette.raised).borderRadius(20)
+            }.width('100%').padding(16).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.raised).borderRadius(20)
             Column({ space: 12 }) {
               this.label($r('app.string.caption_scale'))
-              TextInput({ text: this.scaleDraft, placeholder: '100' }).type(InputType.Number).maxLength(6).height(UiLayout.buttonHeight(this.fontScale)).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface)
+              TextInput({ text: this.scaleDraft, placeholder: new CaptionConfig().fontScale.toString() }).type(InputType.Number).maxLength(6).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface)
                 .enabled(this.state.available && !this.busy).accessibilityText($r('app.string.caption_scale')).onChange((value: string) => this.edit('scale', value))
               this.label($r('app.string.caption_family'))
-              Select(FAMILY_LABELS.map((key: string): SelectOption => ({ value: text(key) }))).selected(this.family).value(text(FAMILY_LABELS[this.family])).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).width('100%')
+              Select(FAMILY_LABELS.map((key: string): SelectOption => ({ value: text(key) }))).selected(this.family).value(text(FAMILY_LABELS[this.family])).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).width('100%')
                 .enabled(this.state.available && !this.busy).accessibilityText($r('app.string.caption_family')).onSelect((index: number) => this.edit('family', index))
               this.label($r('app.string.caption_edge'))
-              Select(EDGE_LABELS.map((key: string): SelectOption => ({ value: text(key) }))).selected(this.edge).value(text(EDGE_LABELS[this.edge])).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).width('100%')
+              Select(EDGE_LABELS.map((key: string): SelectOption => ({ value: text(key) }))).selected(this.edge).value(text(EDGE_LABELS[this.edge])).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).width('100%')
                 .enabled(this.state.available && !this.busy).accessibilityText($r('app.string.caption_edge')).onSelect((index: number) => this.edit('edge', index))
               this.label($r('app.string.caption_foreground'))
-              TextInput({ text: this.foreground }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).enabled(this.state.available && !this.busy)
+              TextInput({ text: this.foreground }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).enabled(this.state.available && !this.busy)
                 .accessibilityText($r('app.string.caption_foreground')).onChange((value: string) => this.edit('foreground', value))
               this.label($r('app.string.caption_background'))
-              TextInput({ text: this.backgroundDraft }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).enabled(this.state.available && !this.busy)
+              TextInput({ text: this.backgroundDraft }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).enabled(this.state.available && !this.busy)
                 .accessibilityText($r('app.string.caption_background')).onChange((value: string) => this.edit('background', value))
               this.label($r('app.string.caption_window'))
-              TextInput({ text: this.windowColor }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor('#F2F3FA').backgroundColor(this.amoled ? '#000000' : this.palette.surface).enabled(this.state.available && !this.busy)
+              TextInput({ text: this.windowColor }).height(UiLayout.buttonHeight(this.fontScale)).maxLength(9).fontColor(this.palette.foreground).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.surface).enabled(this.state.available && !this.busy)
                 .accessibilityText($r('app.string.caption_window')).onChange((value: string) => this.edit('window', value))
               Text($r('app.string.caption_color_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
-            }.width('100%').padding(16).backgroundColor(this.amoled ? '#000000' : this.palette.raised).borderRadius(20)
+            }.width('100%').padding(16).backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.raised).borderRadius(20)
             if (this.dirty) { Text($r('app.string.caption_unsaved')).fontColor(this.palette.muted).fontSize(12).width('100%') }
             BrandButton({ label: $r('app.string.caption_apply'), icon: $r('app.media.menu_save'), primary: true, available: this.state.available && this.dirty && this.valid && !this.busy, onSelect: () => { this.apply(); } })
             BrandButton({ label: $r('app.string.caption_reload'), icon: $r('app.media.menu_sync'), available: !this.busy, onSelect: () => this.reload() })
@@ -144,6 +145,6 @@ struct CaptionSettings {
           }.width('100%').padding(20).constraintSize({ maxWidth: 760 })
         }.width('100%').height('100%')
       }
-    }.width('100%').height('100%').backgroundColor(this.amoled ? '#000000' : this.palette.background)
+    }.width('100%').height('100%').backgroundColor(this.amoled ? this.palette.amoledBackground : this.palette.background)
   }
 }

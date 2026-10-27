@@ -1,3 +1,4 @@
+import { playbackRateFromNative } from './PlaybackSpeedAdapter';
 import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import deviceInfo from '@ohos.deviceInfo';
@@ -12,6 +13,10 @@ import { MpvBridgeLimits } from '../utils/MpvLimits';
 
 // The shim is safe to import on API12; the optional library is loaded only inside capability/create.
 export class MpvPlaybackEngine implements PlaybackEngine {
+  private static readonly startupTimeoutMs: number = 30000;
+  private static readonly snapshotIntervalMs: number = 200;
+  private static readonly fallbackCueDurationMs: number = 1000;
+  private static readonly initialSubtitleFontSize: number = 55;
   private nativeCaption: boolean = true;
   get nativeSubtitles(): boolean { return this.nativeCaption; }
   private wantedSubtitle: boolean = true;
@@ -50,7 +55,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private focus: MpvAudioFocus = new MpvAudioFocus(() => this.interrupted());
   private value: native.MpvState = { loaded: false, rendered: false, paused: true, ended: false, seeking: false,
     error: 0, duration: 0, position: 0, width: 0, height: 0, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, tracks: [],
-    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: 55, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0,
+    subtitleText: '', subtitleAss: '', subtitleStart: -1, subtitleEnd: -1, subtitleEvents: '', subtitleFontSize: MpvPlaybackEngine.initialSubtitleFontSize, subtitleOverflow: false, surfaceWidth: 0, surfaceHeight: 0,
     hardwareDecoder: '', videoOutput: '', audioOutput: '' };
 
   static async available(): Promise<boolean> {
@@ -109,12 +114,12 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     const pending = new Promise<void>((resolve, reject) => { this.ready = resolve; this.rejectReady = reject; });
     // Attach the rejection immediately, including when release happens while native creation is pending.
     pending.catch(() => {});
-    this.timeout = setTimeout(() => { this.fail(); }, 30000);
+    this.timeout = setTimeout(() => { this.fail(); }, MpvPlaybackEngine.startupTimeoutMs);
     try {
       const handle = await native.create({ api: deviceInfo.sdkApiVersion, source: this.source, surface: this.surface!, fontConfiguration: this.fontConfiguration,
         hardwareDecoder: this.options.hwdec, videoOutput: this.options.vo });
       if (this.released || this.failed) { await native.release(handle); return; }
-      this.handle = handle; this.timer = setInterval(() => { this.refresh(); }, 200);
+      this.handle = handle; this.timer = setInterval(() => { this.refresh(); }, MpvPlaybackEngine.snapshotIntervalMs);
       await this.refresh(); await pending;
     } catch (e) { if (!this.released) { this.fail(); throw new Error('mpv_playback_failed'); } }
   }
@@ -198,7 +203,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
   private publishSubtitle(state: native.MpvState, seeking: boolean): void {
     const content = this.wantedSubtitle && !seeking ? this.subtitleContent : undefined;
     const start = Number.isFinite(state.subtitleStart) && state.subtitleStart >= 0 ? Math.round(state.subtitleStart) : state.position;
-    const end = Number.isFinite(state.subtitleEnd) && state.subtitleEnd > start ? Math.round(state.subtitleEnd) : start + 1000;
+    const end = Number.isFinite(state.subtitleEnd) && state.subtitleEnd > start ? Math.round(state.subtitleEnd) : start + MpvPlaybackEngine.fallbackCueDurationMs;
     const identity = content ? `${this.subtitleCacheKey}/${start}/${end}` : 'hidden';
     if (identity === this.subtitlePublished) { return; } this.subtitlePublished = identity;
     this.events?.subtitle({ text: content?.text ?? '', startTime: start, duration: end - start, content: content });
@@ -248,11 +253,7 @@ export class MpvPlaybackEngine implements PlaybackEngine {
     ++this.wantedSeek; this.dispatch('seek', position);
   }
   setSpeed(speed: media.PlaybackSpeed): void {
-    const rates = new Map<media.PlaybackSpeed, number>([[media.PlaybackSpeed.SPEED_FORWARD_0_50_X, 0.5],
-      [media.PlaybackSpeed.SPEED_FORWARD_0_75_X, 0.75], [media.PlaybackSpeed.SPEED_FORWARD_1_00_X, 1],
-      [media.PlaybackSpeed.SPEED_FORWARD_1_25_X, 1.25], [media.PlaybackSpeed.SPEED_FORWARD_1_50_X, 1.5],
-      [media.PlaybackSpeed.SPEED_FORWARD_1_75_X, 1.75], [media.PlaybackSpeed.SPEED_FORWARD_2_00_X, 2]]);
-    const value = rates.get(speed); if (value === undefined) { throw new Error('mpv_speed_invalid'); } this.dispatch('speed', value);
+    const value = playbackRateFromNative(speed); if (value === undefined) { throw new Error('mpv_speed_invalid'); } this.dispatch('speed', value);
   }
   setVolume(value: number): void { if (!Number.isFinite(value) || value < 0 || value > 1) { throw new Error('mpv_volume_invalid'); } this.dispatch('volume', value); }
   setSurfaceSize(width: number, height: number): void {

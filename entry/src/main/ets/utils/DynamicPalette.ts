@@ -1,5 +1,11 @@
 export interface WallpaperColor { red: number; green: number; blue: number; alpha: number }
 export interface DynamicPalette { seed: string; background: string; surface: string; raised: string; selected: string; accent: string; action: string; muted: string; warm: string; danger: string }
+class DynamicPaletteRules {
+  static readonly maximumSwatches: number = 16;
+  static readonly maximumContrastAdjustments: number = 32;
+  static readonly minimumContrast: number = 4.5;
+  static readonly contrastBlendStep: number = 0.12;
+}
 function channels(color: string): number[] { return [1, 3, 5].map((i: number) => Number.parseInt(color.slice(i, i + 2), 16)); }
 function hex(values: number[]): string { return '#' + values.map((n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0')).join('').toUpperCase(); }
 function blend(a: string, b: string, weight: number): string { const from = channels(a); const to = channels(b); return hex(from.map((n: number, i: number) => n + (to[i] - n) * weight)); }
@@ -11,12 +17,12 @@ export function colorLuminance(color: string): number {
 export function colorContrast(a: string, b: string): number { const x = colorLuminance(a); const y = colorLuminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
 function readable(foreground: string, backgrounds: string[]): string {
   let value = foreground;
-  for (let i = 0; i < 32 && backgrounds.some((background: string) => colorContrast(value, background) < 4.5); ++i) { value = blend(value, '#FFFFFF', 0.12); }
+  for (let i = 0; i < DynamicPaletteRules.maximumContrastAdjustments && backgrounds.some((background: string) => colorContrast(value, background) < DynamicPaletteRules.minimumContrast); ++i) { value = blend(value, '#FFFFFF', DynamicPaletteRules.contrastBlendStep); }
   return value;
 }
 // CineIsle dark tones derived from system wallpaper RGB; not an Android Material/HCT implementation.
 export function wallpaperPalette(colors: WallpaperColor[]): DynamicPalette | undefined {
-  if (!Array.isArray(colors) || !colors.length || colors.length > 16) { return undefined; }
+  if (!Array.isArray(colors) || !colors.length || colors.length > DynamicPaletteRules.maximumSwatches) { return undefined; }
   const color = colors.find((c: WallpaperColor) => !!c && [c.red, c.green, c.blue, c.alpha].every((n: number) => Number.isInteger(n) && n >= 0 && n <= 255) && c.alpha === 255);
   if (!color) { return undefined; }
   const seed = hex([color.red, color.green, color.blue]);
@@ -25,6 +31,6 @@ export function wallpaperPalette(colors: WallpaperColor[]): DynamicPalette | und
   const accent = readable(blend(seed, '#FFFFFF', 0.72), surfaces); const muted = readable(blend(accent, '#718388', 0.30), surfaces);
   const warm = readable('#F4CF8B', surfaces); const danger = readable('#FF9F9F', surfaces);
   let action = blend('#061012', seed, 0.32);
-  for (let i = 0; i < 32 && ['#F2F3FA', accent, muted, warm, danger].some((fg: string) => colorContrast(fg, action) < 4.5); ++i) { action = blend(action, '#000000', 0.12); }
+  for (let i = 0; i < DynamicPaletteRules.maximumContrastAdjustments && ['#F2F3FA', accent, muted, warm, danger].some((fg: string) => colorContrast(fg, action) < DynamicPaletteRules.minimumContrast); ++i) { action = blend(action, '#000000', DynamicPaletteRules.contrastBlendStep); }
   return { seed: seed, background: background, surface: surface, raised: raised, selected: selected, accent: accent, action: action, muted: muted, warm: warm, danger: danger };
 }

@@ -1,9 +1,11 @@
 import worker, { MessageEvents } from '@ohos.worker';
 import { DiscoveryProbe } from './DiscoveryProbe';
 import { JellyfinClient } from './JellyfinClient';
-import { DiscoveredServer, DiscoveryEvent, DiscoveryResult, discoveryAddress, discoveryServerLimit } from '../utils/ServerDiscovery';
+import { DiscoveredServer, DiscoveryEvent, DiscoveryResult, discoveryAddress, discoveryServerLimit, DiscoveryPacketLimits } from '../utils/ServerDiscovery';
 
 export class ServerDiscovery {
+  private static readonly workerCancelGraceMs: number = 1000;
+  private static readonly workerWatchdogMs: number = 10000;
   private revision: number = 0;
   private stop: ((code: string) => void) | undefined;
   private released: Promise<void> = Promise.resolve();
@@ -32,11 +34,11 @@ export class ServerDiscovery {
       };
       const stop = (code: string): void => {
         settle(code); if (stopping || closed) { return; } stopping = true;
-        grace = setTimeout(release, 1000);
+        grace = setTimeout(release, ServerDiscovery.workerCancelGraceMs);
         try { thread.postMessage({ type: 'cancel' } as DiscoveryEvent); } catch (e) { release(); }
       };
       this.stop = stop;
-      watchdog = setTimeout(() => stop('discovery_failed'), 10000);
+      watchdog = setTimeout(() => stop('discovery_failed'), ServerDiscovery.workerWatchdogMs);
       thread.onmessage = (message: MessageEvents): void => {
         const event = message.data as DiscoveryEvent;
         if (closed || !event) { return; }
@@ -67,7 +69,7 @@ export class ServerDiscovery {
       const info = await JellyfinClient.inspectServer(address, probe);
       if (revision !== this.revision) { throw new Error('discovery_cancelled'); }
       if (info.Id !== candidate.id) { throw new Error('server_identity_mismatch'); }
-      return { id: info.Id, address: address, name: (info.ServerName || candidate.name).slice(0, 128) };
+      return { id: info.Id, address: address, name: (info.ServerName || candidate.name).slice(0, DiscoveryPacketLimits.maxNameCodeUnits) };
     } catch (e) {
       const code = (e as Error).message;
       if (revision !== this.revision || code === 'discovery_cancelled') { throw new Error('discovery_cancelled'); }

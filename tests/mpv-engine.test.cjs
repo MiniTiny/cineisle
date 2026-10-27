@@ -4,7 +4,7 @@ const { fixture, runCase } = require('./mpv-probe-result.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const ts = require(path.join(process.env.DEVECO_CONTENTS || '/Applications/DevEco-Studio.app/Contents', 'tools/hvigor/hvigor/node_modules/typescript'));
+const ts = require(path.join(require('./deveco-runtime.cjs').contents, 'tools/hvigor/hvigor/node_modules/typescript'));
 const source = fs.readFileSync(path.join(__dirname, '../entry/src/main/ets/service/MpvPlaybackEngine.ets'), 'utf8');
 const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2020 } }).outputText;
 const focusJs = ts.transpileModule(fs.readFileSync(path.join(__dirname, '../entry/src/main/ets/service/MpvAudioFocus.ets'), 'utf8'),
@@ -22,7 +22,7 @@ const initial = () => ({ loaded: true, rendered: true, paused: true, ended: fals
   duration: 9000, position: 0, width: 640, height: 360, speed: 1, volume: 1, seekRevision: 0, seekDone: 0, surfaceWidth: 0, surfaceHeight: 0, hardwareDecoder: 'no', videoOutput: 'gpu-next', audioOutput: 'ohaudio',
   tracks: [{ index: 0, id: 1, kind: 'audio', language: 'eng', title: 'English', selected: true },
     { index: 1, id: 1, kind: 'sub', language: 'zho', title: 'Chinese', selected: true }] });
-function rig(api = 26) {
+function rig(api = 26, speedValues = {}, timing) {
   const timers = new Map(), calls = [], events = [], pending = [], device = { sdkApiVersion: api };
   let next = 0, value = initial(); const handle = {};
   const bridge = {
@@ -39,6 +39,7 @@ function rig(api = 26) {
   };
   const media = { SeekMode: { SEEK_CLOSEST: 3 }, MediaType: { MEDIA_TYPE_AUD: 0, MEDIA_TYPE_SUBTITLE: 2 },
     PlaybackSpeed: { SPEED_FORWARD_0_50_X: -1, SPEED_FORWARD_0_75_X: 0, SPEED_FORWARD_1_00_X: 1, SPEED_FORWARD_1_25_X: 2, SPEED_FORWARD_1_50_X: 3, SPEED_FORWARD_1_75_X: 5, SPEED_FORWARD_2_00_X: 4 } };
+  Object.assign(media.PlaybackSpeed, speedValues);
   const listeners = new Set();
   const session = { active: false,
     on(name, fn) { assert.equal(name, 'audioSessionDeactivated'); listeners.add(fn); },
@@ -59,13 +60,23 @@ function rig(api = 26) {
   platform['../utils/MpvOptions'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvOptions.ts'));
     platform['../utils/MpvLimits'] = pure(path.join(__dirname, '../entry/src/main/ets/utils/MpvLimits.ts'));
   const module = { exports: {} };
-  vm.runInNewContext(js, { module, exports: module.exports, require(id) { assert.ok(id in platform, 'unexpected platform import ' + id); return platform[id]; },
-    setInterval(fn) { const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { timers.delete(id); },
-    setTimeout(fn) { const id = ++next; timers.set(id, fn); return id; }, clearTimeout(id) { timers.delete(id); } });
+  const dependencyCache = new Map();
+  const dependency = (id, from = path.join(__dirname, '../entry/src/main/ets/service')) => {
+    if (id in platform) return platform[id]; assert.ok(id.startsWith('.'), 'unexpected platform import ' + id);
+    const stem = path.resolve(from, id), file = fs.existsSync(stem + '.ts') ? stem + '.ts' : stem + '.ets';
+    if (dependencyCache.has(file)) return dependencyCache.get(file).exports;
+    const child = { exports: {} }; dependencyCache.set(file, child);
+    const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2020 } }).outputText;
+    vm.runInNewContext(code, { module: child, exports: child.exports, require: name => dependency(name, path.dirname(file)) }); return child.exports;
+  };
+  vm.runInNewContext(js, { module, exports: module.exports, require: dependency,
+    setInterval(fn, ms) { if (timing) return timing.setInterval(fn, ms); const id = ++next; timers.set(id, fn); return id; }, clearInterval(id) { if (timing) timing.clearInterval(id); else timers.delete(id); },
+    setTimeout(fn, ms) { if (timing) return timing.setTimeout(fn, ms); const id = ++next; timers.set(id, fn); return id; }, clearTimeout(id) { if (timing) timing.clearTimeout(id); else timers.delete(id); } });
   const Engine = module.exports.MpvPlaybackEngine;
   const eventSink = Object.fromEntries(['state', 'time', 'seek', 'subtitle', 'frame', 'error', 'interrupt'].map(name => [name, (...args) => events.push([name, ...args])]));
   async function open(width = 0, height = 0) { const player = await Engine.create('/cache'); if (width) player.setSurfaceSize(width, height); player.bind(eventSink); player.url = 'https://example.invalid/synthetic'; await settle(); player.surfaceId = '123'; await player.prepare(); return player; }
-  return { Engine, bridge, fonts, calls, events, pending, timers, device, handle, open, eventSink, session, listeners,
+  return { Engine, bridge, fonts, media, calls, events, pending, timers, device, handle, open, eventSink, session, listeners,
+    subtitleFormatter: platform['../utils/MpvTextSubtitle'], subtitleTypes: pure(path.join(__dirname, '../entry/src/main/ets/utils/InlineSubtitle.ts')),
     get value() { return value; }, set value(v) { value = v; }, async tick() { for (const fn of [...timers.values()]) { await fn(); } await settle(); } };
 }
 const cases = [];
@@ -374,6 +385,8 @@ test('a pre-render size stays pending until VO exists', async () => {
 test('native VO geometry that drifts after seek/reconfiguration is brought back to the requested surface', async () => {
   const r=rig(),p=await r.open(1280,720);await p.refresh();assert.equal(r.calls.filter(c=>c[0]==='surface-size').length,1);r.value.surfaceWidth=2276;r.value.surfaceHeight=1280;await p.refresh();await p.refresh();assert.deepEqual(r.calls.filter(c=>c[0]==='surface-size'),[['surface-size',1280,720],['surface-size',1280,720]]);await p.release();
 });
+module.exports = { rig, settle };
+if (require.main === module) {
 const watchdog = setTimeout(() => { console.error('FAIL: adapter fixture did not settle'); process.exitCode = 1; }, 15000);
 (async () => {
   const selected = process.argv[2] ? cases.filter(([name]) => name.includes(process.argv[2])) : cases;
@@ -384,3 +397,5 @@ const watchdog = setTimeout(() => { console.error('FAIL: adapter fixture did not
   }
   console.log(`${selected.length} MPV adapter cases passed. Async bridge fixtures; no decoder/audio/UI claim.`);
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => clearTimeout(watchdog));
+
+}

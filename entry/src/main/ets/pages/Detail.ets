@@ -1,3 +1,4 @@
+import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
 import { showBrandDialog } from '../components/CompactDialog';
@@ -122,7 +123,7 @@ struct Detail {
     const client = AppService.requireClient(); const token = this.generation; this.busy = true; this.message = '';
     try {
       const route = await AppService.detailPlayback(this.item, this.usingCache ? '' : this.sourceId, this.usingCache, restart, this.usingCache ? this.record()?.path ?? '' : '');
-      if (this.current(token, client)) { await router.pushUrl({ url: 'pages/Player', params: route }); }
+      if (this.current(token, client)) { await router.pushUrl({ url: AppRoutes.player, params: route }); }
     } catch (e) { if (this.current(token, client)) { this.message = errorText(e as Error); } }
     finally { if (this.current(token, client)) { this.busy = false; } }
   }
@@ -155,7 +156,7 @@ struct Detail {
     if (this.busy || !this.canDownload() || this.deleted) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
     const record = this.record(); const sourceId = this.sourceId;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: record ? $r('app.string.remove_download') : $r('app.string.download_wifi'),
       message: record ? $r('app.string.remove_download_confirm') : $r('app.string.download_confirm'),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: record ? $r('app.string.remove') : $r('app.string.download'), fontColor: record ? this.palette.danger : this.palette.accent, action: async () => {
         if (!this.current(token, client) || this.busy || this.record() !== record) { return; }
@@ -169,7 +170,7 @@ struct Detail {
   private deleteMedia(): void {
     if (!this.loaded || this.busy || this.usingCache || this.deleted || this.item.Type !== 'Movie' || this.item.CanDelete !== true) { return; }
     const token = this.generation; const client = AppService.requireClient(); const item = this.item;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.server_delete'), message: $r('app.string.server_delete_confirm'),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.server_delete'), fontColor: this.palette.danger, action: async () => {
         if (!this.current(token, client) || this.busy || this.deleted) { return; }
         this.busy = true; this.message = '';
@@ -184,16 +185,16 @@ struct Detail {
     }, this.viewportWidth, this.viewportHeight);
   }
   private openChild(item: MediaItem): void {
-    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: 'pages/Detail', params: { item: item } }); }
+    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: AppRoutes.detail, params: { item: item } }); }
   }
   private openPerson(person: Person): void {
-    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: 'pages/Actor', params: { personId: person.Id, personName: person.Name } }); }
+    if (this.visible && this.pageClient === AppService.client) { router.pushUrl({ url: AppRoutes.actor, params: { personId: person.Id, personName: person.Name } }); }
   }
 
   private batchEpisodes(): void {
     const chosen = this.children.filter((item: MediaItem) => this.selectedEpisodes.includes(item.Id));
     const client = this.pageClient; const token = this.generation;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? '#000000' : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
+    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_download'), message: text('batch_download_confirm', chosen.length),
       buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('download'), fontColor: this.palette.accent, action: async () => {
         if (!client || !this.current(token, client) || this.busy) { return; }
         this.busy = true;
@@ -229,14 +230,14 @@ struct Detail {
               if (this.selectingEpisodes) {
                 Row({ space: 8 }) {
                   Checkbox().select(this.selectedEpisodes.includes(child.Id)).selectedColor(this.palette.action).enabled(!this.busy && !this.deleted && child.CanDownload === true).onChange((value: boolean) => { if (value && !this.selectedEpisodes.includes(child.Id)) { this.selectedEpisodes = [...this.selectedEpisodes, child.Id]; } else if (!value) { this.selectedEpisodes = this.selectedEpisodes.filter((id: string) => id !== child.Id); } })
-                  Text(child.Name).fontSize(14).fontColor('#F2F3FA').layoutWeight(1)
+                  Text(child.Name).fontSize(14).fontColor(this.palette.foreground).layoutWeight(1)
                 }.width('100%')
               }
               MediaCard({ item: child, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
             }.width('100%')
           }, (child: MediaItem) => `${child.Id}:${child.Name}:${child.UserData?.Played}:${child.ImageTags?.Primary}:${child.ProductionYear}:${child.CommunityRating}:${child.SeriesName}:${child.ParentIndexNumber}:${child.IndexNumber}`)
         }
-      }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+      }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
     } else if (this.loaded && !this.busy && ['Series', 'Season'].includes(this.item.Type)) {
       BrandState({ label: this.item.Type === 'Series' ? $r('app.string.no_seasons') : $r('app.string.no_episodes'), icon: $r('app.media.nav_library_active') })
     }
@@ -252,7 +253,7 @@ struct Detail {
           Column({ space: 12 }) {
                   CachedImage({ imageId: this.item.Id, tag: this.item.BackdropImageTags?.[0] ?? '', backdrop: true, pixelWidth: 1280, radius: 16 })
                     .width('100%').height(Math.min(260, Math.max(140, (this.viewportWidth - 32) * 9 / 16)))
-            Text(this.item.Name).fontSize(26).fontWeight(FontWeight.Bold).fontColor('#F2F3FA').width('100%')
+            Text(this.item.Name).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
             if (detailMetadata(this.item, this.sourceId).original) {
               Text(detailMetadata(this.item, this.sourceId).original).fontSize(14).fontColor(this.palette.muted).width('100%')
             }
@@ -289,7 +290,7 @@ struct Detail {
                   available: !this.busy && !this.deleted, onSelect: () => this.deleteMedia() }).width(this.actionWidth()).margin({ bottom: 8 })
               }
             }.width('100%')
-          }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
           if (this.downloadState) { Text(this.downloadState).fontSize(13).fontColor(this.palette.muted).width('100%') }
           if (!this.usingCache && (this.item.Type === 'Movie' || this.item.Type === 'Episode') && (this.item.MediaSources?.length ?? 0) > 1) {
             Column({ space: 12 }) {
@@ -301,7 +302,7 @@ struct Detail {
                     onSelect: () => { this.sourceId = source.Id; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
                 }, (source: MediaSource) => `${source.Id}:${source.Name}`)
               }.width('100%')
-            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
           }
           if (this.usingCache && this.localRecords().length && (this.item.Type === 'Movie' || this.item.Type === 'Episode')) {
             Column({ space: 12 }) {
@@ -312,7 +313,7 @@ struct Detail {
                     available: !this.busy && !this.deleted, onSelect: () => { this.offlinePath = record.path; this.updateDownload(); } }).width(this.actionWidth()).margin({ bottom: 8 })
                 }, (record: DownloadRecord) => record.path)
               }.width('100%')
-            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
           }
           DetailMetadataPanel({ item: this.metadataItem(), sourceId: this.usingCache ? this.record()?.mediaSourceId ?? '' : this.sourceId, stacked: this.viewportWidth < 400 || this.fontScale > 1.2,
             onPerson: (person: Person) => this.openPerson(person) })
@@ -320,12 +321,12 @@ struct Detail {
             Column({ space: 12 }) {
               BrandHeading({ label: $r('app.string.next_up'), icon: $r('app.media.player_next') })
               MediaCard({ item: this.nextUp, wide: true, onSelect: (item: MediaItem) => this.openChild(item) }).width('100%')
-            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+            }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
           }
           this.childrenPanel()
         }.padding(16).width('100%')
       }.layoutWeight(1).width('100%').align(Alignment.TopStart)
-    }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+    }.width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height)); })
   }

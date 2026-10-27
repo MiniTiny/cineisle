@@ -1,0 +1,21 @@
+const f=require('./player-display-fixture.cjs'),{assert,h,windowState}=f,tests=[],test=(name,action)=>tests.push({name,action});
+for(const [raw,expected]of [[-1,0.05],[0,0.05],[0.049999,0.05],[0.05,0.05],[0.050001,0.050001],[0.999999,0.999999],[1,1],[1.000001,1]])test('player display actual brightness '+raw,async check=>{
+ const r=await f.page();await r.p.changeBrightness(raw,true);check(()=>{assert.equal(f.brightnessCalls().at(-1)?.[1],expected);assert.equal(r.p.windowBrightness,expected);assert.equal(r.store.snapshot().playerUi.brightness,expected);assert.equal(r.p.message,'');});
+});
+for(const [raw,expected]of [[0.099999,0.1],[0.1,0.1],[0.100001,0.100001],[0.899999,0.899999],[0.9,0.9],[0.900001,0.9]])test('player display actual dim '+raw,async check=>{const r=await f.page();r.p.changeDim(raw);check(()=>{assert.equal(r.p.dimOpacity,expected);assert.equal(r.store.snapshot().playerUi.dimOpacity,expected);});});
+for(const [dy,expected]of [[1000,0.05],[-1000,1]])test('player display actual pan '+dy,async check=>{
+ const r=await f.page(),calls=[],change=r.p.changeBrightness.bind(r.p);r.p.changeBrightness=(value,remember)=>{calls.push(value);return change(value,remember);};r.p.surfaceWidth=400;r.p.surfaceHeight=300;r.p.beginPan(60,100);r.p.updatePan(0,dy);await h.settle();const before=r.store.snapshot().playerUi.brightness;r.p.endPan();await h.settle();check(()=>{assert.equal(calls[0],expected);assert.equal(before,-1);assert.equal(r.store.snapshot().playerUi.brightness,expected);assert.equal(f.brightnessCalls().at(-1)?.[1],expected);});
+});
+test('player display actual cache rejection preserves native success',async check=>{const r=await f.page();f.failWrite();await r.p.changeBrightness(0.7,true);check(()=>{assert.equal(r.p.windowBrightness,0.7);assert.equal(r.store.snapshot().playerUi.brightness,-1);assert.equal(r.p.ui.brightness,-1);assert.equal(r.p.message,'player_display_save_failed:');});});
+test('player display actual dim cache rejection keeps original optimistic view',async check=>{const r=await f.page();f.failWrite();r.p.changeDim(0.2);check(()=>{assert.equal(r.p.dimOpacity,0.2);assert.equal(r.store.snapshot().playerUi.dimOpacity,0.6);assert.equal(r.p.message,'player_display_save_failed:');});});
+test('player display native rejection retains original error',async check=>{const r=await f.page();windowState.failures.add('brightness');await r.p.changeBrightness(0.7,true);check(()=>{assert.equal(r.p.windowBrightness,0.5);assert.equal(r.store.snapshot().playerUi.brightness,-1);assert.equal(r.p.message,'brightness_failed:');});});
+test('player display delayed native result cannot persist to switched account',async check=>{
+ const r=await f.page(),gate=h.deferred();windowState.waits.set('brightness',gate.promise);const pending=r.p.changeBrightness(0.7,true);await h.settle();const A=h.AppService,{JellyfinClient}=h.load('service/JellyfinClient.ets');A.useClient(new JellyfinClient({...A.client.session,userId:'changed-owner'},'10.10.0'));gate.resolve();await pending;check(()=>{assert.equal(r.store.snapshot().playerUi.brightness,-1);assert.equal(A.experience.snapshot().playerUi,undefined);assert.equal(r.p.windowBrightness,0.5);});
+});
+for(const [value,valid]of [[-1,true],[0.049999,false],[0.05,true],[1,true],[1.000001,false]])test('player display independent window write '+value,async check=>{
+ const {PlaybackWindow}=h.load('service/PlaybackWindow.ets'),errors=[],w=new PlaybackWindow(h.systemPlatform.context,e=>errors.push(e));await w.update({visible:true,playing:false,immersive:false,locked:false,pip:false});const result=await w.setBrightness(value);await w.dispose();check(()=>{assert.equal(result,valid);assert.deepEqual(errors,[]);});
+});
+for(const [value,expected]of [[-1,0.5],[0,0],[0.01,0.01],[1,1]])test('player display independent window read '+value,async check=>{
+ windowState.main.props.brightness=value;const {PlaybackWindow}=h.load('service/PlaybackWindow.ets'),w=new PlaybackWindow(h.systemPlatform.context,()=>{});await w.update({visible:true,playing:false,immersive:false,locked:false,pip:false});const result=w.brightness;await w.dispose();check(()=>assert.equal(result,expected));
+});
+if(require.main===module)f.run(tests).catch(error=>{console.error(error);process.exitCode=1;});module.exports=tests;

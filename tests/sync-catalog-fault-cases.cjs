@@ -1,0 +1,18 @@
+const policy='entry/src/main/ets/utils/SyncPolicy.ts',service='entry/src/main/ets/service/AppService.ets',suite='sync-catalog-contract.test.cjs',recipes=[];
+const add=(id,file,old,replacement,name)=>recipes.push({id,file,old,replacement,name,suite});
+for(const delta of [-1,1])add('page-'+delta,policy,'pageItems: number = 200;',`pageItems: number = ${200+delta};`,'sync catalog actual 201');
+add('consumer-limit',service,'String(SyncCatalogPolicy.pageItems)',"'201'",'sync catalog actual 201');
+for(const type of ['movies','tvshows'])add('scope-'+type,policy,"['movies', 'tvshows']",type==='movies'?"['tvshows']":"['movies']",'sync catalog library '+type);
+add('scope-boxset',policy,"['movies', 'tvshows']","['movies', 'tvshows', 'boxsets']",'sync catalog library boxsets');
+add('scope-empty',policy,"!collectionType || ['movies', 'tvshows']", "!!collectionType && ['movies', 'tvshows']",'sync catalog library undefined');
+add('fixed-offset',service,'value: items.length.toString()',"value: String(Math.floor(items.length / 200) * 200)",'sync catalog unique scopes and short offsets');
+add('checkpoint-remove',service,'AppService.local?.saveSyncProgress(checkpoint);','void checkpoint;','sync catalog actual 201');
+add('callback-remove',service,'progress(items.length, total);','void 0;','sync catalog callback rejection precedes checkpoint');
+add('total-drift',service,"(total >= 0 && total !== page.TotalRecordCount)) { throw new Error('sync_incomplete'); }", "false) { throw new Error('sync_incomplete'); }",'sync catalog independent total-drift');
+add('gap-remove',service,'(page.Items.length === 0 && items.length < total) || items.length + page.Items.length > total','items.length + page.Items.length > total','sync catalog independent gap');
+add('overflow-remove',service,'(page.Items.length === 0 && items.length < total) || items.length + page.Items.length > total','(page.Items.length === 0 && items.length < total)','sync catalog independent overflow');
+add('duplicate-remove',service,'!validMediaItem(item) || ids.has(item.Id)','!validMediaItem(item)','sync catalog independent duplicate');
+add('invalid-item-remove',service,'!validMediaItem(item) || ids.has(item.Id)','ids.has(item.Id)','sync catalog independent invalid-item');
+add('completion-compare',service,'AppService.local?.saveSyncProgress(checkpoint);\n      if (items.length === total) { return items; }','AppService.local?.saveSyncProgress(checkpoint);\n      if (items.length <= total) { return items; }','sync catalog actual 201');
+const controls=[{name:'sync catalog actual 201',phase:'request',requiredCalls:{'file-lock':1}},{name:'sync catalog actual 201',phase:'http-create',nativeInit:true},{name:'sync catalog actual 201',phase:'file-lock'},{name:'sync catalog independent duplicate',phase:'domain'},...['file-open','file-write','file-rename'].map(phase=>({name:'sync catalog actual 201',phase,requiredCalls:{request:2},details:{filename:phase==='file-rename'?'sync-progress.json':'sync-progress.json.tmp',stage:'business'}})),{name:'sync catalog actual 201',phase:'setup'}].map(c=>({...c,scope:'sync-catalog',suite}));
+module.exports={recipes,controls,scope:'sync-catalog',fixture:'tests/catalog-contract-fixture.cjs',earlyPhase:'file-open',earlyOld:'const active = h.activate();',earlyReplacement:"trace.call('file-open',()=>{}); const active = h.activate();",selfFaults:[{id:'native-init-capture',phase:'http-create',file:'tests/catalog-contract-fixture.cjs',old:"trace.call('http-create',()=>{",replacement:"((phase,operation)=>operation())('http-create',()=>{"}]};

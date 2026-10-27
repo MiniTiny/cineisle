@@ -22,7 +22,7 @@ export struct DetailMetadataPanel {
       Flex({ direction: this.stacked ? FlexDirection.Column : FlexDirection.Row, alignItems: ItemAlign.Start }) {
         Text(row.label).fontSize(13).fontColor(this.palette.muted).width(this.stacked ? '100%' : 88)
           .margin(this.stacked ? { bottom: 6 } : { right: 14 })
-        Text(row.value).fontSize(14).fontColor('#F2F3FA').lineHeight(22).width(this.stacked ? '100%' : undefined).layoutWeight(this.stacked ? 0 : 1)
+        Text(row.value).fontSize(14).fontColor(this.palette.foreground).lineHeight(22).width(this.stacked ? '100%' : undefined).layoutWeight(this.stacked ? 0 : 1)
       }.width('100%')
     }, (row: DetailRow) => row.key + ':' + row.value)
   }
@@ -32,10 +32,10 @@ export struct DetailMetadataPanel {
         Column({ space: 14 }) {
           BrandHeading({ label: $r('app.string.detail_story'), icon: $r('app.media.detail_film') })
           if (this.item.Overview?.trim()) {
-            Text(this.item.Overview).fontColor('#F2F3FA').fontSize(15).lineHeight(24).width('100%')
+            Text(this.item.Overview).fontColor(this.palette.foreground).fontSize(15).lineHeight(24).width('100%')
           }
           this.metadataRows(false)
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
       if (detailMetadata(this.item, this.sourceId).chips.length || (this.extraInfo && this.rows(true).length)) {
         Column({ space: 14 }) {
@@ -47,7 +47,7 @@ export struct DetailMetadataPanel {
             }, (chip: string) => chip)
           }.width('100%')
           if (this.extraInfo) { this.metadataRows(true) }
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
       if (detailMetadata(this.item).actors.length) {
         Column({ space: 14 }) {
@@ -58,15 +58,15 @@ export struct DetailMetadataPanel {
                         CachedImage({ imageId: person.Id, tag: person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 24, placeholder: $r('app.media.nav_user_muted') })
                           .width(48).height(48).flexShrink(0)
                 Column({ space: 6 }) {
-                  Text(person.Name).fontColor('#F2F3FA').fontSize(14).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+                  Text(person.Name).fontColor(this.palette.foreground).fontSize(14).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
                   if (person.Role) { Text(person.Role).fontColor(this.palette.muted).fontSize(12).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%') }
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
                 Image($r('app.media.menu_chevron')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(20).height(20).flexShrink(0).accessibilityLevel('no')
               }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(12).hitTestBehavior(HitTestMode.None)
-            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+            }.width('100%').constraintSize({ minHeight: Math.max(64, 56 * this.fontScale) + 16 }).padding(0).borderRadius(16).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
               .accessibilityText(person.Name).onClick(() => this.onPerson(person))
           }, (person: Person) => person.Id + ':' + person.Name + ':' + (person.Role ?? '') + ':' + (person.PrimaryImageTag ?? ''))
-        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding(16).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
       }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }

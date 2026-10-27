@@ -2,6 +2,7 @@ import { SubtitleRun } from '../utils/InlineSubtitle';
 import { CaptionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { NativeCaption } from './NativeCaption';
+import { CaptionRenderLimits } from '../utils/SubtitleLimits';
 
 // Structured captions share per-window native typography in the main player and PiP.
 @Component
@@ -9,7 +10,7 @@ export struct RichCaption {
   @Prop runs: SubtitleRun[] = [];
   @Prop captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
   @Prop fontSize: number = 20;
-  @Prop limit: number = 1000;
+  @Prop limit: number = CaptionRenderLimits.maxLines;
   @Prop identifier: string = '';
   @Prop revision: string = '';
   @Prop padX: number = 8;

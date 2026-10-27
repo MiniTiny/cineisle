@@ -2,6 +2,7 @@
 // to tests. All five exported callbacks remain real. Observe external N-API string
 // reads without copying validation or exposing input contents.
 #include <node_api.h>
+#include <type_traits>
 #include "engine.h"
 struct StringRead { bool copy; size_t bytes, capacity; };
 static std::vector<StringRead> stringReads;
@@ -30,10 +31,20 @@ napi_value Configure(napi_env e, napi_callback_info info) {
     mpv_fixture::Configuration value;
     auto number = [&](const char *key, int &target) { if (Has(e, object, key)) { int32_t n; Check(napi_get_value_int32(e, Field(e, object, key), &n)); target = n; } };
     number("trackCount", value.trackCount); number("firstTrackId", value.firstTrackId); number("events", value.events);
+    if (Has(e, object, "positionSeconds")) Check(napi_get_value_double(e, Field(e, object, "positionSeconds"), &value.positionSeconds));
+    if (Has(e, object, "subtitleFontSize")) Check(napi_get_value_double(e, Field(e, object, "subtitleFontSize"), &value.subtitleFontSize));
+    if (Has(e, object, "subtitleStartSeconds")) Check(napi_get_value_double(e, Field(e, object, "subtitleStartSeconds"), &value.subtitleStartSeconds));
+    if (Has(e, object, "subtitleEndSeconds")) Check(napi_get_value_double(e, Field(e, object, "subtitleEndSeconds"), &value.subtitleEndSeconds));
+    if (Has(e, object, "eventIds")) {
+        auto array = Field(e, object, "eventIds"); uint32_t length; Check(napi_get_array_length(e, array, &length));
+        for (uint32_t i = 0; i < length; ++i) { napi_value item; int32_t id; Check(napi_get_element(e, array, i, &item)); Check(napi_get_value_int32(e, item, &id)); value.eventIds.push_back(id); }
+    }
     if (Has(e, object, "version")) Check(napi_get_value_uint32(e, Field(e, object, "version"), &value.version));
     auto flag = [&](const char *key, bool &target) { if (Has(e, object, key)) Check(napi_get_value_bool(e, Field(e, object, key), &target)); };
     flag("failInitialize", value.failInitialize); flag("failInitializeOnce", value.failInitializeOnce);
     flag("failProperty", value.failProperty); flag("repeatTrackId", value.repeatTrackId);
+    flag("failSeekCommand", value.failSeekCommand);
+    flag("subtitleFontAvailable", value.subtitleFontAvailable); flag("subtitleTracks", value.subtitleTracks);
     auto text = [&](const char *key, std::string &target) {
         if (!Has(e, object, key)) return;
         size_t length; auto field = Field(e, object, key); Check(napi_get_value_string_utf8(e, field, nullptr, 0, &length));
@@ -59,6 +70,7 @@ napi_value Inspect(napi_env e, napi_callback_info) {
     Check(napi_create_object(e, &out)); Check(napi_create_object(e, &options));
     Set(e, out, "created", double(value.created)); Set(e, out, "destroyed", double(value.destroyed)); Set(e, out, "live", double(value.live));
     Set(e, out, "blocked", double(value.blocked)); Set(e, out, "versionCalls", double(value.versionCalls)); Set(e, out, "eventCalls", double(value.eventCalls));
+    Set(e, out, "unavailableFontReads", double(value.unavailableFontReads));
     Set(e, out, "active", double(active.load()));
     { std::lock_guard<std::mutex> lock(apiMutex); Set(e, out, "apiLoaded", api != nullptr); }
     for (const auto &option : value.options) Set(e, options, option.first.c_str(), option.second);
@@ -68,6 +80,12 @@ napi_value Inspect(napi_env e, napi_callback_info) {
     };
     pairs(value.properties, properties); pairs(value.commands, commands);
     Check(napi_set_named_property(e, out, "options", options)); Check(napi_set_named_property(e, out, "properties", properties)); Check(napi_set_named_property(e, out, "commands", commands));
+    auto list = [&](const char *key, const auto &values) {
+        napi_value array; Check(napi_create_array_with_length(e, values.size(), &array));
+        for (size_t i = 0; i < values.size(); ++i) { napi_value item; const auto &value = values[i]; if constexpr (std::is_same_v<std::decay_t<decltype(value)>, std::string>) Check(napi_create_string_utf8(e, value.c_str(), value.size(), &item)); else Check(napi_create_int32(e, value, &item)); Check(napi_set_element(e, array, i, item)); }
+        Check(napi_set_named_property(e, out, key, array));
+    };
+    list("propertyReads", value.propertyReads); list("deliveredEvents", value.deliveredEvents);
     return out;
 }
 // Intentionally bypass Number() and the N-API command wrapper. The production
@@ -80,6 +98,21 @@ napi_value CoreSurface(napi_env e, napi_callback_info info) {
         Handle(e, values[0])->Set(command); return Undefined(e);
     } catch (const std::exception &error) { napi_throw_error(e, nullptr, error.what()); return nullptr; }
 }
+// Direct Session operations bypass the exported command/Snapshot async wrappers.
+napi_value CoreSeek(napi_env e, napi_callback_info info) {
+    try {
+        size_t count = 2; napi_value values[2]; Check(napi_get_cb_info(e, info, &count, values, nullptr, nullptr));
+        Command command; command.type = "seek"; Check(napi_get_value_double(e, values[1], &command.value));
+        Handle(e, values[0])->Set(command); return Undefined(e);
+    } catch (const std::exception &error) { napi_throw_error(e, nullptr, error.what()); return nullptr; }
+}
+napi_value CoreSnapshot(napi_env e, napi_callback_info info) {
+    try {
+        size_t count = 1; napi_value value; Check(napi_get_cb_info(e, info, &count, &value, nullptr, nullptr));
+        return Encode(e, Handle(e, value)->Snapshot());
+    } catch (const std::exception &error) { napi_throw_error(e, nullptr, error.what()); return nullptr; }
+}
+napi_value InitialState(napi_env e, napi_callback_info) { return Encode(e, State{}); }
 napi_value QueueSize(napi_env e, napi_callback_info info) {
     size_t count = 1; napi_value value; Check(napi_get_cb_info(e, info, &count, &value, nullptr, nullptr));
     auto session = Handle(e, value); std::lock_guard<std::mutex> lock(session->mutex);
@@ -103,6 +136,9 @@ static napi_value FixtureInit(napi_env e, napi_value exports) {
         {"unblock", nullptr, Unblock, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"inspect", nullptr, Inspect, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"coreSurface", nullptr, CoreSurface, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"coreSeek", nullptr, CoreSeek, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"coreSnapshot", nullptr, CoreSnapshot, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"initialState", nullptr, InitialState, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"queueSize", nullptr, QueueSize, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"coreEnqueue", nullptr, CoreEnqueue, nullptr, nullptr, nullptr, napi_default, nullptr}};
     Check(napi_define_properties(e, exports, sizeof(descriptors) / sizeof(descriptors[0]), descriptors)); return exports;

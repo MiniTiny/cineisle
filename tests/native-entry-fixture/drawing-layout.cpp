@@ -6,6 +6,7 @@
 #include <native_drawing/drawing_point.h>
 #include <fribidi/fribidi.h>
 #include <cstdlib>
+#include <atomic>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -35,10 +36,29 @@ size_t Boxes(size_t index)
     throw std::runtime_error("caption_fixture_missing_box_count");
 }
 }
+namespace drawing_layout_fixture {
+std::atomic<bool> failFont{false}, failStyle{false};
+std::atomic<unsigned> fontCalls{0}, fontFailures{0}, styleCalls{0}, styleFailures{0};
+void Configure(bool font, bool style) { failFont = font; failStyle = style; fontCalls = 0; fontFailures = 0; styleCalls = 0; styleFailures = 0; }
+unsigned Calls() { return fontCalls.load(); }
+unsigned Failures() { return fontFailures.load(); }
+unsigned StyleCalls() { return styleCalls.load(); }
+unsigned StyleFailures() { return styleFailures.load(); }
+}
 extern "C" {
-OH_Drawing_FontCollection *OH_Drawing_CreateFontCollection(void) { return new OH_Drawing_FontCollection; }
+OH_Drawing_FontCollection *OH_Drawing_CreateFontCollection(void) {
+    using namespace drawing_layout_fixture; ++fontCalls;
+    if (failFont) { ++fontFailures; return nullptr; }
+    try { return new OH_Drawing_FontCollection; }
+    catch (...) { ++fontFailures; throw; }
+}
 void OH_Drawing_DestroyFontCollection(OH_Drawing_FontCollection *value) { delete value; }
-OH_Drawing_TypographyStyle *OH_Drawing_CreateTypographyStyle(void) { return new OH_Drawing_TypographyStyle; }
+OH_Drawing_TypographyStyle *OH_Drawing_CreateTypographyStyle(void) {
+    using namespace drawing_layout_fixture; ++styleCalls;
+    if (failStyle) { ++styleFailures; return nullptr; }
+    try { return new OH_Drawing_TypographyStyle; }
+    catch (...) { ++styleFailures; throw; }
+}
 void OH_Drawing_DestroyTypographyStyle(OH_Drawing_TypographyStyle *value) { delete value; }
 void OH_Drawing_SetTypographyTextAlign(OH_Drawing_TypographyStyle *, int) {}
 void OH_Drawing_SetTypographyTextDirection(OH_Drawing_TypographyStyle *, int) {}

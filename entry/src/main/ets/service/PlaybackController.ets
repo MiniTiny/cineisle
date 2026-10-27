@@ -1,3 +1,7 @@
+import { SurfaceGeometry } from '../utils/SurfaceGeometry';
+import { JellyfinTime } from '../utils/JellyfinTime';
+import { PlaybackRate, normalizePlaybackRate } from '../utils/PlaybackRate';
+import { nativePlaybackSpeed } from './PlaybackSpeedAdapter';
 import media from '@ohos.multimedia.media';
 import audio from '@ohos.multimedia.audio';
 import fs from '@ohos.file.fs';
@@ -37,6 +41,8 @@ export interface PlaybackStatus {
 
 // Owns the native player and its FD. Every asynchronous callback is tied to one load.
 export class PlaybackController {
+  private static readonly progressReportIntervalMs: number = 10000;
+  private static readonly styledRenderIntervalMs: number = 50;
   private player: PlaybackEngine | undefined = undefined;
   private nativeContent: SubtitleContent | undefined;
   private surfacePixelWidth: number = 0;
@@ -78,7 +84,7 @@ export class PlaybackController {
   private hidden: boolean = false;
   private lastReport: number = 0;
   private speed: media.PlaybackSpeed = media.PlaybackSpeed.SPEED_FORWARD_1_00_X;
-  private rate: number = 1;
+  private rate: number = PlaybackRate.Normal;
   private volume: number = 1;
   private reports: Promise<void> = Promise.resolve();
   private pendingProgress: Map<number, PendingReport> = new Map();
@@ -106,7 +112,7 @@ export class PlaybackController {
     // Capture identity before enqueueing, so old stop/progress cannot be attributed to a new source.
     this.reports = this.reports.then(async () => {
       if (event === 'Progress') { this.pendingProgress.delete(generation); }
-      try { await client.report(event, report.route.item.Id, report.route.mediaSourceId, report.route.playSessionId, report.position / 1000, report.paused);
+      try { await client.report(event, report.route.item.Id, report.route.mediaSourceId, report.route.playSessionId, report.position / JellyfinTime.millisecondsPerSecond, report.paused);
         if (generation === this.generation) { this.view.reportError(false); }
       } catch (e) { if (generation === this.generation) { this.view.reportError(true); } }
     });
@@ -170,7 +176,7 @@ export class PlaybackController {
     this.paused = paused; this.started = false; this.subtitleEnded = false;
     this.audio = []; this.subtitles = []; this.audioKey = ''; this.subtitleKey = ''; this.lastReport = 0;
     this.view.tracks([], [], '', ''); this.view.time(0, 0); this.view.state('loading');
-    const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / 10000;
+    const resume = position >= 0 ? position : (route.item.UserData?.PlaybackPositionTicks ?? 0) / JellyfinTime.ticksPerMillisecond;
     this.retryPosition = Number.isFinite(resume) && resume >= 0 ? resume : 0;
     try {
       const player = await this.engineFactory();
@@ -211,7 +217,7 @@ export class PlaybackController {
           if (this.started || position > 0) { this.retryPosition = position; }
         }
         this.view.time(position, player.duration); this.renderSubtitle();
-        if (this.started && !this.paused && Date.now() - this.lastReport >= 10000) { this.lastReport = Date.now(); this.send('Progress'); }
+        if (this.started && !this.paused && Date.now() - this.lastReport >= PlaybackController.progressReportIntervalMs) { this.lastReport = Date.now(); this.send('Progress'); }
       }, seek: (position: number) => {
         if (!this.active(player, generation) || !Number.isFinite(position) || position < 0) { return; }
         this.seeking = false; this.position = position; this.retryPosition = position; this.confirmPosition(position, player.duration);
@@ -297,7 +303,7 @@ export class PlaybackController {
 
   get relativeVolume(): number { return this.volume; }
   setSurfaceSize(width: number, height: number): void {
-    if (![width, height].every((value: number): boolean => Number.isSafeInteger(value) && value > 0 && value <= 8192)) { return; }
+    if (!SurfaceGeometry.valid(width, height)) { return; }
     this.surfacePixelWidth = width; this.surfacePixelHeight = height;
     if (this.player && !this.closed && !this.failed) { this.player.setSurfaceSize(width, height); }
   }
@@ -332,7 +338,7 @@ export class PlaybackController {
     if (!this.styled) { return; }
     if (!this.styledVisible || this.closed || this.failed || this.subtitleEnded || this.seeking || !this.player) { this.styled.clear(); return; }
     this.renderStyled();
-    if (this.player.state === 'playing' && !this.paused) { this.styledTimer = setInterval(() => { this.renderStyled(); }, 50); }
+    if (this.player.state === 'playing' && !this.paused) { this.styledTimer = setInterval(() => { this.renderStyled(); }, PlaybackController.styledRenderIntervalMs); }
   }
 
   private renderStyled(): void {
@@ -467,13 +473,8 @@ export class PlaybackController {
     } catch (e) { this.seeking = priorSeeking; this.view.error(text('play_error')); }
   }
   setSpeed(speed: number): void {
-    this.rate = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].includes(speed) ? speed : 1;
-    const speeds: Map<number, media.PlaybackSpeed> = new Map([
-      [0.5, media.PlaybackSpeed.SPEED_FORWARD_0_50_X], [0.75, media.PlaybackSpeed.SPEED_FORWARD_0_75_X],
-      [1, media.PlaybackSpeed.SPEED_FORWARD_1_00_X], [1.25, media.PlaybackSpeed.SPEED_FORWARD_1_25_X],
-      [1.5, media.PlaybackSpeed.SPEED_FORWARD_1_50_X], [1.75, media.PlaybackSpeed.SPEED_FORWARD_1_75_X], [2, media.PlaybackSpeed.SPEED_FORWARD_2_00_X]
-    ]);
-    this.speed = speeds.get(this.rate)!;
+    this.rate = normalizePlaybackRate(speed);
+    this.speed = nativePlaybackSpeed(this.rate)!;
     try { if (this.player && ['prepared', 'playing', 'paused'].includes(this.player.state)) { this.player.setSpeed(this.speed); } }
     catch (e) { this.view.error(text('speed_failed')); }
   }

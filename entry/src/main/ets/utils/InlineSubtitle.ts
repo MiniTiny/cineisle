@@ -1,6 +1,24 @@
 import { CaptionRenderLimits } from './SubtitleLimits';
 import { subtitleEntities } from './SubtitleEntities';
 
+// Both plain-track converters produce the same relative size in SubtitleRun.
+// Format-specific callers retain their own error or native-renderer fallback.
+export class SubtitleRunScale {
+  static readonly minimum: number = 0.125;
+  static readonly maximum: number = 8;
+  static valid(value: number): boolean {
+    return Number.isFinite(value) && value >= SubtitleRunScale.minimum && value <= SubtitleRunScale.maximum;
+  }
+}
+
+class InlineSubtitleLimits {
+  static readonly maximumFamilyCodeUnits: number = 128;
+  // The stack includes its root; checking before push admits 64 authored frames.
+  static readonly maximumMarkupDepth: number = 64;
+  static readonly bigMultiplier: number = 1.25;
+  static readonly smallMultiplier: number = 0.8;
+}
+
 export class SubtitleBaseline {
   constructor(public direction: number, public sizeScale: number, public family: string,
     public bold: boolean, public italic: boolean) {}
@@ -57,7 +75,7 @@ for (const item of ('black=000000 darkgray=444444 gray=888888 lightgray=CCCCCC w
 function fontColor(value: string): string { return htmlColor(subtitleEntities(value)); }
 function fontFamily(value: string): string {
   const family = subtitleEntities(value).trim();
-  return family && family.length <= 128 && !/["'<>\\/\u0000-\u001f]/.test(family) ? family : '';
+  return family && family.length <= InlineSubtitleLimits.maximumFamilyCodeUnits && !/["'<>\\/\u0000-\u001f]/.test(family) ? family : '';
 }
 // Html's legacy CSS colors use signed integer decoding, not browser #RGB expansion.
 function htmlColor(value: string): string {
@@ -106,8 +124,8 @@ function scriptBaselines(stack: FormatFrame[]): SubtitleBaseline[] {
   let scale = 1; let family = ''; let bold = false; let italic = false;
   for (let i = stack.length - 1; i > 0; i--) {
     const frame = stack[i];
-    if (frame.tag === 'big') { scale *= 1.25; }
-    else if (frame.tag === 'small') { scale *= 0.8; }
+    if (frame.tag === 'big') { scale *= InlineSubtitleLimits.bigMultiplier; }
+    else if (frame.tag === 'small') { scale *= InlineSubtitleLimits.smallMultiplier; }
     else if (frame.tag === 'b' || frame.tag === 'strong') { bold = true; }
     else if (frame.tag === 'i' || frame.tag === 'em') { italic = true; }
     else if (frame.tag === 'font' && frame.metricFamily) { family = frame.metricFamily; }
@@ -166,7 +184,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
   };
   const openFrame = (name: string, tag: string = '', start: number = 0): void => {
     ++styleRevision;
-    if (stack.length > 64) { throw new Error('subtitle_failed'); }
+    if (stack.length > InlineSubtitleLimits.maximumMarkupDepth) { throw new Error('subtitle_failed'); }
     const style = new SubtitleRun('', stack[stack.length - 1].style);
     let metricFamily = '';
     if (name === 'b' || name === 'strong') { style.bold = true; }
@@ -175,9 +193,9 @@ export function inlineSubtitle(value: string): SubtitleContent {
     else if (name === 'u') { style.underline = true; }
     else if (name === 's' || name === 'del' || name === 'strike') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
     else if (name === 'big' || name === 'small') {
-      style.sizeScale *= name === 'big' ? 1.25 : 0.8;
+      style.sizeScale *= name === 'big' ? InlineSubtitleLimits.bigMultiplier : InlineSubtitleLimits.smallMultiplier;
       // Reject an excessive candidate instead of silently changing its authored size.
-      if (!Number.isFinite(style.sizeScale) || style.sizeScale < 0.125 || style.sizeScale > 8) { throw new Error('subtitle_failed'); }
+      if (!SubtitleRunScale.valid(style.sizeScale)) { throw new Error('subtitle_failed'); }
     }
     else if (name === 'font') {
       const attributes = fontAttributes(tag, start);

@@ -5,6 +5,7 @@ import fcntl
 import hashlib
 import json
 import os
+import runpy
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'docs/native-ass-sources.json'
 CACHE = ROOT / '.local/native-ass'
 NAMES = {'meson', 'pkgconf', 'freetype', 'fribidi', 'harfbuzz', 'libass', 'fontconfig', 'expat'}
+
+# curl uses seconds/bytes; extraction counts accepted TarInfo metadata bytes.
+_SOURCE_CONNECT_TIMEOUT_SECONDS = 30
+_SOURCE_DOWNLOAD_TIMEOUT_SECONDS = 1800
+_MAX_SOURCE_ARCHIVE_BYTES = 100_000_000
+_MAX_EXTRACTED_SOURCE_BYTES = 1024 * 1024 * 1024
 
 
 def digest(path):
@@ -70,7 +77,7 @@ def extract(archive, destination):
             if len(parts) == 1 or not (member.isfile() or member.isdir()):
                 continue
             total += member.size
-            if total > 1024 * 1024 * 1024:
+            if total > _MAX_EXTRACTED_SOURCE_BYTES:
                 raise RuntimeError('source archive exceeds extraction limit')
             member.name = str(Path(*parts[1:]))
             source.extract(member, destination, filter='data')
@@ -86,8 +93,8 @@ def source(record, offline, env):
         if offline:
             raise RuntimeError('source archive unavailable offline: ' + record['name'])
         partial = archive.with_suffix('.download')
-        run(['curl', '--fail', '--location', '--connect-timeout', '30', '--max-time', '1800',
-             '--max-filesize', '100000000', '--output', partial, record['url']], env)
+        run(['curl', '--fail', '--location', '--connect-timeout', str(_SOURCE_CONNECT_TIMEOUT_SECONDS), '--max-time', str(_SOURCE_DOWNLOAD_TIMEOUT_SECONDS),
+             '--max-filesize', str(_MAX_SOURCE_ARCHIVE_BYTES), '--output', partial, record['url']], env)
         if digest(partial) != checksum:
             raise RuntimeError('download fingerprint mismatch: ' + record['name'])
         partial.replace(archive)
@@ -117,8 +124,8 @@ def main():
     records = {record['name']: record for record in metadata['sources']}
     if set(records) != NAMES or len(metadata['sources']) != len(NAMES):
         raise RuntimeError('native source manifest is incomplete')
-    sdk_home = os.environ.get('DEVECO_SDK_HOME',
-        os.environ.get('DEVECO_CONTENTS', '/Applications/DevEco-Studio.app/Contents') + '/sdk')
+    toolchain = runpy.run_path(str(ROOT / 'scripts/deveco-runtime.py'))
+    sdk_home = toolchain['resolve_deveco'](empty_is_default=False)['sdkHome']
     sdk = Path(os.environ.get('OHOS_NDK_HOME', sdk_home + '/default/openharmony/native')).resolve()
     cmake = sdk / 'build-tools/cmake/bin/cmake'
     ninja = sdk / 'build-tools/cmake/bin/ninja'

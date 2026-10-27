@@ -2,6 +2,8 @@ import common from '@ohos.app.ability.common';
 import background from '@ohos.resourceschedule.backgroundTaskManager';
 import wantAgent from '@ohos.app.ability.wantAgent';
 
+const backgroundRequestCode: number = 717;
+
 // Audio and synchronization share a UIAbility background task; releasing one must retain the other.
 export class BackgroundLease {
   private static modes: Set<background.BackgroundMode> = new Set();
@@ -13,7 +15,7 @@ export class BackgroundLease {
       try {
         if (!BackgroundLease.modes.size) { if (previous.size) { await background.stopBackgroundRunning(context); } return; }
         const agent = await wantAgent.getWantAgent({ wants: [{ bundleName: context.abilityInfo.bundleName, abilityName: context.abilityInfo.name }],
-          operationType: wantAgent.OperationType.START_ABILITY, requestCode: 717, wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG] });
+          operationType: wantAgent.OperationType.START_ABILITY, requestCode: backgroundRequestCode, wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG] });
         const modes = Array.from(BackgroundLease.modes);
         if (modes.length === 1) { await background.startBackgroundRunning(context, modes[0], agent); }
         else { await background.startBackgroundRunning(context, modes.map((value: background.BackgroundMode) => value === background.BackgroundMode.AUDIO_PLAYBACK ? 'audioPlayback' : 'dataTransfer'), agent); }

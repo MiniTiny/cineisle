@@ -6,6 +6,11 @@ import { discoveryAddress } from '../utils/ServerDiscovery';
 
 // A single public-system request with no Authorization header, cookies or saved account.
 export class DiscoveryProbe extends NativeHttpTransport {
+  private static readonly requestTimeoutMs: number = 6000;
+  private static readonly connectTimeoutMs: number = 4000;
+  private static readonly readTimeoutMs: number = 4000;
+  private static readonly maxResponseBytes: number = 65536;
+  private static readonly maxResponseCodeUnits: number = 65536;
   private address: string;
   private aborted: boolean = false;
   private used: boolean = false;
@@ -28,14 +33,14 @@ export class DiscoveryProbe extends NativeHttpTransport {
         if (error) { reject(error); } else { resolve(value as T); }
       };
       this.abort = () => finish(new Error('discovery_cancelled'));
-      timer = setTimeout(() => finish(new Error('discovery_verify_timeout')), 6000);
+      timer = setTimeout(() => finish(new Error('discovery_verify_timeout')), DiscoveryProbe.requestTimeoutMs);
       try {
         connection.request(this.address + path, { method: http.RequestMethod.GET,
           header: { 'Accept': 'application/json' }, expectDataType: http.HttpDataType.STRING,
-          connectTimeout: 4000, readTimeout: 4000, maxLimit: 65536 }).then((response: http.HttpResponse) => {
+          connectTimeout: DiscoveryProbe.connectTimeoutMs, readTimeout: DiscoveryProbe.readTimeoutMs, maxLimit: DiscoveryProbe.maxResponseBytes }).then((response: http.HttpResponse) => {
           if (settled) { return; }
           try {
-            if (response.responseCode !== 200 || typeof response.result !== 'string' || response.result.length > 65536) { throw new Error('discovery_verify_failed'); }
+            if (response.responseCode !== 200 || typeof response.result !== 'string' || response.result.length > DiscoveryProbe.maxResponseCodeUnits) { throw new Error('discovery_verify_failed'); }
             finish(undefined, JSON.parse(response.result) as T);
           } catch (e) { finish(new Error('discovery_verify_failed')); }
         }).catch(() => finish(new Error('discovery_verify_failed')));

@@ -2,6 +2,7 @@
 // belongs in .local. This is separate from the normal regression gate.
 const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process'), { classify } = require('./mpv-probe-result.cjs');
+const { replaceLiteral } = require('./literal-mutation.cjs');
 const recipes = require('./mpv-fault-cases.cjs'), root = path.resolve(__dirname, '..');
 function fingerprint() {
   const values = {};
@@ -12,7 +13,7 @@ function fingerprint() {
       else if (entry.isFile()) values[file] = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex');
     }
   }
-  for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests']) visit(scope);
+  for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests', 'config']) visit(scope);
   return values;
 }
 function run({ output = path.join(root, '.local/test-results/mpv-probes'), select = '' } = {}) {
@@ -24,7 +25,7 @@ function run({ output = path.join(root, '.local/test-results/mpv-probes'), selec
   const persist = (id, raw) => fs.writeFileSync(path.join(output, id + '.json'), JSON.stringify(raw, null, 2) + '\n');
   let baseline;
   try {
-    for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests']) fs.cpSync(path.join(root, scope), path.join(isolated, scope), { recursive: true });
+    for (const scope of ['entry/src/main/cpp/mpv', 'entry/src/main/ets', 'tests', 'config']) fs.cpSync(path.join(root, scope), path.join(isolated, scope), { recursive: true });
     baseline = require(path.join(isolated, 'tests/native-mpv-build.cjs')).build();
     const native = require(path.join(isolated, 'tests/native-mpv-run.cjs'));
     const active = { name: 'native execute admits four overlapping opens and rejects the fifth without leaking reservation', error: { code: 'ERR_ASSERTION' } };
@@ -62,9 +63,9 @@ function run({ output = path.join(root, '.local/test-results/mpv-probes'), selec
       }
       const target = path.join(isolated, recipe.path);
       assert.ok(fs.realpathSync(target).startsWith(isolated + path.sep), 'Mutation must stay in the isolated tree');
-      const original = fs.readFileSync(target, 'utf8'); assert.equal(original.split(recipe.old).length, 2, 'Stale or ambiguous mutation: ' + recipe.id);
+      const original = fs.readFileSync(target, 'utf8'), mutated = replaceLiteral(original, recipe.old, recipe.new, 'Stale or ambiguous mutation: ' + recipe.id);
       try {
-        fs.writeFileSync(target, original.replace(recipe.old, recipe.new));
+        fs.writeFileSync(target, mutated);
         const raw = worker(recipe, recipe.id), result = classify(raw, recipe);
         persist(recipe.id, raw); evidence.probes.push({ id: recipe.id, path: recipe.path, name: recipe.name, expectedError: recipe.error, ...result });
         console.log(result.status.toUpperCase() + ' ' + recipe.id); save();

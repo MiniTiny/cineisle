@@ -1,3 +1,4 @@
+import { PlaybackRate, playbackRates } from '../utils/PlaybackRate';
 import { UiPalette } from '../utils/UiPalette';
 import image from '@ohos.multimedia.image';
 import { AssSubtitle } from '../service/AssSubtitle';
@@ -18,7 +19,7 @@ import { PlaybackRoute, MediaSource } from '../model/Models';
 import { TrackChoice } from '../utils/Playback';
 import { text } from '../utils/Strings';
 import { AppService } from '../service/AppService';
-import { PlayerOptions, playerOptions } from '../utils/PlayerOptions';
+import { PlayerOptionRules, PlayerOptions, playerOptions } from '../utils/PlayerOptions';
 import { PlaybackController, PlaybackStatus } from '../service/PlaybackController';
 import { PlaybackSurface } from '../service/PlaybackSurface';
 import { SystemCaptions } from '../service/SystemCaptions';
@@ -34,6 +35,13 @@ import { JellyfinClient } from '../service/JellyfinClient';
 import { ExperienceState } from '../utils/Experience';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
+
+// Persistence, control visibility and interaction parameters remain independent.
+const offlineProgressSaveIntervalMs: number = 10000;
+const controlsHideDelayMs: number = 3000;
+const fullWidthSeekSpanMs: number = 90000;
+const speedHoldTriggerMs: number = 500;
+const seekSliderStepMs: number = 1000;
 
 @Entry
 @Component
@@ -51,7 +59,7 @@ struct Player {
   @State route: PlaybackRoute = new PlaybackRoute();
   @State message: string = '';
   @State reportMessage: string = '';
-  @State speed: number = 1;
+  @State speed: number = PlaybackRate.Normal;
   @State state: string = 'loading';
   @State frameReady: boolean = false;
   @State playbackPosition: number = 0;
@@ -91,7 +99,7 @@ struct Player {
   @State immersive: boolean = false;
   @State controlsVisible: boolean = true;
   @State night: boolean = false;
-  @State dimOpacity: number = 0.6;
+  @State dimOpacity: number = PlayerOptionRules.defaultDimOpacity;
   @State windowBrightness: number = 0.5;
   @State volume: number = 1;
   private window: PlaybackWindow | undefined;
@@ -143,9 +151,9 @@ struct Player {
     this.watchCaptions();
     this.ownerClient = AppService.client; this.immersive = true;
     this.ui = playerOptions(AppService.experience?.snapshot().playerUi); this.introEnabled = this.ui.introSkipper ?? true; this.trickplayEnabled = this.ui.trickplay ?? true; this.zoomed = this.ui.startMaximized;
-    this.dimOpacity = this.ui.dimOpacity ?? 0.6;
+    this.dimOpacity = this.ui.dimOpacity ?? PlayerOptionRules.defaultDimOpacity;
     this.window = new PlaybackWindow(getContext(this) as common.UIAbilityContext, (code: string) => { if (this.alive) { this.message = text(code); this.showControls(); } });
-    if (this.ui.rememberBrightness && (this.ui.brightness ?? -1) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
+    if (this.ui.rememberBrightness && (this.ui.brightness ?? PlayerOptionRules.systemBrightness) >= 0) { this.windowBrightness = this.ui.brightness!; this.window.setBrightness(this.windowBrightness); }
     this.syncWindow();
     if (this.route.item.Type === 'Episode') { this.restoreAutoNext(); }
     this.showPreferences(AppService.playbackPreferences.snapshot());
@@ -154,7 +162,7 @@ struct Player {
       state: (state: string) => { if (this.alive) { this.state = state; this.syncBackend(this.controller?.snapshot()); if (state === 'error') { this.options = false; this.clearIntro(); this.clearTrickplay(); this.system?.stopPiP(); } if (!['playing', 'prepared'].includes(state)) { this.cancelGesture(); } this.system?.sync(true); this.syncWindow(); this.showControls(); } },
       frame: (ready: boolean) => { if (this.alive) { this.frameReady = ready; } },
       closed: (status: PlaybackStatus) => { this.finishOffline(status); },
-      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.syncBackend(status); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > 10000) { this.saveOffline(); } } },
+      time: (position: number, duration: number) => { if (this.alive) { this.playbackPosition = position; this.duration = duration; const status = this.controller?.snapshot(); this.syncBackend(status); this.speed = status?.speed ?? 1; if (status && status.width > 0 && status.height > 0) { this.videoAspect = status.width / status.height; } this.system?.sync(); if (this.route.offline && Date.now() - this.lastOfflineSave > offlineProgressSaveIntervalMs) { this.saveOffline(); } } },
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
@@ -412,7 +420,7 @@ struct Player {
   private previewSeek(offset: number): void {
     if (!this.canGesture()) { this.cancelGesture(); return; }
     if (this.seekAnchor < 0 || !Number.isFinite(offset)) { return; }
-    this.seekPreview = Math.max(0, Math.min(this.duration, this.seekAnchor + offset * 90000 / Math.max(1, this.surfaceWidth)));
+    this.seekPreview = Math.max(0, Math.min(this.duration, this.seekAnchor + offset * fullWidthSeekSpanMs / Math.max(1, this.surfaceWidth)));
     this.gestureHint = text('gesture_seek_preview', this.clock(this.seekPreview)); this.clearHide(); this.showThumbnail(this.seekPreview);
   }
   private endSeek(): void {
@@ -421,7 +429,7 @@ struct Player {
   }
   private holdSpeed(x: number, y: number): void {
     if (!this.canGesture() || !this.insideGesture(x, y) || this.state !== 'playing' || this.heldSpeed > 0) { return; }
-    this.cancelGesture(); this.heldSpeed = this.speed; this.speed = 2; this.controller?.setSpeed(2); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
+    this.cancelGesture(); this.heldSpeed = this.speed; this.speed = PlaybackRate.Double; this.controller?.setSpeed(PlaybackRate.Double); this.gestureHint = text('gesture_speed_hold'); this.system?.sync(true);
   }
   private pinch(scale: number): void {
     if (!this.ui.zoom) { return; }
@@ -446,7 +454,7 @@ struct Player {
   private showControls(): void {
     this.clearHide(); this.controlsVisible = true;
     if (this.alive && this.visible && this.immersive && !this.controlsLocked && !this.locked && !this.options && !this.busy && !this.message && this.state === 'playing') {
-      this.hideTimer = setTimeout(() => { this.hideTimer = -1; if (this.alive && this.visible && this.immersive && !this.locked && !this.busy && !this.message && !this.options && !this.controlsLocked && this.state === 'playing') { this.controlsVisible = false; } }, 3000);
+      this.hideTimer = setTimeout(() => { this.hideTimer = -1; if (this.alive && this.visible && this.immersive && !this.locked && !this.busy && !this.message && !this.options && !this.controlsLocked && this.state === 'playing') { this.controlsVisible = false; } }, controlsHideDelayMs);
     }
   }
   private singleTap(): void {
@@ -471,7 +479,7 @@ struct Player {
       }
     }
     if (this.panMode === 'seek') { this.previewSeek(dx); }
-    else if (this.panMode === 'brightness') { this.changeBrightness(Math.max(0.05, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
+    else if (this.panMode === 'brightness') { this.changeBrightness(Math.max(PlayerOptionRules.minBrightness, Math.min(PlayerOptionRules.maxBrightness, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
     else if (this.panMode === 'volume') { this.changeVolume(Math.max(0, Math.min(1, this.displayAnchor - dy / Math.max(1, this.surfaceHeight)))); }
   }
   private endPan(): void {
@@ -491,7 +499,7 @@ struct Player {
   }
   private async changeBrightness(value: number, remember: boolean = false): Promise<void> {
     if (!this.alive || !this.visible || this.locked || !AppLock.permit() || this.controlsLocked || this.pipActive || !Number.isFinite(value)) { return; }
-    value = Math.max(0.05, Math.min(1, value)); this.brightnessTarget = value; const revision = ++this.brightnessRevision;
+    value = Math.max(PlayerOptionRules.minBrightness, Math.min(PlayerOptionRules.maxBrightness, value)); this.brightnessTarget = value; const revision = ++this.brightnessRevision;
     if (!await this.window?.setBrightness(value) || !this.alive || this.locked || this.ownerClient !== AppService.client || revision !== this.brightnessRevision) { return; }
     this.windowBrightness = value;
     if (this.panMode === 'brightness') { this.gestureHint = text('player_brightness_value', Math.round(value * 100)); }
@@ -502,7 +510,7 @@ struct Player {
     value = Math.max(0, Math.min(1, value));
     if (this.controller?.setVolume(value)) { this.volume = value; if (this.panMode === 'volume') { this.gestureHint = text('player_volume_value', Math.round(value * 100)); } }
   }
-  private changeDim(value: number): void { if (!this.locked && !this.controlsLocked && Number.isFinite(value)) { this.dimOpacity = Math.max(0.1, Math.min(0.9, value)); this.saveDisplay(false, this.dimOpacity); } }
+  private changeDim(value: number): void { if (!this.locked && !this.controlsLocked && Number.isFinite(value)) { this.dimOpacity = Math.max(PlayerOptionRules.minDimOpacity, Math.min(PlayerOptionRules.maxDimOpacity, value)); this.saveDisplay(false, this.dimOpacity); } }
 
   build() {
     Column() {
@@ -545,7 +553,7 @@ struct Player {
             Column() {}.width('100%').height('100%')
             .gesture(GestureGroup(GestureMode.Exclusive,
               PinchGesture({ fingers: 2 }).onActionStart(() => this.cancelGesture()).onActionUpdate((event: GestureEvent) => this.pinch(event.scale)),
-              LongPressGesture({ fingers: 1, duration: 500 }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
+              LongPressGesture({ fingers: 1, duration: speedHoldTriggerMs }).onAction((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.holdSpeed(finger.localX, finger.localY); } })
                 .onActionEnd(() => this.cancelGesture()).onActionCancel(() => this.cancelGesture()),
               PanGesture({ fingers: 1, direction: PanDirection.All, distance: 12 })
                 .onActionStart((event: GestureEvent) => { const finger = event.fingerList[0]; if (finger) { this.beginPan(finger.localX - event.offsetX, finger.localY - event.offsetY); this.updatePan(event.offsetX, event.offsetY); } })
@@ -586,7 +594,7 @@ struct Player {
             .onAreaChange((_old: Area, area: Area) => { this.surfaceWidth = Number.parseFloat(String(area.width)); this.surfaceHeight = Number.parseFloat(String(area.height)); })
           if (!this.immersive) { this.playbackControls() }
           }.width('100%').layoutWeight(1)
-        }.width('100%').height('100%').backgroundColor((this.amoled ? '#000000' : this.palette.background))
+        }.width('100%').height('100%').backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.background))
       }
     }.width('100%').height('100%').onAreaChange((_old: Area, area: Area) => {
       this.viewportWidth = Number.parseFloat(String(area.width)); this.viewportHeight = Number.parseFloat(String(area.height));
@@ -613,22 +621,22 @@ struct Player {
     Row({ space: 12 }) {
       Button({ type: ButtonType.Normal }) {
         Image($r('app.media.menu_back')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.controlsLocked).accessibilityText($r('app.string.back')).onClick(() => this.goBack())
-      Text(this.route.item.Name).fontColor('#F2F3FA').fontSize(18).fontWeight(FontWeight.Medium)
+      Text(this.route.item.Name).fontColor(this.palette.foreground).fontSize(18).fontWeight(FontWeight.Medium)
         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
       Button({ type: ButtonType.Normal }) {
         Image(this.controlsLocked ? $r('app.media.menu_unlock') : $r('app.media.menu_lock')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined))
           .width(24).height(24).accessibilityLevel('no')
       }.width(44).height(44).padding(0).borderRadius(14)
-        .backgroundColor(this.controlsLocked ? this.palette.action : (this.amoled ? '#000000' : this.palette.surface))
+        .backgroundColor(this.controlsLocked ? this.palette.action : (this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .accessibilityText(this.controlsLocked ? $r('app.string.controls_unlock') : $r('app.string.controls_lock'))
         .onClick(() => this.lockControls())
       Button({ type: ButtonType.Normal }) {
         Image(this.immersive ? $r('app.media.player_exit_fullscreen') : $r('app.media.player_fullscreen')).colorFilter(this.palette.filter(this.palette.dynamic ? this.palette.accent : undefined)).width(24).height(24).accessibilityLevel('no')
-      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? '#000000' : this.palette.surface)).enabled(!this.controlsLocked)
+      }.width(44).height(44).padding(0).borderRadius(14).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).enabled(!this.controlsLocked)
         .accessibilityText(this.immersive ? $r('app.string.player_exit_fullscreen') : $r('app.string.player_fullscreen')).onClick(() => this.toggleImmersive())
-    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : (this.amoled ? '#000000' : this.palette.background))
+    }.padding(12).width('100%').backgroundColor(this.immersive ? '#B30D1924' : (this.amoled ? this.palette.amoledBackground : this.palette.background))
   }
 
   @Builder
@@ -641,8 +649,8 @@ struct Player {
             if (this.state !== 'error') {
             Row({ space: 8 }) {
               Text(this.clock(this.playbackPosition)).fontColor(this.palette.muted).fontSize(12).flexShrink(0)
-              Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: 1000 })
-                .layoutWeight(1).selectedColor(this.palette.accent).trackColor((this.amoled ? '#000000' : this.palette.surface))
+              Slider({ value: this.sliderPreview >= 0 ? this.sliderPreview : this.playbackPosition, min: 0, max: Math.max(1, this.duration), step: seekSliderStepMs })
+                .layoutWeight(1).selectedColor(this.palette.accent).trackColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
                 .blockColor(this.palette.accent).enabled(!this.busy && this.duration > 0)
                 .accessibilityText($r('app.string.player_seek'))
                 .onChange((value: number, mode: SliderChangeMode) => this.sliderSeek(value, mode))
@@ -661,7 +669,7 @@ struct Player {
                   onSelect: () => { this.options = !this.options; this.showControls(); } })
               }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '48%' : '100%').margin({ bottom: 8 })
             }.width('100%')
-          }.width('100%').padding(12).borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised))
+          }.width('100%').padding(12).borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised))
           if (this.options) {
             this.displayOptions()
             this.systemOptions()
@@ -700,13 +708,13 @@ struct Player {
         onSelect: () => { if (this.pipActive) { this.system?.stopPiP(); } else { this.system?.startPiP(); } } })
       if (!this.pipSupported) { Text($r('app.string.pip_unavailable')).fontColor(this.palette.muted).fontSize(12) }
       Row({ space: 12 }) {
-        Text($r('app.string.background_playback')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.background_playback')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.backgroundEnabled }).enabled(this.systemReady)
           .selectedColor(this.palette.action).switchPointColor(this.palette.accent)
           .accessibilityText($r('app.string.background_playback')).onChange((value: boolean) => { this.system?.setBackground(value); })
       }.width('100%')
       Text($r('app.string.background_playback_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -714,13 +722,13 @@ struct Player {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_media_group'), icon: $r('app.media.nav_library_active') })
       Row({ space: 12 }) {
-        Text($r('app.string.player_intro_skipper')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_intro_skipper')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Checkbox().select(this.introEnabled).enabled(!this.busy && !this.settingsBusy).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_intro_skipper')).onChange((enabled: boolean) => this.changeIntro(enabled))
       }.width('100%')
       Text($r('app.string.player_intro_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 8 }) {
-        Text($r('app.string.player_trickplay')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_trickplay')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Checkbox().select(this.trickplayEnabled).selectedColor(this.palette.action)
           .accessibilityText($r('app.string.player_trickplay')).onChange((enabled: boolean) => this.changeTrickplay(enabled))
       }.width('100%')
@@ -745,7 +753,7 @@ struct Player {
         selected: this.subtitles.findIndex((track: TrackChoice) => track.key === this.subtitleKey) + 1,
         available: !this.busy && !this.settingsBusy, onSelect: (index: number) => { this.track(index === 0 ? '' : this.subtitles[index - 1].key, false); } })
       Text($r('app.string.subtitle_format_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -754,16 +762,16 @@ struct Player {
       BrandHeading({ label: $r('app.string.playback_language_preferences'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.preferred_audio_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy).onChange((value: string) => { this.audioLanguage = value; })
       Text($r('app.string.preferred_subtitle_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor('#F2F3FA')
-        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? '#000000' : this.palette.surface))
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
       Row({ space: 12 }) {
-        Text($r('app.string.preferred_subtitles_off')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.preferred_subtitles_off')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.subtitlesOff }).enabled(!this.settingsBusy && !this.busy)
           .selectedColor(this.palette.action).switchPointColor(this.palette.accent)
           .accessibilityText($r('app.string.preferred_subtitles_off')).onChange((value: boolean) => { this.subtitlesOff = value; })
@@ -781,29 +789,29 @@ struct Player {
       Text($r('app.string.playback_preferences_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       if (this.settingsBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
       if (this.settingsMessage) { Text(this.settingsMessage).fontColor(this.palette.warm).fontSize(12).width('100%') }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
   private displayOptions() {
     Column({ space: 12 }) {
       BrandHeading({ label: $r('app.string.player_display_group'), icon: $r('app.media.menu_settings') })
-      Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
-      Slider({ value: this.windowBrightness * 100, min: 5, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
+      Text($r('app.string.player_brightness_value', Math.round(this.windowBrightness * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
+      Slider({ value: this.windowBrightness * 100, min: PlayerOptionRules.minBrightness * 100, max: PlayerOptionRules.maxBrightness * 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_window_brightness')).onChange((value: number, mode: SliderChangeMode) => { this.changeBrightness(value / 100, mode === SliderChangeMode.End || mode === SliderChangeMode.Click); })
-      Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor('#F2F3FA').fontSize(14).width('100%')
+      Text($r('app.string.player_volume_value', Math.round(this.volume * 100))).fontColor(this.palette.foreground).fontSize(14).width('100%')
       Slider({ value: this.volume * 100, min: 0, max: 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_relative_volume')).onChange((value: number) => this.changeVolume(value / 100))
       Text($r('app.string.player_relative_volume_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Row({ space: 12 }) {
-        Text($r('app.string.player_night_mode')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+        Text($r('app.string.player_night_mode')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
         Toggle({ type: ToggleType.Switch, isOn: this.night }).selectedColor(this.palette.action).accessibilityText($r('app.string.player_night_mode'))
           .onChange((value: boolean) => { this.night = value; this.showControls(); })
       }.width('100%')
       Text($r('app.string.player_dim_value', Math.round(this.dimOpacity * 100))).fontColor(this.palette.muted).fontSize(12).width('100%')
-      Slider({ value: this.dimOpacity * 100, min: 10, max: 90, step: 1 }).width('100%').selectedColor(this.palette.accent)
+      Slider({ value: this.dimOpacity * 100, min: PlayerOptionRules.minDimOpacity * 100, max: PlayerOptionRules.maxDimOpacity * 100, step: 1 }).width('100%').selectedColor(this.palette.accent)
         .accessibilityText($r('app.string.player_dim_opacity')).onChange((value: number, mode: SliderChangeMode) => { if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) { this.changeDim(value / 100); } })
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -812,18 +820,18 @@ struct Player {
       BrandHeading({ label: $r('app.string.player_queue_group'), icon: $r('app.media.player_speed') })
       Text($r('app.string.gesture_hint')).fontColor(this.palette.muted).fontSize(12).width('100%')
       Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-        ForEach([0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], (speed: number) => {
+        ForEach(playbackRates(), (speed: number) => {
           Column() {
-            Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor('#F2F3FA')
+            Button(`${speed}×`).labelStyle({ maxLines: 1, overflow: TextOverflow.Ellipsis }).fontSize(14).fontColor(this.palette.foreground)
               .width('100%').constraintSize({ minHeight: UiLayout.buttonHeight(this.fontScale) }).borderRadius(14)
-              .backgroundColor(this.speed === speed ? this.palette.action : (this.amoled ? '#000000' : this.palette.surface))
+              .backgroundColor(this.speed === speed ? this.palette.action : (this.amoled ? this.palette.amoledBackground : this.palette.surface))
               .accessibilityText(`${speed}×`).onClick(() => this.changeSpeed(speed))
           }.width(this.controlWidth >= 360 && this.fontScale < 1.5 ? '31%' : '48%').margin({ bottom: 8 })
         })
       }.width('100%')
       if (this.route.item.Type === 'Episode') {
         Row({ space: 12 }) {
-          Text($r('app.string.auto_next')).fontColor('#F2F3FA').fontSize(14).layoutWeight(1)
+          Text($r('app.string.auto_next')).fontColor(this.palette.foreground).fontSize(14).layoutWeight(1)
           Toggle({ type: ToggleType.Switch, isOn: this.autoNext }).selectedColor(this.palette.action)
             .switchPointColor(this.palette.accent).accessibilityText($r('app.string.auto_next'))
             .enabled(this.autoNextReady).onChange((value: boolean) => { this.changeAutoNext(value ? 'on' : 'off'); })
@@ -836,6 +844,6 @@ struct Player {
         BrandButton({ label: $r('app.string.next_episode'), icon: $r('app.media.player_next'),
           available: !this.busy && this.state !== 'released', onSelect: () => { this.system?.next(); } })
       }
-    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? '#000000' : this.palette.raised)).alignItems(HorizontalAlign.Start)
+    }.padding(16).width('100%').borderRadius(20).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).alignItems(HorizontalAlign.Start)
   }
 }

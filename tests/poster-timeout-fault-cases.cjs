@@ -1,0 +1,9 @@
+const file='entry/src/main/ets/api/PosterTransport.ets',suite='poster-timeout-contract.test.cjs',recipes=[];
+const add=(id,old,replacement,name)=>recipes.push({id,file,old,replacement,name,suite});
+for(const [key,value]of [['requestTimeoutMs',10000],['connectTimeoutMs',5000],['readTimeoutMs',8000]])for(const delta of [-1,1])add(key+'-'+delta,`${key}: number = ${value};`,`${key}: number = ${value+delta};`,'poster timeout options independent default');
+add('timer-removed',"timer = setTimeout(() => finish('poster_unavailable'), PosterTransport.requestTimeoutMs)",'timer = -1','poster timeout actual 10000');
+add('timer-argument',"finish('poster_unavailable'), PosterTransport.requestTimeoutMs","finish('poster_unavailable'), 10001",'poster timeout actual 10000');
+add('connect-argument','connectTimeout: PosterTransport.connectTimeoutMs','connectTimeout: 5001','poster timeout options independent default');
+add('read-argument','readTimeout: PosterTransport.readTimeoutMs','readTimeout: 7999','poster timeout options independent default');
+const controls=[{name:'poster timeout actual 10000',phase:'request',requiredCalls:{'http-create':1}},{name:'poster timeout actual 10000',phase:'http-create',nativeInit:true},{name:'poster timeout actual 10000',phase:'timer-set',requiredCalls:{'http-create':1},details:{duration:10000}},{name:'poster timeout actual 10000',phase:'setup'}].map(c=>({...c,scope:'poster-timeout',suite}));
+module.exports={recipes,controls,scope:'poster-timeout',fixture:'tests/catalog-contract-fixture.cjs',earlyPhase:'request',earlyOld:'const active = h.activate();',earlyReplacement:"trace.call('request',()=>{}); const active = h.activate();",selfFaults:[{id:'native-init-capture',phase:'http-create',file:'tests/catalog-contract-fixture.cjs',old:"trace.call('http-create',()=>{",replacement:"((phase,operation)=>operation())('http-create',()=>{"}]};

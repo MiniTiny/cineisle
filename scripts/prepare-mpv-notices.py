@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import runpy
 from pathlib import Path
 import re
 import shutil
@@ -118,7 +119,8 @@ def prepare(artifact, offline=False):
         raise RuntimeError('native artifact/source binding does not match the notice inputs')
     if json.loads((workspace / 'source-tree.json').read_text()) != source.snapshot(workspace / 'sources'):
         raise RuntimeError('native source tree changed before notice collection')
-    sdk_home = os.environ.get('DEVECO_SDK_HOME', os.environ.get('DEVECO_CONTENTS', '/Applications/DevEco-Studio.app/Contents') + '/sdk')
+    toolchain = runpy.run_path(str(ROOT / 'scripts/deveco-runtime.py'))
+    sdk_home = toolchain['resolve_deveco'](empty_is_default=False)['sdkHome']
     sdk = Path(os.environ.get('OHOS_NDK_HOME', sdk_home + '/default/openharmony/native')).resolve()
     existing = ROOT / 'entry/src/main/resources/rawfile/third_party/ass'
     inputs = {'sourceManifest': source.digest(source.MANIFEST), 'supplements': source.digest(supplement_file), 'script': source.digest(Path(__file__)),

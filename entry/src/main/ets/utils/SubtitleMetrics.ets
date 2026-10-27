@@ -5,6 +5,8 @@ import { CaptionRenderStyle } from './CaptionStyle';
 
 // Scoped to one caption view. Pixel size is part of the key, including the owning window's fp scale.
 export class SubtitleMetrics {
+  private static readonly measurementLayoutWidthPx: number = 100000;
+  private static readonly maximumCachedAscents: number = 128;
   private ascents: Map<string, number> = new Map<string, number>();
 
   offset(run: SubtitleRun, style: CaptionRenderStyle, baseSize: number, context: UIContext, fontScale?: number): number {
@@ -25,11 +27,11 @@ export class SubtitleMetrics {
       fontWeight: step.bold ? text.FontWeight.W700 : text.FontWeight.W400,
       fontStyle: step.italic ? text.FontStyle.ITALIC : text.FontStyle.NORMAL });
     builder.addText('M'); builder.popStyle();
-    const paragraph = builder.build(); paragraph.layoutSync(100000);
+    const paragraph = builder.build(); paragraph.layoutSync(SubtitleMetrics.measurementLayoutWidthPx);
     const metrics = Array.from(paragraph.getLineMetrics()[0].runMetrics.values())[0].fontMetrics;
     const ascent = -metrics.ascent;
     if (!Number.isFinite(ascent) || ascent <= 0) { throw new Error('subtitle_failed'); }
-    if (this.ascents.size >= 128) { this.ascents.clear(); }
+    if (this.ascents.size >= SubtitleMetrics.maximumCachedAscents) { this.ascents.clear(); }
     this.ascents.set(key, ascent);
     return ascent;
   }

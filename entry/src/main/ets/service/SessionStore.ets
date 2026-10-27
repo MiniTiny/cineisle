@@ -21,7 +21,7 @@ export class SessionStore {
   private static async read(alias: string): Promise<Uint8Array | undefined> {
     const query: asset.AssetMap = new Map(); query.set(asset.Tag.ALIAS, SessionStore.alias(alias)); query.set(asset.Tag.RETURN_TYPE, asset.ReturnType.ALL);
     try { const result = await asset.query(query); return result.length ? result[0].get(asset.Tag.SECRET) as Uint8Array : undefined; }
-    catch (e) { if ((e as BusinessError).code === 24000002) { return undefined; } throw new Error('session_read_failed'); }
+    catch (e) { if ((e as BusinessError).code === asset.ErrorCode.NOT_FOUND) { return undefined; } throw new Error('session_read_failed'); }
   }
   private static async put(alias: string, bytes: Uint8Array): Promise<void> {
     const attrs: asset.AssetMap = new Map(); attrs.set(asset.Tag.ALIAS, SessionStore.alias(alias)); attrs.set(asset.Tag.SECRET, bytes);
@@ -30,7 +30,7 @@ export class SessionStore {
   }
   private static async removeAsset(alias: string): Promise<void> {
     const attrs: asset.AssetMap = new Map(); attrs.set(asset.Tag.ALIAS, SessionStore.alias(alias));
-    try { await asset.remove(attrs); } catch (e) { if ((e as BusinessError).code !== 24000002) { throw new Error('session_clear_failed'); } }
+    try { await asset.remove(attrs); } catch (e) { if ((e as BusinessError).code !== asset.ErrorCode.NOT_FOUND) { throw new Error('session_clear_failed'); } }
   }
   private static index(value: VaultIndex): boolean { return !!value && value.version === AccountVaultFormat.version && typeof value.generation === 'string' && /^[a-zA-Z0-9-]+$/.test(value.generation) && Number.isInteger(value.parts) && value.parts > 0 && value.parts <= AccountVaultFormat.maxParts; }
   private static async readVault(): Promise<AccountVault> {

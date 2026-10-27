@@ -57,7 +57,7 @@ export struct CachedImage {
   }
   build() {
     Image(this.source).alt(this.placeholder).width('100%').height('100%').objectFit(ImageFit.Cover).borderRadius(this.radius)
-      .backgroundColor((this.amoled ? '#000000' : this.palette.surface)).accessibilityText(this.label).accessibilityLevel(this.label ? 'yes' : 'no')
+      .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).accessibilityText(this.label).accessibilityLevel(this.label ? 'yes' : 'no')
       .onComplete(() => this.releaseRetired()).onError(() => { this.reset(); this.releaseRetired(); })
       .onVisibleAreaChange([0], (visible: boolean) => this.visibleArea(visible))
   }

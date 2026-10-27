@@ -9,6 +9,7 @@ import fcntl
 import hashlib
 import json
 import os
+import runpy
 from pathlib import Path, PurePosixPath
 import platform
 import re
@@ -25,6 +26,13 @@ CACHE = ROOT / '.local/native-mpv/source-build'
 COMPONENTS = {'mpv', 'ffmpeg', 'libplacebo', 'mbedtls', 'dav1d', 'lcms', 'shaderc', 'dovi', 'lua',
               'shaderc-glslang', 'shaderc-spirv-headers', 'shaderc-spirv-tools', 'libplacebo-vulkan-headers',
               'mbedtls-framework', 'cbindgen', 'fast_float', 'glad', 'jinja', 'markupsafe'}
+
+# Source transfer and extraction budgets belong to this MPV recipe, independently of ASS.
+_SOURCE_CONNECT_TIMEOUT_SECONDS = 30
+_SOURCE_DOWNLOAD_TIMEOUT_SECONDS = 1800
+_MAX_SOURCE_ARCHIVE_BYTES = 100_000_000
+_MAX_EXTRACTED_SOURCE_MEMBERS = 200_000
+_MAX_EXTRACTED_SOURCE_BYTES = 2 * 1024 * 1024 * 1024
 
 
 def digest(path):
@@ -91,7 +99,7 @@ def extract(archive, destination):
             path = relative(member.name.rstrip('/'))
             if root is None:
                 root = path.parts[0]
-            if path.parts[0] != root or count > 200000:
+            if path.parts[0] != root or count > _MAX_EXTRACTED_SOURCE_MEMBERS:
                 raise RuntimeError('invalid native source archive roots or member count')
             if len(path.parts) == 1:
                 if not member.isdir():
@@ -100,7 +108,7 @@ def extract(archive, destination):
             if not (member.isfile() or member.isdir() or member.issym() or member.islnk()):
                 raise RuntimeError('unsupported native archive member')
             total += member.size
-            if total > 2 * 1024 * 1024 * 1024:
+            if total > _MAX_EXTRACTED_SOURCE_BYTES:
                 raise RuntimeError('native source extraction exceeds limit')
             member.name = str(Path(*path.parts[1:]))
             if member.islnk():
@@ -123,8 +131,8 @@ def source(record, offline, env):
         if offline:
             raise RuntimeError('pinned native source unavailable offline: ' + record.get('name', record.get('package', '')))
         temporary = archive.with_suffix('.download')
-        subprocess.run(['curl', '--fail', '--location', '--connect-timeout', '30', '--max-time', '1800',
-                        '--max-filesize', '100000000', '--output', str(temporary), record['url']], env=env, check=True)
+        subprocess.run(['curl', '--fail', '--location', '--connect-timeout', str(_SOURCE_CONNECT_TIMEOUT_SECONDS), '--max-time', str(_SOURCE_DOWNLOAD_TIMEOUT_SECONDS),
+                        '--max-filesize', str(_MAX_SOURCE_ARCHIVE_BYTES), '--output', str(temporary), record['url']], env=env, check=True)
         if digest(temporary) != checksum:
             raise RuntimeError('downloaded native source fingerprint mismatch')
         temporary.replace(archive)
@@ -440,7 +448,8 @@ def build(offline=False, check=False):
         raise RuntimeError('native MPV client header fingerprint mismatch')
     if digest(ROOT / 'docs/native-ass-sources.json') != metadata['nativeAssManifestSha256']:
         raise RuntimeError('native MPV font dependency source manifest changed')
-    sdk_home = os.environ.get('DEVECO_SDK_HOME', os.environ.get('DEVECO_CONTENTS', '/Applications/DevEco-Studio.app/Contents') + '/sdk')
+    toolchain = runpy.run_path(str(ROOT / 'scripts/deveco-runtime.py'))
+    sdk_home = toolchain['resolve_deveco'](empty_is_default=False)['sdkHome']
     sdk = Path(os.environ.get('OHOS_NDK_HOME', sdk_home + '/default/openharmony/native')).resolve()
     for name, checksum in metadata['sdkHeaders'].items():
         if digest(sdk / 'sysroot/usr/include' / relative(name)) != checksum:

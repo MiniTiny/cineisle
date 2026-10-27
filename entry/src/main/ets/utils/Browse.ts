@@ -1,7 +1,27 @@
 import { LibrarySnapshot, MediaItem, QueryParam } from '../model/Models';
 
-export const librarySortFields: string[] = ['SortName', 'CommunityRating', 'CriticRating', 'DateCreated', 'DatePlayed', 'PremiereDate'];
-export const searchTypes: string[] = ['', 'Movie', 'Series', 'Episode'];
+export class BrowseRequestLimits {
+  static readonly pageItems: number = 60;
+  static readonly allItemsPageItems: number = 200;
+}
+
+export interface BrowseChoice { value: string; caption: string }
+export const librarySortChoices: BrowseChoice[] = [
+  { value: 'SortName', caption: 'sort_name' },
+  { value: 'CommunityRating', caption: 'sort_rating' },
+  { value: 'CriticRating', caption: 'sort_critic' },
+  { value: 'DateCreated', caption: 'sort_added' },
+  { value: 'DatePlayed', caption: 'sort_played' },
+  { value: 'PremiereDate', caption: 'sort_premiere' },
+];
+export const searchTypeChoices: BrowseChoice[] = [
+  { value: '', caption: 'search_type_all' },
+  { value: 'Movie', caption: 'media_movie' },
+  { value: 'Series', caption: 'media_series' },
+  { value: 'Episode', caption: 'media_episode' },
+];
+export const librarySortFields: string[] = librarySortChoices.map((choice: BrowseChoice) => choice.value);
+export const searchTypes: string[] = searchTypeChoices.map((choice: BrowseChoice) => choice.value);
 // Reject broken pages instead of changing the offset or duplicating ArkUI card identities.
 export function searchPage(current: MediaItem[], page: MediaItem[], total: number, type: string = ''): MediaItem[] {
   const values = current.concat(page); const ids = new Set<string>();

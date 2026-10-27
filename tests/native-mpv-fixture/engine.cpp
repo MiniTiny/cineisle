@@ -32,7 +32,7 @@ void Tracks(mpv_node &out) {
         auto *list = track.u.list = new mpv_node_list{6, new mpv_node[6]{}, new char *[6]{}};
         const char *keys[] = {"type", "id", "lang", "title", "codec", "selected"};
         for (int k = 0; k < 6; ++k) list->keys[k] = Copy(keys[k]);
-        Text(list->values[0], "audio"); list->values[1].format = MPV_FORMAT_INT64; list->values[1].u.int64 = config.firstTrackId + (config.repeatTrackId ? 0 : i);
+        Text(list->values[0], config.subtitleTracks ? "sub" : "audio"); list->values[1].format = MPV_FORMAT_INT64; list->values[1].u.int64 = config.firstTrackId + (config.repeatTrackId ? 0 : i);
         Text(list->values[2], config.language); Text(list->values[3], config.title); Text(list->values[4], config.codec);
         list->values[5].format = MPV_FORMAT_FLAG; list->values[5].u.flag = i == 0;
     }
@@ -78,7 +78,8 @@ int mpv_set_option(mpv_handle *, const char *name, mpv_format format, void *data
 }
 int mpv_command(mpv_handle *, const char **args) {
     std::unique_lock<std::mutex> lock(mutex); Barrier(lock, std::string("command:") + args[0]);
-    inspection.commands.emplace_back(args[0], args[1] ? args[1] : ""); return 0;
+    inspection.commands.emplace_back(args[0], args[1] ? args[1] : "");
+    return config.failSeekCommand && std::strcmp(args[0], "seek") == 0 ? MPV_ERROR_GENERIC : 0;
 }
 int mpv_set_property(mpv_handle *handle, const char *name, mpv_format format, void *data) {
     std::unique_lock<std::mutex> lock(mutex); Barrier(lock, std::string("set:") + name);
@@ -96,15 +97,26 @@ int mpv_set_property(mpv_handle *handle, const char *name, mpv_format format, vo
 }
 int mpv_get_property(mpv_handle *handle, const char *name, mpv_format format, void *data) {
     std::lock_guard<std::mutex> lock(mutex); const std::string key(name);
+    inspection.propertyReads.push_back(key);
     if (format == MPV_FORMAT_DOUBLE) {
         double value = 0;
         if (key == "duration") value = 10;
+        else if (key == "time-pos") value = config.positionSeconds;
         else if (key == "width") value = 640;
         else if (key == "height") value = 360;
         else if (key == "speed") value = handle->speed;
         else if (key == "volume") value = handle->volume;
-        else if (key == "sub-start/full" || key == "sub-end/full") value = -1;
-        else if (key == "sub-font-size") value = 55;
+        else if (key == "sub-start/full") value = config.subtitleStartSeconds;
+        else if (key == "sub-end/full") value = config.subtitleEndSeconds;
+        else if (key == "sub-font-size") {
+            value = config.subtitleFontSize;
+            // Failed API calls need not preserve the output buffer. Poison it to
+            // distinguish the production status guard from its initial value.
+            if (!config.subtitleFontAvailable) {
+                *static_cast<double *>(data) = value; ++inspection.unavailableFontReads;
+                return MPV_ERROR_PROPERTY_UNAVAILABLE;
+            }
+        }
         *static_cast<double *>(data) = value;
     } else if (format == MPV_FORMAT_FLAG) *static_cast<int *>(data) = key == "pause" ? handle->paused : 0;
     else if (format == MPV_FORMAT_NODE) {
@@ -123,8 +135,12 @@ int mpv_get_property(mpv_handle *handle, const char *name, mpv_format format, vo
 mpv_event *mpv_wait_event(mpv_handle *, double) {
     std::lock_guard<std::mutex> lock(mutex); ++inspection.eventCalls;
     static thread_local mpv_event event; event = {};
-    event.event_id = config.events > 0 ? MPV_EVENT_FILE_LOADED : MPV_EVENT_NONE;
-    if (config.events > 0) --config.events;
+    if (!config.eventIds.empty()) { event.event_id = mpv_event_id(config.eventIds.front()); config.eventIds.erase(config.eventIds.begin()); }
+    else {
+        event.event_id = config.events > 0 ? MPV_EVENT_FILE_LOADED : MPV_EVENT_NONE;
+        if (config.events > 0) --config.events;
+    }
+    inspection.deliveredEvents.push_back(int(event.event_id));
     return &event;
 }
 void mpv_free_node_contents(mpv_node *node) { Free(*node); }
