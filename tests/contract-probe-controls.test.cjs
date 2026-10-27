@@ -8,6 +8,9 @@ tests.push({name:'contract checkpoint requires operation scope and preceding cal
   const raw = value => ({ stdout: 'CONTRACT_EXTERNAL_STATE ' + JSON.stringify(value), stderr: '' });
   check(() => {
     assert.deepEqual(verifyExternalFailure(raw(state), control), state);
+    const unannounced = { ...state, injected: false };
+    assert.deepEqual(verifyExternalFailure(raw(unannounced), control, false), unannounced);
+    assert.throws(() => verifyExternalFailure(raw(state), control, false), { code: 'ERR_ASSERTION' });
     for (const changed of [{ ...state, version: 2 }, { ...state, scope: 'other' }, { ...state, phase: 'create' }, { ...state, injected: false }, { ...state, calls: { create: 1 } }, { ...state, calls: { request: 1 } }, { ...state, pathname: '/wrong' }]) assert.throws(() => verifyExternalFailure(raw(changed), control), { code: 'ERR_ASSERTION' });
     assert.throws(() => verifyExternalFailure({ stdout: '', stderr: '' }, control), { code: 'ERR_ASSERTION' });
     assert.throws(() => verifyExternalFailure({ stdout: raw(state).stdout + '\n' + raw(state).stdout, stderr: '' }, control), { code: 'ERR_ASSERTION' });

@@ -127,7 +127,8 @@ module.exports = {
   "scope": "ass-error-contract",
   "extraScopes": [
     "entry/src/main/cpp/ass",
-    "entry/src/main/cpp/caption"
+    "entry/src/main/cpp/caption",
+    ".local/native-ass/active-prefix.txt"
   ],
   "fixture": "tests/ass-error-contract-fixture.cjs",
   "earlyPhase": "native-render",
@@ -138,9 +139,79 @@ module.exports = {
       "id": "native-ass-init-observer-remove",
       "phase": "native-create",
       "file": "tests/ass-error-contract-fixture.cjs",
-      "old": "if (mode.endsWith('create')) result = await trace.call('native-create', create);",
+      "old": "if (mode.endsWith('create')) result = await trace.call('native-create', create, creation);",
       "replacement": "if (mode.endsWith('create')) result = await create();",
       "status": "detected"
+    }
+  ],
+  "unannouncedControls": [
+    {
+      "id": "library-create",
+      "name": "async-create ASS error bytes 63",
+      "suite": "ass-error-contract.test.cjs",
+      "scope": "ass-error-contract",
+      "phase": "native-create",
+      "requiredCalls": {
+        "error-configure": 1
+      },
+      "details": {
+        "creates": 1,
+        "libraryFailures": 1,
+        "actualError": "ass_memory_unavailable"
+      },
+      "fault": {
+        "file": "tests/native-entry-fixture/ass-errors-engine.cpp",
+        "old": "if (initializeFailure) return nullptr;",
+        "replacement": "return nullptr;"
+      },
+      "observer": {
+        "file": "tests/native-entry-fixture/ass-errors-engine.cpp",
+        "old": "if (!library) ++inspection.libraryFailures;",
+        "replacement": "(void) library;"
+      },
+      "quarantine": {
+        "file": "tests/ass-error-contract-fixture.cjs",
+        "old": "if (inspection.libraryFailures > 0)",
+        "replacement": "if (false)"
+      },
+      "protection": {
+        "file": "entry/src/main/cpp/ass/NapiAssRenderer.cpp",
+        "old": "value.size() < kErrorCodeUtf8BytesLimit",
+        "replacement": "true"
+      }
+    },
+    {
+      "id": "library-render-setup",
+      "name": "async-render ASS error bytes 63",
+      "suite": "ass-error-contract.test.cjs",
+      "scope": "ass-error-contract",
+      "phase": "native-create",
+      "requiredCalls": {},
+      "details": {
+        "creates": 1,
+        "libraryFailures": 1,
+        "actualError": "ass_memory_unavailable"
+      },
+      "fault": {
+        "file": "tests/native-entry-fixture/ass-errors-engine.cpp",
+        "old": "if (initializeFailure) return nullptr;",
+        "replacement": "return nullptr;"
+      },
+      "observer": {
+        "file": "tests/native-entry-fixture/ass-errors-engine.cpp",
+        "old": "if (!library) ++inspection.libraryFailures;",
+        "replacement": "(void) library;"
+      },
+      "quarantine": {
+        "file": "tests/ass-error-contract-fixture.cjs",
+        "old": "if (inspection.libraryFailures > 0)",
+        "replacement": "if (false)"
+      },
+      "protection": {
+        "file": "entry/src/main/cpp/ass/NapiAssRenderer.cpp",
+        "old": "value.size() < kErrorCodeUtf8BytesLimit",
+        "replacement": "true"
+      }
     }
   ]
 };

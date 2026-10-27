@@ -3,27 +3,29 @@ exports.make = () => {
   const built = require('./native-entry-build.cjs').build({ assErrors: true }), n = built.native, font = path.join(built.directory, 'font.fixture'); fs.writeFileSync(font, 'explicit fixture, not a font');
   const initFailure = process.argv.includes('--native-init-failure'); let trace, handles;
   const configure = (mode, message) => trace.call('error-configure', () => n.configureError(mode, message, initFailure));
-  const attempt = async operation => {
-    try { return { value: await operation() }; }
-    catch (error) {
-      if (initFailure && error.message === 'ass_memory_unavailable') throw Object.assign(Error(error.message, { cause: error }), { code: 'EIO', contractInjected: true });
-      return { error: error.message };
-    }
+  const attempt = async (operation, details = {}) => {
+    let result;
+    try { result = { value: await operation() }; } catch (error) { result = { error: error.message }; }
+    const inspection = n.inspectError();
+    Object.assign(details, { creates: inspection.creates, libraryFailures: inspection.libraryFailures, actualError: result.error || '' });
+    if (inspection.libraryFailures > 0) throw Object.assign(Error('actual ASS library initialization failed'), { code: 'EIO', contractInjected: initFailure });
+    return result;
   };
   const f = { assert, trace: () => trace,
     async invoke(mode, message) {
       let handle;
       try {
+        const creation = {};
         const create = async () => {
-          const result = await attempt(() => n.create('doc', font, '')); if (result.value) handles.push(result.value); return result;
+          const result = await attempt(() => n.create('doc', font, ''), creation); if (result.value) handles.push(result.value); return result;
         };
         if (mode === 'lower') return { result: await trace.call('core-code', () => n.coreErrorCode(message)) };
         if (mode === 'sync-render' || mode === 'sync-close' || mode === 'async-render') {
-          const created = await trace.call('native-create', create); if (created.error) throw Error('unexpected setup create: ' + created.error); handle = created.value;
+          const created = await trace.call('native-create', create, creation); if (created.error) throw Error('unexpected setup create: ' + created.error); handle = created.value;
         }
         configure(mode, message);
         let result;
-        if (mode.endsWith('create')) result = await trace.call('native-create', create);
+        if (mode.endsWith('create')) result = await trace.call('native-create', create, creation);
         else if (mode.endsWith('render')) result = await trace.call('native-render', () => attempt(() => n.render(handle, 0, 1, 1, 1, 1)));
         else result = await trace.call('native-close', () => attempt(() => n.close(handle)));
         return { result: result.error, inspection: n.inspectError() };

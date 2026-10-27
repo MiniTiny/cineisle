@@ -27,10 +27,10 @@ function external(scope, fault) {
     }); }
   };
 }
-function verifyExternalFailure(raw, control) {
+function verifyExternalFailure(raw, control, expectedInjected = true) {
   const rows = ((raw.stdout || '') + '\n' + (raw.stderr || '')).split('\n').filter(line => line.startsWith(prefix)).map(line => JSON.parse(line.slice(prefix.length)));
   assert.equal(rows.length, 1, 'Missing or ambiguous contract checkpoint'); const state = rows[0];
-  assert.equal(state.version, 1); assert.equal(state.scope, control.scope); assert.equal(state.phase, control.phase); assert.equal(state.injected, true);
+  assert.equal(state.version, 1); assert.equal(state.scope, control.scope); assert.equal(state.phase, control.phase); assert.equal(state.injected, expectedInjected);
   assert.ok(state.calls[control.phase] >= 1, 'Selected external operation was not called');
   for (const [phase, min] of Object.entries(control.requiredCalls || {})) assert.ok(state.calls[phase] >= min, 'Contract fault occurred before required ' + phase);
   for (const [key, value] of Object.entries(control.details || {})) assert.equal(state[key], value, 'Wrong checkpoint ' + key);

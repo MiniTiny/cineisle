@@ -14,6 +14,11 @@ std::mutex errorMutex;
 std::string errorPhase, errorMessage;
 bool initializeFailure = false;
 ass_error_fixture::Inspection inspection{};
+ASS_Library *LibraryInitBody() {
+    if (initializeFailure) return nullptr;
+    if (errorPhase == "async-create") throw std::runtime_error(errorMessage);
+    return FixtureLibraryInit();
+}
 }
 namespace ass_error_fixture {
 void Configure(const std::string &phase, const std::string &message, bool failInitialize) {
@@ -25,9 +30,9 @@ Inspection Inspect() { std::lock_guard<std::mutex> guard(errorMutex); return ins
 extern "C" {
 ASS_Library *ass_library_init(void) {
     std::lock_guard<std::mutex> guard(errorMutex); ++inspection.creates;
-    if (initializeFailure) return nullptr;
-    if (errorPhase == "async-create") throw std::runtime_error(errorMessage);
-    return FixtureLibraryInit();
+    auto *library = LibraryInitBody();
+    if (!library) ++inspection.libraryFailures;
+    return library;
 }
 ASS_Image *ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, long long time, int *changed) {
     std::lock_guard<std::mutex> guard(errorMutex); ++inspection.renders;

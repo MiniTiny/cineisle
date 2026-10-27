@@ -37,7 +37,8 @@ napi_value CoreCode(napi_env e, napi_callback_info info) {
 }
 napi_value InspectError(napi_env e, napi_callback_info) {
     const auto value = ass_error_fixture::Inspect(); napi_value out; Check(napi_create_object(e, &out));
-    Number(e, out, "creates", uint32_t(value.creates)); Number(e, out, "renders", uint32_t(value.renders)); return out;
+    Number(e, out, "creates", uint32_t(value.creates)); Number(e, out, "renders", uint32_t(value.renders));
+    Number(e, out, "libraryFailures", uint32_t(value.libraryFailures)); return out;
 }
 }
 static napi_value FixtureInit(napi_env e, napi_value exports) {
