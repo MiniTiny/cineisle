@@ -1,0 +1,1862 @@
+{
+  "schema": 1,
+  "reference": "Android API34 Html.fromHtml plus pinned Media3 SubripParser processLine/text-loop contract; BufferedReader line adapter; not full Media3 decoder execution",
+  "cases": [
+    {
+      "id": "nbsp-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " A ",
+          "text": " A "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nbsp-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br> <br>B",
+          "text": "A\n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nbsp-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " <br>B",
+          "text": " \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nbsp-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " ",
+          "text": " "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nbsp-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b> A </b>\n \n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b> A </b><br> <br><i>B</i>",
+          "text": " A \n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "figure-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " A ",
+          "text": " A "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "figure-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br> <br>B",
+          "text": "A\n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "figure-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " <br>B",
+          "text": " \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "figure-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " ",
+          "text": " "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "figure-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b> A </b>\n \n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b> A </b><br> <br><i>B</i>",
+          "text": " A \n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "narrow-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " A ",
+          "text": " A "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "narrow-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br> <br>B",
+          "text": "A\n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "narrow-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " <br>B",
+          "text": " \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "narrow-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " ",
+          "text": " "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "narrow-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b> A </b>\n \n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b> A </b><br> <br><i>B</i>",
+          "text": " A \n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "em-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " A ",
+          "text": " A "
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "em-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br> <br>B",
+          "text": "A\n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "em-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " <br>B",
+          "text": "\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "em-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " ",
+          "text": ""
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "em-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b> A </b>\n \n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b> A </b><br> <br><i>B</i>",
+          "text": " A \n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ideographic-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n　A　\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "　A　",
+          "text": "　A　"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ideographic-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n　\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>　<br>B",
+          "text": "A\n　\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ideographic-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n　\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "　<br>B",
+          "text": "\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ideographic-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n　\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "　",
+          "text": ""
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ideographic-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b>　A　</b>\n　\n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>　A　</b><br>　<br><i>B</i>",
+          "text": "　A　\n　\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "bom-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n﻿A﻿\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "﻿A﻿",
+          "text": "A﻿"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "bom-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n﻿\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>﻿<br>B",
+          "text": "A\n﻿\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "bom-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n﻿\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "﻿<br>B",
+          "text": "\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "bom-only",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n﻿\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "﻿",
+          "text": ""
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "bom-styled",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n<b>﻿A﻿</b>\n﻿\n<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>﻿A﻿</b><br>﻿<br><i>B</i>",
+          "text": "﻿A﻿\n﻿\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "space-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "space-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "space-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "tab-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\tA\t\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "tab-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\t\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "tab-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\t\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ff-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\fA\f\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ff-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\f\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ff-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\f\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "vt-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u000bA\u000b\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "vt-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\u000b\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "vt-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u000b\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control1-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u0001A\u0001\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control1-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\u0001\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control1-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u0001\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control31-edges",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u001fA\u001f\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control31-interior-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\u001f\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "control31-leading-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n\u001f\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "B",
+          "text": "B"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "multiple-empty-after-trim",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \n\t\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br><br>B",
+          "text": "A\n\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "empty-physical-ends-cue",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n\nDISCARDED\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "encoded-nbsp",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n&nbsp;A&nbsp;\n&nbsp;\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "&nbsp;A&nbsp;<br>&nbsp;<br>B",
+          "text": " A \n \nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "crlf",
+      "source": "1\r\n00:00:01,000 --> 00:00:05,000\r\nA\r\n \r\nB\r\n\r\n2\r\n00:00:06,000 --> 00:00:09,000\r\nNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "cr-only",
+      "source": "1\r00:00:01,000 --> 00:00:05,000\rA\r \rB\r\r2\r00:00:06,000 --> 00:00:09,000\rNEXT",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "no-final-newline",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n \nB",
+      "cues": [
+        {
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        }
+      ]
+    }
+  ],
+  "direct": [
+    {
+      "id": "0020-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "0020-inside-bold",
+      "html": "<b> </b>B",
+      "text": "B"
+    },
+    {
+      "id": "0020-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n\nB"
+    },
+    {
+      "id": "0020-with-text",
+      "html": " B ",
+      "text": "B "
+    },
+    {
+      "id": "0009-before-break",
+      "html": "\t<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "0009-inside-bold",
+      "html": "<b>\t</b>B",
+      "text": "\tB"
+    },
+    {
+      "id": "0009-after-text",
+      "html": "A<br>\t<br>B",
+      "text": "A\n\t\nB"
+    },
+    {
+      "id": "0009-with-text",
+      "html": "\tB\t",
+      "text": "\tB\t"
+    },
+    {
+      "id": "000b-before-break",
+      "html": "\u000b<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "000b-inside-bold",
+      "html": "<b>\u000b</b>B",
+      "text": "B"
+    },
+    {
+      "id": "000b-after-text",
+      "html": "A<br>\u000b<br>B",
+      "text": "A\n\nB"
+    },
+    {
+      "id": "000b-with-text",
+      "html": "\u000bB\u000b",
+      "text": "B"
+    },
+    {
+      "id": "000c-before-break",
+      "html": "\f<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "000c-inside-bold",
+      "html": "<b>\f</b>B",
+      "text": "B"
+    },
+    {
+      "id": "000c-after-text",
+      "html": "A<br>\f<br>B",
+      "text": "A\n\nB"
+    },
+    {
+      "id": "000c-with-text",
+      "html": "\fB\f",
+      "text": "B"
+    },
+    {
+      "id": "001c-before-break",
+      "html": "\u001c<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "001c-inside-bold",
+      "html": "<b>\u001c</b>B",
+      "text": "B"
+    },
+    {
+      "id": "001c-after-text",
+      "html": "A<br>\u001c<br>B",
+      "text": "A\n\nB"
+    },
+    {
+      "id": "001c-with-text",
+      "html": "\u001cB\u001c",
+      "text": "B"
+    },
+    {
+      "id": "00a0-before-break",
+      "html": " <br>B",
+      "text": " \nB"
+    },
+    {
+      "id": "00a0-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "00a0-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "00a0-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "1680-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "1680-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "1680-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "1680-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2000-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2000-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2000-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2000-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2001-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2001-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2001-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2001-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2002-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2002-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2002-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2002-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2003-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2003-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2003-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2003-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2004-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2004-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2004-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2004-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2005-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2005-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2005-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2005-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2006-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2006-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2006-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2006-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2007-before-break",
+      "html": " <br>B",
+      "text": " \nB"
+    },
+    {
+      "id": "2007-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2007-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2007-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2008-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2008-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2008-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2008-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2009-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2009-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2009-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2009-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "200a-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "200a-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "200a-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "200a-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2028-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2028-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2028-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2028-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "2029-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "2029-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "2029-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "2029-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "202f-before-break",
+      "html": " <br>B",
+      "text": " \nB"
+    },
+    {
+      "id": "202f-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "202f-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "202f-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "205f-before-break",
+      "html": " <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "205f-inside-bold",
+      "html": "<b> </b>B",
+      "text": " B"
+    },
+    {
+      "id": "205f-after-text",
+      "html": "A<br> <br>B",
+      "text": "A\n \nB"
+    },
+    {
+      "id": "205f-with-text",
+      "html": " B ",
+      "text": " B "
+    },
+    {
+      "id": "3000-before-break",
+      "html": "　<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "3000-inside-bold",
+      "html": "<b>　</b>B",
+      "text": "　B"
+    },
+    {
+      "id": "3000-after-text",
+      "html": "A<br>　<br>B",
+      "text": "A\n　\nB"
+    },
+    {
+      "id": "3000-with-text",
+      "html": "　B　",
+      "text": "　B　"
+    },
+    {
+      "id": "feff-before-break",
+      "html": "﻿<br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "feff-inside-bold",
+      "html": "<b>﻿</b>B",
+      "text": "﻿B"
+    },
+    {
+      "id": "feff-after-text",
+      "html": "A<br>﻿<br>B",
+      "text": "A\n﻿\nB"
+    },
+    {
+      "id": "feff-with-text",
+      "html": "﻿B﻿",
+      "text": "B﻿"
+    },
+    {
+      "id": "extra-0",
+      "html": "﻿﻿A",
+      "text": "﻿A"
+    },
+    {
+      "id": "extra-1",
+      "html": " ﻿A",
+      "text": "﻿A"
+    },
+    {
+      "id": "extra-2",
+      "html": "﻿ A",
+      "text": "A"
+    },
+    {
+      "id": "extra-3",
+      "html": " <span>B</span>",
+      "text": "B"
+    },
+    {
+      "id": "extra-4",
+      "html": "  <br>B",
+      "text": "  \nB"
+    },
+    {
+      "id": "extra-5",
+      "html": "<br> <br>B",
+      "text": "\n \nB"
+    },
+    {
+      "id": "extra-6",
+      "html": "<!--x--> <br>B",
+      "text": "\nB"
+    },
+    {
+      "id": "00-control-before",
+      "html": "\u0000B",
+      "text": "B"
+    },
+    {
+      "id": "00-control-middle",
+      "html": "A\u0000B",
+      "text": "AB"
+    },
+    {
+      "id": "00-control-style",
+      "html": "<b>\u0000</b>B",
+      "text": "B"
+    },
+    {
+      "id": "01-control-before",
+      "html": "\u0001B",
+      "text": "B"
+    },
+    {
+      "id": "01-control-middle",
+      "html": "A\u0001B",
+      "text": "AB"
+    },
+    {
+      "id": "01-control-style",
+      "html": "<b>\u0001</b>B",
+      "text": "B"
+    },
+    {
+      "id": "02-control-before",
+      "html": "\u0002B",
+      "text": "B"
+    },
+    {
+      "id": "02-control-middle",
+      "html": "A\u0002B",
+      "text": "AB"
+    },
+    {
+      "id": "02-control-style",
+      "html": "<b>\u0002</b>B",
+      "text": "B"
+    },
+    {
+      "id": "03-control-before",
+      "html": "\u0003B",
+      "text": "B"
+    },
+    {
+      "id": "03-control-middle",
+      "html": "A\u0003B",
+      "text": "AB"
+    },
+    {
+      "id": "03-control-style",
+      "html": "<b>\u0003</b>B",
+      "text": "B"
+    },
+    {
+      "id": "04-control-before",
+      "html": "\u0004B",
+      "text": "B"
+    },
+    {
+      "id": "04-control-middle",
+      "html": "A\u0004B",
+      "text": "AB"
+    },
+    {
+      "id": "04-control-style",
+      "html": "<b>\u0004</b>B",
+      "text": "B"
+    },
+    {
+      "id": "05-control-before",
+      "html": "\u0005B",
+      "text": "B"
+    },
+    {
+      "id": "05-control-middle",
+      "html": "A\u0005B",
+      "text": "AB"
+    },
+    {
+      "id": "05-control-style",
+      "html": "<b>\u0005</b>B",
+      "text": "B"
+    },
+    {
+      "id": "06-control-before",
+      "html": "\u0006B",
+      "text": "B"
+    },
+    {
+      "id": "06-control-middle",
+      "html": "A\u0006B",
+      "text": "AB"
+    },
+    {
+      "id": "06-control-style",
+      "html": "<b>\u0006</b>B",
+      "text": "B"
+    },
+    {
+      "id": "07-control-before",
+      "html": "\u0007B",
+      "text": "B"
+    },
+    {
+      "id": "07-control-middle",
+      "html": "A\u0007B",
+      "text": "AB"
+    },
+    {
+      "id": "07-control-style",
+      "html": "<b>\u0007</b>B",
+      "text": "B"
+    },
+    {
+      "id": "08-control-before",
+      "html": "\bB",
+      "text": "B"
+    },
+    {
+      "id": "08-control-middle",
+      "html": "A\bB",
+      "text": "AB"
+    },
+    {
+      "id": "08-control-style",
+      "html": "<b>\b</b>B",
+      "text": "B"
+    },
+    {
+      "id": "09-control-before",
+      "html": "\tB",
+      "text": "\tB"
+    },
+    {
+      "id": "09-control-middle",
+      "html": "A\tB",
+      "text": "A\tB"
+    },
+    {
+      "id": "09-control-style",
+      "html": "<b>\t</b>B",
+      "text": "\tB"
+    },
+    {
+      "id": "0a-control-before",
+      "html": "\nB",
+      "text": "B"
+    },
+    {
+      "id": "0a-control-middle",
+      "html": "A\nB",
+      "text": "A B"
+    },
+    {
+      "id": "0a-control-style",
+      "html": "<b>\n</b>B",
+      "text": "B"
+    },
+    {
+      "id": "0b-control-before",
+      "html": "\u000bB",
+      "text": "B"
+    },
+    {
+      "id": "0b-control-middle",
+      "html": "A\u000bB",
+      "text": "AB"
+    },
+    {
+      "id": "0b-control-style",
+      "html": "<b>\u000b</b>B",
+      "text": "B"
+    },
+    {
+      "id": "0c-control-before",
+      "html": "\fB",
+      "text": "B"
+    },
+    {
+      "id": "0c-control-middle",
+      "html": "A\fB",
+      "text": "AB"
+    },
+    {
+      "id": "0c-control-style",
+      "html": "<b>\f</b>B",
+      "text": "B"
+    },
+    {
+      "id": "0d-control-before",
+      "html": "\rB",
+      "text": "B"
+    },
+    {
+      "id": "0d-control-middle",
+      "html": "A\rB",
+      "text": "A B"
+    },
+    {
+      "id": "0d-control-style",
+      "html": "<b>\r</b>B",
+      "text": "B"
+    },
+    {
+      "id": "0e-control-before",
+      "html": "\u000eB",
+      "text": "B"
+    },
+    {
+      "id": "0e-control-middle",
+      "html": "A\u000eB",
+      "text": "AB"
+    },
+    {
+      "id": "0e-control-style",
+      "html": "<b>\u000e</b>B",
+      "text": "B"
+    },
+    {
+      "id": "0f-control-before",
+      "html": "\u000fB",
+      "text": "B"
+    },
+    {
+      "id": "0f-control-middle",
+      "html": "A\u000fB",
+      "text": "AB"
+    },
+    {
+      "id": "0f-control-style",
+      "html": "<b>\u000f</b>B",
+      "text": "B"
+    },
+    {
+      "id": "10-control-before",
+      "html": "\u0010B",
+      "text": "B"
+    },
+    {
+      "id": "10-control-middle",
+      "html": "A\u0010B",
+      "text": "AB"
+    },
+    {
+      "id": "10-control-style",
+      "html": "<b>\u0010</b>B",
+      "text": "B"
+    },
+    {
+      "id": "11-control-before",
+      "html": "\u0011B",
+      "text": "B"
+    },
+    {
+      "id": "11-control-middle",
+      "html": "A\u0011B",
+      "text": "AB"
+    },
+    {
+      "id": "11-control-style",
+      "html": "<b>\u0011</b>B",
+      "text": "B"
+    },
+    {
+      "id": "12-control-before",
+      "html": "\u0012B",
+      "text": "B"
+    },
+    {
+      "id": "12-control-middle",
+      "html": "A\u0012B",
+      "text": "AB"
+    },
+    {
+      "id": "12-control-style",
+      "html": "<b>\u0012</b>B",
+      "text": "B"
+    },
+    {
+      "id": "13-control-before",
+      "html": "\u0013B",
+      "text": "B"
+    },
+    {
+      "id": "13-control-middle",
+      "html": "A\u0013B",
+      "text": "AB"
+    },
+    {
+      "id": "13-control-style",
+      "html": "<b>\u0013</b>B",
+      "text": "B"
+    },
+    {
+      "id": "14-control-before",
+      "html": "\u0014B",
+      "text": "B"
+    },
+    {
+      "id": "14-control-middle",
+      "html": "A\u0014B",
+      "text": "AB"
+    },
+    {
+      "id": "14-control-style",
+      "html": "<b>\u0014</b>B",
+      "text": "B"
+    },
+    {
+      "id": "15-control-before",
+      "html": "\u0015B",
+      "text": "B"
+    },
+    {
+      "id": "15-control-middle",
+      "html": "A\u0015B",
+      "text": "AB"
+    },
+    {
+      "id": "15-control-style",
+      "html": "<b>\u0015</b>B",
+      "text": "B"
+    },
+    {
+      "id": "16-control-before",
+      "html": "\u0016B",
+      "text": "B"
+    },
+    {
+      "id": "16-control-middle",
+      "html": "A\u0016B",
+      "text": "AB"
+    },
+    {
+      "id": "16-control-style",
+      "html": "<b>\u0016</b>B",
+      "text": "B"
+    },
+    {
+      "id": "17-control-before",
+      "html": "\u0017B",
+      "text": "B"
+    },
+    {
+      "id": "17-control-middle",
+      "html": "A\u0017B",
+      "text": "AB"
+    },
+    {
+      "id": "17-control-style",
+      "html": "<b>\u0017</b>B",
+      "text": "B"
+    },
+    {
+      "id": "18-control-before",
+      "html": "\u0018B",
+      "text": "B"
+    },
+    {
+      "id": "18-control-middle",
+      "html": "A\u0018B",
+      "text": "AB"
+    },
+    {
+      "id": "18-control-style",
+      "html": "<b>\u0018</b>B",
+      "text": "B"
+    },
+    {
+      "id": "19-control-before",
+      "html": "\u0019B",
+      "text": "B"
+    },
+    {
+      "id": "19-control-middle",
+      "html": "A\u0019B",
+      "text": "AB"
+    },
+    {
+      "id": "19-control-style",
+      "html": "<b>\u0019</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1a-control-before",
+      "html": "\u001aB",
+      "text": "B"
+    },
+    {
+      "id": "1a-control-middle",
+      "html": "A\u001aB",
+      "text": "AB"
+    },
+    {
+      "id": "1a-control-style",
+      "html": "<b>\u001a</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1b-control-before",
+      "html": "\u001bB",
+      "text": "B"
+    },
+    {
+      "id": "1b-control-middle",
+      "html": "A\u001bB",
+      "text": "AB"
+    },
+    {
+      "id": "1b-control-style",
+      "html": "<b>\u001b</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1c-control-before",
+      "html": "\u001cB",
+      "text": "B"
+    },
+    {
+      "id": "1c-control-middle",
+      "html": "A\u001cB",
+      "text": "AB"
+    },
+    {
+      "id": "1c-control-style",
+      "html": "<b>\u001c</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1d-control-before",
+      "html": "\u001dB",
+      "text": "B"
+    },
+    {
+      "id": "1d-control-middle",
+      "html": "A\u001dB",
+      "text": "AB"
+    },
+    {
+      "id": "1d-control-style",
+      "html": "<b>\u001d</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1e-control-before",
+      "html": "\u001eB",
+      "text": "B"
+    },
+    {
+      "id": "1e-control-middle",
+      "html": "A\u001eB",
+      "text": "AB"
+    },
+    {
+      "id": "1e-control-style",
+      "html": "<b>\u001e</b>B",
+      "text": "B"
+    },
+    {
+      "id": "1f-control-before",
+      "html": "\u001fB",
+      "text": "B"
+    },
+    {
+      "id": "1f-control-middle",
+      "html": "A\u001fB",
+      "text": "AB"
+    },
+    {
+      "id": "1f-control-style",
+      "html": "<b>\u001f</b>B",
+      "text": "B"
+    }
+  ]
+}

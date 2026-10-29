@@ -437,3 +437,9 @@ MPV 配置运行 `node tests/mpv-options.test.cjs`、`node tests/mpv-options-ui.
 实际产品原生验收分别检查主窗口/PiP中两行文字之间的空行和样式隔离，不能只检查节点原文。包含带尾部换行的段落、两倍字号、横竖屏、真实小窗视频覆盖、定位/空档/回退跳转、同文字背景变化、PIN、退出清除、在线请求和冷重启离线零业务请求。无颜色/背景的段落也应选择原生排版后端，保留段落标记并核对正文完整，不能因尾部空行出现错误省略号；普通纯行内字幕保留原有Span链路。记录每个窗口的实际行数预算及字体/像素边界；超出窗口容量的排版不能宣传为任意长度完整显示。真实服务、物理设备及其他HTML布局分别验收。
 
 原生尾部换行专项使用同一驱动分别采集修复前后RGBA，再设置`CINEISLE_CAPTION_CAPTURE_DIR`运行`python3 tests/caption-tail-emulator.test.py`。核对完整ASCII/UTF-16正文加末端换行后的字节一致性、跨片段末端换行、真实正文超出时仍保持原截断，以及输入/驱动/源文件/HAP绑定。此脚本依赖真实捕获，不纳入无设备本地回归的通过数。
+
+### SRT 物理行与空白兼容
+
+运行`node tests/srt-whitespace.test.cjs`及原有SRT专项、协议、完整回归与`./scripts/build.sh`。参考夹具独立采集Android API34的实际`Html.fromHtml`结果；SRT部分使用固定SubripParser的逐行trim与文本循环合约，明确BufferedReader适配边界，不声称完整Media3解码器执行。覆盖不换行/数字/窄不换行空格、其他Unicode空白、文首BOM、全部ASCII控制字符、首个元素前后差别、空行和裁剪空行、LF/CRLF/CR、文件尾无换行、样式与定位。检查原始离线文件冷读零HTTP、在线控制器跨空行的完整对白与清空、时间码兼容及深度/并发预算。预期不得由被测实现重新生成。
+
+协议和控制器夹具证明解析文字与时序，不代替Harmony实际字形、主窗口/PiP布局、实体API12/15设备、真实Jellyfin或长时播放验收；这些仍分别记证。其余HTML/TagSoup恢复与布局差距继续保留。

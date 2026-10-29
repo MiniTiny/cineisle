@@ -138,6 +138,8 @@ function scriptBaselines(stack: FormatFrame[]): SubtitleBaseline[] {
 
 // Keep the existing plain-text result while retaining common SubRip emphasis/font spans.
 export function inlineSubtitle(value: string): SubtitleContent {
+  // The HTML scanner consumes one document-leading BOM and normalizes line ends.
+  value = value.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
   const pieces: SubtitleRun[] = []; const root = new SubtitleRun();
   const stack: FormatFrame[] = [{ tag: '', style: root }];
   const colorMarks: StyleMark[] = []; const backgroundMarks: StyleMark[] = []; const strikeMarks: StyleMark[] = [];
@@ -152,7 +154,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     else if (name === 'font') { endMark(colorMarks); }
     else if (['s', 'del', 'strike'].includes(name)) { endMark(strikeMarks); }
   };
-  let plainStart = 0; let tagStart = -1; let quote = ''; let trailingBreaks = 0; let paragraph = false;
+  let plainStart = 0; let tagStart = -1; let quote = ''; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
   const append = (raw: string): void => {
     if (!raw) { return; }
     const style = stack[stack.length - 1].style; const previous = pieces[pieces.length - 1];
@@ -163,11 +165,15 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const appendText = (raw: string): void => {
     // Decode before folding, as Html.characters does. Encoded tags remain literal text.
     // The legacy HTML scanner drops nonzero numeric controls, rather than turning them into breaks.
-    const readable = raw.replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
+    const readable = raw.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
       const code = digits[0].toLowerCase() === 'x' ? Number.parseInt(digits.slice(1), 16) : Number.parseInt(digits, 10);
       return code > 0 && code < 32 ? '' : entity;
     });
     let text = subtitleEntities(readable).replace(/[ \n]+/g, ' ');
+      // Before the first element/text, TagSoup ignores an all-Java-whitespace
+      // chunk. Nonbreaking spaces (NBSP/figure/narrow) are not in that set.
+      if (!contentStarted && /^[\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]*$/.test(text)) { return; }
+      if (text) { contentStarted = true; }
     const previous = pieces[pieces.length - 1]?.text;
     const last = previous ? previous[previous.length - 1] : '\n';
     if ((last === ' ' || last === '\n') && text.startsWith(' ')) { text = text.slice(1); }
@@ -242,6 +248,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*)\b/i.exec(tag);
     if (match) {
       const name = match[2].toLowerCase(); const closing = !!match[1];
+        contentStarted = true;
       if (name === 'br' && !closing) { append('\n'); }
       else if (['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
         const block = name === 'p' || name === 'div';
