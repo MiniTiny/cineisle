@@ -19,6 +19,16 @@ class InlineSubtitleLimits {
   static readonly smallMultiplier: number = 0.8;
 }
 
+// Android Html's legacy h1..h6 spans, independently captured with TextPaint.
+const HEADING_SIZE_SCALES: number[] = [1.5, 1.4, 1.3, 1.2, 1.1, 1];
+function headingScale(tag: string): number {
+  const match = /^h([1-6])$/.exec(tag);
+  return match ? HEADING_SIZE_SCALES[Number(match[1]) - 1] : 0;
+}
+function isSubtitleBlock(tag: string): boolean {
+  return tag === 'p' || tag === 'div' || headingScale(tag) > 0;
+}
+
 export class SubtitleBaseline {
   constructor(public direction: number, public sizeScale: number, public family: string,
     public bold: boolean, public italic: boolean) {}
@@ -123,8 +133,9 @@ function scriptBaselines(stack: FormatFrame[]): SubtitleBaseline[] {
   const result: SubtitleBaseline[] = [];
   let scale = 1; let family = ''; let bold = false; let italic = false;
   for (let i = stack.length - 1; i > 0; i--) {
-    const frame = stack[i];
-    if (frame.tag === 'big') { scale *= InlineSubtitleLimits.bigMultiplier; }
+    const frame = stack[i]; const heading = headingScale(frame.tag);
+    if (heading > 0) { scale *= heading; bold = true; }
+    else if (frame.tag === 'big') { scale *= InlineSubtitleLimits.bigMultiplier; }
     else if (frame.tag === 'small') { scale *= InlineSubtitleLimits.smallMultiplier; }
     else if (frame.tag === 'b' || frame.tag === 'strong') { bold = true; }
     else if (frame.tag === 'i' || frame.tag === 'em') { italic = true; }
@@ -185,21 +196,22 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const closeTo = (index: number): void => {
     while (stack.length > index) {
       const frame = stack.pop()!; ++styleRevision; endStyle(frame.tag);
-      if (frame.tag === 'p' || frame.tag === 'div') { blockBreak(); }
+      if (isSubtitleBlock(frame.tag)) { blockBreak(); }
     }
   };
   const openFrame = (name: string, tag: string = '', start: number = 0): void => {
     ++styleRevision;
     if (stack.length > InlineSubtitleLimits.maximumMarkupDepth) { throw new Error('subtitle_failed'); }
     const style = new SubtitleRun('', stack[stack.length - 1].style);
-    let metricFamily = '';
+    let metricFamily = ''; const heading = headingScale(name);
     if (name === 'b' || name === 'strong') { style.bold = true; }
     else if (['i', 'em', 'cite', 'dfn'].includes(name)) { style.italic = true; }
     else if (name === 'tt') { metricFamily = 'monospace'; style.family = metricFamily; }
     else if (name === 'u') { style.underline = true; }
     else if (name === 's' || name === 'del' || name === 'strike') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
-    else if (name === 'big' || name === 'small') {
-      style.sizeScale *= name === 'big' ? InlineSubtitleLimits.bigMultiplier : InlineSubtitleLimits.smallMultiplier;
+    else if (name === 'big' || name === 'small' || heading > 0) {
+      style.sizeScale *= heading > 0 ? heading : name === 'big' ? InlineSubtitleLimits.bigMultiplier : InlineSubtitleLimits.smallMultiplier;
+      if (heading > 0) { style.bold = true; }
       // Reject an excessive candidate instead of silently changing its authored size.
       if (!SubtitleRunScale.valid(style.sizeScale)) { throw new Error('subtitle_failed'); }
     }
@@ -229,7 +241,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const restartable = ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'];
   const suspendInline = (): string[] => {
     const restart: string[] = [];
-    while (stack.length > 1 && !['p', 'div'].includes(stack[stack.length - 1].tag)) {
+    while (stack.length > 1 && !isSubtitleBlock(stack[stack.length - 1].tag)) {
       const name = stack[stack.length - 1].tag;
       if (restartable.includes(name)) { restart.unshift(name); }
       closeTo(stack.length - 1);
@@ -248,10 +260,12 @@ export function inlineSubtitle(value: string): SubtitleContent {
     const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*)\b/i.exec(tag);
     if (match) {
       const name = match[2].toLowerCase(); const closing = !!match[1];
+      // The legacy name scanner can stop before '-' or ':'. New headings require a complete name.
+      const heading = headingScale(name) > 0 && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
         contentStarted = true;
       if (name === 'br' && !closing) { append('\n'); }
-      else if (['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
-        const block = name === 'p' || name === 'div';
+      else if (heading || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
+        const block = isSubtitleBlock(name);
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) {
             if (stack[j].tag === name) {
@@ -263,8 +277,8 @@ export function inlineSubtitle(value: string): SubtitleContent {
           const restart = block ? suspendInline() : [];
           if (block) {
             paragraph = true;
-            // Paragraphs close implicitly at a new block; div nesting remains valid.
-            for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === 'p') { closeTo(j); break; } }
+            // Paragraphs and headings close at a new supported block; div nesting remains valid.
+            for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === 'p' || headingScale(stack[j].tag) > 0) { closeTo(j); break; } }
             blockBreak();
           }
           if (!/\/\s*>$/.test(tag)) { openFrame(name, tag, match[0].length); }

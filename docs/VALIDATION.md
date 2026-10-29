@@ -455,3 +455,11 @@ MPV 配置运行 `node tests/mpv-options.test.cjs`、`node tests/mpv-options-ui.
 运行`node tests/srt-override-lines.test.cjs`、已有文字/空白/定位/段落专项、协议、完整回归与`./scripts/build.sh`。预期独立来自Android API34：固定SubripParser的processLine、文本循环与完整标记选择合约配合实际Html.fromHtml，明确BufferedReader行适配器及非完整Media3二进制的边界。覆盖九种独立定位行、前导/中间/尾部覆盖块、无效和嵌套标记、未闭合块、NEL/行/段落分隔符、CRLF/CR及全部32个C1字符的原文和十进制/十六进制引用。
 
 检查同文字跨定位边界的真实控制器发布、关闭后的迟到响应、离线原文原子保存和冷读零HTTP、深度/同时定位预算、长期顺序字幕及大量未闭合/嵌套起始标记的线性扫描。未知和二次转义引用保持文字，不能因解码生成新定位块或执行HTML。逻辑定位和字符参考不替代Harmony实际字形/几何、实体设备、真实Jellyfin、完整TagSoup恢复或所有播放引擎验收。
+
+### SRT 六级标题
+
+运行`node tests/srt-headings.test.cjs`及原有文字、行内、段落、CSS、字号、上下标和定位专项，再执行协议、完整回归与`./scripts/build.sh`。标题参考独立采集实际Android Html.fromHtml/CharacterStyle/TextPaint，逐UTF-16核对文字、粗体、字号、颜色、字体及上下标操作前状态；浮点容差只用于原生float32数值舍入。明确物理行trim/br适配与完整Media3二进制执行的边界，不从被测解析器生成预期。
+
+覆盖六级倍率、常见行内格式、p/div与标题隐式关闭、异常嵌套、中文/重音/emoji、大小写、完整标签名边界、自定义名称及编码标签。检查同文字大小变化、普通/原生/关闭切换、迟到响应、失败替换保留旧选择、原始离线文件冷读、深度/字号/片段/并发预算和长顺序字幕。
+
+实际Harmony包分别核对主窗口与PiP的完整字形、粗体和相对尺寸、真实段落间距、同文字实时变化、跳转与空档、轨道/PIN/退出清除、字号变化和冷重启离线零业务请求。只存在节点原文或有像素不代表完整显示，须复核错误省略号与真实溢出；绑定产品源码、输入和HAP。段落对齐、引用/列表及其他HTML/CSS、完整TagSoup、物理设备、真实Jellyfin和其他解码路径继续独立记证。
