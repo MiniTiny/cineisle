@@ -1,10 +1,15 @@
 // Product ArkUI producers, cache, transport and decoder stay real. Only Harmony APIs are fixtures.
+const h = require('./feature-regression.test.cjs');
+// Install before catalog captures its original factory; all HTTP observers delegate here.
+const native = require('./poster-profiles-native.cjs').installHttp(h);
 const f = require('./catalog-contract-fixture.cjs').make('poster-profiles');
-const { h, A, assert } = f, fs = require('node:fs'), path = require('node:path');
+const { A, assert } = f, fs = require('node:fs'), path = require('node:path');
 const p = require('./poster-platform.cjs').install(h);
 const { PosterCache } = h.load('service/PosterCache.ets');
 const { decodePoster } = h.load('service/PosterBitmap.ets');
-const image = h.platform.get('@ohos.multimedia.image'), createImageSource = image.createImageSource;
+const image = h.platform.get('@ohos.multimedia.image');
+native.installImage(image, p.imageState);
+const createImageSource = image.createImageSource;
 const io = h.platform.get('@ohos.file.fs');
 const originalIO = Object.fromEntries(['mkdir', 'listFile', 'open', 'write', 'rename', 'read', 'close', 'fsync'].map(key => [key, io[key]]));
 let views = [], caches = [];
@@ -36,13 +41,12 @@ function producer(id) {
 function recordIO() {
   for (const [key, method] of Object.entries(originalIO)) io[key] = (...args) => f.trace().call('cache-' + key, () => method(...args));
 }
-module.exports = { ...f, p, cache, producer, jpeg, ui,
+module.exports = { ...f, p, native, cache, producer, jpeg, ui,
   async load(entry) { entry.show(true); await f.settle(); await A.posters.usage(); await f.settle(); },
   run: tests => f.run(tests.map(test => ({ ...test, async action(check) {
     p.reset(); views = []; caches = []; recordIO();
+    native.reset({ httpFailure: process.argv.includes('--profiles-http-init-failure'), imageFailure: process.argv.includes('--native-image-init-failure') });
     image.createImageSource = bytes => f.trace().call('image-source', () => {
-      // Failure occurs in the native API fixture, not via the external trace injection switch.
-      if (process.argv.includes('--native-image-init-failure')) throw Object.assign(Error('native image source initialization failed'), { code: 'EIO' });
       const value = createImageSource(bytes), getInfo = value.getImageInfo.bind(value), createMap = value.createPixelMap.bind(value);
       value.getImageInfo = () => f.trace().call('image-info', () => getInfo());
       value.createPixelMap = options => f.trace().call('bitmap-create', () => createMap(options));

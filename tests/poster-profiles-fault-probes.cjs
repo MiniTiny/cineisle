@@ -2,6 +2,7 @@
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto'), assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process'), { classify } = require('./resource-cache-result.cjs');
 const { verifyExternalFailure } = require('./contract-external.cjs'), { replaceLiteral } = require('./literal-mutation.cjs');
+const { verifyNativeEntry } = require('./poster-profiles-native-controls.test.cjs');
 const recipes = require('./poster-profiles-fault-cases.cjs'), root = path.resolve(__dirname, '..');
 const scopes = ['entry/src/main/ets', 'entry/src/main/resources', 'tests', 'config'];
 function fingerprint() {
@@ -21,13 +22,14 @@ function run(output = path.join(root, '.local/test-results/poster-profiles-probe
     for (const scope of scopes) fs.cpSync(path.join(root, scope), path.join(temp, scope), { recursive: true });
     const selected = 'poster profile actual producer default', legal = recipes.find(recipe => recipe.id === 'default-other-legal');
     for (const [label, flag, phase, injected, requiredCalls] of [
-      ['http', '--native-init-failure', 'http-create', true, { 'ui-visibility': 1 }],
+      ['http', '--profiles-http-init-failure', 'http-create', false, { 'ui-visibility': 1 }],
       ['image', '--native-image-init-failure', 'image-source', false, { 'http-create': 1, request: 1 }],
       ['disk', '--native-disk-init-failure', 'cache-mkdir', false, { 'ui-visibility': 1 }]
     ]) for (const variant of ['normal', 'mutant']) {
       const invoke = () => { const raw = child(selected, flag), result = classify(raw, selected); persist('control-' + label + '-' + variant, raw);
         const checkpoint = verifyExternalFailure(raw, { scope: 'poster-profiles', phase, requiredCalls }, injected);
-        evidence.controls.push({ label, variant, result, checkpoint }); save(); assert.equal(result.status, 'invalid'); assert.equal(result.record.fixturePhase, 'poster-profiles-external'); };
+        const nativeEntry = label === 'disk' ? undefined : verifyNativeEntry(raw, label, true);
+        evidence.controls.push({ label, variant, result, checkpoint, nativeEntry }); save(); assert.equal(result.status, 'invalid'); assert.equal(result.record.fixturePhase, 'poster-profiles-external'); };
       if (variant === 'mutant') mutate(legal, invoke); else invoke();
     }
     const known = new Set();
