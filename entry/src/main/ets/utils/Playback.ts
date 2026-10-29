@@ -70,22 +70,39 @@ function cueTime(value: string): number {
   return Number.isSafeInteger(time) ? time : -1;
 }
 
+function trimSubripLine(line: string): string {
+  // Java String.trim uses this code-unit range, not Unicode WhiteSpace.
+  // Scan once rather than retrying an end-anchored regex over long inner spaces.
+  let first = 0; let last = line.length;
+  while (first < last && line.charCodeAt(first) <= 0x20) { ++first; }
+  while (last > first && line.charCodeAt(last - 1) <= 0x20) { --last; }
+  return line.slice(first, last);
+}
+
 // Jellyfin converts non-ASS text tracks to SRT. Decode text; never execute HTML.
 export function parseSubtitles(source: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
-  for (const block of source.replace(/^\uFEFF/, '').replace(/\r/g, '').split(/\n\s*\n/)) {
+  // SubRip ends a cue at an empty physical line, not a line containing whitespace.
+  for (const block of source.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n\n')) {
     const lines = block.split('\n');
+    // readLine consumes the final terminator without inventing another empty line.
+    if (lines[lines.length - 1] === '') { lines.pop(); }
     const timing = lines.findIndex((line: string) => line.includes('-->'));
     if (timing < 0) { continue; }
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
     if (start < 0 || end <= start) { continue; }
-    // Fixed SubripParser trims physical SRT lines and supplies explicit HTML breaks.
-    const body = lines.slice(timing + 1).map((line: string): string => line.trim()).filter((line: string): boolean => !!line).join('<br>');
+    let body = '';
+    for (const line of lines.slice(timing + 1)) {
+      if (body.length) { body += '<br>'; }
+      // Java String.trim removes only code units through U+0020. Unicode spaces
+      // belong to the authored text. A trimmed-empty line still supplies a break.
+      body += trimSubripLine(line);
+    }
     // SubRip uses the first standalone SSA alignment tag, not arbitrary ASS override syntax.
     const alignment = /\{\\an([1-9])\}/.exec(body);
     const content = inlineSubtitle(body.replace(/\{\\[^{}]*\}/g, ''));
-    if (start >= 0 && end > start && content.text.trim()) {
+    if (start >= 0 && end > start && /[^\u0000-\u0020]/.test(content.text)) {
       const cue: SubtitleCue = { start: start, end: end, text: content.text, maxEnd: end };
       if (content.runs.length) { cue.runs = content.runs; }
       if (alignment) { cue.placement = new PositionedSubtitle(cues.length, content.text, content.runs, Number(alignment[1])); }
