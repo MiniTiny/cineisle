@@ -1,6 +1,11 @@
 export class PosterOptions { enabled: boolean = true; maxMb: number = 20; }
 // User-selected disk capacity, independent of image/HTTP byte budgets.
 export class PosterOptionRules {
+  static readonly maximumCapacityDraftDigits: number = 3;
+  // Draft grammar is independent of numeric capacity validation.
+  static validCapacityDraft(value: string): boolean {
+    return new RegExp('^[0-9]{1,' + PosterOptionRules.maximumCapacityDraftDigits + '}$').test(value);
+  }
   static readonly minimumCapacityMb: number = 1;
   static readonly maximumCapacityMb: number = 200;
 }

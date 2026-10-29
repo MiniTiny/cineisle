@@ -25,7 +25,7 @@ import { PlayerOptionRules, PlayerOptions, playerOptions, validPlayerOptions } f
 import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
 import { PosterCache } from '../service/PosterCache';
-import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
+import { PosterOptionRules, PosterOptions, validPosterOptions } from '../utils/PosterOptions';
 import { EngineChoice, engineChoiceCaption } from '../utils/EngineChoice';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
@@ -219,7 +219,7 @@ struct Settings {
   private async savePosters(): Promise<void> {
     const cache = AppService.posters; if (!cache || this.posterBusy || !this.posterPermit(this.posterRevision, cache)) { return; }
     const next: PosterOptions = { enabled: this.posterEnabled, maxMb: this.posterEnabled ? Number(this.posterCapacity) : cache.snapshot().maxMb };
-    if ((this.posterEnabled && !/^[0-9]{1,3}$/.test(this.posterCapacity)) || !validPosterOptions(next)) { this.posterMessage = text('poster_options_invalid'); return; }
+    if ((this.posterEnabled && !PosterOptionRules.validCapacityDraft(this.posterCapacity)) || !validPosterOptions(next)) { this.posterMessage = text('poster_options_invalid'); return; }
     const revision = this.posterRevision; this.posterBusy = true; this.posterMessage = '';
     try { const value = await cache.save(next, () => this.posterPermit(revision, cache)); if (this.posterPermit(revision, cache)) { this.posterEnabled = value.enabled; this.posterCapacity = value.maxMb.toString(); this.posterMessage = text('poster_options_saved'); } }
     catch (e) { if (this.posterPermit(revision, cache)) { this.posterMessage = text((e as Error).message === 'poster_options_restore_failed' ? 'poster_options_restore_failed' : 'poster_options_save_failed'); } }
@@ -384,7 +384,7 @@ struct Settings {
       SettingsToggle({ label: $r('app.string.poster_cache_enabled'), selected: this.posterEnabled, available: !this.posterBusy,
         onChange: (v: boolean) => { this.posterEnabled = v; } })
       this.fieldCaption($r('app.string.poster_cache_capacity'))
-      TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(PosterOptionRules.maximumCapacityDraftDigits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
         .onChange((v: string) => { this.posterCapacity = v; })
       if (this.posterKnown) { Text($r('app.string.poster_cache_usage', (this.posterBytes / 1048576).toFixed(2), this.posterFiles)).fontSize(12).fontColor(this.palette.muted).width('100%') }
