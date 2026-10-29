@@ -1,0 +1,1460 @@
+{
+  "schema": 1,
+  "reference": "Actual Android API34 Html.fromHtml with pinned SubripParser processLine/text-loop/tag-identity contract;BufferedReader line adapter;not full Media3 binary execution",
+  "cases": [
+    {
+      "id": "alignment-1-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an1}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 1,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-1-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an1}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 1,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-2-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an2}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 2,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-2-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an2}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 2,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-3-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an3}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 3,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-3-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an3}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 3,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-4-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an4}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 4,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-4-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an4}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 4,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-5-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an5}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 5,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-5-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an5}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 5,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-6-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an6}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 6,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-6-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an6}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 6,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-7-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-7-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an7}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-8-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an8}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 8,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-8-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an8}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 8,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-9-own-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an9}\n<b>中文 A</b>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 9,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<b>中文 A</b>",
+          "text": "中文 A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "alignment-9-trailing-line",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an9}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 9,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "leading-unknown",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\q2}\nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "leading-many",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\q2}\n{\\an7}\n{\\an3}\nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "middle-override",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\q2}\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br>B",
+          "text": "A\n\nB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "middle-many",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\an7}\n{\\q2}\nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br><br>B",
+          "text": "A\n\n\nB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "leading-space-tag",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n  {\\an7}  \nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "leading-tag-left-space",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7} \nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "tag-space-raw",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n \n{\\an7}\n \nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "trim-before-removal",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA{\\q2} \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>B",
+          "text": "A\nB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "first-exact",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an0}{\\an10}{\\AN7}{\\an7\\b1}{\\an9}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 9,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nested-no-inner-alignment",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\outer{\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nested-then-valid",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\outer{\\an7}A{\\an3}B\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 3,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "AB",
+          "text": "AB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "unclosed-readable",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7\nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\an7<br>A",
+          "text": "{\\an7\nA"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "unclosed-new-line-valid",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\open\n{\\an3}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 3,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\open<br>A",
+          "text": "{\\open\nA"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "literal-braces",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{ordinary} A {\\q2} B\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{ordinary} A  B",
+          "text": "{ordinary} A B"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "encoded-tag",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n&#123;\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "&#123;\\an7}A",
+          "text": "{\\an7}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "two-backslashes",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "empty-override",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "tag-only-empty",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\n{\\q2}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "",
+          "text": ""
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "font-color",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\n<font color=\"red\">A</font>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<font color=\"red\">A</font>",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "paragraph",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\n<p>A</p>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "<p>A</p>",
+          "text": "A\n\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "leading-tag-then-nbsp",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\n A \n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": " A ",
+          "text": " A "
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "complex-ordinary",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA{\\q2}{\\an3}<i>B</i>\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 3,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<i>B</i>",
+          "text": "AB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ending-unknown",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\q2}\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br>",
+          "text": "A\n"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "trailing-empty-processed",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\nA\n{\\q2}\n \nB\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A<br><br><br>B",
+          "text": "A\n\n\nB"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nel-interrupt",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\outer{\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\outerA",
+          "text": "{\\outer…A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nel-tag-broken",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\an7}A",
+          "text": "{\\an…7}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "nel-not-crossed",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\qx}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\qx}A",
+          "text": "{\\q…x}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ls-interrupt",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\outer {\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\outer A",
+          "text": "{\\outer A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ls-tag-broken",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an 7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\an 7}A",
+          "text": "{\\an 7}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ls-not-crossed",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\q x}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\q x}A",
+          "text": "{\\q x}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ps-interrupt",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\outer {\\an7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\outer A",
+          "text": "{\\outer A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ps-tag-broken",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an 7}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\an 7}A",
+          "text": "{\\an 7}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "ps-not-crossed",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\q x}A\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT",
+      "cues": [
+        {
+          "alignment": 0,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "{\\q x}A",
+          "text": "{\\q x}A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "crlf",
+      "source": "1\r\n00:00:01,000 --> 00:00:05,000\r\n{\\an7}\r\n \r\nA\r\n\r\n2\r\n00:00:06,000 --> 00:00:09,000\r\nNEXT\r\n",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "cr",
+      "source": "1\r00:00:01,000 --> 00:00:05,000\r{\\an7}\r \rA\r\r2\r00:00:06,000 --> 00:00:09,000\rNEXT\r",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    },
+    {
+      "id": "final-terminator",
+      "source": "1\n00:00:01,000 --> 00:00:05,000\n{\\an7}\nA\n\n2\n00:00:06,000 --> 00:00:09,000\nNEXT\n",
+      "cues": [
+        {
+          "alignment": 7,
+          "timing": "00:00:01,000 --> 00:00:05,000",
+          "html": "A",
+          "text": "A"
+        },
+        {
+          "alignment": 0,
+          "timing": "00:00:06,000 --> 00:00:09,000",
+          "html": "NEXT",
+          "text": "NEXT"
+        }
+      ]
+    }
+  ],
+  "direct": [
+    {
+      "id": "80-raw",
+      "html": "AB",
+      "text": "A€B"
+    },
+    {
+      "id": "80-decimal",
+      "html": "A&#128;B",
+      "text": "A€B"
+    },
+    {
+      "id": "80-hex",
+      "html": "A&#x80;B",
+      "text": "A€B"
+    },
+    {
+      "id": "81-raw",
+      "html": "AB",
+      "text": "A�B"
+    },
+    {
+      "id": "81-decimal",
+      "html": "A&#129;B",
+      "text": "A�B"
+    },
+    {
+      "id": "81-hex",
+      "html": "A&#x81;B",
+      "text": "A�B"
+    },
+    {
+      "id": "82-raw",
+      "html": "AB",
+      "text": "A‚B"
+    },
+    {
+      "id": "82-decimal",
+      "html": "A&#130;B",
+      "text": "A‚B"
+    },
+    {
+      "id": "82-hex",
+      "html": "A&#x82;B",
+      "text": "A‚B"
+    },
+    {
+      "id": "83-raw",
+      "html": "AB",
+      "text": "AƒB"
+    },
+    {
+      "id": "83-decimal",
+      "html": "A&#131;B",
+      "text": "AƒB"
+    },
+    {
+      "id": "83-hex",
+      "html": "A&#x83;B",
+      "text": "AƒB"
+    },
+    {
+      "id": "84-raw",
+      "html": "AB",
+      "text": "A„B"
+    },
+    {
+      "id": "84-decimal",
+      "html": "A&#132;B",
+      "text": "A„B"
+    },
+    {
+      "id": "84-hex",
+      "html": "A&#x84;B",
+      "text": "A„B"
+    },
+    {
+      "id": "85-raw",
+      "html": "AB",
+      "text": "A…B"
+    },
+    {
+      "id": "85-decimal",
+      "html": "A&#133;B",
+      "text": "A…B"
+    },
+    {
+      "id": "85-hex",
+      "html": "A&#x85;B",
+      "text": "A…B"
+    },
+    {
+      "id": "86-raw",
+      "html": "AB",
+      "text": "A†B"
+    },
+    {
+      "id": "86-decimal",
+      "html": "A&#134;B",
+      "text": "A†B"
+    },
+    {
+      "id": "86-hex",
+      "html": "A&#x86;B",
+      "text": "A†B"
+    },
+    {
+      "id": "87-raw",
+      "html": "AB",
+      "text": "A‡B"
+    },
+    {
+      "id": "87-decimal",
+      "html": "A&#135;B",
+      "text": "A‡B"
+    },
+    {
+      "id": "87-hex",
+      "html": "A&#x87;B",
+      "text": "A‡B"
+    },
+    {
+      "id": "88-raw",
+      "html": "AB",
+      "text": "AˆB"
+    },
+    {
+      "id": "88-decimal",
+      "html": "A&#136;B",
+      "text": "AˆB"
+    },
+    {
+      "id": "88-hex",
+      "html": "A&#x88;B",
+      "text": "AˆB"
+    },
+    {
+      "id": "89-raw",
+      "html": "AB",
+      "text": "A‰B"
+    },
+    {
+      "id": "89-decimal",
+      "html": "A&#137;B",
+      "text": "A‰B"
+    },
+    {
+      "id": "89-hex",
+      "html": "A&#x89;B",
+      "text": "A‰B"
+    },
+    {
+      "id": "8a-raw",
+      "html": "AB",
+      "text": "AŠB"
+    },
+    {
+      "id": "8a-decimal",
+      "html": "A&#138;B",
+      "text": "AŠB"
+    },
+    {
+      "id": "8a-hex",
+      "html": "A&#x8a;B",
+      "text": "AŠB"
+    },
+    {
+      "id": "8b-raw",
+      "html": "AB",
+      "text": "A‹B"
+    },
+    {
+      "id": "8b-decimal",
+      "html": "A&#139;B",
+      "text": "A‹B"
+    },
+    {
+      "id": "8b-hex",
+      "html": "A&#x8b;B",
+      "text": "A‹B"
+    },
+    {
+      "id": "8c-raw",
+      "html": "AB",
+      "text": "AŒB"
+    },
+    {
+      "id": "8c-decimal",
+      "html": "A&#140;B",
+      "text": "AŒB"
+    },
+    {
+      "id": "8c-hex",
+      "html": "A&#x8c;B",
+      "text": "AŒB"
+    },
+    {
+      "id": "8d-raw",
+      "html": "AB",
+      "text": "A�B"
+    },
+    {
+      "id": "8d-decimal",
+      "html": "A&#141;B",
+      "text": "A�B"
+    },
+    {
+      "id": "8d-hex",
+      "html": "A&#x8d;B",
+      "text": "A�B"
+    },
+    {
+      "id": "8e-raw",
+      "html": "AB",
+      "text": "AŽB"
+    },
+    {
+      "id": "8e-decimal",
+      "html": "A&#142;B",
+      "text": "AŽB"
+    },
+    {
+      "id": "8e-hex",
+      "html": "A&#x8e;B",
+      "text": "AŽB"
+    },
+    {
+      "id": "8f-raw",
+      "html": "AB",
+      "text": "A�B"
+    },
+    {
+      "id": "8f-decimal",
+      "html": "A&#143;B",
+      "text": "A�B"
+    },
+    {
+      "id": "8f-hex",
+      "html": "A&#x8f;B",
+      "text": "A�B"
+    },
+    {
+      "id": "90-raw",
+      "html": "AB",
+      "text": "A�B"
+    },
+    {
+      "id": "90-decimal",
+      "html": "A&#144;B",
+      "text": "A�B"
+    },
+    {
+      "id": "90-hex",
+      "html": "A&#x90;B",
+      "text": "A�B"
+    },
+    {
+      "id": "91-raw",
+      "html": "AB",
+      "text": "A‘B"
+    },
+    {
+      "id": "91-decimal",
+      "html": "A&#145;B",
+      "text": "A‘B"
+    },
+    {
+      "id": "91-hex",
+      "html": "A&#x91;B",
+      "text": "A‘B"
+    },
+    {
+      "id": "92-raw",
+      "html": "AB",
+      "text": "A’B"
+    },
+    {
+      "id": "92-decimal",
+      "html": "A&#146;B",
+      "text": "A’B"
+    },
+    {
+      "id": "92-hex",
+      "html": "A&#x92;B",
+      "text": "A’B"
+    },
+    {
+      "id": "93-raw",
+      "html": "AB",
+      "text": "A“B"
+    },
+    {
+      "id": "93-decimal",
+      "html": "A&#147;B",
+      "text": "A“B"
+    },
+    {
+      "id": "93-hex",
+      "html": "A&#x93;B",
+      "text": "A“B"
+    },
+    {
+      "id": "94-raw",
+      "html": "AB",
+      "text": "A”B"
+    },
+    {
+      "id": "94-decimal",
+      "html": "A&#148;B",
+      "text": "A”B"
+    },
+    {
+      "id": "94-hex",
+      "html": "A&#x94;B",
+      "text": "A”B"
+    },
+    {
+      "id": "95-raw",
+      "html": "AB",
+      "text": "A•B"
+    },
+    {
+      "id": "95-decimal",
+      "html": "A&#149;B",
+      "text": "A•B"
+    },
+    {
+      "id": "95-hex",
+      "html": "A&#x95;B",
+      "text": "A•B"
+    },
+    {
+      "id": "96-raw",
+      "html": "AB",
+      "text": "A–B"
+    },
+    {
+      "id": "96-decimal",
+      "html": "A&#150;B",
+      "text": "A–B"
+    },
+    {
+      "id": "96-hex",
+      "html": "A&#x96;B",
+      "text": "A–B"
+    },
+    {
+      "id": "97-raw",
+      "html": "AB",
+      "text": "A—B"
+    },
+    {
+      "id": "97-decimal",
+      "html": "A&#151;B",
+      "text": "A—B"
+    },
+    {
+      "id": "97-hex",
+      "html": "A&#x97;B",
+      "text": "A—B"
+    },
+    {
+      "id": "98-raw",
+      "html": "AB",
+      "text": "A˜B"
+    },
+    {
+      "id": "98-decimal",
+      "html": "A&#152;B",
+      "text": "A˜B"
+    },
+    {
+      "id": "98-hex",
+      "html": "A&#x98;B",
+      "text": "A˜B"
+    },
+    {
+      "id": "99-raw",
+      "html": "AB",
+      "text": "A™B"
+    },
+    {
+      "id": "99-decimal",
+      "html": "A&#153;B",
+      "text": "A™B"
+    },
+    {
+      "id": "99-hex",
+      "html": "A&#x99;B",
+      "text": "A™B"
+    },
+    {
+      "id": "9a-raw",
+      "html": "AB",
+      "text": "AšB"
+    },
+    {
+      "id": "9a-decimal",
+      "html": "A&#154;B",
+      "text": "AšB"
+    },
+    {
+      "id": "9a-hex",
+      "html": "A&#x9a;B",
+      "text": "AšB"
+    },
+    {
+      "id": "9b-raw",
+      "html": "AB",
+      "text": "A›B"
+    },
+    {
+      "id": "9b-decimal",
+      "html": "A&#155;B",
+      "text": "A›B"
+    },
+    {
+      "id": "9b-hex",
+      "html": "A&#x9b;B",
+      "text": "A›B"
+    },
+    {
+      "id": "9c-raw",
+      "html": "AB",
+      "text": "AœB"
+    },
+    {
+      "id": "9c-decimal",
+      "html": "A&#156;B",
+      "text": "AœB"
+    },
+    {
+      "id": "9c-hex",
+      "html": "A&#x9c;B",
+      "text": "AœB"
+    },
+    {
+      "id": "9d-raw",
+      "html": "AB",
+      "text": "A�B"
+    },
+    {
+      "id": "9d-decimal",
+      "html": "A&#157;B",
+      "text": "A�B"
+    },
+    {
+      "id": "9d-hex",
+      "html": "A&#x9d;B",
+      "text": "A�B"
+    },
+    {
+      "id": "9e-raw",
+      "html": "AB",
+      "text": "AžB"
+    },
+    {
+      "id": "9e-decimal",
+      "html": "A&#158;B",
+      "text": "AžB"
+    },
+    {
+      "id": "9e-hex",
+      "html": "A&#x9e;B",
+      "text": "AžB"
+    },
+    {
+      "id": "9f-raw",
+      "html": "AB",
+      "text": "AŸB"
+    },
+    {
+      "id": "9f-decimal",
+      "html": "A&#159;B",
+      "text": "AŸB"
+    },
+    {
+      "id": "9f-hex",
+      "html": "A&#x9f;B",
+      "text": "AŸB"
+    }
+  ]
+}

@@ -443,3 +443,9 @@ MPV 配置运行 `node tests/mpv-options.test.cjs`、`node tests/mpv-options-ui.
 运行`node tests/srt-whitespace.test.cjs`及原有SRT专项、协议、完整回归与`./scripts/build.sh`。参考夹具独立采集Android API34的实际`Html.fromHtml`结果；SRT部分使用固定SubripParser的逐行trim与文本循环合约，明确BufferedReader适配边界，不声称完整Media3解码器执行。覆盖不换行/数字/窄不换行空格、其他Unicode空白、文首BOM、全部ASCII控制字符、首个元素前后差别、空行和裁剪空行、LF/CRLF/CR、文件尾无换行、样式与定位。检查原始离线文件冷读零HTTP、在线控制器跨空行的完整对白与清空、时间码兼容及深度/并发预算。预期不得由被测实现重新生成。
 
 协议和控制器夹具证明解析文字与时序，不代替Harmony实际字形、主窗口/PiP布局、实体API12/15设备、真实Jellyfin或长时播放验收；这些仍分别记证。其余HTML/TagSoup恢复与布局差距继续保留。
+
+### SRT 覆盖块逐行处理与C1字符
+
+运行`node tests/srt-override-lines.test.cjs`、已有文字/空白/定位/段落专项、协议、完整回归与`./scripts/build.sh`。预期独立来自Android API34：固定SubripParser的processLine、文本循环与完整标记选择合约配合实际Html.fromHtml，明确BufferedReader行适配器及非完整Media3二进制的边界。覆盖九种独立定位行、前导/中间/尾部覆盖块、无效和嵌套标记、未闭合块、NEL/行/段落分隔符、CRLF/CR及全部32个C1字符的原文和十进制/十六进制引用。
+
+检查同文字跨定位边界的真实控制器发布、关闭后的迟到响应、离线原文原子保存和冷读零HTTP、深度/同时定位预算、长期顺序字幕及大量未闭合/嵌套起始标记的线性扫描。未知和二次转义引用保持文字，不能因解码生成新定位块或执行HTML。逻辑定位和字符参考不替代Harmony实际字形/几何、实体设备、真实Jellyfin、完整TagSoup恢复或所有播放引擎验收。
