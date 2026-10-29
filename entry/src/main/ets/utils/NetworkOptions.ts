@@ -7,6 +7,11 @@ export class NetworkOptions {
 }
 // User-selectable API timeout range and whole-second granularity.
 export class NetworkOptionRules {
+  static readonly maximumTimeoutDraftDigits: number = 3;
+  // Text grammar remains distinct from the timeout range and whole-second step.
+  static validTimeoutDraft(value: string): boolean {
+    return new RegExp('^[0-9]{1,' + NetworkOptionRules.maximumTimeoutDraftDigits + '}$').test(value);
+  }
   static readonly minimumTimeoutMs: number = 1000;
   static readonly maximumTimeoutMs: number = 120000;
   static readonly timeoutStepMs: number = 1000;

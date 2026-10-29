@@ -296,6 +296,11 @@ const recipes=[
     "suite": "player-options-contract.test.cjs"
   }
 ];
+recipes.push(
+  ...[2, 4].map((value, index) => ({ id: 'seek-draft-limit-' + value, file: 'entry/src/main/ets/utils/PlayerOptions.ts', old: 'maximumSeekDraftCodeUnits: number = 3', replacement: 'maximumSeekDraftCodeUnits: number = ' + value, name: 'player draft actual ' + (index ? 'forward' : 'back') + ' "123"', suite: 'player-draft-contract.test.cjs' })),
+  ...[['back', 'seekBack'], ['forward', 'seekForward']].flatMap(([key, field]) => [2, 4].map(value => ({ id: 'seek-draft-' + key + '-consumer-' + value, file: 'entry/src/main/ets/pages/Settings.ets', old: 'TextInput({ text: this.' + field + ' }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits)', replacement: 'TextInput({ text: this.' + field + ' }).type(InputType.Number).maxLength(' + value + ')', name: 'player draft actual ' + key + ' "123"', suite: 'player-draft-contract.test.cjs' }))),
+  ...[['back', 'seekBack'], ['forward', 'seekForward']].map(([key, field]) => ({ id: 'seek-draft-' + key + '-coercion-drift', file: 'entry/src/main/ets/pages/Settings.ets', old: 'Number(this.' + field + ')', replacement: 'Number.parseInt(this.' + field + ', 10)', name: 'player draft actual ' + key + ' "1e2"', suite: 'player-draft-contract.test.cjs' }))
+);
 const controls=[
   {
     "name": "player options actual Settings forward 300",
@@ -332,4 +337,4 @@ const controls=[
     }
   }
 ];
-module.exports={recipes,controls,scope:'player-options',fixture:'tests/player-display-fixture.cjs',earlyPhase:'option-file-write',earlyOld:'try{await test.action(check,time);',earlyReplacement:"try{f.trace().call('option-file-write',()=>{});await test.action(check,time);",selfFaults:[{id:'window-init-capture',phase:'window-get',file:'tests/player-display-fixture.cjs',old:"f.trace().call('window-get',()=>{",replacement:"((phase,operation)=>operation())('window-get',()=>{"}]};
+module.exports={recipes,controls,scope:'player-options',extraScopes:['entry/src/main/resources'],fixture:'tests/player-display-fixture.cjs',earlyPhase:'option-file-write',earlyOld:'try{await test.action(check,time);',earlyReplacement:"try{f.trace().call('option-file-write',()=>{});await test.action(check,time);",selfFaults:[{id:'window-init-capture',phase:'window-get',file:'tests/player-display-fixture.cjs',old:"f.trace().call('window-get',()=>{",replacement:"((phase,operation)=>operation())('window-get',()=>{"}]};

@@ -1,3 +1,4 @@
+import { PosterImagePolicy } from '../utils/PosterOptions';
 import { UiPalette } from '../utils/UiPalette';
 import { UiLayout } from '../utils/UiLayout';
 import { MediaItem } from '../model/Models';
@@ -29,7 +30,7 @@ export struct MediaCard {
     Column({ space: 4 }) {
       Stack() {
         CachedImage({ imageId: posterTarget(this.item, this.wide).id, tag: posterTarget(this.item, this.wide).tag ?? '',
-          backdrop: posterTarget(this.item, this.wide).backdrop, pixelWidth: this.wide ? 1280 : 480, label: this.item.Name })
+          backdrop: posterTarget(this.item, this.wide).backdrop, pixelWidth: this.wide ? PosterImagePolicy.largeWidthPx : PosterImagePolicy.mediumWidthPx, label: this.item.Name })
           .width('100%').aspectRatio(this.wide ? 16 / 9 : 2 / 3)
         if (this.item.UserData?.Played) {
           Row() {

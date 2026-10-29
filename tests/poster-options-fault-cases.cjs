@@ -128,6 +128,12 @@ const recipes=[
     "suite": "poster-options-contract.test.cjs"
   }
 ];
+recipes.push(
+  ...[2, 4].map(value => ({ id: 'capacity-draft-digits-' + value, file: 'entry/src/main/ets/utils/PosterOptions.ts', old: 'maximumCapacityDraftDigits: number = 3', replacement: 'maximumCapacityDraftDigits: number = ' + value, name: value === 2 ? 'poster draft actual input "123"' : 'poster draft actual input "0001"', suite: 'poster-draft-contract.test.cjs' })),
+  { id: 'capacity-draft-producer-drift', file: 'entry/src/main/ets/pages/Settings.ets', old: '.maxLength(PosterOptionRules.maximumCapacityDraftDigits)', replacement: '.maxLength(2)', name: 'poster draft actual input "123"', suite: 'poster-draft-contract.test.cjs' },
+  { id: 'capacity-draft-guard-remove', file: 'entry/src/main/ets/pages/Settings.ets', old: '!PosterOptionRules.validCapacityDraft(this.posterCapacity)', replacement: 'false', name: 'poster draft actual input "0001"', suite: 'poster-draft-contract.test.cjs' },
+  { id: 'capacity-draft-minimum-quantifier', file: 'entry/src/main/ets/utils/PosterOptions.ts', old: "new RegExp('^[0-9]{1,' + PosterOptionRules.maximumCapacityDraftDigits", replacement: "new RegExp('^[0-9]{2,' + PosterOptionRules.maximumCapacityDraftDigits", name: 'poster draft grammar "1"', suite: 'poster-draft-contract.test.cjs' }
+);
 const controls=[
   {
     "name": "poster options actual save capacity 1",

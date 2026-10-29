@@ -1,3 +1,4 @@
+import { PosterImagePolicy } from '../utils/PosterOptions';
 import { UiPalette } from '../utils/UiPalette';
 import { BrandHeading } from './BrandHeading';
 import { MediaItem, Person } from '../model/Models';
@@ -55,7 +56,7 @@ export struct DetailMetadataPanel {
           ForEach(detailMetadata(this.item).actors, (person: Person) => {
             Button({ type: ButtonType.Normal }) {
               Row({ space: 12 }) {
-                        CachedImage({ imageId: person.Id, tag: person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 24, placeholder: $r('app.media.nav_user_muted') })
+                        CachedImage({ imageId: person.Id, tag: person.PrimaryImageTag ?? '', pixelWidth: PosterImagePolicy.smallWidthPx, radius: 24, placeholder: $r('app.media.nav_user_muted') })
                           .width(48).height(48).flexShrink(0)
                 Column({ space: 6 }) {
                   Text(person.Name).fontColor(this.palette.foreground).fontSize(14).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')

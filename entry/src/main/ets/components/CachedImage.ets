@@ -4,7 +4,7 @@ import { AppService } from '../service/AppService';
 import { AppLock } from '../service/AppLock';
 import { JellyfinClient } from '../service/JellyfinClient';
 import { decodePoster } from '../service/PosterBitmap';
-import { PosterTicket, PosterTarget, PosterData } from '../utils/PosterOptions';
+import { PosterTicket, PosterTarget, PosterData, PosterImagePolicy } from '../utils/PosterOptions';
 
 @Component
 export struct CachedImage {
@@ -13,7 +13,7 @@ export struct CachedImage {
   @Prop @Watch('reload') imageId: string = '';
   @Prop @Watch('reload') tag: string = '';
   @Prop @Watch('reload') backdrop: boolean = false;
-  @Prop @Watch('reload') pixelWidth: number = 480;
+  @Prop @Watch('reload') pixelWidth: number = PosterImagePolicy.mediumWidthPx;
   @Prop placeholder: Resource = $r('app.media.poster_placeholder');
   @Prop radius: number = 8;
   @Prop label: string = '';

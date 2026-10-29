@@ -22,10 +22,10 @@ import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
 import { deviceNameValue, DeviceNameRules } from '../utils/DeviceOptions';
 import { PlayerOptionRules, PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
-import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
+import { NetworkOptionRules, NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
 import { PosterCache } from '../service/PosterCache';
-import { PosterOptions, validPosterOptions } from '../utils/PosterOptions';
+import { PosterOptionRules, PosterOptions, validPosterOptions } from '../utils/PosterOptions';
 import { EngineChoice, engineChoiceCaption } from '../utils/EngineChoice';
 import { EnginePreferences } from '../service/EnginePreferences';
 import { PlaybackEngines } from '../service/PlaybackEngines';
@@ -219,7 +219,7 @@ struct Settings {
   private async savePosters(): Promise<void> {
     const cache = AppService.posters; if (!cache || this.posterBusy || !this.posterPermit(this.posterRevision, cache)) { return; }
     const next: PosterOptions = { enabled: this.posterEnabled, maxMb: this.posterEnabled ? Number(this.posterCapacity) : cache.snapshot().maxMb };
-    if ((this.posterEnabled && !/^[0-9]{1,3}$/.test(this.posterCapacity)) || !validPosterOptions(next)) { this.posterMessage = text('poster_options_invalid'); return; }
+    if ((this.posterEnabled && !PosterOptionRules.validCapacityDraft(this.posterCapacity)) || !validPosterOptions(next)) { this.posterMessage = text('poster_options_invalid'); return; }
     const revision = this.posterRevision; this.posterBusy = true; this.posterMessage = '';
     try { const value = await cache.save(next, () => this.posterPermit(revision, cache)); if (this.posterPermit(revision, cache)) { this.posterEnabled = value.enabled; this.posterCapacity = value.maxMb.toString(); this.posterMessage = text('poster_options_saved'); } }
     catch (e) { if (this.posterPermit(revision, cache)) { this.posterMessage = text((e as Error).message === 'poster_options_restore_failed' ? 'poster_options_restore_failed' : 'poster_options_save_failed'); } }
@@ -247,7 +247,7 @@ struct Settings {
     if (this.networkBusy || !this.deviceVisible || this.locked || !AppLock.permit() || this.ownerClient !== AppService.client) { return; }
     const next: NetworkOptions = reset ? new NetworkOptions() : { requestMs: Number(this.requestSeconds) * 1000,
       connectMs: Number(this.connectSeconds) * 1000, readMs: Number(this.readSeconds) * 1000, autoCache: this.autoCache };
-    if ((!reset && ![this.requestSeconds, this.connectSeconds, this.readSeconds].every((v: string) => /^[0-9]{1,3}$/.test(v))) || !validNetworkOptions(next)) {
+    if ((!reset && ![this.requestSeconds, this.connectSeconds, this.readSeconds].every((v: string) => NetworkOptionRules.validTimeoutDraft(v))) || !validNetworkOptions(next)) {
       this.networkMessage = text('network_options_invalid'); return;
     }
     const revision = this.networkRevision; const client = this.ownerClient;
@@ -384,7 +384,7 @@ struct Settings {
       SettingsToggle({ label: $r('app.string.poster_cache_enabled'), selected: this.posterEnabled, available: !this.posterBusy,
         onChange: (v: boolean) => { this.posterEnabled = v; } })
       this.fieldCaption($r('app.string.poster_cache_capacity'))
-      TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.posterCapacity }).type(InputType.Number).maxLength(PosterOptionRules.maximumCapacityDraftDigits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(this.posterEnabled && !this.posterBusy).accessibilityText($r('app.string.poster_cache_capacity'))
         .onChange((v: string) => { this.posterCapacity = v; })
       if (this.posterKnown) { Text($r('app.string.poster_cache_usage', (this.posterBytes / 1048576).toFixed(2), this.posterFiles)).fontSize(12).fontColor(this.palette.muted).width('100%') }
@@ -398,7 +398,7 @@ struct Settings {
   @Builder
   private networkField(label: Resource, key: number) {
     this.fieldCaption(label)
-    TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(3).accessibilityText(label)
+    TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(NetworkOptionRules.maximumTimeoutDraftDigits).accessibilityText(label)
       .height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.networkBusy && !this.locked)
       .onChange((v: string) => { if (key === 0) { this.requestSeconds = v; } else if (key === 1) { this.connectSeconds = v; } else { this.readSeconds = v; } })
   }
@@ -492,10 +492,10 @@ struct Settings {
       SettingsToggle({ label: $r('app.string.player_remember_brightness'), selected: this.playerUi.rememberBrightness ?? false,
         onChange: (value: boolean) => this.savePlayer('brightness', value) })
       this.fieldCaption($r('app.string.player_back_seconds'))
-      TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
       this.fieldCaption($r('app.string.player_forward_seconds'))
-      TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
       BrandButton({ label: $r('app.string.player_save_steps'), icon: $r('app.media.menu_save'), onSelect: () => this.savePlayer() })
       SettingsToggle({ label: $r('app.string.player_auto_pip'), selected: this.playerUi.autoPiP,

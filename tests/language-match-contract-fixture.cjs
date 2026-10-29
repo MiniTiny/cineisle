@@ -25,10 +25,15 @@ async function before() {
   privateScore = undefined;
   pref.api.getPreferences = (...args) => trace.call('preferences-open', async () => {
     if (process.argv.includes('--native-preferences-init-failure')) throw Object.assign(Error('injected native Preferences initializer failure'), { code: 'EIO', contractInjected: true });
+    if (process.argv.includes('--native-preferences-open-failure')) pref.state.failOpen = true;
     const instance = await originalOpen(...args);
+    if (process.argv.includes('--native-preferences-read-failure')) pref.state.failGet = true;
     for (const [method, phase] of [['get', 'preferences-get'], ['put', 'preferences-put'], ['flush', 'preferences-flush']]) {
       const original = instance[method].bind(instance);
-      instance[method] = (...values) => trace.call(phase, () => original(...values));
+      instance[method] = (...values) => trace.call(phase, () => {
+        if (method === 'flush' && process.argv.includes('--native-preferences-flush-failure')) pref.state.failFlush = 1;
+        return original(...values);
+      });
     }
     return instance;
   });
@@ -40,7 +45,9 @@ async function before() {
   });
 }
 async function after() { media.createAVPlayer = originalCreate; pref.api.getPreferences = originalOpen; }
-const fixture = { h, assert, rules, pref, trace: () => trace, score: (...args) => privateScore(...args),
+const fixture = {
+  ui: () => trace.call('ui-compile', () => require('./brand-forms.test.cjs')),
+  h, assert, rules, pref, PlaybackPreferenceStore, trace: () => trace, score: (...args) => privateScore(...args),
   observed: promise => Promise.resolve(promise).then(value => ({ value }), error => ({ error })),
   async store() { const s = new PlaybackPreferenceStore(); await s.load({ filesDir: h.directory }); return s; },
   async playing(language, tracks, selected = []) {

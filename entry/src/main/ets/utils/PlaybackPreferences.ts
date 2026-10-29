@@ -7,6 +7,11 @@ export class PlaybackPreferences {
   subtitlesOff: boolean = false;
 }
 
+// Raw editor length is independent of the normalized tag admission below.
+export class PlaybackLanguageInput {
+  static readonly maximumRawCodeUnits: number = 63;
+}
+
 class PlaybackLanguageRules {
   static readonly maximumTagCodeUnits: number = 63;
   static readonly exactScore: number = 100;
