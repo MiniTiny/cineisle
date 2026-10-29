@@ -1,3 +1,4 @@
+import { PosterImagePolicy } from '../utils/PosterOptions';
 import { AppRoutes } from '../utils/Navigation';
 import { UiPalette } from '../utils/UiPalette';
 import { downloadVersion } from '../utils/DownloadIdentity';
@@ -251,7 +252,7 @@ struct Detail {
       Scroll() {
         Column({ space: 18 }) {
           Column({ space: 12 }) {
-                  CachedImage({ imageId: this.item.Id, tag: this.item.BackdropImageTags?.[0] ?? '', backdrop: true, pixelWidth: 1280, radius: 16 })
+                  CachedImage({ imageId: this.item.Id, tag: this.item.BackdropImageTags?.[0] ?? '', backdrop: true, pixelWidth: PosterImagePolicy.largeWidthPx, radius: 16 })
                     .width('100%').height(Math.min(260, Math.max(140, (this.viewportWidth - 32) * 9 / 16)))
             Text(this.item.Name).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
             if (detailMetadata(this.item, this.sourceId).original) {

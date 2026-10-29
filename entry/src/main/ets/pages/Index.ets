@@ -1,3 +1,4 @@
+import { PosterImagePolicy } from '../utils/PosterOptions';
 import { AppRoutes, MainTab, storedTab, tabSelected } from '../utils/Navigation';
 import { BrowseChoice, librarySortChoices, searchTypeChoices } from '../utils/Browse';
 import { actorOrders, ActorOrderChoice, defaultActorOrder } from '../utils/ActorOrder';
@@ -585,7 +586,7 @@ struct Index {
           Column({ space: 8 }) {
             Button({ type: ButtonType.Normal }) {
             Row({ space: 14 }) {
-                  CachedImage({ imageId: actor.person.Id, tag: actor.person.PrimaryImageTag ?? '', pixelWidth: 160, radius: 28, placeholder: $r('app.media.nav_user_active') }).width(56).height(56).flexShrink(0)
+                  CachedImage({ imageId: actor.person.Id, tag: actor.person.PrimaryImageTag ?? '', pixelWidth: PosterImagePolicy.smallWidthPx, radius: 28, placeholder: $r('app.media.nav_user_active') }).width(56).height(56).flexShrink(0)
               Column({ space: 6 }) {
                 Text(actor.person.Name).fontColor(this.palette.foreground).fontSize(16).width('100%')
               }.alignItems(HorizontalAlign.Start).layoutWeight(1)
