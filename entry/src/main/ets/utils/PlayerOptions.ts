@@ -1,5 +1,7 @@
 // Product preference rules, shared by persistence validation and display controls.
 export class PlayerOptionRules {
+  // UI text limit only: direct saves retain their existing Number conversion semantics.
+  static readonly maximumSeekDraftCodeUnits: number = 3;
   static readonly minSeekMs: number = 1000;
   static readonly maxSeekMs: number = 300000;
   static readonly seekStepMs: number = 1000;

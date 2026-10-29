@@ -10,7 +10,10 @@ const domains = [{ scope: 'poster-options', suite: 'poster-draft-contract.test.c
   modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] },
   ...['requestMs', 'connectMs', 'readMs'].map(key => ({ scope: 'network-options', suite: 'network-draft-contract.test.cjs', name: 'network draft actual ' + key + ' "120"',
     file: 'entry/src/main/ets/pages/Settings.ets', old: '.maxLength(NetworkOptionRules.maximumTimeoutDraftDigits)', replacement: '.maxLength(2)',
-    modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] }))];
+    modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] })),
+  ...[['back', 'seekBack'], ['forward', 'seekForward']].map(([key, field]) => ({ scope: 'player-options', suite: 'player-draft-contract.test.cjs', name: 'player draft actual ' + key + ' "123"',
+    file: 'entry/src/main/ets/pages/Settings.ets', old: 'TextInput({ text: this.' + field + ' }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits)', replacement: 'TextInput({ text: this.' + field + ' }).type(InputType.Number).maxLength(2)',
+    modes: [['file-open', { 'ui-save': 1 }], ['file-read', { 'ui-save': 1 }], ['file-write', { 'ui-save': 1 }]] }))];
 function run(selectedScope) {
   const selected = selectedScope ? domains.filter(domain => domain.scope === selectedScope) : domains; assert.ok(selected.length, 'No selected draft controls');
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-draft-controls-'));

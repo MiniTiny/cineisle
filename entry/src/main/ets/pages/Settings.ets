@@ -492,10 +492,10 @@ struct Settings {
       SettingsToggle({ label: $r('app.string.player_remember_brightness'), selected: this.playerUi.rememberBrightness ?? false,
         onChange: (value: boolean) => this.savePlayer('brightness', value) })
       this.fieldCaption($r('app.string.player_back_seconds'))
-      TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.seekBack }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_back_seconds')).onChange((value: string) => { this.seekBack = value; })
       this.fieldCaption($r('app.string.player_forward_seconds'))
-      TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(3).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
+      TextInput({ text: this.seekForward }).type(InputType.Number).maxLength(PlayerOptionRules.maximumSeekDraftCodeUnits).height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground)
         .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).accessibilityText($r('app.string.player_forward_seconds')).onChange((value: string) => { this.seekForward = value; })
       BrandButton({ label: $r('app.string.player_save_steps'), icon: $r('app.media.menu_save'), onSelect: () => this.savePlayer() })
       SettingsToggle({ label: $r('app.string.player_auto_pip'), selected: this.playerUi.autoPiP,
