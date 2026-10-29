@@ -365,6 +365,10 @@ struct Settings {
         .value(uiLanguageCaption(this.languageDraft, text('ui_language_system'))).fontColor(this.palette.foreground).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .height(UiLayout.buttonHeight(this.fontScale)).width('100%').accessibilityText($r('app.string.ui_language_group')).enabled(!this.languageBusy)
         .onSelect((index: number) => { if (!this.languageBusy && !this.locked && index >= 0 && index < UI_LANGUAGES.length && Number.isInteger(index)) { this.languageDraft = UI_LANGUAGES[index]; } })
+      if (this.fontScale > 1) {
+        // API 12 Select is single-line. Keep its full draft identity readable at large text sizes.
+        Text(uiLanguageCaption(this.languageDraft, text('ui_language_system'))).fontSize(14).fontColor(this.palette.foreground).width('100%')
+      }
       BrandButton({ label: $r('app.string.ui_language_save'), icon: $r('app.media.menu_save'), primary: true,
         available: !this.languageBusy && this.languageDraft !== this.languageSaved, onSelect: () => this.saveLanguage() })
       if (this.languageBusy) { BrandState({ label: $r('app.string.loading'), loading: true }) }
