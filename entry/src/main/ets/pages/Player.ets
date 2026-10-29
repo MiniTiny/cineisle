@@ -28,7 +28,7 @@ import { captionShadows } from '../utils/CaptionUI';
 import { EMPTY_SUBTITLE_RUNS, SubtitleContent, SubtitleRun, EMPTY_POSITIONED_SUBTITLES, PositionedSubtitle } from '../utils/InlineSubtitle';
 import { PositionedCaption } from '../components/PositionedCaption';
 import { RichCaption } from '../components/RichCaption';
-import { PlaybackPreferences } from '../utils/PlaybackPreferences';
+import { PlaybackLanguageInput, PlaybackPreferences } from '../utils/PlaybackPreferences';
 import { SystemPlayback, SystemPlayerState } from '../service/SystemPlayback';
 import { PlaybackWindow } from '../service/PlaybackWindow';
 import { JellyfinClient } from '../service/JellyfinClient';
@@ -762,12 +762,12 @@ struct Player {
       BrandHeading({ label: $r('app.string.playback_language_preferences'), icon: $r('app.media.menu_settings') })
       Text($r('app.string.preferred_audio_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)
         .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy).onChange((value: string) => { this.audioLanguage = value; })
       Text($r('app.string.preferred_subtitle_language')).fontColor(this.palette.muted).fontSize(14)
       TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })
-        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(63).fontSize(14).fontColor(this.palette.foreground)
+        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)
         .placeholderColor(this.palette.muted).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface))
         .enabled(!this.settingsBusy && !this.busy && !this.subtitlesOff).onChange((value: string) => { this.subtitleLanguage = value; })
       Row({ space: 12 }) {

@@ -38,5 +38,48 @@ test('language invalid persisted value preserves bytes and default issue', async
   const bytes = require('node:fs').readFileSync(native.filename, 'utf8');
   check(() => { assert.deepEqual(store.snapshot(), pref('')); assert.equal(store.issue, 'playback_preferences_invalid'); assert.equal(JSON.parse(bytes).settings_v1, raw); });
 });
+// Render production ArkUI builders and invoke the controls that users actually use.
+for (const field of ['audioLanguage', 'subtitleLanguage']) {
+  test('language editor raw limit ' + field, async check => {
+    const { render, flat } = f.ui(), r = render('Player', { options: true, alive: true });
+    const inputs = flat(r.roots).filter(n => n.type === 'TextInput');
+    const input = inputs[field === 'audioLanguage' ? 0 : 1];
+    input.attrs.onChange[0](' EN_us ');
+    check(() => { assert.equal(input.attrs.maxLength[0], 63); assert.equal(r.view[field], ' EN_us '); });
+  });
+  for (const n of [62, 63, 64]) test(`language editor save ${field} ${n}`, async check => {
+    const { render, flat, button } = f.ui(), store = new f.PlaybackPreferenceStore();
+    const language = tag(n), native = new f.h.NativePlayer([
+      { track_index: 11, track_type: 0, language },
+      { track_index: 12, track_type: 2, language }
+    ]);
+    const { c: base, values } = f.h.rig();
+    const { PlaybackController } = f.h.load('service/PlaybackController.ets');
+    const controller = new PlaybackController(base.client, base.view, () => store.snapshot());
+    f.h.nativeQueue.push(native);
+    try {
+      await controller.open(f.h.route(), 'surface'); await f.h.settle();
+      const r = render('Player', { options: true, alive: true, controller });
+      r.AppService.playbackPreferences = store;
+      const inputs = flat(r.roots).filter(n => n.type === 'TextInput');
+      // Direct callbacks deliberately bypass native maxLength; the normalized boundary stays independent.
+      inputs[field === 'audioLanguage' ? 0 : 1].attrs.onChange[0](' ' + language.toUpperCase().replace(/-/g, '_') + ' ');
+      await button(r, 'save_playback_preferences').attrs.onClick[0]();
+      await f.h.settle();
+      const snapshot = store.snapshot(), calls = f.pref.state.calls.slice();
+      check(() => {
+        assert.deepEqual(inputs.map(input => input.attrs.maxLength[0]), [63, 63]);
+        assert.equal(r.view.settingsBusy, false);
+        assert.equal(r.view.settingsMessage, n <= 63 ? 'playback_preferences_saved' : 'playback_language_invalid');
+        assert.equal(snapshot[field], n <= 63 ? language : '');
+        if (n <= 63) {
+          const raw = JSON.parse(calls.find(c => c[0] === 'put')[2]);
+          assert.equal(raw.version, 1); assert.equal(raw[field], language);
+          assert.equal(field === 'audioLanguage' ? values.audioKey : values.subtitleKey, field === 'audioLanguage' ? 'native:11' : 'native:12');
+        } else assert.equal(calls.filter(c => c[0] === 'put').length, 0);
+      });
+    } finally { await controller.close(); }
+  });
+}
 if (require.main === module) f.run(tests).catch(e => { console.error(e); process.exitCode = 1; });
 module.exports = tests;

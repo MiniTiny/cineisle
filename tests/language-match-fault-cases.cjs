@@ -120,7 +120,58 @@ const recipes = [
     "suite": "language-match-contract.test.cjs"
   }
 ];
+recipes.push(...[
+  {
+    "id": "editor-audioLanguage-62",
+    "file": "entry/src/main/ets/pages/Player.ets",
+    "old": "TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)",
+    "replacement": "TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(62).fontSize(14).fontColor(this.palette.foreground)",
+    "name": "language editor raw limit audioLanguage",
+    "suite": "language-match-contract.test.cjs"
+  },
+  {
+    "id": "editor-audioLanguage-64",
+    "file": "entry/src/main/ets/pages/Player.ets",
+    "old": "TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)",
+    "replacement": "TextInput({ text: this.audioLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(64).fontSize(14).fontColor(this.palette.foreground)",
+    "name": "language editor raw limit audioLanguage",
+    "suite": "language-match-contract.test.cjs"
+  },
+  {
+    "id": "editor-subtitleLanguage-62",
+    "file": "entry/src/main/ets/pages/Player.ets",
+    "old": "TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)",
+    "replacement": "TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(62).fontSize(14).fontColor(this.palette.foreground)",
+    "name": "language editor raw limit subtitleLanguage",
+    "suite": "language-match-contract.test.cjs"
+  },
+  {
+    "id": "editor-subtitleLanguage-64",
+    "file": "entry/src/main/ets/pages/Player.ets",
+    "old": "TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(PlaybackLanguageInput.maximumRawCodeUnits).fontSize(14).fontColor(this.palette.foreground)",
+    "replacement": "TextInput({ text: this.subtitleLanguage, placeholder: text('playback_language_placeholder') })\n        .height(UiLayout.buttonHeight(this.fontScale)).maxLength(64).fontSize(14).fontColor(this.palette.foreground)",
+    "name": "language editor raw limit subtitleLanguage",
+    "suite": "language-match-contract.test.cjs"
+  },
+  {
+    "id": "editor-raw-rule-62",
+    "file": "entry/src/main/ets/utils/PlaybackPreferences.ts",
+    "old": "maximumRawCodeUnits: number = 63",
+    "replacement": "maximumRawCodeUnits: number = 62",
+    "name": "language editor raw limit audioLanguage",
+    "suite": "language-match-contract.test.cjs"
+  },
+  {
+    "id": "editor-raw-rule-64",
+    "file": "entry/src/main/ets/utils/PlaybackPreferences.ts",
+    "old": "maximumRawCodeUnits: number = 63",
+    "replacement": "maximumRawCodeUnits: number = 64",
+    "name": "language editor raw limit audioLanguage",
+    "suite": "language-match-contract.test.cjs"
+  }
+]);
 const controls = [
+  {phase:"ui-compile", name:"language editor raw limit audioLanguage", suite:"language-match-contract.test.cjs", scope:"language-match"},
   {
     "phase": "preferences-open",
     "name": "language persisted admission 63",
@@ -166,4 +217,4 @@ const controls = [
     "scope": "language-match"
   }
 ];
-module.exports={recipes,controls,scope:'language-match',fixture:'tests/language-match-contract-fixture.cjs',earlyPhase:'native-track-select',earlyOld:'try { privateScore = compileScore(); await test.action(check); }',earlyReplacement:"try { trace.call('native-track-select',()=>{}); privateScore = compileScore(); await test.action(check); }",selfFaults:[{id:'native-preferences-init-observer',phase:'preferences-open',file:'tests/language-match-contract-fixture.cjs',old:"(...args) => trace.call('preferences-open', async () => {",replacement:"(...args) => ((phase,operation)=>operation())('preferences-open', async () => {",status:'invalid'},{id:'native-player-init-observer',phase:'native-player-create',file:'tests/language-match-contract-fixture.cjs',old:"() => trace.call('native-player-create', async () => {",replacement:"() => ((phase,operation)=>operation())('native-player-create', async () => {",status:'detected'}]};
+module.exports={recipes,controls,extraScopes:['entry/src/main/resources'],scope:'language-match',fixture:'tests/language-match-contract-fixture.cjs',earlyPhase:'native-track-select',earlyOld:'try { privateScore = compileScore(); await test.action(check); }',earlyReplacement:"try { trace.call('native-track-select',()=>{}); privateScore = compileScore(); await test.action(check); }",selfFaults:[{id:'native-preferences-init-observer',phase:'preferences-open',file:'tests/language-match-contract-fixture.cjs',old:"(...args) => trace.call('preferences-open', async () => {",replacement:"(...args) => ((phase,operation)=>operation())('preferences-open', async () => {",status:'invalid'},{id:'native-player-init-observer',phase:'native-player-create',file:'tests/language-match-contract-fixture.cjs',old:"() => trace.call('native-player-create', async () => {",replacement:"() => ((phase,operation)=>operation())('native-player-create', async () => {",status:'detected'}]};
