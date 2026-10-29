@@ -310,13 +310,26 @@ for (const entry of CHARACTER_REFERENCES.split(/\s+/)) {
   namedCharacters.set(parts[0], String.fromCodePoint(Number(parts[1])));
 }
 
+// Android's legacy HTML scanner maps C1 controls through Windows-1252;
+// the five undefined entries become U+FFFD, for raw text and numeric references.
+const LEGACY_C1_FIRST_CODE_UNIT: number = 0x80;
+const LEGACY_C1_CHARACTERS: string = '\u20AC\uFFFD\u201A\u0192\u201E\u2026\u2020\u2021' +
+  '\u02C6\u2030\u0160\u2039\u0152\uFFFD\u017D\uFFFD' +
+  '\uFFFD\u2018\u2019\u201C\u201D\u2022\u2013\u2014' +
+  '\u02DC\u2122\u0161\u203A\u0153\uFFFD\u017E\u0178';
+
 export function subtitleEntities(value: string): string {
   // One pass: an encoded tag stays visible text and escaped ampersands cannot decode twice.
-  return value.replace(/&(#(?:[xX][0-9a-fA-F]{1,8}|[0-9]{1,10})|[A-Za-z][A-Za-z0-9]{0,30});/g,
+  const readable = value.replace(/[\u0080-\u009F]/g, (character: string): string =>
+    LEGACY_C1_CHARACTERS[character.charCodeAt(0) - LEGACY_C1_FIRST_CODE_UNIT]);
+  return readable.replace(/&(#(?:[xX][0-9a-fA-F]{1,8}|[0-9]{1,10})|[A-Za-z][A-Za-z0-9]{0,30});/g,
     (reference: string, name: string): string => {
       if (name[0] !== '#') { return namedCharacters.get(name) ?? reference; }
       const hex = name[1] === 'x' || name[1] === 'X';
       const code = parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10);
+      if (code >= LEGACY_C1_FIRST_CODE_UNIT && code < LEGACY_C1_FIRST_CODE_UNIT + LEGACY_C1_CHARACTERS.length) {
+        return LEGACY_C1_CHARACTERS[code - LEGACY_C1_FIRST_CODE_UNIT];
+      }
       return code > 0 && code <= 0x10FFFF && !(code >= 0xD800 && code <= 0xDFFF) ? String.fromCodePoint(code) : reference;
     });
 }

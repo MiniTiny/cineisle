@@ -4,6 +4,7 @@ import { inlineSubtitle, SubtitleContent, SubtitleRun, PositionedSubtitle } from
 
 export interface SubtitleCue { start: number; end: number; text: string; maxEnd: number; runs?: SubtitleRun[]; placement?: PositionedSubtitle }
 interface SubtitleBudgetEvent { time: number; weight: number; styled: number; positioned: number }
+interface SubripLine { text: string; alignment: number }
 export interface TrackChoice { key: string; index: number; type: number; label: string; remote: boolean; language?: string; path?: string; format?: string }
 
 // Unknown season numbers in old caches only allow continuation within the known season.
@@ -79,6 +80,33 @@ function trimSubripLine(line: string): string {
   return line.slice(first, last);
 }
 
+function processSubripLine(raw: string): SubripLine {
+  const line = trimSubripLine(raw);
+  const parts: string[] = [];
+  let plainStart = 0; let overrideStart = -1; let alignment = 0;
+  // Java Pattern's dot cannot cross these line separators. CR/LF have already
+  // been consumed by the physical-line reader. Match the first closing brace,
+  // including nested openings, without retrying an unterminated tag suffix.
+  const patternLineEnd = /[\u0085\u2028\u2029]/;
+  for (let i = 0; i < line.length; ++i) {
+    const character = line[i];
+    if (overrideStart < 0) {
+      if (character === '{' && line[i + 1] === '\\') { overrideStart = i; }
+      continue;
+    }
+    if (patternLineEnd.test(character)) { overrideStart = -1; continue; }
+    if (character !== '}') { continue; }
+    if (plainStart < overrideStart) { parts.push(line.slice(plainStart, overrideStart)); }
+    if (!alignment) {
+      const match = /^\{\\an([1-9])\}$/.exec(line.slice(overrideStart, i + 1));
+      if (match) { alignment = Number(match[1]); }
+    }
+    plainStart = i + 1; overrideStart = -1;
+  }
+  if (plainStart < line.length) { parts.push(line.slice(plainStart)); }
+  return { text: parts.join(''), alignment: alignment };
+}
+
 // Jellyfin converts non-ASS text tracks to SRT. Decode text; never execute HTML.
 export function parseSubtitles(source: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
@@ -92,20 +120,19 @@ export function parseSubtitles(source: string): SubtitleCue[] {
     const times = lines[timing].split('-->');
     const start = cueTime(times[0]); const end = cueTime(times[1]?.trim().split(/\s/)[0] ?? '');
     if (start < 0 || end <= start) { continue; }
-    let body = '';
+    const body: string[] = [];
+    let hasText = false; let alignment = 0;
     for (const line of lines.slice(timing + 1)) {
-      if (body.length) { body += '<br>'; }
-      // Java String.trim removes only code units through U+0020. Unicode spaces
-      // belong to the authored text. A trimmed-empty line still supplies a break.
-      body += trimSubripLine(line);
+      const processed = processSubripLine(line);
+      if (!alignment) { alignment = processed.alignment; }
+      if (hasText) { body.push('<br>'); }
+      if (processed.text) { body.push(processed.text); hasText = true; }
     }
-    // SubRip uses the first standalone SSA alignment tag, not arbitrary ASS override syntax.
-    const alignment = /\{\\an([1-9])\}/.exec(body);
-    const content = inlineSubtitle(body.replace(/\{\\[^{}]*\}/g, ''));
+    const content = inlineSubtitle(body.join(''));
     if (start >= 0 && end > start && /[^\u0000-\u0020]/.test(content.text)) {
       const cue: SubtitleCue = { start: start, end: end, text: content.text, maxEnd: end };
       if (content.runs.length) { cue.runs = content.runs; }
-      if (alignment) { cue.placement = new PositionedSubtitle(cues.length, content.text, content.runs, Number(alignment[1])); }
+      if (alignment) { cue.placement = new PositionedSubtitle(cues.length, content.text, content.runs, alignment); }
       cues.push(cue);
     }
   }
