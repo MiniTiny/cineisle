@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const h=require('./feature-regression.test.cjs'),prefs=require('./preferences-platform.cjs').install(h.platform,h.directory);
 const {LanguagePreferences:L}=h.load('service/LanguagePreferences.ets'),{effectiveUiLanguage,validUiLanguage,UI_LANGUAGES,uiLanguageCaption}=h.load('utils/UiLanguage.ts');
 const tests=[],test=(n,f)=>tests.push([n,f]);let preferred='default',system='zh-Hans',failApply=0;const calls=[];const context={...h.context,getApplicationContext:()=>({setLanguage(value){calls.push(value);if(failApply-->0)throw Error('native failed')}})};
-Object.assign(h.platform.get('@ohos.i18n').System,{getSystemLanguage:()=>system,getAppPreferredLanguage:()=>preferred,setAppPreferredLanguage:value=>{preferred=value}});
+Object.assign(h.platform.get('@ohos.i18n').System,{getSystemLanguage:()=>system,getSystemLocale:()=>system,getAppPreferredLanguage:()=>preferred,setAppPreferredLanguage:value=>{preferred=value}});
 function reset(){h.reset();prefs.reset();fs.rmSync(path.join(h.directory,'ui_language.fixture.json'),{force:true});Object.assign(L,{context:undefined,store:undefined,loading:undefined,writes:Promise.resolve(),value:'system',persisted:'',applied:'',issue:''});preferred='default';system='zh-Hans';failApply=0;calls.length=0}
 const read=p=>JSON.parse(fs.readFileSync(p)).string;
 test('German has one explicit choice with its native caption and rejects malformed saved tokens',()=>{assert.equal(validUiLanguage('de-DE'),true);assert.equal(uiLanguageCaption('de-DE','System'),'Deutsch');assert.equal(UI_LANGUAGES.filter(v=>v==='de-DE').length,1);for(const value of ['de','DE-DE','de_AT','../de-DE'])assert.equal(validUiLanguage(value),false)});

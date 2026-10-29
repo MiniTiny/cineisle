@@ -1,7 +1,7 @@
 // Native space/network declarations are deterministic fixtures, never device acceptance.
 exports.install = platform => {
   if (!platform.has('@ohos.wallpaper')) platform.set('@ohos.wallpaper', { WallpaperType: { WALLPAPER_SYSTEM: 0, WALLPAPER_LOCKSCREEN: 1 }, async getColors() { return []; }, on() {}, off() {} });
-  if (!platform.has('@ohos.i18n')) platform.set('@ohos.i18n', { System: { getSystemLanguage: () => 'zh-Hans', getAppPreferredLanguage: () => 'zh-Hans', setAppPreferredLanguage() {} } });
+  if (!platform.has('@ohos.i18n')) platform.set('@ohos.i18n', { System: { getSystemLanguage: () => 'zh-Hans', getSystemLocale: () => 'zh-Hans-CN', getAppPreferredLanguage: () => 'zh-Hans', setAppPreferredLanguage() {} } });
   if (!platform.has('@ohos.multimedia.image')) platform.set('@ohos.multimedia.image', { createImageSource() { throw Error('image decoder not installed in this fixture'); } });
   require('./sync-platform.cjs').install(platform);
   if (!platform.has('@ohos.file.statvfs')) platform.set('@ohos.file.statvfs', {});

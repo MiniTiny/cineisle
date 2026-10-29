@@ -430,6 +430,12 @@ MPV 配置运行 `node tests/mpv-options.test.cjs`、`node tests/mpv-options-ui.
 
 运行`node tests/italian-language.test.cjs`、应用语言策略及设置UI回归、全量回归与`./scripts/build.sh`。核对全部597个界面键、参数顺序、百分号、换行和技术名称；删除范围、保留本机文件、回传未确认、系统字幕影响及硬解回退不得翻译为成功承诺。验证Italiano显式选择、it地区系统映射、跨账户持久化、冷启动、失败回滚与取消所有权。实际原生包核对设置、首页、详情、下载、退出账户及恢复系统跟随，并在横竖屏和普通/两倍字号检查保存按钮的完整排版和滚动访问。独立地区术语、物理设备、实际系统语言变更及真实Jellyfin分别验收。
 
+### 巴西葡萄牙语界面
+
+运行`node tests/brazilian-portuguese.test.cjs`、既有应用语言策略及设置UI回归、协议、全量回归与`./scripts/build.sh`。核对597个界面键、参数顺序、百分号、换行、技术名称及删除/保留范围、回传未确认、系统字幕影响和硬解回退的语义。分别验证显式pt-BR、完整系统locale含巴西地区、语言ID仅pt时的地区辨别、pt-PT/裸pt回退、地区变更、冷重建、读取失败恢复、写入/应用失败回滚及页面所有权取消；不把欧洲葡语计入已翻译。
+
+实际原生包通过产品选择器和保存控件检查即时/冷启动语言、设置/首页/下载/详情、退出账户、英文及恢复当前系统跟随。记录系统语言与完整locale，确认应用覆盖未改变系统配置；横竖屏、普通/两倍字号检查选择器和保存文字排版与滚动访问。API12原生Select为单行，大字号时在控件旁以可换行文本完整展示当前草稿语言，不能仅以节点原文或控件边界证明可见地区名称完整。系统pt-BR/pt-PT的实际切换、物理API12/15设备、独立母语审阅及真实Jellyfin仍分别验收，夹具系统locale不能代替这些证据。
+
 ### SRT 段落与文字别名
 
 运行`node tests/srt-paragraph.test.cjs`、`node tests/srt-paragraph-ui.test.cjs`及原有文字/行内/脚本/定位/栅格回归，再做完整回归与`./scripts/build.sh`。独立Android参考须覆盖直接HTML和固定SubripParser逐行trim/br连接两种输入，不由被测解析器生成预期。检查段落空行、尾部换行、实体与空白、p隐式关闭、嵌套div、块边界格式关闭/重开、p与div的CSS差异及cite/dfn/tt。

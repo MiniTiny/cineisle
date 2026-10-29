@@ -38,7 +38,9 @@ export class LanguagePreferences {
   }
   private static apply(choice: UiLanguage): void {
     const context = LanguagePreferences.context; if (!context) { throw new Error('ui_language_load_failed'); }
-    const target = effectiveUiLanguage(choice, i18n.System.getSystemLanguage());
+    // A regional pack needs the full locale. This API is available since API 9 and
+    // remains compatible with API 12; getSystemLocaleInstance requires API 20.
+    const target = effectiveUiLanguage(choice, i18n.System.getSystemLocale());
     if (target !== LanguagePreferences.applied) { context.getApplicationContext().setLanguage(target); LanguagePreferences.applied = target; }
   }
   static systemChanged(): void {
