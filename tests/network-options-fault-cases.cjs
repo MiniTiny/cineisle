@@ -160,6 +160,12 @@ const recipes=[
     "suite": "network-options-contract.test.cjs"
   }
 ];
+recipes.push(
+  ...[2, 4].map(value => ({ id: 'timeout-draft-digits-' + value, file: 'entry/src/main/ets/utils/NetworkOptions.ts', old: 'maximumTimeoutDraftDigits: number = 3', replacement: 'maximumTimeoutDraftDigits: number = ' + value, name: value === 2 ? 'network draft actual requestMs "120"' : 'network draft actual requestMs "0001"', suite: 'network-draft-contract.test.cjs' })),
+  ...['requestMs', 'connectMs', 'readMs'].map(key => ({ id: 'timeout-draft-producer-' + key, file: 'entry/src/main/ets/pages/Settings.ets', old: '.maxLength(NetworkOptionRules.maximumTimeoutDraftDigits)', replacement: '.maxLength(2)', name: 'network draft actual ' + key + ' "120"', suite: 'network-draft-contract.test.cjs' })),
+  { id: 'timeout-draft-guard-remove', file: 'entry/src/main/ets/pages/Settings.ets', old: 'NetworkOptionRules.validTimeoutDraft(v)', replacement: 'true', name: 'network draft actual requestMs "0001"', suite: 'network-draft-contract.test.cjs' },
+  { id: 'timeout-draft-minimum-quantifier', file: 'entry/src/main/ets/utils/NetworkOptions.ts', old: "new RegExp('^[0-9]{1,' + NetworkOptionRules.maximumTimeoutDraftDigits", replacement: "new RegExp('^[0-9]{2,' + NetworkOptionRules.maximumTimeoutDraftDigits", name: 'network draft grammar "1"', suite: 'network-draft-contract.test.cjs' }
+);
 const controls=[
   {
     "name": "network options stored requestMs 1000",

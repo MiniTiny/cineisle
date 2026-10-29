@@ -22,7 +22,7 @@ import { JellyfinClient } from '../service/JellyfinClient';
 import { errorText, text } from '../utils/Strings';
 import { deviceNameValue, DeviceNameRules } from '../utils/DeviceOptions';
 import { PlayerOptionRules, PlayerOptions, playerOptions, validPlayerOptions } from '../utils/PlayerOptions';
-import { NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
+import { NetworkOptionRules, NetworkOptions, NetworkPolicy, validNetworkOptions } from '../utils/NetworkOptions';
 import { NetworkPreferences } from '../service/NetworkPreferences';
 import { PosterCache } from '../service/PosterCache';
 import { PosterOptionRules, PosterOptions, validPosterOptions } from '../utils/PosterOptions';
@@ -247,7 +247,7 @@ struct Settings {
     if (this.networkBusy || !this.deviceVisible || this.locked || !AppLock.permit() || this.ownerClient !== AppService.client) { return; }
     const next: NetworkOptions = reset ? new NetworkOptions() : { requestMs: Number(this.requestSeconds) * 1000,
       connectMs: Number(this.connectSeconds) * 1000, readMs: Number(this.readSeconds) * 1000, autoCache: this.autoCache };
-    if ((!reset && ![this.requestSeconds, this.connectSeconds, this.readSeconds].every((v: string) => /^[0-9]{1,3}$/.test(v))) || !validNetworkOptions(next)) {
+    if ((!reset && ![this.requestSeconds, this.connectSeconds, this.readSeconds].every((v: string) => NetworkOptionRules.validTimeoutDraft(v))) || !validNetworkOptions(next)) {
       this.networkMessage = text('network_options_invalid'); return;
     }
     const revision = this.networkRevision; const client = this.ownerClient;
@@ -398,7 +398,7 @@ struct Settings {
   @Builder
   private networkField(label: Resource, key: number) {
     this.fieldCaption(label)
-    TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(3).accessibilityText(label)
+    TextInput({ text: key === 0 ? this.requestSeconds : key === 1 ? this.connectSeconds : this.readSeconds }).type(InputType.Number).maxLength(NetworkOptionRules.maximumTimeoutDraftDigits).accessibilityText(label)
       .height(UiLayout.buttonHeight(this.fontScale)).fontColor(this.palette.foreground).backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.surface)).borderRadius(12).enabled(!this.networkBusy && !this.locked)
       .onChange((v: string) => { if (key === 0) { this.requestSeconds = v; } else if (key === 1) { this.connectSeconds = v; } else { this.readSeconds = v; } })
   }

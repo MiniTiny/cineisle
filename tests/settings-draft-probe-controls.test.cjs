@@ -7,7 +7,10 @@ const { replaceLiteral } = require('./literal-mutation.cjs');
 const root = path.resolve(__dirname, '..');
 const domains = [{ scope: 'poster-options', suite: 'poster-draft-contract.test.cjs', name: 'poster draft actual input "123"',
   file: 'entry/src/main/ets/pages/Settings.ets', old: '.maxLength(PosterOptionRules.maximumCapacityDraftDigits)', replacement: '.maxLength(2)',
-  modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] }];
+  modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] },
+  ...['requestMs', 'connectMs', 'readMs'].map(key => ({ scope: 'network-options', suite: 'network-draft-contract.test.cjs', name: 'network draft actual ' + key + ' "120"',
+    file: 'entry/src/main/ets/pages/Settings.ets', old: '.maxLength(NetworkOptionRules.maximumTimeoutDraftDigits)', replacement: '.maxLength(2)',
+    modes: [['prefs-open', {}], ['prefs-get', { 'prefs-open': 1 }], ['prefs-flush', { 'prefs-put': 1 }]] }))];
 function run(selectedScope) {
   const selected = selectedScope ? domains.filter(domain => domain.scope === selectedScope) : domains; assert.ok(selected.length, 'No selected draft controls');
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'cineisle-draft-controls-'));
