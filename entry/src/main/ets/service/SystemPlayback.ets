@@ -30,6 +30,7 @@ export class SystemPlayback {
   private static readonly publicationIntervalMs: number = 1000;
   private static readonly autoPiPWaitMs: number = 1200;
   private static readonly autoPiPRetryMs: number = 30000;
+  private static readonly pipStopConfirmationMs: number = 3000;
   private static readonly defaultSkipMs: number = 15000;
   static current: SystemPlayback | undefined = undefined;
   private static sessionHandoff: Promise<void> = Promise.resolve();
@@ -68,6 +69,8 @@ export class SystemPlayback {
   private closing: Promise<void> | undefined = undefined;
   private tasks: Promise<void> = Promise.resolve();
   private pipWork: Promise<void> = Promise.resolve();
+  private pipStopRequest: Promise<void> | undefined = undefined;
+  private pipStopSignal: (() => void) | undefined = undefined;
   private latest: PlaybackStatus;
   private pending: PlaybackStatus | undefined = undefined;
   private publication: Promise<void> | undefined = undefined;
@@ -373,6 +376,15 @@ export class SystemPlayback {
     this.pip = pip; pip.setAutoStartEnabled(false);
     if (this.disposed) { return; }
     pip.on('stateChange', (state: PiPWindow.PiPState) => {
+      if (state === PiPWindow.PiPState.STOPPED) {
+        if (this.pip !== pip) { return; }
+        // Native stop completion and STOPPED delivery can arrive in either order.
+        // Cleanup must keep listening even after this owner is marked disposed.
+        if (this.disposed) { this.pipActive = false; this.pipStarting = false; }
+        else if (this.pipActive || this.pipStarting) { this.pipStopped(false); }
+        this.pipStopSignal?.();
+        return;
+      }
       if (this.disposed) { return; }
       if (state === PiPWindow.PiPState.STARTED) {
         if (this.hidden && !this.pipStarting && !this.pipActive && !this.autoArmed) { pip.stopPiP().catch(() => {}); return; }
@@ -383,7 +395,7 @@ export class SystemPlayback {
           this.setTask(true).then(async (granted: boolean) => { if (!granted && !this.disposed) { await this.pause(); await this.stopPiP(); } });
         }
       } else if (state === PiPWindow.PiPState.ABOUT_TO_RESTORE) { this.restoring = true; this.foreground(); }
-      else if (state === PiPWindow.PiPState.STOPPED || state === PiPWindow.PiPState.ERROR) { this.pipStopped(state === PiPWindow.PiPState.ERROR); }
+      else if (state === PiPWindow.PiPState.ERROR) { this.pipStopped(true); }
     });
     pip.on('controlPanelActionEvent', (event: PiPWindow.PiPActionEventType, status?: number) => {
       if (this.disposed) { return; }
@@ -403,6 +415,10 @@ export class SystemPlayback {
       if (this.disposed || this.pipActive || this.pipStarting || !AppLock.permit() || (automatic && !this.wantsAutoPiP())) { return; }
       if (!this.pipSupported || !['playing', 'paused', 'prepared'].includes(this.controller.snapshot().state)) { this.view.error(text('pip_unavailable')); return; }
       await this.initialize(); if (this.disposed || !this.ready) { return; }
+      if (this.pipStopRequest) {
+        try { await this.stopPiPWindow(); }
+        catch (e) { this.view.error(text('pip_failed')); return; }
+      }
       this.pipStarting = true;
       try {
         if (this.controller.snapshot().state === 'playing' && !await this.setTask(true)) { throw new Error('background_unavailable'); }
@@ -431,24 +447,51 @@ export class SystemPlayback {
     else { await this.setTask(this.backgroundEnabled && this.controller.snapshot().state === 'playing'); }
   }
 
-  async stopPiP(): Promise<void> {
+  stopPiP(): Promise<void> {
     this.setAutoStart(false);
-    await this.pipWork;
-    if (!this.disposed && this.pip && this.pipActive) {
-      try { await this.pip.stopPiP(); }
+    const operation = this.pipWork.then(async () => {
+      if (this.disposed) { return; }
+      try { await this.stopPiPWindow(); }
       catch (e) { this.view.error(text('pip_failed')); }
+    });
+    this.pipWork = operation; return operation;
+  }
+
+  private async stopPiPWindow(): Promise<void> {
+    const pip = this.pip;
+    if (!pip || (!this.pipActive && !this.pipStarting && !this.pipStopRequest)) { return; }
+    let signal: () => void = () => {};
+    const stopped = new Promise<void>((resolve) => {
+      signal = resolve; this.pipStopSignal = signal;
+      if (!this.pipActive && !this.pipStarting) { resolve(); }
+    });
+    let timer: number | undefined = undefined;
+    try {
+      if (!this.pipStopRequest) {
+        const request = pip.stopPiP(); this.pipStopRequest = request;
+        request.catch(() => { if (this.pipStopRequest === request) { this.pipStopRequest = undefined; } });
+      }
+      const request = this.pipStopRequest;
+      const deadline = new Promise<void>((resolve, reject) => {
+        timer = setTimeout(() => { reject(new Error('pip_stop_unconfirmed')); }, SystemPlayback.pipStopConfirmationMs);
+      });
+      await Promise.race([Promise.all([request, stopped]).then(() => {}), deadline]);
+      if (this.pipStopRequest === request) { this.pipStopRequest = undefined; }
+    } finally {
+      if (timer !== undefined) { clearTimeout(timer); }
+      if (this.pipStopSignal === signal) { this.pipStopSignal = undefined; }
     }
   }
 
   async stop(): Promise<void> { await this.dispose(); this.view.stopped(); }
 
   dispose(): Promise<void> {
-    if (this.closing) { return this.closing.then(async () => {
+    if (this.closing) { this.closing = this.closing.then(async () => {
       await this.releasePiP(); await this.releaseSession();
       this.captions?.dispose();
       if (this.taskActive) { await this.setTask(false); }
       this.clearOwner();
-    }); }
+    }); return this.closing; }
     this.disposed = true; this.ready = false; this.backgroundEnabled = false; this.taskWanted = false; ++this.preferenceRevision; ++this.commandRevision;
     this.autoWait?.();
     this.controller.pausePlayback();
@@ -467,8 +510,9 @@ export class SystemPlayback {
 
   private async releasePiP(): Promise<void> {
     if (this.pip) {
-      try { this.pip.setAutoStartEnabled(false); this.pip.off('stateChange'); this.pip.off('controlPanelActionEvent');
-        if (this.pipActive || this.pipStarting) { await this.pip.stopPiP(); }
+      try { this.pip.setAutoStartEnabled(false);
+        await this.stopPiPWindow();
+        this.pip.off('stateChange'); this.pip.off('controlPanelActionEvent');
           this.pip = undefined; this.autoArmed = false; this.pipActive = false; this.pipStarting = false; this.emit();
       } catch (e) { this.view.error(text('system_playback_cleanup_failed')); }
     }
