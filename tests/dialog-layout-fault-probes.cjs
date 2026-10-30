@@ -10,6 +10,85 @@ function mutate(source,r){
  const lines=source.split('\n'),matches=lines.map((text,i)=>text.includes(r.line)?i:-1).filter(i=>i>=0);assert.equal(matches.length,1,r.id+' ambiguous consumer');
  lines[matches[0]]=replaceLiteral(lines[matches[0]],r.old,r.replacement,r.id);return lines.join('\n');
 }
+// Independent, fixed review contract: removing a recipe cannot shrink the required set.
+const requiredProbeIds = Object.freeze([
+  "dialog-button-index-drift",
+  "height-drift",
+  "height-compare",
+  "wide-drift",
+  "wide-compare",
+  "width-drift",
+  "insets-drift",
+  "height-ratio-drift",
+  "width-cap-removed",
+  "dispatch-compare",
+  "dispatch-native-only",
+  "dispatch-custom-only",
+  "dispatch-nan-complement",
+  "render-width-drift",
+  "render-height-drift",
+  "single-action-guard-removed",
+  "wide-message-branch-removed",
+  "repeated-action-guard-removed",
+  "retired-action-guard-removed",
+  "index-integer-guard-removed",
+  "index-range-guard-removed",
+  "dispose-once-guard-removed",
+  "action-before-close",
+  "release-before-close",
+  "open-error-presentation-drift",
+  "close-error-presentation-drift",
+  "account-remove-width",
+  "account-remove-height",
+  "server-remove-width",
+  "server-remove-height",
+  "accounts-reset-width",
+  "accounts-reset-height",
+  "detail-download-width",
+  "detail-download-height",
+  "detail-delete-width",
+  "detail-delete-height",
+  "detail-batch-width",
+  "detail-batch-height",
+  "downloads-remove-width",
+  "downloads-remove-height",
+  "favorites-remove-width",
+  "favorites-remove-height",
+  "posters-clear-width",
+  "posters-clear-height",
+  "index-reason-width",
+  "index-reason-height",
+  "index-remove-width",
+  "index-remove-height",
+  "index-logout-width",
+  "index-logout-height",
+  "account-remove-pending-close-action-lost",
+  "server-remove-pending-close-action-lost",
+  "accounts-reset-pending-close-action-lost",
+  "detail-download-pending-close-action-lost",
+  "detail-delete-pending-close-action-lost",
+  "detail-batch-pending-close-action-lost",
+  "downloads-remove-pending-close-action-lost",
+  "favorites-remove-pending-close-action-lost",
+  "posters-clear-pending-close-action-lost",
+  "index-remove-pending-close-action-lost",
+  "index-logout-pending-close-action-lost",
+  "bottom-pending-close-action-lost",
+  "bottom-pending-close-action-duplicated",
+  "bottom-pending-close-dispose-guard-removed"
+]);
+function validateRecipes(value) {
+ const fail = reason => { throw Object.assign(new Error('Invalid dialog probe profile: '+reason), {code:'ERR_DIALOG_PROBE_PROFILE'}); };
+ if (!Array.isArray(value) || value.length === 0) fail('expected a non-empty recipe array');
+ const ids = new Set();
+ for (const r of value) {
+  if (!r || typeof r.id !== 'string' || !r.id || ids.has(r.id)) fail('missing or duplicate recipe id');
+  ids.add(r.id);
+  if (['file','old','name','phase'].some(key => typeof r[key] !== 'string' || !r[key]) || typeof r.replacement !== 'string') fail('malformed recipe '+r.id);
+ }
+ if (ids.size !== requiredProbeIds.length || requiredProbeIds.some(id => !ids.has(id))) fail('required recipe ids do not match');
+ return true;
+}
 function run(output=path.join(root,'.local/test-results/dialog-layout-probes')){
  const frozen=fingerprint(root),temp=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'cineisle-dialog-probes-'))),evidence={source:frozen,complete:false,baselines:[],probes:[],controls:[],selfFaults:[]};
  fs.mkdirSync(output,{recursive:true});const save=()=>fs.writeFileSync(path.join(output,'evidence.json'),JSON.stringify(evidence,null,2));
@@ -25,6 +104,7 @@ function run(output=path.join(root,'.local/test-results/dialog-layout-probes')){
   assert.ok(native.some(v=>v.phase===phase&&v.call===1&&v.failed===true),'Native failure must originate inside the actual stand-in API body');return {...value,checkpoint};
  };
  try{
+  validateRecipes(recipes);
   for(const scope of scopes)fs.cpSync(path.join(root,scope),path.join(temp,scope),{recursive:true});
   const seen=new Set(),normalControls=new Set();
   for(const r of recipes){
@@ -53,7 +133,7 @@ function run(output=path.join(root,'.local/test-results/dialog-layout-probes')){
   }finally{fs.writeFileSync(p,original);}
   assert.deepEqual(fingerprint(root),frozen);assert.deepEqual(fingerprint(temp),frozen);
   evidence.complete=true;evidence.allDetected=evidence.probes.length===recipes.length&&evidence.probes.every(p=>p.detected);save();return evidence;
- }catch(error){evidence.error=error.stack;save();throw error;}finally{fs.rmSync(temp,{recursive:true,force:true});}
+ }catch(error){evidence.error=error.stack;evidence.errorCode=error.code;save();throw error;}finally{fs.rmSync(temp,{recursive:true,force:true});}
 }
-module.exports={run,mutate};
+module.exports={run,mutate,validateRecipes};
 if(require.main===module){const e=run(process.argv[2]&&path.resolve(process.argv[2]));console.log(`${e.probes.length} dialog layout fault probes passed; allDetected=${e.allDetected}`);}
