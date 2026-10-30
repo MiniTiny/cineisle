@@ -1,3 +1,4 @@
+import { UiLayout } from '../utils/UiLayout';
 import { UiPalette } from '../utils/UiPalette';
 import { ComponentContent } from '@ohos.arkui.node';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -32,13 +33,13 @@ export struct CompactDialog {
           BrandButton({ label: action.value, icon: index === 0 && this.data.actions.length > 1 ? $r('app.media.menu_cancel') : $r('app.media.nav_check_active'),
             focus: index === 0, destructive: (typeof action.fontColor === 'string' && action.fontColor === this.palette.danger) || (action.fontColor as Resource)?.id === $r('app.color.brand_danger').id,
             onSelect: () => this.data.choose(index) })
-        }.width(this.data.width >= 600 && this.data.actions.length > 1 ? '48%' : '100%')
+        }.width(UiLayout.wideDialog(this.data.width) && this.data.actions.length > 1 ? '48%' : '100%')
       })
     }.width('100%')
   }
   build() {
     Column({ space: 12 }) {
-      if (this.data.width >= 600) {
+      if (UiLayout.wideDialog(this.data.width)) {
         Text(this.data.title).fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.palette.foreground).width('100%')
         Scroll() { Text(this.data.message).fontSize(14).lineHeight(22).fontColor(this.palette.muted).width('100%') }
           .width('100%').layoutWeight(1).align(Alignment.TopStart)
@@ -52,7 +53,7 @@ export struct CompactDialog {
           }.width('100%')
         }.width('100%').layoutWeight(1).align(Alignment.TopStart)
       }
-    }.width(Math.min(720, this.data.width - 32)).height(this.data.height * 0.9).padding(16)
+    }.width(UiLayout.dialogWidth(this.data.width)).height(UiLayout.dialogHeight(this.data.height)).padding(16)
       .backgroundColor((this.amoled ? this.palette.amoledBackground : this.palette.raised)).borderRadius(20).id('CineIsleCompactDialog')
   }
 }
@@ -60,7 +61,8 @@ export struct CompactDialog {
 function compactDialogBuilder(data: CompactDialogData) { CompactDialog({ data: data }) }
 
 export function showBrandDialog(context: () => UIContext, options: BrandDialogOptions, width: number, height: number): void {
-  if (height >= 440) {
+  // Keep the original >= test: NaN follows the custom-dialog path.
+  if (height >= UiLayout.compactDialogHeightVp) {
     if (options.buttons) { AlertDialog.show(options as AlertDialogParamWithOptions); }
     else { AlertDialog.show(options as AlertDialogParamWithConfirm); }
     return;

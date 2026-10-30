@@ -104,8 +104,8 @@ struct Favorites {
   }
   private remove(): void {
     const chosen = this.all.filter((i: MediaItem) => this.selected.includes(i.Id)); const client = this.client;
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
-      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: () => {
+    showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.batch_unfavorite'), message: text('batch_unfavorite_confirm', chosen.length),
+      buttonDirection: UiLayout.compactDialog(this.viewportHeight) && UiLayout.wideDialog(this.viewportWidth) ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} }, { value: text('confirm'), fontColor: this.palette.danger, action: () => {
         if (client === AppService.client && !this.busy) { this.batch(chosen, false); }
       } }] }, this.viewportWidth, this.viewportHeight);
   }
