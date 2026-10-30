@@ -47,6 +47,32 @@ for (const entry of f.entries) {
     content.data.release(); r.native.flush(); content.data.release();
     check(() => assert.equal(content.disposed, 1));
   });
+  if (entry.action) test('pending close disappearance ' + entry.id, async check => {
+    // The OS may retire the view before closeCustomDialog resolves. A confirmed
+    // action still runs after that resolution, even if disposal has already run.
+    for (const disposeBeforeClose of [false, true]) {
+      const gate = f.deferred(), r = f.makePage(entry, 600, 439, { closeGate: gate }); await r.trigger();
+      const content = r.native.contents[0], view = r.childViews.find(v => v.data === content.data);
+      assert.ok(view, 'Actual CompactDialog lifecycle view missing');
+      const before = r.events.filter(e => e[0] === entry.action).length;
+      f.clickDialog(r, 1); await f.settle();
+      view.aboutToDisappear(); view.aboutToDisappear(); f.clickDialog(r, 1);
+      // Checks run after external-health validation; capture each stage now.
+      const pending = [r.events.filter(e => e[0] === entry.action).length, r.native.calls['dialog-close'],
+        content.disposed, r.native.timers.length, r.native.events.includes('close-resolved')];
+      check(() => assert.deepEqual(pending, [before, 1, 0, 1, false]));
+      if (disposeBeforeClose) r.native.flush();
+      gate.resolve(); await f.settle();
+      const confirmed = [r.events.filter(e => e[0] === entry.action).length, r.native.calls['dialog-close'],
+        content.disposed, r.native.timers.length, r.native.events.filter(e => e === 'close-resolved').length, [...r.native.toasts]];
+      check(() => assert.deepEqual(confirmed, [before + 1, 1, disposeBeforeClose ? 1 : 0, disposeBeforeClose ? 0 : 1, 1, []]));
+      view.aboutToDisappear(); f.clickDialog(r, 1); r.native.flush();
+      check(() => {
+        assert.equal(content.disposed, 1); assert.equal(r.native.timers.length, 0);
+        assert.equal(r.events.filter(e => e[0] === entry.action).length, before + 1);
+      });
+    }
+  });
 }
 for (const entry of f.entries.filter(e => e.action)) test('action error ' + entry.id, async check => {
   const r = f.makePage(entry, 600, 439, { businessFailure: true }); await r.trigger();
@@ -88,6 +114,41 @@ test('bottom ordered close release action disposal', async check => {
   check(() => assert.deepEqual(JSON.parse(JSON.stringify(r.native.events.filter(e=>e==='close-resolved'||e==='action'||Array.isArray(e)))),[['opened',{alignment:1,autoCancel:true}],'close-resolved',['timer',0],'action']));
   r.native.flush(); content.data.release(); content.data.choose(0); r.native.flush();
   check(() => {assert.equal(content.disposed,1);assert.equal(r.native.events.filter(e=>e==='action').length,1);});
+});
+test('bottom pending close disappearance preserves confirmed action', async check => {
+  for (const disposeBeforeClose of [false, true]) {
+    const gate = f.deferred(); let r;
+    r = f.bottom(600, 439, [{ value: 'Confirm', action() { r.native.events.push('action'); } }], { closeGate: gate });
+    r.trigger(); const content = r.native.contents[0], view = r.childViews.find(v => v.data === content.data);
+    assert.ok(view, 'Actual CompactDialog lifecycle view missing');
+    // Independent exported entry, followed by the actual SDK-built button callback.
+    f.clickDialog(r, 0); await f.settle(); view.aboutToDisappear(); view.aboutToDisappear();
+    f.clickDialog(r, 0);
+    const pending = [r.native.events.includes('action'), r.native.events.includes('close-resolved'),
+      r.native.calls['dialog-close'], content.disposed, r.native.timers.length];
+    check(() => assert.deepEqual(pending, [false, false, 1, 0, 1]));
+    if (disposeBeforeClose) r.native.flush();
+    gate.resolve(); await f.settle();
+    const confirmed = [r.native.events.filter(e => e === 'close-resolved' || e === 'action'),
+      content.disposed, r.native.timers.length, [...r.native.toasts]];
+    check(() => assert.deepEqual(confirmed, [['close-resolved', 'action'], disposeBeforeClose ? 1 : 0, disposeBeforeClose ? 0 : 1, []]));
+    view.aboutToDisappear(); f.clickDialog(r, 0); r.native.flush();
+    check(() => { assert.equal(content.disposed, 1); assert.equal(r.native.calls['dialog-close'], 1); assert.equal(r.native.events.filter(e => e === 'action').length, 1); });
+  }
+});
+test('bottom pending close disappearance preserves rejection toast', async check => {
+  const gate = f.deferred(); let actions = 0;
+  const r = f.bottom(600, 439, [{ value: 'Confirm', action() { actions++; } }], { closeGate: gate, expectedFailure: 'dialog-close' });
+  r.trigger(); const content = r.native.contents[0], view = r.childViews.find(v => v.data === content.data);
+  assert.ok(view, 'Actual CompactDialog lifecycle view missing');
+  f.clickDialog(r, 0); await f.settle(); view.aboutToDisappear(); r.native.flush();
+  const pending = [actions, [...r.native.toasts], content.disposed];
+  check(() => assert.deepEqual(pending, [0, [], 1]));
+  gate.resolve(); await f.settle(); view.aboutToDisappear(); f.clickDialog(r, 0); r.native.flush();
+  check(() => {
+    assert.equal(actions, 0); assert.equal(content.disposed, 1); assert.equal(r.native.calls['dialog-close'], 1);
+    assert.deepEqual(r.native.toasts, ['dialog close failed: EIO']); assert.equal(r.native.timers.length, 0);
+  });
 });
 for (const phase of ['dialog-open','dialog-close']) test('bottom error '+phase, async check => {
   let actions=0;const r=f.bottom(600,439,[{value:'Action',action(){actions++;}}],{expectedFailure:phase});r.trigger();await f.settle();

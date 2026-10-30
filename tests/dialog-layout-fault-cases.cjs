@@ -47,4 +47,17 @@ for(const [id,page,line] of consumers)for(const [property,old,replacement] of [
  ['width','UiLayout.dialogWidth(this.viewportWidth)','UiLayout.dialogWidth(this.viewportWidth) - 1'],
  ['height','UiLayout.dialogHeightPercent()',"'89%'"]
 ])recipes.push({id:id+'-'+property,file:'entry/src/main/ets/pages/'+page+'.ets',line,old,replacement,name:'entry '+id,phase:'content-create'});
+// Each real page and the independent export must detect a confirmed action lost
+// when the lifecycle release races the pending close continuation.
+for (const [id] of consumers.filter(([id]) => id !== 'index-reason')) recipes.push({
+ id: id+'-pending-close-action-lost', file: dialog,
+ old: 'then(() => { release(); actions[index].action(); })',
+ replacement: 'then(() => { if (released) { return; } release(); actions[index].action(); })',
+ name: 'pending close disappearance '+id, phase: 'dialog-close'
+});
+for (const [id,old,replacement] of [
+ ['bottom-pending-close-action-lost','then(() => { release(); actions[index].action(); })','then(() => { if (released) { return; } release(); actions[index].action(); })'],
+ ['bottom-pending-close-action-duplicated','then(() => { release(); actions[index].action(); })','then(() => { release(); actions[index].action(); if (released) { actions[index].action(); } })'],
+ ['bottom-pending-close-dispose-guard-removed','if (!released) {','if (true) {']
+]) recipes.push({id,file:dialog,old,replacement,name:'bottom pending close disappearance preserves confirmed action',phase:'dialog-close'});
 module.exports={recipes};
