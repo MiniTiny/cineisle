@@ -30,13 +30,13 @@ test('Brazilian Portuguese is one explicit choice and other Portuguese persisted
   assert.equal(validUiLanguage('pt-BR'), true);
   assert.equal(UI_LANGUAGES.filter(x => x === 'pt-BR').length, 1);
   assert.equal(uiLanguageCaption('pt-BR', 'System'), 'Português (Brasil)');
-  for (const value of ['pt', 'pt-PT', 'PT-BR', 'pt_BR', '../pt-BR', ' pt-BR']) assert.equal(validUiLanguage(value), false, value);
+  for (const value of ['pt', 'PT-BR', 'pt_BR', '../pt-BR', ' pt-BR']) assert.equal(validUiLanguage(value), false, value);
 });
-test('Brazilian regions map precisely without claiming European or other Portuguese translation', () => {
+test('Brazilian regions remain distinct from the independent Portugal pack', () => {
   for (const value of ['pt-BR', 'pt_BR', 'PT_br', 'pt-Latn-BR', ' pt_Latn_BR ', 'pt-BR-u-nu-latn']) {
     assert.equal(effectiveUiLanguage('system', value), 'pt-BR', value);
   }
-  for (const value of ['pt', 'pt-PT', 'pt-AO', 'pt-MZ', 'pt-IT', 'pt-Latn-PT', 'por-BR', 'en-BR', 'pt-BRA']) {
+  for (const value of ['por-BR', 'en-BR', 'pt-BRA']) {
     assert.equal(effectiveUiLanguage('system', value), 'en-US', value);
   }
   assert.equal(effectiveUiLanguage('pt-BR', 'pt-PT'), 'pt-BR');
@@ -76,7 +76,7 @@ test('destructive scope, retained files, unconfirmed uploads and actual backend 
 test('system-follow uses the full locale when the system language omits its region', async () => {
   system = 'pt'; locale = 'pt-Latn-BR'; await L.attach(context);
   assert.equal(calls.at(-1), 'pt-BR'); assert.equal(L.snapshot(), 'system'); assert.equal(preferred, 'default');
-  locale = 'pt-Latn-PT'; L.systemChanged(); assert.equal(calls.at(-1), 'en-US');
+  locale = 'pt-Latn-PT'; L.systemChanged(); assert.equal(calls.at(-1), 'pt-PT');
   locale = 'pt-BR'; L.systemChanged(); assert.equal(calls.at(-1), 'pt-BR');
   assert.equal(prefs.state.calls.some(x => x[0] === 'put'), false);
 });
@@ -92,9 +92,9 @@ test('explicit Brazilian choice survives a cold preference reconstruction and sy
   locale = 'pt-PT'; await L.attach(context); assert.equal(L.snapshot(), 'pt-BR'); assert.equal(calls.at(-1), 'pt-BR');
   const count = calls.length; locale = 'it-IT'; L.systemChanged(); assert.equal(calls.length, count);
 });
-test('returning to system restores its native default and keeps regional fallback honest', async () => {
+test('returning to system restores its native default and keeps regional choice distinct', async () => {
   await L.attach(context); await L.save('pt-BR', () => true); locale = 'pt-PT'; await L.save('system', () => true);
-  assert.equal(L.snapshot(), 'system'); assert.equal(preferred, 'default'); assert.equal(calls.at(-1), 'en-US');
+  assert.equal(L.snapshot(), 'system'); assert.equal(preferred, 'default'); assert.equal(calls.at(-1), 'pt-PT');
 });
 test('native application failure restores the previous explicit choice and durable record', async () => {
   await L.attach(context); await L.save('fr-FR', () => true); failApply = 1;
@@ -112,8 +112,8 @@ test('revoked page ownership during persistence cannot publish a new global lang
   await assert.rejects(saving, /ui_language_cancelled/); assert.equal(L.snapshot(), 'system'); assert.equal(preferred, 'default');
 });
 test('an unsupported Portuguese record stays intact until an explicit supported repair', async () => {
-  const store = await prefs.api.getPreferences(context, { name: 'ui_language' }); await store.put('choice_v1', 'pt-PT'); await store.flush();
-  await assert.rejects(L.attach(context), /ui_language_invalid/); assert.equal(disk().choice_v1, 'pt-PT');
+  const store = await prefs.api.getPreferences(context, { name: 'ui_language' }); await store.put('choice_v1', 'pt-AO'); await store.flush();
+  await assert.rejects(L.attach(context), /ui_language_invalid/); assert.equal(disk().choice_v1, 'pt-AO');
   await L.save('pt-BR', () => true); assert.equal(L.snapshot(), 'pt-BR'); assert.equal(disk().choice_v1, 'pt-BR');
 });
 
