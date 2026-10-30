@@ -1,6 +1,20 @@
 // Viewport dimensions are vp; text scale follows the application configuration.
 export interface VideoFrame { width: number; height: number }
 export class UiLayout {
+  // Shared dialog presentation in vp. Header/filter breakpoints have separate ownership.
+  static readonly compactDialogHeightVp: number = 440;
+  static readonly wideDialogWidthVp: number = 600;
+  static readonly maximumDialogWidthVp: number = 720;
+  static readonly dialogHorizontalInsetsVp: number = 32;
+  static readonly dialogHeightRatio: number = 0.9;
+  static compactDialog(height: number): boolean { return height < UiLayout.compactDialogHeightVp; }
+  static wideDialog(width: number): boolean { return width >= UiLayout.wideDialogWidthVp; }
+  static dialogWidth(width: number): number { return Math.min(UiLayout.maximumDialogWidthVp, width - UiLayout.dialogHorizontalInsetsVp); }
+  static dialogHeight(height: number): number { return height * UiLayout.dialogHeightRatio; }
+  static dialogHeightPercent(): Dimension {
+    return ((UiLayout.dialogHeightRatio * 100).toString() + '%') as Dimension;
+  }
+
   static scale(value: number | undefined): number { return value !== undefined && Number.isFinite(value) && value > 0 ? Math.min(3.2, Math.max(1, value)) : 1; }
   static buttonHeight(scale: number): number { return 40 * UiLayout.scale(scale); }
   static headerHeight(scale: number): number { return Math.max(56, UiLayout.buttonHeight(scale) + 8); }

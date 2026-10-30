@@ -228,7 +228,7 @@ struct Settings {
   private clearPosters(): void {
     const cache = AppService.posters; const revision = this.posterRevision;
     if (!cache || this.posterBusy || !this.posterPermit(revision, cache)) { return; }
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined,
+    showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined,
       backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: text('poster_cache_clear'), message: text('poster_cache_clear_confirm'),
       buttons: [{ defaultFocus: true, value: text('cancel'), fontColor: this.palette.accent, action: () => {} },
         { value: text('confirm'), fontColor: this.palette.warm, action: async () => {

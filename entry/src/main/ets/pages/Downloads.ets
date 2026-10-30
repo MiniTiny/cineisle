@@ -60,8 +60,8 @@ struct Downloads {
     finally { this.busy = false; this.changed(); }
   }
   private remove(record: DownloadRecord): void {
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-      buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
+    showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+      buttonDirection: UiLayout.compactDialog(this.viewportHeight) && UiLayout.wideDialog(this.viewportWidth) ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
         if (this.client !== AppService.client) { return; }
         try { await AppService.removeDownload(record); this.changed(); } catch (e) { this.message = errorText(e as Error); }
       } }] }, this.viewportWidth, this.viewportHeight);
