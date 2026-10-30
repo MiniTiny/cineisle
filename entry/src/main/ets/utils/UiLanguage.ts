@@ -1,9 +1,10 @@
-export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-BR';
-export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-BR'];
+export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-PT' | 'pt-BR';
+export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR'];
 export function validUiLanguage(value: string): boolean { return UI_LANGUAGES.includes(value as UiLanguage); }
 export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): string {
   if (choice === 'system') { return systemLabel; }
   if (choice === 'zh-CN') { return '简体中文'; }
+  if (choice === 'pt-PT') { return 'Português (Portugal)'; }
   if (choice === 'pt-BR') { return 'Português (Brasil)'; }
   if (choice === 'it-IT') { return 'Italiano'; }
   if (choice === 'de-DE') { return 'Deutsch'; }
@@ -14,9 +15,20 @@ export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): stri
 export function effectiveUiLanguage(choice: UiLanguage, system: string): string {
   if (choice !== 'system') { return choice; }
   const parts = system.trim().replace(/_/g, '-').toLowerCase().split('-');
-  // The independent European Portuguese pack is not shipped yet. Require the
-  // Brazilian region, allowing the explicit Latin script before that region.
-  if (parts[0] === 'pt' && (parts[1] === 'br' || (parts[1] === 'latn' && parts[2] === 'br'))) { return 'pt-BR'; }
+  if (parts[0] === 'pt') {
+    if (parts.some(part => !/^[a-z0-9]{1,8}$/.test(part))) { return 'en-US'; }
+    // Only the region subtag selects Brazil; extension/private-use BR is not a region.
+    // The independent Portugal pack also serves generic Latin Portuguese.
+    let regionIndex = 1;
+    if (parts[1]?.length === 4) {
+      if (parts[1] !== 'latn') { return 'en-US'; }
+      regionIndex = 2;
+    }
+    const region = parts[regionIndex] ?? '';
+    if (region === 'br') { return 'pt-BR'; }
+    if (region === '' || /^[a-z]{2}$|^\d{3}$/.test(region) || region.length === 1) { return 'pt-PT'; }
+    return 'en-US';
+  }
   if (parts[0] === 'it') { return 'it-IT'; }
   if (parts[0] === 'de') { return 'de-DE'; }
   if (parts[0] === 'es') { return 'es-ES'; }
