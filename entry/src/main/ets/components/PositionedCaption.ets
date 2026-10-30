@@ -16,7 +16,7 @@ export struct PositionedCaption {
 
   build() {
     Column() {
-      RichCaption({ runs: this.cue.runs.length ? this.cue.runs : [new SubtitleRun(this.cue.text)],
+      RichCaption({ runs: this.cue.runs.length ? this.cue.runs : [new SubtitleRun(this.cue.text)], paragraphs: this.cue.paragraphs,
         captionStyle: this.captionStyle, fontSize: this.fontSize, identifier: this.identifier, revision: this.cue.revision,
         stretch: false, padX: 3, padY: 1, availableWidth: Math.max(1, this.canvasWidth * (subtitleColumn(this.cue.alignment) === 1 ? 1 : 0.92) - 4) })
     }.constraintSize({ maxWidth: Math.max(1, this.canvasWidth * (subtitleColumn(this.cue.alignment) === 1 ? 1 : 0.92)),

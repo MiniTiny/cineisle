@@ -81,6 +81,14 @@ test('identical time updates do not rebuild or repeatedly update a subtitle node
   const updates = node.updates.length; for (let i = 0; i < 30; i++) nativePlayers[0].emit('timeUpdate', 1600 + i);
   assert.equal(node.updates.length, updates); assert.equal(sdk.nodes.length, 1);
 });
+test('same active paragraph spans do not refresh the PiP node on every clock tick', async () => {
+  const raw = '1\n00:00:01,000 --> 00:00:03,000\n<p style="text-align:end">same</p>\n';
+  const p = await page(route(), async () => raw); await serverCue(p);
+  const window = await pip(p), node = window.captionNode.builderNode, updates = node.updates.length;
+  assert.deepEqual(JSON.parse(JSON.stringify(node.params.paragraphs)), [{ start: 0, end: 5, kind: 'end' }]);
+  for (let i = 0; i < 30; i++) nativePlayers[0].emit('timeUpdate', 1600 + i);
+  assert.equal(node.updates.length, updates); assert.equal(sdk.nodes.length, 1);
+});
 test('new PiP container builds its node in its own UIContext and disposes the old node', () => {
   const { c } = caption(); c.setText('中文'); const first = c.makeNode(sdk.uiContext()).builderNode;
   const context = sdk.uiContext(), second = c.makeNode(context).builderNode; c.setText('更新');

@@ -1,4 +1,5 @@
 import { SubtitleRun } from '../utils/InlineSubtitle';
+import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphSpan } from '../utils/SubtitleParagraph';
 import { CaptionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { NativeCaption } from './NativeCaption';
@@ -8,6 +9,7 @@ import { CaptionRenderLimits } from '../utils/SubtitleLimits';
 @Component
 export struct RichCaption {
   @Prop runs: SubtitleRun[] = [];
+  @Prop paragraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS;
   @Prop captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
   @Prop fontSize: number = 20;
   @Prop limit: number = CaptionRenderLimits.maxLines;
@@ -42,8 +44,8 @@ export struct RichCaption {
   }
 
   build() {
-    if (this.runs.some((run: SubtitleRun): boolean => !!run.paragraph || !!run.baselines?.length || !!run.background)) {
-      NativeCaption({ runs: this.runs, captionStyle: this.captionStyle, fontSize: this.fontSize, limit: this.limit,
+    if (this.paragraphs.length || this.runs.some((run: SubtitleRun): boolean => !!run.paragraph || !!run.baselines?.length || !!run.background)) {
+      NativeCaption({ runs: this.runs, paragraphs: this.paragraphs, captionStyle: this.captionStyle, fontSize: this.fontSize, limit: this.limit,
         identifier: this.identifier, revision: this.revision, padX: this.padX, padY: this.padY, radius: this.radius, stretch: this.stretch, availableWidth: this.availableWidth })
     } else if (this.runs.some((run: SubtitleRun): boolean => run.underline && !!run.strike)) {
       Stack({ alignContent: Alignment.TopStart }) {

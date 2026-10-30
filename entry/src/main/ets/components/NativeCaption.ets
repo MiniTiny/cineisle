@@ -1,4 +1,5 @@
 import { SubtitleRun } from '../utils/InlineSubtitle';
+import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphSpan } from '../utils/SubtitleParagraph';
 import { CaptionRenderStyle } from '../utils/CaptionStyle';
 import { CaptionRasterizer, CaptionPicture, captionRequest } from '../utils/CaptionRasterizer';
 import { SubtitleMetrics } from '../utils/SubtitleMetrics';
@@ -9,6 +10,7 @@ import { text } from '../utils/Strings';
 @Component
 export struct NativeCaption {
   @Prop @Watch('schedule') runs: SubtitleRun[] = [];
+  @Prop @Watch('schedule') paragraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS;
   @Prop @Watch('schedule') captionStyle: CaptionRenderStyle = new CaptionRenderStyle();
   @Prop @Watch('schedule') fontSize: number = 20;
   @Prop @Watch('schedule') limit: number = CaptionRenderLimits.maxLines;
@@ -41,7 +43,7 @@ export struct NativeCaption {
     const width = (this.stretch ? this.measuredWidth : this.availableWidth) - this.padX * 2;
     if (width <= 0) { return; }
     try {
-      const request = captionRequest(this.runs, this.captionStyle, this.fontSize, width, this.limit, !this.stretch, this.getUIContext(), this.metrics, this.fontScale, this.revision);
+      const request = captionRequest(this.runs, this.captionStyle, this.fontSize, width, this.limit, !this.stretch, this.getUIContext(), this.metrics, this.fontScale, this.revision, this.paragraphs);
       const key = JSON.stringify(request);
       if (key !== this.desiredKey) { this.desiredKey = key; this.issue = false; }
       this.raster.request(request);

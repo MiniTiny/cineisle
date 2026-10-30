@@ -49,7 +49,8 @@ function render(name,overrides={},scale=1){
   if(id.endsWith('/ActorProfileRules')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/ActorProfileRules.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/JellyfinTime')){const e={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/JellyfinTime.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/SubtitlePosition'))return require('./player-regression.test.cjs').load('utils/SubtitlePosition.ts');
-  if(id.endsWith('/InlineSubtitle')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/InlineSubtitle.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
+  if(id.endsWith('/SubtitleParagraph'))return require('./player-regression.test.cjs').load('utils/SubtitleParagraph.ts');
+  if(id.endsWith('/InlineSubtitle'))return require('./player-regression.test.cjs').load('utils/InlineSubtitle.ts');
   if(id.endsWith('/StyledSubtitle')){const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/StyledSubtitle.ts','utf8'),{compilerOptions:options}).outputText,e);return e.exports;}
   if(id.endsWith('/SystemCaptions')&&overrides.captionService)return {SystemCaptions:overrides.captionService};
   if(id.endsWith('/CaptionStyle')||id.endsWith('/CaptionUI')){const file=id.endsWith('/CaptionStyle')?'CaptionStyle.ts':'CaptionUI.ets';const e={exports:{},require:()=>({})};vm.runInNewContext(ts.transpileModule(fs.readFileSync('entry/src/main/ets/utils/'+file,'utf8'),{compilerOptions:options}).outputText,e);return e.exports;}

@@ -1,0 +1,1257 @@
+{
+  "basis": "Independent actual Android API34 Html.fromHtml and fixed-version Media3 SubripParser/SubtitlePainter binary captures;UTF16 paragraph ranges;no Harmony-generated expected values",
+  "androidBaseline": "225fba7cb5ad68865986a96e4b62d883c1d987a0",
+  "api": 34,
+  "frameworkReferenceSha256": "367c47c86edfe09492376f7cb64d2b0b14adc4a89a8a76f0b9332dc24d111b33",
+  "media3BinaryReferenceSha256": "8c4e4062d81b8d0075aa2d2c43ba3bb92e24a98d9f7ee3f7271321e5279f9dbe",
+  "cases": [
+    {
+      "id": "literal-empty",
+      "mode": "html",
+      "source": "",
+      "text": "",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-empty",
+      "mode": "srt",
+      "source": "",
+      "text": "",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-plain",
+      "mode": "html",
+      "source": "A B",
+      "text": "A B",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-plain",
+      "mode": "srt",
+      "source": "A B",
+      "text": "A B",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-br",
+      "mode": "html",
+      "source": "A<br>B",
+      "text": "A\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-br",
+      "mode": "srt",
+      "source": "A<br>B",
+      "text": "A\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-quote",
+      "mode": "html",
+      "source": "<blockquote>A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote",
+      "mode": "srt",
+      "source": "<blockquote>A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-leading",
+      "mode": "html",
+      "source": "A<blockquote>B</blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-leading",
+      "mode": "srt",
+      "source": "A<blockquote>B</blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-unclosed",
+      "mode": "html",
+      "source": "<blockquote>A",
+      "text": "A\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-unclosed",
+      "mode": "srt",
+      "source": "<blockquote>A",
+      "text": "A\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-nested",
+      "mode": "html",
+      "source": "<blockquote>A<blockquote>B</blockquote>C</blockquote>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "quote"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-nested",
+      "mode": "srt",
+      "source": "<blockquote>A<blockquote>B</blockquote>C</blockquote>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "quote"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-list",
+      "mode": "html",
+      "source": "<ul><li>A</li><li>B</li></ul>",
+      "text": "A\n\nB\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-list",
+      "mode": "srt",
+      "source": "<ul><li>A</li><li>B</li></ul>",
+      "text": "A\n\nB\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-list-tail",
+      "mode": "html",
+      "source": "<ul><li>A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-list-tail",
+      "mode": "srt",
+      "source": "<ul><li>A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-li-alone",
+      "mode": "html",
+      "source": "<li>A</li>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-li-alone",
+      "mode": "srt",
+      "source": "<li>A</li>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-li-unclosed",
+      "mode": "html",
+      "source": "<ul><li>A<li>B</ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-li-unclosed",
+      "mode": "srt",
+      "source": "<ul><li>A<li>B</ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-ol",
+      "mode": "html",
+      "source": "<ol><li>A</li><li>B</li></ol>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-ol",
+      "mode": "srt",
+      "source": "<ol><li>A</li><li>B</li></ol>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-ul-plain",
+      "mode": "html",
+      "source": "<ul>A</ul>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-ul-plain",
+      "mode": "srt",
+      "source": "<ul>A</ul>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-nested-list",
+      "mode": "html",
+      "source": "<ul><li>A<ul><li>B</li></ul>C</li><li>D</li></ul>E",
+      "text": "A\n\nB\n\nC\n\nD\n\nE",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "bullet"
+        },
+        {
+          "start": 9,
+          "end": 11,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-nested-list",
+      "mode": "srt",
+      "source": "<ul><li>A<ul><li>B</li></ul>C</li><li>D</li></ul>E",
+      "text": "A\n\nB\n\nC\n\nD\n\nE",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "bullet"
+        },
+        {
+          "start": 9,
+          "end": 11,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-list",
+      "mode": "html",
+      "source": "<blockquote><ul><li>A</li><li>B</li></ul></blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-list",
+      "mode": "srt",
+      "source": "<blockquote><ul><li>A</li><li>B</li></ul></blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-list-quote",
+      "mode": "html",
+      "source": "<ul><li><blockquote>A</blockquote>B</li><li>C</li></ul>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        },
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 6,
+          "end": 8,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-list-quote",
+      "mode": "srt",
+      "source": "<ul><li><blockquote>A</blockquote>B</li><li>C</li></ul>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        },
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "bullet"
+        },
+        {
+          "start": 6,
+          "end": 8,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-paragraphs",
+      "mode": "html",
+      "source": "<blockquote><p>A</p><p>B</p></blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-paragraphs",
+      "mode": "srt",
+      "source": "<blockquote><p>A</p><p>B</p></blockquote>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 5,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-bold",
+      "mode": "html",
+      "source": "<blockquote><b>A</b> B</blockquote>C",
+      "text": "A B\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-bold",
+      "mode": "srt",
+      "source": "<blockquote><b>A</b> B</blockquote>C",
+      "text": "A B\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-li-italic",
+      "mode": "html",
+      "source": "<ul><li><i>A</i> B</li><li>C</li></ul>",
+      "text": "A B\n\nC\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 7,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-li-italic",
+      "mode": "srt",
+      "source": "<ul><li><i>A</i> B</li><li>C</li></ul>",
+      "text": "A B\n\nC\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 7,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-multiline",
+      "mode": "html",
+      "source": " A\n<blockquote> B </blockquote>\n C ",
+      "text": "A \n\nB \n\nC ",
+      "paragraphs": [
+        {
+          "start": 4,
+          "end": 7,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-multiline",
+      "mode": "srt",
+      "source": " A\n<blockquote> B </blockquote>\n C ",
+      "text": "A\n\nB \n\n\nC",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 6,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-paragraph-start",
+      "mode": "html",
+      "source": "<p style=\"text-align:start\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "start"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-paragraph-start",
+      "mode": "srt",
+      "source": "<p style=\"text-align:start\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "start"
+        }
+      ]
+    },
+    {
+      "id": "literal-paragraph-center",
+      "mode": "html",
+      "source": "<p style=\"text-align:center\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "center"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-paragraph-center",
+      "mode": "srt",
+      "source": "<p style=\"text-align:center\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "center"
+        }
+      ]
+    },
+    {
+      "id": "literal-paragraph-end",
+      "mode": "html",
+      "source": "<p style=\"text-align:end\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-paragraph-end",
+      "mode": "srt",
+      "source": "<p style=\"text-align:end\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "literal-paragraph-left",
+      "mode": "html",
+      "source": "<p style=\"text-align:left\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-paragraph-left",
+      "mode": "srt",
+      "source": "<p style=\"text-align:left\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-div-end",
+      "mode": "html",
+      "source": "<div style=\"text-align:end\">A</div>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-div-end",
+      "mode": "srt",
+      "source": "<div style=\"text-align:end\">A</div>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "literal-heading-start",
+      "mode": "html",
+      "source": "<h3 style=\"text-align:start\">A</h3>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "start"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-heading-start",
+      "mode": "srt",
+      "source": "<h3 style=\"text-align:start\">A</h3>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "start"
+        }
+      ]
+    },
+    {
+      "id": "literal-list-end",
+      "mode": "html",
+      "source": "<ul style=\"text-align:end\"><li>A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-list-end",
+      "mode": "srt",
+      "source": "<ul style=\"text-align:end\"><li>A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-li-end",
+      "mode": "html",
+      "source": "<ul><li style=\"text-align:end\">A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-li-end",
+      "mode": "srt",
+      "source": "<ul><li style=\"text-align:end\">A</li><li>B</li></ul>C",
+      "text": "A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-end",
+      "mode": "html",
+      "source": "<blockquote style=\"text-align:end\">A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-end",
+      "mode": "srt",
+      "source": "<blockquote style=\"text-align:end\">A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        },
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-align-nested",
+      "mode": "html",
+      "source": "<div style=\"text-align:end\">A<p style=\"text-align:start\">B</p>C</div>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "start"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-align-nested",
+      "mode": "srt",
+      "source": "<div style=\"text-align:end\">A<p style=\"text-align:start\">B</p>C</div>D",
+      "text": "A\n\nB\n\nC\n\nD",
+      "paragraphs": [
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "start"
+        },
+        {
+          "start": 0,
+          "end": 8,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "literal-quote-rtl",
+      "mode": "html",
+      "source": "<blockquote>אבג</blockquote>ABC",
+      "text": "אבג\n\nABC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-quote-rtl",
+      "mode": "srt",
+      "source": "<blockquote>אבג</blockquote>ABC",
+      "text": "אבג\n\nABC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-li-rtl",
+      "mode": "html",
+      "source": "<ul><li>אבג</li><li>ABC</li></ul>",
+      "text": "אבג\n\nABC\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 9,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-li-rtl",
+      "mode": "srt",
+      "source": "<ul><li>אבג</li><li>ABC</li></ul>",
+      "text": "אבג\n\nABC\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 9,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-paragraph-end-rtl",
+      "mode": "html",
+      "source": "<p style=\"text-align:end\">אבג</p>ABC",
+      "text": "אבג\n\nABC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-paragraph-end-rtl",
+      "mode": "srt",
+      "source": "<p style=\"text-align:end\">אבג</p>ABC",
+      "text": "אבג\n\nABC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "literal-surrogate",
+      "mode": "html",
+      "source": "<ul><li>😀A</li><li>B</li></ul>C",
+      "text": "😀A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 7,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-surrogate",
+      "mode": "srt",
+      "source": "<ul><li>😀A</li><li>B</li></ul>C",
+      "text": "😀A\n\nB\n\nC",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 4,
+          "kind": "bullet"
+        },
+        {
+          "start": 5,
+          "end": 7,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-line-wrap",
+      "mode": "html",
+      "source": "<blockquote>Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu</blockquote>Tail",
+      "text": "Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu\n\nTail",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 67,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-line-wrap",
+      "mode": "srt",
+      "source": "<blockquote>Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu</blockquote>Tail",
+      "text": "Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu\n\nTail",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 67,
+          "kind": "quote"
+        }
+      ]
+    },
+    {
+      "id": "literal-list-wrap",
+      "mode": "html",
+      "source": "<ul><li>Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu</li><li>Tail</li></ul>",
+      "text": "Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu\n\nTail\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 67,
+          "kind": "bullet"
+        },
+        {
+          "start": 68,
+          "end": 73,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-list-wrap",
+      "mode": "srt",
+      "source": "<ul><li>Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu</li><li>Tail</li></ul>",
+      "text": "Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu\n\nTail\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 67,
+          "kind": "bullet"
+        },
+        {
+          "start": 68,
+          "end": 73,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-empty-li",
+      "mode": "html",
+      "source": "<ul><li></li><li>A</li><li></li></ul>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "srt-lines-empty-li",
+      "mode": "srt",
+      "source": "<ul><li></li><li>A</li><li></li></ul>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        }
+      ]
+    },
+    {
+      "id": "literal-empty-quote",
+      "mode": "html",
+      "source": "A<blockquote></blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-empty-quote",
+      "mode": "srt",
+      "source": "A<blockquote></blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-quote-close",
+      "mode": "html",
+      "source": "A</blockquote>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-quote-close",
+      "mode": "srt",
+      "source": "A</blockquote>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "literal-list-close",
+      "mode": "html",
+      "source": "A</li>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "srt-lines-list-close",
+      "mode": "srt",
+      "source": "A</li>B",
+      "text": "AB",
+      "paragraphs": []
+    },
+    {
+      "id": "media3-quote-an7",
+      "mode": "srt",
+      "source": "{\\an7}<blockquote>A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ],
+      "alignment": 7
+    },
+    {
+      "id": "media3-quote-an9",
+      "mode": "srt",
+      "source": "{\\an9}<blockquote>A</blockquote>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "quote"
+        }
+      ],
+      "alignment": 9
+    },
+    {
+      "id": "media3-list-an7",
+      "mode": "srt",
+      "source": "{\\an7}<ul><li>A</li><li>B</li></ul>",
+      "text": "A\n\nB\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ],
+      "alignment": 7
+    },
+    {
+      "id": "media3-list-an9",
+      "mode": "srt",
+      "source": "{\\an9}<ul><li>A</li><li>B</li></ul>",
+      "text": "A\n\nB\n\n",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "bullet"
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "kind": "bullet"
+        }
+      ],
+      "alignment": 9
+    },
+    {
+      "id": "media3-paragraph-end-an7",
+      "mode": "srt",
+      "source": "{\\an7}<p style=\"text-align:end\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ],
+      "alignment": 7
+    },
+    {
+      "id": "media3-paragraph-end-an9",
+      "mode": "srt",
+      "source": "{\\an9}<p style=\"text-align:end\">A</p>B",
+      "text": "A\n\nB",
+      "paragraphs": [
+        {
+          "start": 0,
+          "end": 2,
+          "kind": "end"
+        }
+      ],
+      "alignment": 9
+    }
+  ]
+}

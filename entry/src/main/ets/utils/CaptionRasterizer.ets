@@ -3,6 +3,7 @@ import * as native from 'libcineisle_ass.so';
 import image from '@ohos.multimedia.image';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { SubtitleRun } from './InlineSubtitle';
+import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphSpan, SubtitleParagraphLimits } from './SubtitleParagraph';
 import { SubtitleMetrics } from './SubtitleMetrics';
 import { CaptionColor, CaptionRenderStyle, captionColor } from './CaptionStyle';
 import { captionShadows } from './CaptionUI';
@@ -18,10 +19,16 @@ export function captionArgb(value: CaptionColor): number {
   return Number.parseInt(hex, 16);
 }
 export function captionRequest(runs: SubtitleRun[], style: CaptionRenderStyle, size: number, width: number,
-  maxLines: number, intrinsic: boolean, context: UIContext, metrics: SubtitleMetrics, fontScale?: number, revision: string = ''): native.NativeCaptionRequest {
+  maxLines: number, intrinsic: boolean, context: UIContext, metrics: SubtitleMetrics, fontScale?: number, revision: string = '',
+  paragraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS): native.NativeCaptionRequest {
   if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(size) || size <= 0 ||
     !Number.isInteger(maxLines) || maxLines < 1 || maxLines > CaptionRenderLimits.maxLines || (fontScale !== undefined && (!Number.isFinite(fontScale) || fontScale <= 0 || fontScale > CaptionRenderLimits.maximumExplicitFontScale))) { throw new Error('subtitle_failed'); }
-  return { revision: revision, width: context.vp2px(width), maxLines: maxLines, intrinsic: intrinsic,
+  const content = runs.map((run: SubtitleRun): string => run.text).join('');
+  if (paragraphs.length > SubtitleParagraphLimits.maximumActiveSpans || paragraphs.some((span: SubtitleParagraphSpan): boolean =>
+    !span || !Number.isInteger(span.start) || !Number.isInteger(span.end) || span.start < 0 || span.end <= span.start || span.end > content.length ||
+    !['start', 'center', 'end', 'bullet', 'quote'].includes(span.kind) ||
+    (span.start > 0 && content[span.start - 1] !== '\n') || (span.end < content.length && content[span.end - 1] !== '\n'))) { throw new Error('subtitle_failed'); }
+  const request: native.NativeCaptionRequest = { revision: revision, width: context.vp2px(width), maxLines: maxLines, intrinsic: intrinsic,
     runs: runs.map((run: SubtitleRun): native.NativeCaptionRun => ({ text: run.text,
       family: run.family || style.family, size: style.system ? context.vp2px(size * (run.sizeScale ?? 1)) : fontScale === undefined ? context.fp2px(size * (run.sizeScale ?? 1)) : context.vp2px(size * (run.sizeScale ?? 1) * fontScale),
       baseline: metrics.offset(run, style, size, context, fontScale), color: captionArgb(run.color || style.foreground), background: run.background ? captionArgb(run.background) : 0,
@@ -29,6 +36,13 @@ export function captionRequest(runs: SubtitleRun[], style: CaptionRenderStyle, s
     shadows: captionShadows(style.edge).map((shadow: ShadowOptions): native.NativeCaptionShadow => ({ color: captionArgb(shadow.color as CaptionColor),
       x: context.vp2px(Number(shadow.offsetX ?? 0)), y: context.vp2px(Number(shadow.offsetY ?? 0)),
       radius: context.vp2px(Number(shadow.radius ?? 0)) })).filter((shadow: native.NativeCaptionShadow): boolean => (shadow.color >>> 24) !== 0) };
+  if (paragraphs.length) {
+    request.paragraphs = paragraphs.map((span: SubtitleParagraphSpan): native.NativeCaptionParagraphSpan => ({ start: span.start, end: span.end, kind: span.kind }));
+    // Paragraph padding/markers use the caption defaults, independent of authored font/color spans.
+    request.paragraphStyle = { size: style.system ? context.vp2px(size) : fontScale === undefined ? context.fp2px(size) : context.vp2px(size * fontScale),
+      color: captionArgb(style.foreground) };
+  }
+  return request;
 }
 interface Job { request: native.NativeCaptionRequest; revision: number }
 // One job at a time per window. Newer requests replace the queued request; late pictures never reach ArkUI.

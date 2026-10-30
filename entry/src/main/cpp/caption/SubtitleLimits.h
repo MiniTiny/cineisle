@@ -18,6 +18,7 @@ inline constexpr std::size_t kMaxAssFontPathBytes = 4096;
 inline constexpr std::size_t kMaxAssFamilyBytes = 512;
 inline constexpr std::size_t kMaxAssConfigPathBytes = 4096;
 inline constexpr uint32_t kMaxCaptionRuns = 4096;
+inline constexpr uint32_t kMaxCaptionParagraphSpans = 4096;
 inline constexpr uint32_t kMaxCaptionLines = 1000;
 inline constexpr uint32_t kMaxCaptionLayoutWidthPx = 8192;
 inline constexpr uint32_t kMaxCaptionFontSizePx = 8192;

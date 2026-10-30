@@ -2,10 +2,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), {spawnSync} = require('node:child_process');
 const h = require('./feature-regression.test.cjs');
 const {SubtitleTransferLimits,SubtitleDocumentLimits,CaptionRenderLimits,AssRenderLimits}=h.load('utils/SubtitleLimits.ts');
+const {SubtitleParagraphLimits}=h.load('utils/SubtitleParagraph.ts');
 const {validAssDocument,parseSubtitles}=h.load('utils/Playback.ts');
 const {OfflineSubtitles}=h.load('service/OfflineSubtitles.ets');
 const {DownloadSpace}=h.load('service/DownloadSpace.ets');
 const tests=[],test=(name,fn)=>tests.push([name,fn]);
+test('paragraph span count has independent per-cue and active budgets',()=>{
+ assert.equal(SubtitleParagraphLimits.maximumSpansPerCue,4096);assert.equal(SubtitleParagraphLimits.maximumActiveSpans,4096);
+});
 test('decoded, wire, complexity and geometry budgets retain distinct units',()=>{
  assert.equal(SubtitleTransferLimits.maxBytes,4194304);assert.equal(SubtitleDocumentLimits.maxCodeUnits,1048576);
  assert.deepEqual([CaptionRenderLimits.maxRunsPerCue,CaptionRenderLimits.maxSimultaneousRunWeight,CaptionRenderLimits.maxPositionedCues,CaptionRenderLimits.maxLines,CaptionRenderLimits.maxRasterPixels],[4096,4096,256,1000,2073600]);
@@ -44,7 +48,7 @@ test('download admission retains the four-MiB subtitle reservation plus eight-Mi
  }finally{release();api.getFreeSize=original}
 });
 test('native header compiles against frozen boundary values independently of the ArkTS implementation',()=>{
- const golden={kMaxAssDocumentUtf8Bytes:4194304,kMaxCaptionTextUtf8Bytes:4194304,kMaxAssCanvasDimensionPx:4096,kMaxVideoDimensionPx:32768,kMaxAssFramePixels:2073600,kMaxCaptionFramePixels:2073600,kMaxAssImages:100000,kMaxAssGlyphCacheEntries:1000,kMaxAssBitmapCacheMiB:16,kMaxAssFontPathBytes:4096,kMaxAssFamilyBytes:512,kMaxAssConfigPathBytes:4096,kMaxCaptionRuns:4096,kMaxCaptionLines:1000,kMaxCaptionLayoutWidthPx:8192,kMaxCaptionFontSizePx:8192,kMaxCaptionFrameHeightPx:32768,kMaxCaptionLineBoxes:16384,kMaxCaptionFamilyBytes:128,kMaxCaptionShadows:4,kMaxCaptionBaselineOffsetPx:1000000,kMaxShadowOffsetPx:128,kMaxShadowRadiusPx:128};
+ const golden={kMaxAssDocumentUtf8Bytes:4194304,kMaxCaptionTextUtf8Bytes:4194304,kMaxAssCanvasDimensionPx:4096,kMaxVideoDimensionPx:32768,kMaxAssFramePixels:2073600,kMaxCaptionFramePixels:2073600,kMaxAssImages:100000,kMaxAssGlyphCacheEntries:1000,kMaxAssBitmapCacheMiB:16,kMaxAssFontPathBytes:4096,kMaxAssFamilyBytes:512,kMaxAssConfigPathBytes:4096,kMaxCaptionRuns:4096,kMaxCaptionParagraphSpans:4096,kMaxCaptionLines:1000,kMaxCaptionLayoutWidthPx:8192,kMaxCaptionFontSizePx:8192,kMaxCaptionFrameHeightPx:32768,kMaxCaptionLineBoxes:16384,kMaxCaptionFamilyBytes:128,kMaxCaptionShadows:4,kMaxCaptionBaselineOffsetPx:1000000,kMaxShadowOffsetPx:128,kMaxShadowRadiusPx:128};
  const source='#include "caption/SubtitleLimits.h"\nusing namespace cineisle::subtitle_limits;\n'+Object.entries(golden).map(([name,value])=>`static_assert(${name} == ${value}, "${name}");`).join('\n');
  const result=spawnSync(process.env.CXX||'clang++',['-std=c++17','-fsyntax-only','-x','c++','-I'+path.resolve(__dirname,'../entry/src/main/cpp'),'-'],{input:source,encoding:'utf8'});
  assert.equal(result.status,0,result.stderr||result.error?.message);

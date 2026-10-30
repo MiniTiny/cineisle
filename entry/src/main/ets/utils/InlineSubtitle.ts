@@ -1,5 +1,6 @@
 import { CaptionRenderLimits } from './SubtitleLimits';
 import { subtitleEntities } from './SubtitleEntities';
+import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphKind, SubtitleParagraphLimits, SubtitleParagraphSpan } from './SubtitleParagraph';
 
 // Both plain-track converters produce the same relative size in SubtitleRun.
 // Format-specific callers retain their own error or native-renderer fallback.
@@ -26,7 +27,7 @@ function headingScale(tag: string): number {
   return match ? HEADING_SIZE_SCALES[Number(match[1]) - 1] : 0;
 }
 function isSubtitleBlock(tag: string): boolean {
-  return tag === 'p' || tag === 'div' || headingScale(tag) > 0;
+  return ['p', 'div', 'ul', 'li', 'blockquote'].includes(tag) || headingScale(tag) > 0;
 }
 
 export class SubtitleBaseline {
@@ -57,8 +58,10 @@ export class PositionedSubtitle {
   text: string;
   runs: SubtitleRun[];
   alignment: number;
-  constructor(id: number, text: string, runs: SubtitleRun[], alignment: number) {
-    this.id = id; this.text = text; this.runs = runs; this.alignment = alignment;
+  paragraphs: SubtitleParagraphSpan[];
+  constructor(id: number, text: string, runs: SubtitleRun[], alignment: number,
+    paragraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS) {
+    this.id = id; this.text = text; this.runs = runs; this.alignment = alignment; this.paragraphs = paragraphs;
   }
 }
 export const EMPTY_POSITIONED_SUBTITLES: PositionedSubtitle[] = [];
@@ -68,12 +71,16 @@ export class SubtitleContent {
   runs: SubtitleRun[];
   flowText: string;
   flowRuns: SubtitleRun[];
+  paragraphs: SubtitleParagraphSpan[];
+  flowParagraphs: SubtitleParagraphSpan[];
   positioned: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
-  constructor(text: string = '', runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS) {
+  constructor(text: string = '', runs: SubtitleRun[] = EMPTY_SUBTITLE_RUNS,
+    paragraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS) {
     this.text = text; this.runs = runs; this.flowText = text; this.flowRuns = runs;
+    this.paragraphs = paragraphs; this.flowParagraphs = paragraphs;
   }
 }
-interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string }
+interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string; paragraphStart?: number }
 interface FontAttributes { color?: string; face?: string; style?: string }
 interface StyleMark { start: number; property: string; value: string }
 interface StyleSpan extends StyleMark { end: number }
@@ -161,13 +168,22 @@ export function inlineSubtitle(value: string): SubtitleContent {
   };
   const endStyle = (name: string): void => {
     // Html closes the last property mark, even when a nested span did not open it.
-    if (name === 'span' || name === 'p') { endMark(strikeMarks); endMark(backgroundMarks); endMark(colorMarks); }
+    if (name === 'span' || name === 'p' || name === 'li') { endMark(strikeMarks); endMark(backgroundMarks); endMark(colorMarks); }
     else if (name === 'font') { endMark(colorMarks); }
     else if (['s', 'del', 'strike'].includes(name)) { endMark(strikeMarks); }
+  };
+  const paragraphs: SubtitleParagraphSpan[] = [];
+  const paragraphAlignments: SubtitleParagraphSpan[] = [];
+  let textUnits = 0;
+  const endParagraph = (start: number, kind: SubtitleParagraphKind): void => {
+    if (start >= textUnits) { return; }
+    if (paragraphs.length >= SubtitleParagraphLimits.maximumSpansPerCue) { throw new Error('subtitle_failed'); }
+    paragraphs.push(new SubtitleParagraphSpan(start, textUnits, kind));
   };
   let plainStart = 0; let tagStart = -1; let quote = ''; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
   const append = (raw: string): void => {
     if (!raw) { return; }
+    textUnits += raw.length;
     const style = stack[stack.length - 1].style; const previous = pieces[pieces.length - 1];
     if (previous && appendedRevision === styleRevision && sameStyle(previous, style)) { previous.text += raw; }
     else { if (pieces.length >= CaptionRenderLimits.maxRunsPerCue) { throw new Error('subtitle_failed'); } pieces.push(new SubtitleRun(raw, style)); appendedRevision = styleRevision; }
@@ -185,6 +201,9 @@ export function inlineSubtitle(value: string): SubtitleContent {
       // chunk. Nonbreaking spaces (NBSP/figure/narrow) are not in that set.
       if (!contentStarted && /^[\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]*$/.test(text)) { return; }
       if (text) { contentStarted = true; }
+    // TagSoup closes an ul before direct non-whitespace character content;
+    // only list items belong to that container's content model.
+    if (stack[stack.length - 1].tag === 'ul' && /[^ \t\n\r\f]/.test(text)) { closeTo(stack.length - 1); }
     const previous = pieces[pieces.length - 1]?.text;
     const last = previous ? previous[previous.length - 1] : '\n';
     if ((last === ' ' || last === '\n') && text.startsWith(' ')) { text = text.slice(1); }
@@ -196,7 +215,15 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const closeTo = (index: number): void => {
     while (stack.length > index) {
       const frame = stack.pop()!; ++styleRevision; endStyle(frame.tag);
-      if (isSubtitleBlock(frame.tag)) { blockBreak(); }
+      if (isSubtitleBlock(frame.tag)) {
+        blockBreak();
+        // Html ends the last open alignment mark at any block boundary,
+        // including a child li without its own text-align declaration.
+        const alignment = paragraphAlignments.pop();
+        if (alignment) { endParagraph(alignment.start, alignment.kind); }
+        if (frame.tag === 'li') { endParagraph(frame.paragraphStart!, 'bullet'); }
+        if (frame.tag === 'blockquote') { endParagraph(frame.paragraphStart!, 'quote'); }
+      }
     }
   };
   const openFrame = (name: string, tag: string = '', start: number = 0): void => {
@@ -222,7 +249,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
       metricFamily = fontFamily(attributes.face ?? '');
       style.family = metricFamily || style.family;
     }
-    else if (name === 'span' || name === 'p') {
+    else if (name === 'span' || name === 'p' || name === 'li') {
       const css = subtitleEntities(fontAttributes(tag, start).style ?? '');
       // One preceding whitespace gives the same capture without quadratic retries over long blank styles.
       const foreground = /(?:\s|^)color\s*:\s*(\S*)\b/.exec(css);
@@ -234,7 +261,15 @@ export function inlineSubtitle(value: string): SubtitleContent {
       if (backgroundColor) { backgroundMarks.push({ start: pieces.length, property: 'background', value: backgroundColor }); }
       if (decoration?.[1].toLowerCase() === 'line-through') { strikeMarks.push({ start: pieces.length, property: 'strike', value: 'true' }); }
     }
-    stack.push({ tag: name, style: style, metricFamily: metricFamily });
+    let alignment: SubtitleParagraphKind | undefined = undefined;
+    if (isSubtitleBlock(name)) {
+      const css = subtitleEntities(fontAttributes(tag, start).style ?? '');
+      const match = /(?:\s|^)text-align\s*:\s*(\S*)\b/.exec(css);
+      const value = match?.[1].toLowerCase();
+      if (value === 'start' || value === 'center' || value === 'end') { alignment = value; }
+    }
+    if (alignment) { paragraphAlignments.push(new SubtitleParagraphSpan(textUnits, textUnits, alignment)); }
+    stack.push({ tag: name, style: style, metricFamily: metricFamily, paragraphStart: textUnits });
     style.baselines = scriptBaselines(stack);
   };
   // Restart phrasing styles around blocks; span/font attributes end at that boundary.
@@ -264,7 +299,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
       const heading = headingScale(name) > 0 && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
         contentStarted = true;
       if (name === 'br' && !closing) { append('\n'); }
-      else if (heading || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
+      else if (heading || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'ul', 'li', 'blockquote', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
         const block = isSubtitleBlock(name);
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) {
@@ -277,6 +312,13 @@ export function inlineSubtitle(value: string): SubtitleContent {
           const restart = block ? suspendInline() : [];
           if (block) {
             paragraph = true;
+            if (name === 'li') {
+              // A sibling li closes the previous item; a nested ul owns its own items.
+              for (let j = stack.length - 1; j > 0; j--) {
+                if (stack[j].tag === 'ul') { break; }
+                if (stack[j].tag === 'li') { closeTo(j); break; }
+              }
+            }
             // Paragraphs and headings close at a new supported block; div nesting remains valid.
             for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === 'p' || headingScale(stack[j].tag) > 0) { closeTo(j); break; } }
             blockBreak();
@@ -303,6 +345,11 @@ export function inlineSubtitle(value: string): SubtitleContent {
   }
   if (paragraph) { pieces.forEach((run: SubtitleRun): void => { run.paragraph = true; }); }
   const text = pieces.map((run: SubtitleRun) => run.text).join('');
+  // Html's legacy ParagraphStyle finalization excludes one trailing blank line.
+  for (const span of paragraphs) {
+    if (span.end >= 2 && text.slice(span.end - 2, span.end) === '\n\n') { span.end--; }
+  }
+  const paragraphSpans = paragraphs.filter((span: SubtitleParagraphSpan): boolean => span.start < span.end);
   if (!pieces.some((run: SubtitleRun) => hasStyle(run))) { return new SubtitleContent(text); }
   const runs: SubtitleRun[] = [];
   for (const run of pieces) {
@@ -312,5 +359,5 @@ export function inlineSubtitle(value: string): SubtitleContent {
       else { runs.push(new SubtitleRun(run.text, run)); }
     }
   }
-  return new SubtitleContent(text, runs.some((run: SubtitleRun) => hasStyle(run)) ? runs : EMPTY_SUBTITLE_RUNS);
+  return new SubtitleContent(text, runs.some((run: SubtitleRun) => hasStyle(run)) ? runs : EMPTY_SUBTITLE_RUNS, paragraphSpans);
 }

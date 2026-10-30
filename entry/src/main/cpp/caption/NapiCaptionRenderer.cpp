@@ -9,6 +9,7 @@
 #include <native_drawing/drawing_filter.h>
 #include <native_drawing/drawing_mask_filter.h>
 #include <native_drawing/drawing_point.h>
+#include <native_drawing/drawing_rect.h>
 #include <fribidi/fribidi.h>
 #include <algorithm>
 #include <cmath>
@@ -35,11 +36,26 @@ struct Run {
     bool bold = false, italic = false, underline = false, strike = false;
 };
 struct Shadow { uint32_t color; double x, y, radius; };
-struct Request { double width = 1; uint32_t lines = limits::kMaxCaptionLines; bool intrinsic = false; std::vector<Run> runs; std::vector<Shadow> shadows; };
+enum class ParagraphKind { Start, Center, End, Bullet, Quote };
+struct ParagraphDirective { uint32_t start, end; ParagraphKind kind; };
+struct Request {
+    double width = 1; uint32_t lines = limits::kMaxCaptionLines; bool intrinsic = false;
+    std::vector<Run> runs; std::vector<Shadow> shadows;
+    std::vector<ParagraphDirective> paragraphs; std::u16string paragraphText;
+    double paragraphSize = 0; uint32_t paragraphColor = 0;
+    // Internal layout choices; absent paragraph metadata keeps the original centered path.
+    int alignment = TEXT_ALIGN_CENTER, direction = -1;
+};
 struct Frame { uint32_t width = 0, height = 0, layoutWidth = 0, layoutHeight = 0, halo = 0; std::vector<uint8_t> rgba; };
 void Check(napi_status status) { if (status != napi_ok) { throw std::invalid_argument("caption_argument_invalid"); } }
 napi_value Field(napi_env env, napi_value object, const char *key) {
     napi_value result; Check(napi_get_named_property(env, object, key, &result)); return result;
+}
+void RequireObject(napi_env env, napi_value value) {
+    napi_valuetype type; Check(napi_typeof(env, value, &type));
+    napi_value nil; Check(napi_get_null(env, &nil)); bool isNull;
+    Check(napi_strict_equals(env, value, nil, &isNull));
+    if (type != napi_object || isNull) { throw std::invalid_argument("caption_argument_invalid"); }
 }
 double Number(napi_env env, napi_value value, double minimum, double maximum) {
     double result; Check(napi_get_value_double(env, value, &result));
@@ -65,14 +81,29 @@ Request Read(napi_env env, napi_value value) {
     Request out; out.width = Number(env, Field(env, value, "width"), 1, limits::kMaxCaptionLayoutWidthPx);
     out.lines = Integer(env, Field(env, value, "maxLines"), 1, limits::kMaxCaptionLines);
     out.intrinsic = Boolean(env, Field(env, value, "intrinsic"));
+    bool hasParagraphs; Check(napi_has_named_property(env, value, "paragraphs", &hasParagraphs));
+    napi_value paragraphArray = nullptr; uint32_t paragraphCount = 0;
+    if (hasParagraphs) {
+        paragraphArray = Field(env, value, "paragraphs"); bool array;
+        Check(napi_is_array(env, paragraphArray, &array));
+        if (!array) { throw std::invalid_argument("caption_paragraphs_invalid"); }
+        Check(napi_get_array_length(env, paragraphArray, &paragraphCount));
+        if (paragraphCount > limits::kMaxCaptionParagraphSpans) { throw std::invalid_argument("caption_paragraphs_invalid"); }
+    }
     auto array = Field(env, value, "runs"); bool isArray; Check(napi_is_array(env, array, &isArray));
     uint32_t count; Check(napi_get_array_length(env, array, &count));
     if (!isArray || !count || count > limits::kMaxCaptionRuns) { throw std::invalid_argument("caption_runs_invalid"); }
     size_t bytes = 0;
     for (uint32_t i = 0; i < count; ++i) {
         napi_value entry; Check(napi_get_element(env, array, i, &entry)); Run run;
-        run.text = String(env, Field(env, entry, "text"), MAX_TEXT, &run.units); bytes += run.text.size();
+        const auto text = Field(env, entry, "text");
+        run.text = String(env, text, MAX_TEXT, &run.units); bytes += run.text.size();
         if (bytes > MAX_TEXT) { throw std::invalid_argument("caption_text_too_large"); }
+        if (paragraphCount) {
+            std::vector<char16_t> units(run.units + 1); size_t length;
+            Check(napi_get_value_string_utf16(env, text, units.data(), units.size(), &length));
+            out.paragraphText.append(units.data(), length);
+        }
         run.family = String(env, Field(env, entry, "family"), limits::kMaxCaptionFamilyBytes);
         run.size = Number(env, Field(env, entry, "size"), kMinCaptionFontSizePx, limits::kMaxCaptionFontSizePx);
         run.baseline = Number(env, Field(env, entry, "baseline"), -limits::kMaxCaptionBaselineOffsetPx, limits::kMaxCaptionBaselineOffsetPx);
@@ -84,6 +115,30 @@ Request Read(napi_env env, napi_value value) {
         out.runs.push_back(std::move(run));
     }
     if (!bytes) { throw std::invalid_argument("caption_text_empty"); }
+    if (paragraphCount) {
+        const auto style = Field(env, value, "paragraphStyle");
+        RequireObject(env, style);
+        out.paragraphSize = Number(env, Field(env, style, "size"), kMinCaptionFontSizePx, limits::kMaxCaptionFontSizePx);
+        out.paragraphColor = Integer(env, Field(env, style, "color"), 0, UINT32_MAX);
+        for (uint32_t i = 0; i < paragraphCount; ++i) {
+            napi_value span; Check(napi_get_element(env, paragraphArray, i, &span));
+            RequireObject(env, span);
+            const auto start = Integer(env, Field(env, span, "start"), 0, uint32_t(out.paragraphText.size()));
+            const auto end = Integer(env, Field(env, span, "end"), 0, uint32_t(out.paragraphText.size()));
+            if (end <= start || (start && out.paragraphText[start - 1] != u'\n') ||
+                (end < out.paragraphText.size() && out.paragraphText[end - 1] != u'\n')) {
+                throw std::invalid_argument("caption_paragraph_range_invalid");
+            }
+            const auto kind = String(env, Field(env, span, "kind"), 6); ParagraphKind parsed;
+            if (kind == "start") { parsed = ParagraphKind::Start; }
+            else if (kind == "center") { parsed = ParagraphKind::Center; }
+            else if (kind == "end") { parsed = ParagraphKind::End; }
+            else if (kind == "bullet") { parsed = ParagraphKind::Bullet; }
+            else if (kind == "quote") { parsed = ParagraphKind::Quote; }
+            else { throw std::invalid_argument("caption_paragraph_kind_invalid"); }
+            out.paragraphs.push_back({start, end, parsed});
+        }
+    }
     array = Field(env, value, "shadows"); Check(napi_is_array(env, array, &isArray)); Check(napi_get_array_length(env, array, &count));
     if (!isArray || count > limits::kMaxCaptionShadows) { throw std::invalid_argument("caption_shadows_invalid"); }
     for (uint32_t i = 0; i < count; ++i) {
@@ -121,8 +176,8 @@ struct Paragraph {
     std::vector<size_t> starts, ends;
     Paragraph(const Request &request, int orientation, bool ellipsis = true) {
         if (!fonts || !style) { throw std::bad_alloc(); }
-        OH_Drawing_SetTypographyTextAlign(style.get(), TEXT_ALIGN_CENTER);
-        OH_Drawing_SetTypographyTextDirection(style.get(), Direction(request));
+        OH_Drawing_SetTypographyTextAlign(style.get(), request.alignment);
+        OH_Drawing_SetTypographyTextDirection(style.get(), request.direction < 0 ? Direction(request) : request.direction);
         OH_Drawing_SetTypographyTextMaxLines(style.get(), request.lines);
         OH_Drawing_SetTypographyTextEllipsis(style.get(), ellipsis ? "\xE2\x80\xA6" : "");
         builder.reset(OH_Drawing_CreateTypographyHandler(style.get(), fonts.get())); if (!builder) { throw std::bad_alloc(); }
@@ -233,8 +288,246 @@ void KeepVisibleTail(const Request &request, int orientation, double width, std:
     OH_Drawing_TypographyLayout(complete->text.get(), width);
     paragraph.swap(complete); // Destroy each old typography before its owned fonts and brushes.
 }
+// Android API34 BulletSpan/QuoteSpan defaults are physical pixels, independent of font size.
+constexpr double kBulletRadiusPx = 4, kBulletGapPx = 2;
+constexpr double kQuoteStripePx = 2, kQuoteGapPx = 2;
+constexpr uint32_t kQuoteColor = 0xFF0000FF;
+constexpr double kCuePaddingFraction = 0.125; // Media3 1.2.1 SubtitlePainter.
+size_t Utf16Units(const std::string &text, size_t start, size_t end) {
+    size_t units = 0;
+    for (size_t i = start; i < end; ++i) {
+        const auto byte = static_cast<unsigned char>(text[i]);
+        if ((byte & 0xC0) != 0x80) { units += byte >= 0xF0 ? 2 : 1; }
+    }
+    return units;
+}
+Request Fragment(const Request &source) {
+    Request out; out.width = source.width; out.lines = source.lines; out.shadows = source.shadows;
+    return out;
+}
+Run RunStyle(const Run &source) {
+    Run out; out.family = source.family; out.size = source.size; out.baseline = source.baseline;
+    out.color = source.color; out.background = source.background;
+    out.bold = source.bold; out.italic = source.italic; out.underline = source.underline; out.strike = source.strike;
+    return out;
+}
+struct ParagraphPart {
+    Request request;
+    size_t start = 0, run = 0, byte = 0;
+    double margin = 0, x = 0, y = 0, height = 0;
+    std::vector<ParagraphDirective> markers;
+    std::unique_ptr<Paragraph> owner;
+};
+std::vector<ParagraphPart> SplitParagraphs(const Request &source) {
+    std::vector<ParagraphPart> parts;
+    ParagraphPart current; current.request = Fragment(source);
+    size_t position = 0;
+    Run lastNewline;
+    // One forward pass over UTF8. At most maxLines logical paragraphs can be visible.
+    for (size_t i = 0; i < source.runs.size(); ++i) {
+        const auto &run = source.runs[i]; size_t start = 0;
+        while (start < run.text.size()) {
+            if (current.request.runs.empty()) { current.run = i; current.byte = start; current.start = position; }
+            const auto newline = run.text.find('\n', start);
+            const size_t end = newline == std::string::npos ? run.text.size() : newline + 1;
+            Run slice = RunStyle(run); slice.text = run.text.substr(start, end - start); slice.units = Utf16Units(run.text, start, end);
+            position += slice.units; current.request.runs.push_back(std::move(slice)); start = end;
+            if (newline != std::string::npos) {
+                lastNewline = RunStyle(run); lastNewline.text = "\n"; lastNewline.units = 1;
+                parts.push_back(std::move(current));
+                if (parts.size() == source.lines) { return parts; }
+                current = ParagraphPart{}; current.request = Fragment(source); current.start = position;
+            }
+        }
+    }
+    if (current.request.runs.empty()) {
+        // Raw empty typography ignores the requested font. A styled newline with a one-line
+        // cap retains the actual blank paragraph's metrics without painting a placeholder.
+        current.request.runs.push_back(std::move(lastNewline));
+        current.run = source.runs.size(); current.byte = 0;
+    }
+    parts.push_back(std::move(current));
+    return parts;
+}
+Request ParagraphTail(const Request &source, const ParagraphPart &part) {
+    Request out = Fragment(source);
+    for (size_t i = part.run; i < source.runs.size(); ++i) {
+        Run run = source.runs[i];
+        if (i == part.run) { run.text = run.text.substr(part.byte); run.units = Utf16Units(run.text, 0, run.text.size()); }
+        if (!run.text.empty()) { out.runs.push_back(std::move(run)); }
+    }
+    return out;
+}
+OH_Drawing_LineMetrics ParagraphLine(Paragraph &paragraph, size_t index) {
+    OH_Drawing_LineMetrics line{};
+    if (!OH_Drawing_TypographyGetLineMetricsAt(paragraph.text.get(), int(index), &line) ||
+        !std::isfinite(line.width) || !std::isfinite(line.height) || !std::isfinite(line.y) || line.height < 0) {
+        throw std::runtime_error("caption_layout_failed");
+    }
+    return line;
+}
+bool TerminalParagraphRow(const OH_Drawing_LineMetrics &line, size_t units) {
+    return line.width == 0 && line.endIndex == units && (line.startIndex == units || (units && line.startIndex == units - 1));
+}
+size_t BodyLines(Paragraph &paragraph, const Request &request) {
+    size_t count = OH_Drawing_TypographyGetLineCount(paragraph.text.get());
+    size_t units = 0; for (const auto &run : request.runs) { units += run.units; }
+    if (count > 1 && !request.runs.empty() && !request.runs.back().text.empty() && request.runs.back().text.back() == '\n') {
+        const auto last = ParagraphLine(paragraph, count - 1);
+        // API26 reports the terminal empty row over the final newline itself, rather than
+        // the following UTF16 position. Both forms identify the same unpainted extra row.
+        if (TerminalParagraphRow(last, units)) { --count; }
+    }
+    return std::max<size_t>(1, count);
+}
+void ConfigureParagraph(const Request &source, ParagraphPart &part) {
+    for (const auto &span : source.paragraphs) {
+        if (span.start > part.start || span.end <= part.start) { continue; }
+        switch (span.kind) {
+            case ParagraphKind::Start: part.request.alignment = TEXT_ALIGN_START; break;
+            case ParagraphKind::Center: part.request.alignment = TEXT_ALIGN_CENTER; break;
+            case ParagraphKind::End: part.request.alignment = TEXT_ALIGN_END; break;
+            case ParagraphKind::Bullet:
+                part.margin += kBulletRadiusPx * 2 + kBulletGapPx; part.markers.push_back(span); break;
+            case ParagraphKind::Quote:
+                part.margin += kQuoteStripePx + kQuoteGapPx; part.markers.push_back(span); break;
+        }
+    }
+    if (part.margin >= source.width) { throw std::runtime_error("caption_frame_too_large"); }
+    part.request.direction = Direction(part.request);
+}
+struct ParagraphMarker { bool bullet; double x, top, bottom; uint32_t color; };
+void PaintMarker(OH_Drawing_Canvas *canvas, const ParagraphMarker &marker, const Shadow &shadow) {
+    Own<OH_Drawing_Brush, OH_Drawing_BrushDestroy> brush(OH_Drawing_BrushCreate(), OH_Drawing_BrushDestroy);
+    if (!brush) { throw std::bad_alloc(); }
+    OH_Drawing_BrushSetAntiAlias(brush.get(), true); OH_Drawing_BrushSetColor(brush.get(), shadow.color);
+    Own<OH_Drawing_Filter, OH_Drawing_FilterDestroy> filter(nullptr, OH_Drawing_FilterDestroy);
+    Own<OH_Drawing_MaskFilter, OH_Drawing_MaskFilterDestroy> mask(nullptr, OH_Drawing_MaskFilterDestroy);
+    if (shadow.radius > 0) {
+        filter.reset(OH_Drawing_FilterCreate()); mask.reset(OH_Drawing_MaskFilterCreateBlur(NORMAL, shadow.radius, true));
+        if (!filter || !mask) { throw std::bad_alloc(); }
+        OH_Drawing_FilterSetMaskFilter(filter.get(), mask.get()); OH_Drawing_BrushSetFilter(brush.get(), filter.get());
+    }
+    if (marker.bullet) {
+        Own<OH_Drawing_Point, OH_Drawing_PointDestroy> point(
+            OH_Drawing_PointCreate(marker.x + shadow.x, (marker.top + marker.bottom) / 2 + shadow.y), OH_Drawing_PointDestroy);
+        if (!point) { throw std::bad_alloc(); }
+        OH_Drawing_CanvasAttachBrush(canvas, brush.get());
+        OH_Drawing_CanvasDrawCircle(canvas, point.get(), kBulletRadiusPx);
+    } else {
+        Own<OH_Drawing_Rect, OH_Drawing_RectDestroy> rect(OH_Drawing_RectCreate(marker.x + shadow.x,
+            marker.top + shadow.y, marker.x + kQuoteStripePx + shadow.x, marker.bottom + shadow.y), OH_Drawing_RectDestroy);
+        if (!rect) { throw std::bad_alloc(); }
+        OH_Drawing_CanvasAttachBrush(canvas, brush.get()); OH_Drawing_CanvasDrawRect(canvas, rect.get());
+    }
+    OH_Drawing_CanvasDetachBrush(canvas);
+}
+Frame RasterizeParagraphs(const Request &request, int orientation) {
+    auto parts = SplitParagraphs(request);
+    const double padding = std::floor(request.paragraphSize * kCuePaddingFraction + 0.5);
+    double blockWidth = 1;
+    for (auto &part : parts) {
+        ConfigureParagraph(request, part);
+        part.request.width = std::max(1.0, request.width - padding * 2 - part.margin);
+        part.request.lines = request.lines + 1;
+        Paragraph probe(part.request, orientation, false);
+        const double longest = OH_Drawing_TypographyGetLongestLine(probe.text.get());
+        if (!std::isfinite(longest) || longest < 0) { throw std::runtime_error("caption_layout_failed"); }
+        blockWidth = std::max(blockWidth, std::ceil(longest) + part.margin + padding * 2);
+    }
+    blockWidth = std::min(request.width, blockWidth);
+    const double width = request.intrinsic ? blockWidth : request.width;
+    const double blockLeft = (width - blockWidth) / 2;
+    size_t remaining = request.lines, painted = 0;
+    double height = 0;
+    const size_t visibleEnd = request.paragraphText.find_last_not_of(u'\n') == std::u16string::npos ? 0 :
+        request.paragraphText.find_last_not_of(u'\n') + 1;
+    for (auto &part : parts) {
+        part.request.width = std::max(1.0, blockWidth - part.margin); part.request.lines = uint32_t(remaining + 1);
+        part.owner = std::make_unique<Paragraph>(part.request, orientation, false);
+        const size_t body = BodyLines(*part.owner, part.request);
+        const size_t used = std::min(remaining, body);
+        size_t units = 0; for (const auto &run : part.request.runs) { units += run.units; }
+        const bool overflow = body > remaining || (used == remaining && part.start + units < visibleEnd);
+        if (overflow) {
+            auto tail = ParagraphTail(request, part); tail.width = part.request.width; tail.lines = uint32_t(used);
+            tail.alignment = part.request.alignment; tail.direction = part.request.direction;
+            part.request = std::move(tail); part.owner = std::make_unique<Paragraph>(part.request, orientation);
+            KeepVisibleTail(part.request, orientation, part.request.width, part.owner);
+        } else {
+            part.request.lines = uint32_t(used); part.owner = std::make_unique<Paragraph>(part.request, orientation, false);
+        }
+        part.x = blockLeft + (part.request.direction == TEXT_DIRECTION_RTL ? 0 : part.margin); part.y = height;
+        part.height = std::ceil(OH_Drawing_TypographyGetHeight(part.owner->text.get()));
+        if (!std::isfinite(part.height) || part.height < 1) { throw std::runtime_error("caption_layout_failed"); }
+        height += part.height;
+        if (height > limits::kMaxCaptionFrameHeightPx) { throw std::runtime_error("caption_frame_too_large"); }
+        ++painted; remaining -= used; if (!remaining) { break; }
+    }
+    parts.resize(painted);
+    double halo = 2;
+    for (const auto &shadow : request.shadows) { halo = std::max(halo, std::ceil(shadow.radius * 3 + std::max(std::abs(shadow.x), std::abs(shadow.y))) + 2); }
+    Frame out; out.layoutWidth = uint32_t(std::ceil(width)); out.layoutHeight = uint32_t(height); out.halo = uint32_t(halo);
+    out.width = out.layoutWidth + out.halo * 2; out.height = out.layoutHeight + out.halo * 2;
+    if (uint64_t(out.width) * out.height > MAX_PIXELS) { throw std::runtime_error("caption_frame_too_large"); }
+    std::vector<Underline> lines; std::vector<ParagraphMarker> markers;
+    std::map<std::tuple<std::string, double, bool, bool>, OH_Drawing_Font_Metrics> metrics;
+    for (auto &part : parts) {
+        auto &paragraph = *part.owner;
+        for (size_t i = 0; i < part.request.runs.size(); ++i) {
+            const auto &run = part.request.runs[i]; if (!run.underline || !run.units) { continue; }
+            const auto key = std::make_tuple(run.family, run.size, run.bold, run.italic);
+            auto found = metrics.find(key); if (found == metrics.end()) { found = metrics.emplace(key, FontMetrics(run)).first; }
+            const auto &font = found->second; auto boxes = Boxes(paragraph, paragraph.starts[i], paragraph.ends[i]);
+            const auto count = OH_Drawing_GetSizeOfTextBox(boxes.get());
+            if (lines.size() + markers.size() + count > limits::kMaxCaptionLineBoxes) { throw std::runtime_error("caption_frame_too_complex"); }
+            for (size_t j = 0; j < count; ++j) {
+                const float left = OH_Drawing_GetLeftFromTextBox(boxes.get(), int(j)), right = OH_Drawing_GetRightFromTextBox(boxes.get(), int(j));
+                if (right <= left) { continue; }
+                const float y = OH_Drawing_GetBottomFromTextBox(boxes.get(), int(j)) - font.descent + font.underlinePosition + font.underlineThickness / 2;
+                lines.push_back({float(left + part.x + out.halo), float(right + part.x + out.halo), float(y + part.y + out.halo), font.underlineThickness, run.color});
+            }
+        }
+        double margin = 0;
+        const bool rtl = part.request.direction == TEXT_DIRECTION_RTL;
+        for (const auto &span : part.markers) {
+            const bool bullet = span.kind == ParagraphKind::Bullet;
+            const double extent = bullet ? kBulletRadiusPx * 2 + kBulletGapPx : kQuoteStripePx + kQuoteGapPx;
+            const auto count = OH_Drawing_TypographyGetLineCount(paragraph.text.get());
+            for (size_t i = 0; i < count; ++i) {
+                if (bullet && (i || span.start != part.start)) { continue; }
+                if (lines.size() + markers.size() >= limits::kMaxCaptionLineBoxes) { throw std::runtime_error("caption_frame_too_complex"); }
+                const auto line = ParagraphLine(paragraph, i);
+                double x = rtl ? blockLeft + blockWidth - margin : blockLeft + margin;
+                x += bullet ? (rtl ? -kBulletRadiusPx : kBulletRadiusPx) : (rtl ? -kQuoteStripePx : 0);
+                markers.push_back({bullet, x + out.halo, part.y + line.y + out.halo,
+                    part.y + line.y + line.height + out.halo, bullet ? request.paragraphColor : kQuoteColor});
+            }
+            margin += extent;
+        }
+    }
+    Own<OH_Drawing_Bitmap, OH_Drawing_BitmapDestroy> bitmap(OH_Drawing_BitmapCreate(), OH_Drawing_BitmapDestroy);
+    Own<OH_Drawing_Canvas, OH_Drawing_CanvasDestroy> canvas(OH_Drawing_CanvasCreate(), OH_Drawing_CanvasDestroy);
+    if (!bitmap || !canvas) { throw std::bad_alloc(); }
+    OH_Drawing_BitmapFormat format{COLOR_FORMAT_RGBA_8888, ALPHA_FORMAT_PREMUL};
+    OH_Drawing_BitmapBuild(bitmap.get(), out.width, out.height, &format);
+    if (!OH_Drawing_BitmapGetPixels(bitmap.get())) { throw std::bad_alloc(); }
+    OH_Drawing_CanvasBind(canvas.get(), bitmap.get()); OH_Drawing_CanvasClear(canvas.get(), 0);
+    for (const auto &line : lines) { for (const auto &shadow : request.shadows) { Line(canvas.get(), line, shadow); } }
+    for (const auto &marker : markers) {
+        for (const auto &shadow : request.shadows) { PaintMarker(canvas.get(), marker, shadow); }
+        PaintMarker(canvas.get(), marker, {marker.color, 0, 0, 0});
+    }
+    for (const auto &part : parts) { OH_Drawing_TypographyPaint(part.owner->text.get(), canvas.get(), part.x + out.halo, part.y + out.halo); }
+    for (const auto &line : lines) { Line(canvas.get(), line, {line.color, 0, 0, 0}); }
+    OH_Drawing_Image_Info info{}; OH_Drawing_BitmapGetImageInfo(bitmap.get(), &info);
+    out.rgba.resize(size_t(out.width) * out.height * 4);
+    if (!OH_Drawing_BitmapReadPixels(bitmap.get(), &info, out.rgba.data(), size_t(out.width) * 4, 0, 0)) { throw std::runtime_error("caption_pixels_unavailable"); }
+    return out;
+}
 Frame Rasterize(const Request &request) {
     const int orientation = Orientation();
+    if (!request.paragraphs.empty()) { return RasterizeParagraphs(request, orientation); }
     auto owner = std::make_unique<Paragraph>(request, orientation);
     double width = request.width;
     if (request.intrinsic) {
