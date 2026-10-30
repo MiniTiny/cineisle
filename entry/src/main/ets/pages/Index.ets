@@ -543,7 +543,7 @@ struct Index {
   private reason(item: MediaItem): void {
     const value = this.discoveries.find((d: Discovery) => d.item.Id === item.Id);
     if (!value) { return; }
-    showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: this.palette.accent, action: () => {} } }, this.viewportWidth, this.viewportHeight);
+    showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.discovery_reason'), message: value.actors.concat(value.genres).join(' · ') || $r('app.string.discovery_recent'), confirm: { value: $r('app.string.ok'), fontColor: this.palette.accent, action: () => {} } }, this.viewportWidth, this.viewportHeight);
   }
 
   @Builder
@@ -628,8 +628,8 @@ struct Index {
                 try { router.pushUrl({ url: AppRoutes.player, params: AppService.downloadPlayback(record) }); } catch (e) { this.message = errorText(e as Error); }
               } }) }.width(this.viewportWidth < 360 || this.fontScale > 1 ? '100%' : '48%').margin({ bottom: 8, right: '2%' })
               Column() { BrandButton({ label: $r('app.string.remove_download'), icon: $r('app.media.detail_remove'), destructive: true, available: !this.busy, onSelect: () => {
-                showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
-                  buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
+                showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.remove_download'), message: $r('app.string.remove_download_confirm'),
+                  buttonDirection: UiLayout.compactDialog(this.viewportHeight) && UiLayout.wideDialog(this.viewportWidth) ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.remove'), fontColor: this.palette.danger, action: async () => {
                     try { await AppService.removeDownload(record); this.downloads = [...AppService.downloads]; } catch (e) { this.message = errorText(e as Error); }
                   } }]
                 }, this.viewportWidth, this.viewportHeight);
@@ -707,8 +707,8 @@ struct Index {
           if (this.syncMessage) { Text(this.syncMessage).fontSize(13).fontColor(this.palette.muted).width('100%') }
         }.width('100%')
         this.menuAction($r('app.string.change_account'), $r('app.media.menu_logout'), () => {
-          showBrandDialog(() => this.getUIContext(), { width: this.viewportHeight < 440 ? Math.min(720, this.viewportWidth - 32) : undefined, height: this.viewportHeight < 440 ? '90%' : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
-            buttonDirection: this.viewportHeight < 440 && this.viewportWidth >= 600 ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.logout'), fontColor: this.palette.danger, action: async () => { await this.logout(); } }]
+          showBrandDialog(() => this.getUIContext(), { width: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogWidth(this.viewportWidth) : undefined, height: UiLayout.compactDialog(this.viewportHeight) ? UiLayout.dialogHeightPercent() : undefined, backgroundColor: (this.amoled ? this.palette.amoledBackground : this.palette.raised), backgroundBlurStyle: BlurStyle.NONE, cornerRadius: 20, title: $r('app.string.change_account'), message: $r('app.string.logout_confirm'),
+            buttonDirection: UiLayout.compactDialog(this.viewportHeight) && UiLayout.wideDialog(this.viewportWidth) ? DialogButtonDirection.HORIZONTAL : DialogButtonDirection.VERTICAL, buttons: [{ defaultFocus: true, value: $r('app.string.cancel'), fontColor: this.palette.accent, action: () => {} }, { value: $r('app.string.logout'), fontColor: this.palette.danger, action: async () => { await this.logout(); } }]
           }, this.viewportWidth, this.viewportHeight);
         }, true, true)
         Text($r('app.string.version')).fontSize(12).fontColor(this.palette.muted).width('100%').textAlign(TextAlign.Center)
