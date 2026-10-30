@@ -21,8 +21,12 @@ export interface NativeCaptionRun {
   bold: boolean; italic: boolean; underline: boolean; strike: boolean;
 }
 export interface NativeCaptionShadow { color: number; x: number; y: number; radius: number; }
+export interface NativeCaptionParagraphSpan { start: number; end: number; kind: 'start' | 'center' | 'end' | 'bullet' | 'quote'; }
+export interface NativeCaptionParagraphStyle { size: number; color: number; }
 export interface NativeCaptionRequest {
   revision?: string;
+  paragraphs?: NativeCaptionParagraphSpan[];
+  paragraphStyle?: NativeCaptionParagraphStyle;
   width: number; maxLines: number; intrinsic: boolean; runs: NativeCaptionRun[]; shadows: NativeCaptionShadow[];
 }
 export interface NativeCaptionFrame {

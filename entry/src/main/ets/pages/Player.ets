@@ -26,6 +26,7 @@ import { SystemCaptions } from '../service/SystemCaptions';
 import { CaptionRenderStyle, captionRenderStyle } from '../utils/CaptionStyle';
 import { captionShadows } from '../utils/CaptionUI';
 import { EMPTY_SUBTITLE_RUNS, SubtitleContent, SubtitleRun, EMPTY_POSITIONED_SUBTITLES, PositionedSubtitle } from '../utils/InlineSubtitle';
+import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphSpan } from '../utils/SubtitleParagraph';
 import { PositionedCaption } from '../components/PositionedCaption';
 import { RichCaption } from '../components/RichCaption';
 import { PlaybackLanguageInput, PlaybackPreferences } from '../utils/PlaybackPreferences';
@@ -66,6 +67,7 @@ struct Player {
   @State duration: number = 0;
   @State subtitle: string = '';
   @State subtitleRuns: SubtitleRun[] = EMPTY_SUBTITLE_RUNS;
+  @State subtitleParagraphs: SubtitleParagraphSpan[] = EMPTY_SUBTITLE_PARAGRAPHS;
   @State subtitleRevision: string = '';
   @State positionedSubtitles: PositionedSubtitle[] = EMPTY_POSITIONED_SUBTITLES;
   @State styledFrame: StyledSubtitleFrame | undefined = undefined;
@@ -166,9 +168,9 @@ struct Player {
       tracks: (audio: TrackChoice[], subtitles: TrackChoice[], audioKey: string, subtitleKey: string) => {
         if (this.alive) { this.audio = audio; this.subtitles = subtitles; this.audioKey = audioKey; this.subtitleKey = subtitleKey; }
       },
-      subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.subtitleRevision = ''; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.positionedSubtitles = EMPTY_POSITIONED_SUBTITLES; this.system?.updateSubtitle(value); } },
+        subtitle: (value: string) => { if (this.alive) { this.subtitle = value; this.subtitleRevision = ''; this.subtitleRuns = EMPTY_SUBTITLE_RUNS; this.subtitleParagraphs = EMPTY_SUBTITLE_PARAGRAPHS; this.positionedSubtitles = EMPTY_POSITIONED_SUBTITLES; this.system?.updateSubtitle(value); } },
       caption: (value: SubtitleContent) => {
-        if (this.alive) { this.subtitle = value.flowText; this.subtitleRevision = value.revision; this.subtitleRuns = value.flowRuns; this.positionedSubtitles = value.positioned; this.system?.updateSubtitle(value.flowText, value.flowRuns, value.positioned, value.revision); }
+          if (this.alive) { this.subtitle = value.flowText; this.subtitleRevision = value.revision; this.subtitleRuns = value.flowRuns; this.subtitleParagraphs = value.flowParagraphs; this.positionedSubtitles = value.positioned; this.system?.updateSubtitle(value.flowText, value.flowRuns, value.positioned, value.revision, value.flowParagraphs); }
       },
       styledSubtitle: (frame: StyledSubtitleFrame | undefined) => {
         if (this.alive) { this.styledFrame = frame; this.system?.updateStyledSubtitle(frame); }
@@ -605,7 +607,7 @@ struct Player {
   private plainSubtitle() {
     Column() {
       if (this.subtitleRuns.length) {
-        RichCaption({ runs: this.subtitleRuns, captionStyle: this.captionStyle, fontSize: 20 * (this.captionStyle.system ? this.captionStyle.scale : 1),
+        RichCaption({ runs: this.subtitleRuns, paragraphs: this.subtitleParagraphs, captionStyle: this.captionStyle, fontSize: 20 * (this.captionStyle.system ? this.captionStyle.scale : 1),
           identifier: 'playbackTextSubtitle', revision: this.subtitleRevision }).width('100%')
       } else {
       Text(this.subtitle).id('playbackTextSubtitle')
