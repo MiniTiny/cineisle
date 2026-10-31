@@ -1,13 +1,37 @@
 {
   "string": [
-    {"name": "player_retry", "value": "重试播放"},
-    {"name": "player_failure_hint", "value": "播放未能继续。可重试当前版本，或在播放选项中选择其他版本。"},
-    { "name": "player_skip_intro", "value": "跳过片头" },
-    { "name": "player_intro_skipper", "value": "片头跳过提示" },
-    { "name": "player_intro_hint", "value": "需要服务器提供 Intro Skipper 时间段；只在有效时段提示，点击后跳过。离线可使用已缓存的媒体时间段。" },
-    { "name": "player_intro_save_failed", "value": "片头跳过偏好保存失败，请重试" },
-    { "name": "download_legacy_version", "value": "旧版下载（未记录版本）" },
-    { "name": "offline_versions", "value": "已下载的版本" },
+    {
+      "name": "player_retry",
+      "value": "重试播放"
+    },
+    {
+      "name": "player_failure_hint",
+      "value": "播放未能继续。可重试当前版本，或在播放选项中选择其他版本。"
+    },
+    {
+      "name": "player_skip_intro",
+      "value": "跳过片头"
+    },
+    {
+      "name": "player_intro_skipper",
+      "value": "片头跳过提示"
+    },
+    {
+      "name": "player_intro_hint",
+      "value": "需要服务器提供 Intro Skipper 时间段；只在有效时段提示，点击后跳过。离线可使用已缓存的媒体时间段。"
+    },
+    {
+      "name": "player_intro_save_failed",
+      "value": "片头跳过偏好保存失败，请重试"
+    },
+    {
+      "name": "download_legacy_version",
+      "value": "旧版下载（未记录版本）"
+    },
+    {
+      "name": "offline_versions",
+      "value": "已下载的版本"
+    },
     {
       "name": "module_desc",
       "value": "映屿 · CineIsle 鸿蒙私人影视库"
@@ -1948,112 +1972,421 @@
       "name": "player_trickplay_save_failed",
       "value": "拖动进度缩略图设置保存失败"
     },
-    {"name": "ui_language_group", "value": "应用界面语言"},
-    {"name": "ui_language_hint", "value": "支持简体中文、繁体中文、英文、法语、西班牙语、德语、意大利语、葡萄牙葡语、巴西葡萄牙语和韩语；其他系统语言使用英文。此设置全应用共用，仅切换界面，媒体资料及音轨/字幕偏好保持独立。"},
-    {"name": "ui_language_system", "value": "跟随系统"},
-    {"name": "ui_language_save", "value": "保存并应用界面语言"},
-    {"name": "ui_language_saved", "value": "界面语言已保存并应用"},
-    {"name": "ui_language_invalid", "value": "界面语言设置无效，请重新选择并保存"},
-    {"name": "ui_language_load_failed", "value": "无法读取界面语言设置，请重开设置页后重试"},
-    {"name": "ui_language_save_failed", "value": "界面语言未能保存，已恢复原设置，请重试"},
-    {"name": "ui_language_restore_failed", "value": "界面语言恢复失败，当前设置未确认，请重启后重新保存"},
-    {"name": "ui_language_cancelled", "value": "界面语言操作已取消"},
-    {"name": "ui_language_apply_failed", "value": "未能更新界面语言，请重开设置页后重试"},
-    {"name": "appearance_group", "value": "外观与详情"},
-    {"name": "appearance_amoled", "value": "AMOLED 纯黑背景"},
-    {"name": "appearance_amoled_hint", "value": "将页面、卡片、输入框和系统栏背景改为纯黑；关闭后恢复映屿深色配色。全应用共用，立即生效并保留到重启。"},
-    {"name": "appearance_extra_info", "value": "显示额外媒体信息"},
-    {"name": "appearance_extra_hint", "value": "在电影和单集详情中显示文件大小及完整视频、音频、字幕规格；关闭后仍保留简介、基本标签与演职人员。"},
-    {"name": "appearance_saved", "value": "外观设置已保存并应用"},
-    {"name": "appearance_invalid", "value": "保存的外观设置无效，请重新选择设置"},
-    {"name": "appearance_load_failed", "value": "无法读取外观设置，请重新打开设置页重试"},
-    {"name": "appearance_unavailable", "value": "窗口外观暂不可用，请重新打开设置页重试"},
-    {"name": "appearance_cancelled", "value": "外观设置操作已取消"},
-    {"name": "appearance_save_failed", "value": "外观设置未能保存，已尝试恢复原设置，请重试"},
-    {"name": "appearance_restore_failed", "value": "外观设置恢复未确认，请重开设置页确认后重试"},
-    {"name": "dynamic_colors", "value": "跟随壁纸配色"},
-    {"name": "dynamic_colors_hint", "value": "使用系统壁纸颜色生成映屿深色配色，默认开启。读取失败时使用原映屿配色，返回前台会重试；AMOLED 模式仍保留纯黑容器。"},
-    {"name": "dynamic_colors_loading", "value": "正在确认壁纸配色…"},
-    {"name": "dynamic_colors_active", "value": "已应用当前系统壁纸配色"},
-    {"name": "dynamic_colors_off", "value": "使用原映屿配色"},
-    {"name": "dynamic_colors_fallback", "value": "暂未获得可用壁纸颜色，使用原映屿配色；返回前台将重试。"},
-    {"name": "dynamic_colors_update_failed", "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"},
+    {
+      "name": "ui_language_group",
+      "value": "应用界面语言"
+    },
+    {
+      "name": "ui_language_hint",
+      "value": "支持简体中文、繁体中文、英文、法语、西班牙语、德语、意大利语、葡萄牙葡语、巴西葡萄牙语、韩语和俄语；其他系统语言使用英文。此设置全应用共用，仅切换界面，媒体资料及音轨/字幕偏好保持独立。"
+    },
+    {
+      "name": "ui_language_system",
+      "value": "跟随系统"
+    },
+    {
+      "name": "ui_language_save",
+      "value": "保存并应用界面语言"
+    },
+    {
+      "name": "ui_language_saved",
+      "value": "界面语言已保存并应用"
+    },
+    {
+      "name": "ui_language_invalid",
+      "value": "界面语言设置无效，请重新选择并保存"
+    },
+    {
+      "name": "ui_language_load_failed",
+      "value": "无法读取界面语言设置，请重开设置页后重试"
+    },
+    {
+      "name": "ui_language_save_failed",
+      "value": "界面语言未能保存，已恢复原设置，请重试"
+    },
+    {
+      "name": "ui_language_restore_failed",
+      "value": "界面语言恢复失败，当前设置未确认，请重启后重新保存"
+    },
+    {
+      "name": "ui_language_cancelled",
+      "value": "界面语言操作已取消"
+    },
+    {
+      "name": "ui_language_apply_failed",
+      "value": "未能更新界面语言，请重开设置页后重试"
+    },
+    {
+      "name": "appearance_group",
+      "value": "外观与详情"
+    },
+    {
+      "name": "appearance_amoled",
+      "value": "AMOLED 纯黑背景"
+    },
+    {
+      "name": "appearance_amoled_hint",
+      "value": "将页面、卡片、输入框和系统栏背景改为纯黑；关闭后恢复映屿深色配色。全应用共用，立即生效并保留到重启。"
+    },
+    {
+      "name": "appearance_extra_info",
+      "value": "显示额外媒体信息"
+    },
+    {
+      "name": "appearance_extra_hint",
+      "value": "在电影和单集详情中显示文件大小及完整视频、音频、字幕规格；关闭后仍保留简介、基本标签与演职人员。"
+    },
+    {
+      "name": "appearance_saved",
+      "value": "外观设置已保存并应用"
+    },
+    {
+      "name": "appearance_invalid",
+      "value": "保存的外观设置无效，请重新选择设置"
+    },
+    {
+      "name": "appearance_load_failed",
+      "value": "无法读取外观设置，请重新打开设置页重试"
+    },
+    {
+      "name": "appearance_unavailable",
+      "value": "窗口外观暂不可用，请重新打开设置页重试"
+    },
+    {
+      "name": "appearance_cancelled",
+      "value": "外观设置操作已取消"
+    },
+    {
+      "name": "appearance_save_failed",
+      "value": "外观设置未能保存，已尝试恢复原设置，请重试"
+    },
+    {
+      "name": "appearance_restore_failed",
+      "value": "外观设置恢复未确认，请重开设置页确认后重试"
+    },
+    {
+      "name": "dynamic_colors",
+      "value": "跟随壁纸配色"
+    },
+    {
+      "name": "dynamic_colors_hint",
+      "value": "使用系统壁纸颜色生成映屿深色配色，默认开启。读取失败时使用原映屿配色，返回前台会重试；AMOLED 模式仍保留纯黑容器。"
+    },
+    {
+      "name": "dynamic_colors_loading",
+      "value": "正在确认壁纸配色…"
+    },
+    {
+      "name": "dynamic_colors_active",
+      "value": "已应用当前系统壁纸配色"
+    },
+    {
+      "name": "dynamic_colors_off",
+      "value": "使用原映屿配色"
+    },
+    {
+      "name": "dynamic_colors_fallback",
+      "value": "暂未获得可用壁纸颜色，使用原映屿配色；返回前台将重试。"
+    },
+    {
+      "name": "dynamic_colors_update_failed",
+      "value": "配色窗口更新失败，已尝试恢复上一配色；请重开设置页确认。"
+    },
     {
       "name": "sync_cache_write_failed",
       "value": "本机缓存未能保存，修改仍保留；请释放存储空间后重试。"
     },
-    {"name": "caption_settings_title", "value": "系统字幕样式"},
-    {"name": "caption_scope", "value": "以下设置保存到系统字幕配置，并影响其他支持该配置的应用。返回不会保存草稿。"},
-    {"name": "caption_unavailable", "value": "此设备暂不支持系统字幕样式，播放继续使用默认字幕样式。"},
-    {"name": "caption_invalid", "value": "字幕配置无效，请检查字号比例和颜色格式。"},
-    {"name": "caption_changed", "value": "系统字幕配置已更改，请重新读取后再应用。"},
-    {"name": "caption_save_failed", "value": "无法保存系统字幕样式，原配置已保留或恢复。"},
-    {"name": "caption_save_unconfirmed", "value": "无法确认保存或恢复结果，请重新读取系统配置。"},
-    {"name": "caption_saved", "value": "已应用系统字幕样式。"},
-    {"name": "caption_active", "value": "正在使用系统字幕样式"},
-    {"name": "caption_default", "value": "系统字幕样式已关闭，播放继续使用默认字幕样式。"},
-    {"name": "caption_enabled", "value": "使用系统字幕样式"},
-    {"name": "caption_scale", "value": "字号比例（1–200%）"},
-    {"name": "caption_family", "value": "字体"},
-    {"name": "caption_edge", "value": "文字边缘"},
-    {"name": "caption_foreground", "value": "文字颜色"},
-    {"name": "caption_background", "value": "文字背景颜色"},
-    {"name": "caption_window", "value": "字幕窗口颜色"},
-    {"name": "caption_color_hint", "value": "颜色可用 #RRGGBB 或 #AARRGGBB；前两位 AA 表示透明度，00 为透明，FF 为不透明。"},
-    {"name": "caption_preview", "value": "字幕样式预览"},
-    {"name": "caption_preview_text", "value": "映屿字幕预览 · CineIsle\n第二行字幕"},
-    {"name": "caption_apply", "value": "应用到系统字幕"},
-    {"name": "caption_reload", "value": "重新读取系统样式"},
-    {"name": "caption_preset_light", "value": "白字深底"},
-    {"name": "caption_preset_yellow", "value": "黄字深底"},
-    {"name": "caption_unsaved", "value": "当前为预览草稿，应用后生效。"},
-    {"name": "caption_family_default", "value": "系统默认"},
-    {"name": "caption_family_mono_serif", "value": "等宽衬线"},
-    {"name": "caption_family_serif", "value": "衬线"},
-    {"name": "caption_family_mono_sans", "value": "等宽无衬线"},
-    {"name": "caption_family_sans", "value": "无衬线"},
-    {"name": "caption_family_casual", "value": "休闲"},
-    {"name": "caption_family_cursive", "value": "手写"},
-    {"name": "caption_family_small_caps", "value": "小型大写字母"},
-    {"name": "caption_edge_none", "value": "无"},
-    {"name": "caption_edge_raised", "value": "凸起"},
-    {"name": "caption_edge_depressed", "value": "凹陷"},
-    {"name": "caption_edge_uniform", "value": "描边"},
-    {"name": "caption_edge_shadow", "value": "投影"},
-    {"name": "change_queued_blocked", "value": "修改已保存在本机，服务器尚未确认。自动回传已暂停，请检查服务器或账户后手动重试。"},
-    {"name": "batch_queued", "value": "其中 %d 项待回传"},
-    {"name": "engine_title", "value": "播放引擎"},
-    {"name": "engine_current", "value": "当前引擎：%s"},
-    {"name": "engine_unknown", "value": "尚未确认已保存的引擎"},
-    {"name": "engine_hint", "value": "新打开的视频使用所选引擎。切换不会修改正在播放的视频。"},
-    {"name": "engine_native", "value": "系统播放器"},
-    {"name": "engine_mpv", "value": "MPV 播放器"},
-    {"name": "engine_mpv_requires_api", "value": "MPV 需要 HarmonyOS API15 或更新版本。"},
-    {"name": "engine_mpv_unavailable", "value": "MPV 当前不可用，请检查设备支持，或在设置中明确选择系统播放器。"},
-    {"name": "engine_load_failed", "value": "无法读取播放引擎设置，请到设置页重试或重新选择。"},
-    {"name": "engine_invalid", "value": "播放引擎设置无效，请重新选择。"},
-    {"name": "engine_save_failed", "value": "引擎设置保存失败，已保留原选择。"},
-    {"name": "engine_restore_failed", "value": "引擎设置恢复失败，请重新保存后再播放。"},
-    {"name": "engine_cancelled", "value": "引擎设置已取消"},
-    {"name": "engine_saved", "value": "已保存，新打开的视频将使用此引擎。"},
-    {"name": "mpv_options_title", "value": "MPV 播放配置"},
-    {"name": "mpv_hardware_label", "value": "解码方式"},
-    {"name": "mpv_video_label", "value": "视频输出"},
-    {"name": "mpv_hardware_software", "value": "软件解码"},
-    {"name": "mpv_hardware_ohcodec", "value": "OpenHarmony 硬件解码"},
-    {"name": "mpv_hardware_copy", "value": "OpenHarmony 硬解拷贝"},
-    {"name": "mpv_options_hint", "value": "按应用保存，仅影响下一次打开的视频。硬解不可用时可能回退软件解码；播放器会显示实际后端。"},
-    {"name": "mpv_audio_fixed", "value": "音频输出由 OpenHarmony 系统音频管理。"},
-    {"name": "mpv_options_current", "value": "已保存：解码 %s · 视频 %s"},
-    {"name": "mpv_options_unknown", "value": "MPV 配置尚未确认；重新选择并保存可明确修复异常配置。"},
-    {"name": "mpv_options_save", "value": "保存 MPV 配置"},
-    {"name": "mpv_options_saved", "value": "MPV 配置已保存，下次打开视频生效"},
-    {"name": "mpv_options_invalid", "value": "MPV 配置损坏或不支持，请重新选择并保存"},
-    {"name": "mpv_options_load_failed", "value": "无法读取 MPV 配置"},
-    {"name": "mpv_options_save_failed", "value": "MPV 配置未保存，请重试"},
-    {"name": "mpv_options_restore_failed", "value": "MPV 配置回滚失败，请重新选择并保存后再播放"},
-    {"name": "mpv_options_cancelled", "value": "本次 MPV 配置保存已取消"},
-    {"name": "mpv_backend_actual", "value": "实际解码：%s · 视频：%s · 音频：%s"},
-    {"name": "mpv_backend_unknown", "value": "尚未报告"}
+    {
+      "name": "caption_settings_title",
+      "value": "系统字幕样式"
+    },
+    {
+      "name": "caption_scope",
+      "value": "以下设置保存到系统字幕配置，并影响其他支持该配置的应用。返回不会保存草稿。"
+    },
+    {
+      "name": "caption_unavailable",
+      "value": "此设备暂不支持系统字幕样式，播放继续使用默认字幕样式。"
+    },
+    {
+      "name": "caption_invalid",
+      "value": "字幕配置无效，请检查字号比例和颜色格式。"
+    },
+    {
+      "name": "caption_changed",
+      "value": "系统字幕配置已更改，请重新读取后再应用。"
+    },
+    {
+      "name": "caption_save_failed",
+      "value": "无法保存系统字幕样式，原配置已保留或恢复。"
+    },
+    {
+      "name": "caption_save_unconfirmed",
+      "value": "无法确认保存或恢复结果，请重新读取系统配置。"
+    },
+    {
+      "name": "caption_saved",
+      "value": "已应用系统字幕样式。"
+    },
+    {
+      "name": "caption_active",
+      "value": "正在使用系统字幕样式"
+    },
+    {
+      "name": "caption_default",
+      "value": "系统字幕样式已关闭，播放继续使用默认字幕样式。"
+    },
+    {
+      "name": "caption_enabled",
+      "value": "使用系统字幕样式"
+    },
+    {
+      "name": "caption_scale",
+      "value": "字号比例（1–200%）"
+    },
+    {
+      "name": "caption_family",
+      "value": "字体"
+    },
+    {
+      "name": "caption_edge",
+      "value": "文字边缘"
+    },
+    {
+      "name": "caption_foreground",
+      "value": "文字颜色"
+    },
+    {
+      "name": "caption_background",
+      "value": "文字背景颜色"
+    },
+    {
+      "name": "caption_window",
+      "value": "字幕窗口颜色"
+    },
+    {
+      "name": "caption_color_hint",
+      "value": "颜色可用 #RRGGBB 或 #AARRGGBB；前两位 AA 表示透明度，00 为透明，FF 为不透明。"
+    },
+    {
+      "name": "caption_preview",
+      "value": "字幕样式预览"
+    },
+    {
+      "name": "caption_preview_text",
+      "value": "映屿字幕预览 · CineIsle\n第二行字幕"
+    },
+    {
+      "name": "caption_apply",
+      "value": "应用到系统字幕"
+    },
+    {
+      "name": "caption_reload",
+      "value": "重新读取系统样式"
+    },
+    {
+      "name": "caption_preset_light",
+      "value": "白字深底"
+    },
+    {
+      "name": "caption_preset_yellow",
+      "value": "黄字深底"
+    },
+    {
+      "name": "caption_unsaved",
+      "value": "当前为预览草稿，应用后生效。"
+    },
+    {
+      "name": "caption_family_default",
+      "value": "系统默认"
+    },
+    {
+      "name": "caption_family_mono_serif",
+      "value": "等宽衬线"
+    },
+    {
+      "name": "caption_family_serif",
+      "value": "衬线"
+    },
+    {
+      "name": "caption_family_mono_sans",
+      "value": "等宽无衬线"
+    },
+    {
+      "name": "caption_family_sans",
+      "value": "无衬线"
+    },
+    {
+      "name": "caption_family_casual",
+      "value": "休闲"
+    },
+    {
+      "name": "caption_family_cursive",
+      "value": "手写"
+    },
+    {
+      "name": "caption_family_small_caps",
+      "value": "小型大写字母"
+    },
+    {
+      "name": "caption_edge_none",
+      "value": "无"
+    },
+    {
+      "name": "caption_edge_raised",
+      "value": "凸起"
+    },
+    {
+      "name": "caption_edge_depressed",
+      "value": "凹陷"
+    },
+    {
+      "name": "caption_edge_uniform",
+      "value": "描边"
+    },
+    {
+      "name": "caption_edge_shadow",
+      "value": "投影"
+    },
+    {
+      "name": "change_queued_blocked",
+      "value": "修改已保存在本机，服务器尚未确认。自动回传已暂停，请检查服务器或账户后手动重试。"
+    },
+    {
+      "name": "batch_queued",
+      "value": "其中 %d 项待回传"
+    },
+    {
+      "name": "engine_title",
+      "value": "播放引擎"
+    },
+    {
+      "name": "engine_current",
+      "value": "当前引擎：%s"
+    },
+    {
+      "name": "engine_unknown",
+      "value": "尚未确认已保存的引擎"
+    },
+    {
+      "name": "engine_hint",
+      "value": "新打开的视频使用所选引擎。切换不会修改正在播放的视频。"
+    },
+    {
+      "name": "engine_native",
+      "value": "系统播放器"
+    },
+    {
+      "name": "engine_mpv",
+      "value": "MPV 播放器"
+    },
+    {
+      "name": "engine_mpv_requires_api",
+      "value": "MPV 需要 HarmonyOS API15 或更新版本。"
+    },
+    {
+      "name": "engine_mpv_unavailable",
+      "value": "MPV 当前不可用，请检查设备支持，或在设置中明确选择系统播放器。"
+    },
+    {
+      "name": "engine_load_failed",
+      "value": "无法读取播放引擎设置，请到设置页重试或重新选择。"
+    },
+    {
+      "name": "engine_invalid",
+      "value": "播放引擎设置无效，请重新选择。"
+    },
+    {
+      "name": "engine_save_failed",
+      "value": "引擎设置保存失败，已保留原选择。"
+    },
+    {
+      "name": "engine_restore_failed",
+      "value": "引擎设置恢复失败，请重新保存后再播放。"
+    },
+    {
+      "name": "engine_cancelled",
+      "value": "引擎设置已取消"
+    },
+    {
+      "name": "engine_saved",
+      "value": "已保存，新打开的视频将使用此引擎。"
+    },
+    {
+      "name": "mpv_options_title",
+      "value": "MPV 播放配置"
+    },
+    {
+      "name": "mpv_hardware_label",
+      "value": "解码方式"
+    },
+    {
+      "name": "mpv_video_label",
+      "value": "视频输出"
+    },
+    {
+      "name": "mpv_hardware_software",
+      "value": "软件解码"
+    },
+    {
+      "name": "mpv_hardware_ohcodec",
+      "value": "OpenHarmony 硬件解码"
+    },
+    {
+      "name": "mpv_hardware_copy",
+      "value": "OpenHarmony 硬解拷贝"
+    },
+    {
+      "name": "mpv_options_hint",
+      "value": "按应用保存，仅影响下一次打开的视频。硬解不可用时可能回退软件解码；播放器会显示实际后端。"
+    },
+    {
+      "name": "mpv_audio_fixed",
+      "value": "音频输出由 OpenHarmony 系统音频管理。"
+    },
+    {
+      "name": "mpv_options_current",
+      "value": "已保存：解码 %s · 视频 %s"
+    },
+    {
+      "name": "mpv_options_unknown",
+      "value": "MPV 配置尚未确认；重新选择并保存可明确修复异常配置。"
+    },
+    {
+      "name": "mpv_options_save",
+      "value": "保存 MPV 配置"
+    },
+    {
+      "name": "mpv_options_saved",
+      "value": "MPV 配置已保存，下次打开视频生效"
+    },
+    {
+      "name": "mpv_options_invalid",
+      "value": "MPV 配置损坏或不支持，请重新选择并保存"
+    },
+    {
+      "name": "mpv_options_load_failed",
+      "value": "无法读取 MPV 配置"
+    },
+    {
+      "name": "mpv_options_save_failed",
+      "value": "MPV 配置未保存，请重试"
+    },
+    {
+      "name": "mpv_options_restore_failed",
+      "value": "MPV 配置回滚失败，请重新选择并保存后再播放"
+    },
+    {
+      "name": "mpv_options_cancelled",
+      "value": "本次 MPV 配置保存已取消"
+    },
+    {
+      "name": "mpv_backend_actual",
+      "value": "实际解码：%s · 视频：%s · 音频：%s"
+    },
+    {
+      "name": "mpv_backend_unknown",
+      "value": "尚未报告"
+    }
   ]
 }

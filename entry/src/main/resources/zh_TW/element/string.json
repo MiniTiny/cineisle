@@ -1,7 +1,13 @@
 {
   "string": [
-    {"name": "player_retry", "value": "重試播放"},
-    {"name": "player_failure_hint", "value": "播放未能繼續。可重試目前版本，或在播放選項中選擇其他版本。"},
+    {
+      "name": "player_retry",
+      "value": "重試播放"
+    },
+    {
+      "name": "player_failure_hint",
+      "value": "播放未能繼續。可重試目前版本，或在播放選項中選擇其他版本。"
+    },
     {
       "name": "player_skip_intro",
       "value": "跳過片頭"
@@ -1972,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "支援簡體中文、繁體中文、英文、法文、西班牙文、德文、義大利文、葡萄牙葡萄牙文、巴西葡萄牙文與韓文；其他系統語言使用英文。此設定全應用程式共用，僅切換介面，媒體資料及音軌／字幕偏好保持獨立。"
+      "value": "支援簡體中文、繁體中文、英文、法文、西班牙文、德文、義大利文、葡萄牙葡萄牙文、巴西葡萄牙文、韓文與俄文；其他系統語言使用英文。此設定全應用程式共用，僅切換介面，媒體資料及音軌／字幕偏好保持獨立。"
     },
     {
       "name": "ui_language_system",
@@ -2090,78 +2096,297 @@
       "name": "sync_cache_write_failed",
       "value": "本機快取未能儲存，修改仍保留；請釋放儲存空間後重試。"
     },
-    {"name": "caption_settings_title", "value": "系統字幕樣式"},
-    {"name": "caption_scope", "value": "以下設定儲存至系統字幕配置，並影響其他支援該配置的應用程式。返回不會儲存草稿。"},
-    {"name": "caption_unavailable", "value": "此裝置暫不支援系統字幕樣式，播放繼續使用預設字幕樣式。"},
-    {"name": "caption_invalid", "value": "字幕配置無效，請檢查字級比例與色彩格式。"},
-    {"name": "caption_changed", "value": "系統字幕配置已變更，請重新讀取後再套用。"},
-    {"name": "caption_save_failed", "value": "無法儲存系統字幕樣式，原配置已保留或還原。"},
-    {"name": "caption_save_unconfirmed", "value": "無法確認儲存或還原結果，請重新讀取系統配置。"},
-    {"name": "caption_saved", "value": "已套用系統字幕樣式。"},
-    {"name": "caption_active", "value": "正在使用系統字幕樣式"},
-    {"name": "caption_default", "value": "系統字幕樣式已關閉，播放繼續使用預設字幕樣式。"},
-    {"name": "caption_enabled", "value": "使用系統字幕樣式"},
-    {"name": "caption_scale", "value": "字級比例（1–200%）"},
-    {"name": "caption_family", "value": "字型"},
-    {"name": "caption_edge", "value": "文字邊緣"},
-    {"name": "caption_foreground", "value": "文字色彩"},
-    {"name": "caption_background", "value": "文字背景色彩"},
-    {"name": "caption_window", "value": "字幕視窗色彩"},
-    {"name": "caption_color_hint", "value": "色彩可用 #RRGGBB 或 #AARRGGBB；前兩位 AA 表示不透明度，00 為透明，FF 為不透明。"},
-    {"name": "caption_preview", "value": "字幕樣式預覽"},
-    {"name": "caption_preview_text", "value": "映嶼字幕預覽 · CineIsle\n第二行字幕"},
-    {"name": "caption_apply", "value": "套用至系統字幕"},
-    {"name": "caption_reload", "value": "重新讀取系統樣式"},
-    {"name": "caption_preset_light", "value": "白字深底"},
-    {"name": "caption_preset_yellow", "value": "黃字深底"},
-    {"name": "caption_unsaved", "value": "目前為預覽草稿，套用後生效。"},
-    {"name": "caption_family_default", "value": "系統預設"},
-    {"name": "caption_family_mono_serif", "value": "等寬襯線"},
-    {"name": "caption_family_serif", "value": "襯線"},
-    {"name": "caption_family_mono_sans", "value": "等寬無襯線"},
-    {"name": "caption_family_sans", "value": "無襯線"},
-    {"name": "caption_family_casual", "value": "休閒"},
-    {"name": "caption_family_cursive", "value": "手寫"},
-    {"name": "caption_family_small_caps", "value": "小型大寫字母"},
-    {"name": "caption_edge_none", "value": "無"},
-    {"name": "caption_edge_raised", "value": "凸起"},
-    {"name": "caption_edge_depressed", "value": "凹陷"},
-    {"name": "caption_edge_uniform", "value": "描邊"},
-    {"name": "caption_edge_shadow", "value": "投影"},
-    {"name": "change_queued_blocked", "value": "修改已儲存在本機，伺服器尚未確認。自動回傳已暫停，請檢查伺服器或帳號後手動重試。"},
-    {"name": "batch_queued", "value": "其中 %d 項待回傳"},
-    {"name": "engine_title", "value": "播放引擎"},
-    {"name": "engine_current", "value": "目前引擎：%s"},
-    {"name": "engine_unknown", "value": "尚未確認已儲存的引擎"},
-    {"name": "engine_hint", "value": "新開啟的影片使用所選引擎。切換不會修改正在播放的影片。"},
-    {"name": "engine_native", "value": "系統播放器"},
-    {"name": "engine_mpv", "value": "MPV 播放器"},
-    {"name": "engine_mpv_requires_api", "value": "MPV 需要 HarmonyOS API15 或更新版本。"},
-    {"name": "engine_mpv_unavailable", "value": "目前無法使用 MPV，請檢查裝置支援，或在設定中明確選擇系統播放器。"},
-    {"name": "engine_load_failed", "value": "無法讀取播放引擎設定，請至設定頁重試或重新選擇。"},
-    {"name": "engine_invalid", "value": "播放引擎設定無效，請重新選擇。"},
-    {"name": "engine_save_failed", "value": "引擎設定儲存失敗，已保留原選擇。"},
-    {"name": "engine_restore_failed", "value": "引擎設定還原失敗，請重新儲存後再播放。"},
-    {"name": "engine_cancelled", "value": "引擎設定已取消"},
-    {"name": "engine_saved", "value": "已儲存，新開啟的影片將使用此引擎。"},
-    {"name": "mpv_options_title", "value": "MPV 播放設定"},
-    {"name": "mpv_hardware_label", "value": "解碼方式"},
-    {"name": "mpv_video_label", "value": "影像輸出"},
-    {"name": "mpv_hardware_software", "value": "軟體解碼"},
-    {"name": "mpv_hardware_ohcodec", "value": "OpenHarmony 硬體解碼"},
-    {"name": "mpv_hardware_copy", "value": "OpenHarmony 硬體解碼複製回傳"},
-    {"name": "mpv_options_hint", "value": "依應用程式儲存，僅套用於下次開啟的影片。硬體解碼無法使用時可能改用軟體解碼；播放器會顯示實際後端。"},
-    {"name": "mpv_audio_fixed", "value": "音訊輸出由 OpenHarmony 系統音訊管理。"},
-    {"name": "mpv_options_current", "value": "已儲存：解碼 %s · 影像 %s"},
-    {"name": "mpv_options_unknown", "value": "MPV 設定尚未確認；重新選擇並儲存可明確修復異常設定。"},
-    {"name": "mpv_options_save", "value": "儲存 MPV 設定"},
-    {"name": "mpv_options_saved", "value": "MPV 設定已儲存，下次開啟影片時生效"},
-    {"name": "mpv_options_invalid", "value": "MPV 設定損壞或不支援，請重新選擇並儲存"},
-    {"name": "mpv_options_load_failed", "value": "無法讀取 MPV 設定"},
-    {"name": "mpv_options_save_failed", "value": "MPV 設定未儲存，請重試"},
-    {"name": "mpv_options_restore_failed", "value": "MPV 設定回復失敗，請重新選擇並儲存後再播放"},
-    {"name": "mpv_options_cancelled", "value": "本次 MPV 設定儲存已取消"},
-    {"name": "mpv_backend_actual", "value": "實際解碼：%s · 影像：%s · 音訊：%s"},
-    {"name": "mpv_backend_unknown", "value": "尚未回報"}
+    {
+      "name": "caption_settings_title",
+      "value": "系統字幕樣式"
+    },
+    {
+      "name": "caption_scope",
+      "value": "以下設定儲存至系統字幕配置，並影響其他支援該配置的應用程式。返回不會儲存草稿。"
+    },
+    {
+      "name": "caption_unavailable",
+      "value": "此裝置暫不支援系統字幕樣式，播放繼續使用預設字幕樣式。"
+    },
+    {
+      "name": "caption_invalid",
+      "value": "字幕配置無效，請檢查字級比例與色彩格式。"
+    },
+    {
+      "name": "caption_changed",
+      "value": "系統字幕配置已變更，請重新讀取後再套用。"
+    },
+    {
+      "name": "caption_save_failed",
+      "value": "無法儲存系統字幕樣式，原配置已保留或還原。"
+    },
+    {
+      "name": "caption_save_unconfirmed",
+      "value": "無法確認儲存或還原結果，請重新讀取系統配置。"
+    },
+    {
+      "name": "caption_saved",
+      "value": "已套用系統字幕樣式。"
+    },
+    {
+      "name": "caption_active",
+      "value": "正在使用系統字幕樣式"
+    },
+    {
+      "name": "caption_default",
+      "value": "系統字幕樣式已關閉，播放繼續使用預設字幕樣式。"
+    },
+    {
+      "name": "caption_enabled",
+      "value": "使用系統字幕樣式"
+    },
+    {
+      "name": "caption_scale",
+      "value": "字級比例（1–200%）"
+    },
+    {
+      "name": "caption_family",
+      "value": "字型"
+    },
+    {
+      "name": "caption_edge",
+      "value": "文字邊緣"
+    },
+    {
+      "name": "caption_foreground",
+      "value": "文字色彩"
+    },
+    {
+      "name": "caption_background",
+      "value": "文字背景色彩"
+    },
+    {
+      "name": "caption_window",
+      "value": "字幕視窗色彩"
+    },
+    {
+      "name": "caption_color_hint",
+      "value": "色彩可用 #RRGGBB 或 #AARRGGBB；前兩位 AA 表示不透明度，00 為透明，FF 為不透明。"
+    },
+    {
+      "name": "caption_preview",
+      "value": "字幕樣式預覽"
+    },
+    {
+      "name": "caption_preview_text",
+      "value": "映嶼字幕預覽 · CineIsle\n第二行字幕"
+    },
+    {
+      "name": "caption_apply",
+      "value": "套用至系統字幕"
+    },
+    {
+      "name": "caption_reload",
+      "value": "重新讀取系統樣式"
+    },
+    {
+      "name": "caption_preset_light",
+      "value": "白字深底"
+    },
+    {
+      "name": "caption_preset_yellow",
+      "value": "黃字深底"
+    },
+    {
+      "name": "caption_unsaved",
+      "value": "目前為預覽草稿，套用後生效。"
+    },
+    {
+      "name": "caption_family_default",
+      "value": "系統預設"
+    },
+    {
+      "name": "caption_family_mono_serif",
+      "value": "等寬襯線"
+    },
+    {
+      "name": "caption_family_serif",
+      "value": "襯線"
+    },
+    {
+      "name": "caption_family_mono_sans",
+      "value": "等寬無襯線"
+    },
+    {
+      "name": "caption_family_sans",
+      "value": "無襯線"
+    },
+    {
+      "name": "caption_family_casual",
+      "value": "休閒"
+    },
+    {
+      "name": "caption_family_cursive",
+      "value": "手寫"
+    },
+    {
+      "name": "caption_family_small_caps",
+      "value": "小型大寫字母"
+    },
+    {
+      "name": "caption_edge_none",
+      "value": "無"
+    },
+    {
+      "name": "caption_edge_raised",
+      "value": "凸起"
+    },
+    {
+      "name": "caption_edge_depressed",
+      "value": "凹陷"
+    },
+    {
+      "name": "caption_edge_uniform",
+      "value": "描邊"
+    },
+    {
+      "name": "caption_edge_shadow",
+      "value": "投影"
+    },
+    {
+      "name": "change_queued_blocked",
+      "value": "修改已儲存在本機，伺服器尚未確認。自動回傳已暫停，請檢查伺服器或帳號後手動重試。"
+    },
+    {
+      "name": "batch_queued",
+      "value": "其中 %d 項待回傳"
+    },
+    {
+      "name": "engine_title",
+      "value": "播放引擎"
+    },
+    {
+      "name": "engine_current",
+      "value": "目前引擎：%s"
+    },
+    {
+      "name": "engine_unknown",
+      "value": "尚未確認已儲存的引擎"
+    },
+    {
+      "name": "engine_hint",
+      "value": "新開啟的影片使用所選引擎。切換不會修改正在播放的影片。"
+    },
+    {
+      "name": "engine_native",
+      "value": "系統播放器"
+    },
+    {
+      "name": "engine_mpv",
+      "value": "MPV 播放器"
+    },
+    {
+      "name": "engine_mpv_requires_api",
+      "value": "MPV 需要 HarmonyOS API15 或更新版本。"
+    },
+    {
+      "name": "engine_mpv_unavailable",
+      "value": "目前無法使用 MPV，請檢查裝置支援，或在設定中明確選擇系統播放器。"
+    },
+    {
+      "name": "engine_load_failed",
+      "value": "無法讀取播放引擎設定，請至設定頁重試或重新選擇。"
+    },
+    {
+      "name": "engine_invalid",
+      "value": "播放引擎設定無效，請重新選擇。"
+    },
+    {
+      "name": "engine_save_failed",
+      "value": "引擎設定儲存失敗，已保留原選擇。"
+    },
+    {
+      "name": "engine_restore_failed",
+      "value": "引擎設定還原失敗，請重新儲存後再播放。"
+    },
+    {
+      "name": "engine_cancelled",
+      "value": "引擎設定已取消"
+    },
+    {
+      "name": "engine_saved",
+      "value": "已儲存，新開啟的影片將使用此引擎。"
+    },
+    {
+      "name": "mpv_options_title",
+      "value": "MPV 播放設定"
+    },
+    {
+      "name": "mpv_hardware_label",
+      "value": "解碼方式"
+    },
+    {
+      "name": "mpv_video_label",
+      "value": "影像輸出"
+    },
+    {
+      "name": "mpv_hardware_software",
+      "value": "軟體解碼"
+    },
+    {
+      "name": "mpv_hardware_ohcodec",
+      "value": "OpenHarmony 硬體解碼"
+    },
+    {
+      "name": "mpv_hardware_copy",
+      "value": "OpenHarmony 硬體解碼複製回傳"
+    },
+    {
+      "name": "mpv_options_hint",
+      "value": "依應用程式儲存，僅套用於下次開啟的影片。硬體解碼無法使用時可能改用軟體解碼；播放器會顯示實際後端。"
+    },
+    {
+      "name": "mpv_audio_fixed",
+      "value": "音訊輸出由 OpenHarmony 系統音訊管理。"
+    },
+    {
+      "name": "mpv_options_current",
+      "value": "已儲存：解碼 %s · 影像 %s"
+    },
+    {
+      "name": "mpv_options_unknown",
+      "value": "MPV 設定尚未確認；重新選擇並儲存可明確修復異常設定。"
+    },
+    {
+      "name": "mpv_options_save",
+      "value": "儲存 MPV 設定"
+    },
+    {
+      "name": "mpv_options_saved",
+      "value": "MPV 設定已儲存，下次開啟影片時生效"
+    },
+    {
+      "name": "mpv_options_invalid",
+      "value": "MPV 設定損壞或不支援，請重新選擇並儲存"
+    },
+    {
+      "name": "mpv_options_load_failed",
+      "value": "無法讀取 MPV 設定"
+    },
+    {
+      "name": "mpv_options_save_failed",
+      "value": "MPV 設定未儲存，請重試"
+    },
+    {
+      "name": "mpv_options_restore_failed",
+      "value": "MPV 設定回復失敗，請重新選擇並儲存後再播放"
+    },
+    {
+      "name": "mpv_options_cancelled",
+      "value": "本次 MPV 設定儲存已取消"
+    },
+    {
+      "name": "mpv_backend_actual",
+      "value": "實際解碼：%s · 影像：%s · 音訊：%s"
+    },
+    {
+      "name": "mpv_backend_unknown",
+      "value": "尚未回報"
+    }
   ]
 }
