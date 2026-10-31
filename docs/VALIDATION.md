@@ -491,3 +491,11 @@ MPV 配置运行 `node tests/mpv-options.test.cjs`、`node tests/mpv-options-ui.
 运行`node tests/pip-stop-order.test.cjs`、系统播放、画中画字幕、自动PiP及会话交接专项，再执行协议、完整回归与`./scripts/build.sh`。原生停止Promise与`STOPPED`事件使用独立可控信号，覆盖两种先后顺序、并发停止、停止中销毁、排队重开、缺失回调、3秒超时、迟到Promise/事件和并发清理重试。真实停止失败仍须显示错误并保留所有者；超时或未知结果不能自动重放已发出的停止请求。测试须完整执行并清理定时器，不能把未完成异步用例的进程退出当作成功。
 
 实际设备分别以普通和富文本字幕、在线和离线片源对照，核对PiP停止后的主窗恢复、关闭后各资源状态和下一次播放的系统会话就绪。补测同进程反复进入/退出、停止中直接关闭、PIN、字号变更及自动PiP；记录原生错误数字身份，不根据本地化消息分类。诊断包若增加只读状态或调用标记，须标明与产品源码的差异并验证去除观测后字节一致；诊断观测与未插桩产品包分别验收。API12/API15物理设备、真实Jellyfin与长期后台稳定性保持独立验收边界。
+
+### SRT 链接文字样式
+
+运行`node tests/srt-link-style.test.cjs`、`node tests/srt-link-style-ui.test.cjs`和全部已有SRT专项，再执行协议、完整回归与`./scripts/build.sh`。预期独立采集实际Android Html.fromHtml及固定Media3 SubripParser/SubtitlePainter，按UTF-16核对文字、颜色、下划线和强调；区分原始物理行与预处理HTML，不由Harmony生成期望。
+
+覆盖空/无值/缺失href、引号与未加引号属性、直接及间接嵌套、跨标签闭合、块边界、限定名称、异常小于号、编码和emoji。验证前景颜色关闭次序、透明ARGB 0不回退为用户前景、地址不进入字幕模型、在线同文字实时变化、定位/重叠/seek结束边界、原始离线缓存无HTTP冷读，以及64层/4096片段预算两侧。
+
+SDK编译UI分别核对普通Span、段落原生请求、定位、Player、PiP重建与同文字栅格刷新；不能假设所有颜色/下划线都会进入原生位图路径。实际Harmony分别验证Span与原生栅格的透明前景、可见颜色和下划线，以及字体/阴影/背景/段落组合；主窗口/PiP采集同文字切换、跳转、空档、字幕关闭、PIN和冷启动离线证据。绑定源码、输入、HAP与原始截图/RGBA；物理API12/15、真实Jellyfin和未覆盖的TagSoup保持独立验收。

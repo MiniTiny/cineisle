@@ -1,0 +1,4013 @@
+{
+  "baseline": "225fba7cb5ad68865986a96e4b62d883c1d987a0",
+  "basis": "Actual Android API34 Html.fromHtml with direct HTML and independently transformed physical SRT lines;50 distinct sources,100 mode rows;100px white text,transparent background,edge none. Actual fixed Media3 raw SRT verification is separate. Additional12 actual framework namespace/scanner cases;50 raw SRT cases verified independently against fixed Media3 parser and painter.",
+  "frameworkResultSha256": "20f9a1e24bfc26edf34db0882240df348042f3186d4a3a60b4c8b84ce17e5370",
+  "cases": [
+    {
+      "id": "html-plain",
+      "mode": "html",
+      "source": "PRE LINK POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-href",
+      "mode": "html",
+      "source": "PRE <a href=\"https://example.invalid/\">LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nohref",
+      "mode": "html",
+      "source": "PRE <a>LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-emptyhref",
+      "mode": "html",
+      "source": "PRE <a href=\"\">LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-unclosed",
+      "mode": "html",
+      "source": "PRE <a href=\"x\">LINK",
+      "text": "PRE LINK",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-bold",
+      "mode": "html",
+      "source": "<a href=\"x\"><b>LINK</b></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-underline",
+      "mode": "html",
+      "source": "<u><a href=\"x\">LINK</a></u>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-font-before",
+      "mode": "html",
+      "source": "<font color=\"red\"><a href=\"x\">LINK</a></font>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-font-inside",
+      "mode": "html",
+      "source": "<a href=\"x\"><font color=\"red\">LINK</font></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-span-before",
+      "mode": "html",
+      "source": "<span style=\"color:red\"><a href=\"x\">LINK</a></span>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-span-inside",
+      "mode": "html",
+      "source": "<a href=\"x\"><span style=\"color:red\">LINK</span></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested",
+      "mode": "html",
+      "source": "<a href=\"x\">A<a href=\"y\">B</a>C</a>",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-crossed",
+      "mode": "html",
+      "source": "<b><a href=\"x\">A</b>B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-entities",
+      "mode": "html",
+      "source": "<a href=\"x&amp;y\">A&amp;B😀</a>",
+      "text": "A&B😀",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-empty",
+      "mode": "html",
+      "source": "A<a href=\"x\"></a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nohref-underline",
+      "mode": "html",
+      "source": "<a><u>LINK</u></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-br",
+      "mode": "html",
+      "source": "<a href=\"x\">A<br>B</a>",
+      "text": "A\nB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-block",
+      "mode": "html",
+      "source": "<a href=\"x\"><p>A</p>B</a>",
+      "text": "A\n\nB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-unknownscheme",
+      "mode": "html",
+      "source": "<a href=\"unknown:abc\">LINK</a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-spaces",
+      "mode": "html",
+      "source": "<A HREF = \"x\">LINK</A>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-bare-href",
+      "mode": "html",
+      "source": "PRE <a href>LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-empty-attribute",
+      "mode": "html",
+      "source": "A<a href = >B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-single-quote",
+      "mode": "html",
+      "source": "A<a href='x'>B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-data-only",
+      "mode": "html",
+      "source": "A<a data-href=\"x\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-href-in-value",
+      "mode": "html",
+      "source": "A<a data=\"href\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-namespace-href",
+      "mode": "html",
+      "source": "A<a x:href=\"x\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-duplicate-href",
+      "mode": "html",
+      "source": "A<a href=\"x\" href=\"y\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-self-close",
+      "mode": "html",
+      "source": "<a href=\"x\"/>A",
+      "text": "A",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-self-close-unquoted",
+      "mode": "html",
+      "source": "<a href=x/>A",
+      "text": "A",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-anchor-prefix",
+      "mode": "html",
+      "source": "<a-b href=\"x\">A</a-b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-anchor-namespace",
+      "mode": "html",
+      "source": "<a:b href=\"x\">A</a:b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-abbr",
+      "mode": "html",
+      "source": "<abbr href=\"x\">A</abbr>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested-bold",
+      "mode": "html",
+      "source": "<a href=\"x\"><b>A<a href=\"y\">B</a>C</b>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested-italic",
+      "mode": "html",
+      "source": "<a href=\"x\"><i>A<a href=\"y\">B</a>C</i>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested-font",
+      "mode": "html",
+      "source": "<a href=\"x\"><font color=\"red\">A<a href=\"y\">B</a>C</font>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested-span",
+      "mode": "html",
+      "source": "<a href=\"x\"><span style=\"color:red\">A<a href=\"y\">B</a>C</span>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-nested-nohref",
+      "mode": "html",
+      "source": "<a href=\"x\">A<a>B</a>C</a>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-outer-nohref",
+      "mode": "html",
+      "source": "<a>A<a href=\"y\">B</a>C</a>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-close-before-bold",
+      "mode": "html",
+      "source": "<b>A<a href=\"x\">B</a>C</b>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-close-through-italic",
+      "mode": "html",
+      "source": "<a href=\"x\">A<i>B</a>C</i>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-close-through-font",
+      "mode": "html",
+      "source": "<a href=\"x\">A<font color=\"red\">B</a>C</font>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-close-through-span",
+      "mode": "html",
+      "source": "<a href=\"x\">A<span style=\"color:red\">B</a>C</span>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-paragraph-boundary",
+      "mode": "html",
+      "source": "<p>A<a href=\"x\">B<p>C</a>D",
+      "text": "AB\n\nCD\n\n",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-div-boundary",
+      "mode": "html",
+      "source": "<a href=\"x\">A<div>B</div>C</a>D",
+      "text": "A\n\nB\n\nCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-list-boundary",
+      "mode": "html",
+      "source": "<a href=\"x\">A<li>B</li>C</a>D",
+      "text": "A\n\nB\n\nCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-inside-paragraph",
+      "mode": "html",
+      "source": "<p><a href=\"x\">A</a>B</p>C",
+      "text": "AB\n\nC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-physical-line",
+      "mode": "html",
+      "source": "<a href=\"x\">A\nB</a>C",
+      "text": "A BC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-attribute-line",
+      "mode": "html",
+      "source": "<a\nhref=\"x\">A</a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-encoded-href-name",
+      "mode": "html",
+      "source": "<a h&#114;ef=\"x\">A</a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "html-script-and-css",
+      "mode": "html",
+      "source": "<a href=\"javascript:unused\" onclick=\"unused()\" style=\"color:red\">A</a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-plain",
+      "mode": "srt",
+      "source": "PRE LINK POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-href",
+      "mode": "srt",
+      "source": "PRE <a href=\"https://example.invalid/\">LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nohref",
+      "mode": "srt",
+      "source": "PRE <a>LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-emptyhref",
+      "mode": "srt",
+      "source": "PRE <a href=\"\">LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-unclosed",
+      "mode": "srt",
+      "source": "PRE <a href=\"x\">LINK",
+      "text": "PRE LINK",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-bold",
+      "mode": "srt",
+      "source": "<a href=\"x\"><b>LINK</b></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-underline",
+      "mode": "srt",
+      "source": "<u><a href=\"x\">LINK</a></u>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-font-before",
+      "mode": "srt",
+      "source": "<font color=\"red\"><a href=\"x\">LINK</a></font>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-font-inside",
+      "mode": "srt",
+      "source": "<a href=\"x\"><font color=\"red\">LINK</font></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-span-before",
+      "mode": "srt",
+      "source": "<span style=\"color:red\"><a href=\"x\">LINK</a></span>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-span-inside",
+      "mode": "srt",
+      "source": "<a href=\"x\"><span style=\"color:red\">LINK</span></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<a href=\"y\">B</a>C</a>",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-crossed",
+      "mode": "srt",
+      "source": "<b><a href=\"x\">A</b>B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-entities",
+      "mode": "srt",
+      "source": "<a href=\"x&amp;y\">A&amp;B😀</a>",
+      "text": "A&B😀",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-empty",
+      "mode": "srt",
+      "source": "A<a href=\"x\"></a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nohref-underline",
+      "mode": "srt",
+      "source": "<a><u>LINK</u></a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-br",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<br>B</a>",
+      "text": "A\nB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-block",
+      "mode": "srt",
+      "source": "<a href=\"x\"><p>A</p>B</a>",
+      "text": "A\n\nB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-unknownscheme",
+      "mode": "srt",
+      "source": "<a href=\"unknown:abc\">LINK</a>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-spaces",
+      "mode": "srt",
+      "source": "<A HREF = \"x\">LINK</A>",
+      "text": "LINK",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-bare-href",
+      "mode": "srt",
+      "source": "PRE <a href>LINK</a> POST",
+      "text": "PRE LINK POST",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-empty-attribute",
+      "mode": "srt",
+      "source": "A<a href = >B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-single-quote",
+      "mode": "srt",
+      "source": "A<a href='x'>B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-data-only",
+      "mode": "srt",
+      "source": "A<a data-href=\"x\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-href-in-value",
+      "mode": "srt",
+      "source": "A<a data=\"href\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-namespace-href",
+      "mode": "srt",
+      "source": "A<a x:href=\"x\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-duplicate-href",
+      "mode": "srt",
+      "source": "A<a href=\"x\" href=\"y\">B</a>C",
+      "text": "ABC",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-self-close",
+      "mode": "srt",
+      "source": "<a href=\"x\"/>A",
+      "text": "A",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-self-close-unquoted",
+      "mode": "srt",
+      "source": "<a href=x/>A",
+      "text": "A",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-anchor-prefix",
+      "mode": "srt",
+      "source": "<a-b href=\"x\">A</a-b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-anchor-namespace",
+      "mode": "srt",
+      "source": "<a:b href=\"x\">A</a:b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-abbr",
+      "mode": "srt",
+      "source": "<abbr href=\"x\">A</abbr>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested-bold",
+      "mode": "srt",
+      "source": "<a href=\"x\"><b>A<a href=\"y\">B</a>C</b>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested-italic",
+      "mode": "srt",
+      "source": "<a href=\"x\"><i>A<a href=\"y\">B</a>C</i>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested-font",
+      "mode": "srt",
+      "source": "<a href=\"x\"><font color=\"red\">A<a href=\"y\">B</a>C</font>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested-span",
+      "mode": "srt",
+      "source": "<a href=\"x\"><span style=\"color:red\">A<a href=\"y\">B</a>C</span>D</a>E",
+      "text": "ABCDE",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-nested-nohref",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<a>B</a>C</a>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-outer-nohref",
+      "mode": "srt",
+      "source": "<a>A<a href=\"y\">B</a>C</a>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-close-before-bold",
+      "mode": "srt",
+      "source": "<b>A<a href=\"x\">B</a>C</b>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-close-through-italic",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<i>B</a>C</i>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-close-through-font",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<font color=\"red\">B</a>C</font>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-close-through-span",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<span style=\"color:red\">B</a>C</span>D",
+      "text": "ABCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-paragraph-boundary",
+      "mode": "srt",
+      "source": "<p>A<a href=\"x\">B<p>C</a>D",
+      "text": "AB\n\nCD\n\n",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-div-boundary",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<div>B</div>C</a>D",
+      "text": "A\n\nB\n\nCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-list-boundary",
+      "mode": "srt",
+      "source": "<a href=\"x\">A<li>B</li>C</a>D",
+      "text": "A\n\nB\n\nCD",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-inside-paragraph",
+      "mode": "srt",
+      "source": "<p><a href=\"x\">A</a>B</p>C",
+      "text": "AB\n\nC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-physical-line",
+      "mode": "srt",
+      "source": "<a href=\"x\">A\nB</a>C",
+      "text": "A\nBC",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-attribute-line",
+      "mode": "srt",
+      "source": "<a\nhref=\"x\">A</a>B",
+      "text": "href=\"x\">AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-encoded-href-name",
+      "mode": "srt",
+      "source": "<a h&#114;ef=\"x\">A</a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "srt-script-and-css",
+      "mode": "srt",
+      "source": "<a href=\"javascript:unused\" onclick=\"unused()\" style=\"color:red\">A</a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-a-b",
+      "mode": "html",
+      "source": "<a:b href=\"x\">A</a:b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-x-b",
+      "mode": "html",
+      "source": "<x:b>A</x:b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-a-i",
+      "mode": "html",
+      "source": "<a:i>A</a:i>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": true
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": true
+        }
+      ]
+    },
+    {
+      "id": "namespace-a-foo",
+      "mode": "html",
+      "source": "<a:foo href=\"x\">A</a:foo>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-x-a",
+      "mode": "html",
+      "source": "<x:a href=\"x\">A</x:a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-a-a",
+      "mode": "html",
+      "source": "<a:a href=\"x\">A</a:a>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#00000000",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-a-underline",
+      "mode": "html",
+      "source": "<a:u>A</a:u>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": true,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-colon-close-local",
+      "mode": "html",
+      "source": "<a:b>A</b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-colon-open-local",
+      "mode": "html",
+      "source": "<b>A</a:b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-nested-tag",
+      "mode": "html",
+      "source": "<a<br>href=\"x\">A</a>B",
+      "text": "href=\"x\">AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-nested-bold-tag",
+      "mode": "html",
+      "source": "<b <i>A</b>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": true,
+          "italic": false
+        },
+        {
+          "color": "#FFFFFFFF",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    },
+    {
+      "id": "namespace-namespace-css",
+      "mode": "html",
+      "source": "<x:span style=\"color:red\">A</x:span>B",
+      "text": "AB",
+      "units": [
+        {
+          "color": "#FFFF0000",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        },
+        {
+          "color": "#FFFF0000",
+          "underline": false,
+          "bold": false,
+          "italic": false
+        }
+      ]
+    }
+  ],
+  "namespaceResultSha256": "ec35bbf21e98e9ddf34ef35cbd6dd6620ab4ec5eafa378ae40426a4dae28b857",
+  "media3ResultSha256": "19535cec148f49ce892b95ff9f896bc1dfcfc1adce7d9ea22b866f4815b18eae"
+}

@@ -18,6 +18,8 @@ class InlineSubtitleLimits {
   static readonly maximumMarkupDepth: number = 64;
   static readonly bigMultiplier: number = 1.25;
   static readonly smallMultiplier: number = 0.8;
+  // Fixed Media3 SubtitlePainter leaves TextPaint.linkColor transparent.
+  static readonly linkColor: string = '#00000000';
 }
 
 // Android Html's legacy h1..h6 spans, independently captured with TextPaint.
@@ -80,8 +82,8 @@ export class SubtitleContent {
     this.paragraphs = paragraphs; this.flowParagraphs = paragraphs;
   }
 }
-interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string; paragraphStart?: number }
-interface FontAttributes { color?: string; face?: string; style?: string }
+interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string; paragraphStart?: number; linkStart?: number; qualifiedTag?: string }
+interface FontAttributes { color?: string; face?: string; style?: string; hasHref?: boolean; selfClosing?: boolean }
 interface StyleMark { start: number; property: string; value: string }
 interface StyleSpan extends StyleMark { end: number }
 // Html.fromHtml's default (legacy) named-color values, including green = 00FF00.
@@ -112,10 +114,19 @@ function htmlColor(value: string): string {
 function fontAttributes(tag: string, start: number): FontAttributes {
   const result: FontAttributes = {}; let i = start;
   while (i < tag.length) {
-    while (i < tag.length && !/[a-z]/i.test(tag[i])) { i++; }
+    while (i < tag.length && !/[a-z]/i.test(tag[i])) {
+      if (tag[i] === '/') {
+        let end = i + 1;
+        while (end < tag.length && /\s/.test(tag[end])) { end++; }
+        if (tag[end] === '>') { result.selfClosing = true; }
+      }
+      i++;
+    }
     const begin = i;
     while (i < tag.length && /[a-z0-9_:-]/i.test(tag[i])) { i++; }
     const name = tag.slice(begin, i).toLowerCase();
+    // Only the attribute's presence matters to drawing; never retain or open its URL.
+    if (name === 'href') { result.hasHref = true; }
     while (i < tag.length && /\s/.test(tag[i])) { i++; }
     if (tag[i] !== '=') { continue; }
     i++; while (i < tag.length && /\s/.test(tag[i])) { i++; }
@@ -180,7 +191,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (paragraphs.length >= SubtitleParagraphLimits.maximumSpansPerCue) { throw new Error('subtitle_failed'); }
     paragraphs.push(new SubtitleParagraphSpan(start, textUnits, kind));
   };
-  let plainStart = 0; let tagStart = -1; let quote = ''; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
+  let plainStart = 0; let tagStart = -1; let tagHasName = false; let quote = ''; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
   const append = (raw: string): void => {
     if (!raw) { return; }
     textUnits += raw.length;
@@ -215,6 +226,9 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const closeTo = (index: number): void => {
     while (stack.length > index) {
       const frame = stack.pop()!; ++styleRevision; endStyle(frame.tag);
+      if (frame.linkStart !== undefined && frame.linkStart < pieces.length) {
+        spans.push({ start: frame.linkStart, end: pieces.length, property: 'link', value: InlineSubtitleLimits.linkColor });
+      }
       if (isSubtitleBlock(frame.tag)) {
         blockBreak();
         // Html ends the last open alignment mark at any block boundary,
@@ -226,7 +240,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
       }
     }
   };
-  const openFrame = (name: string, tag: string = '', start: number = 0): void => {
+  const openFrame = (name: string, tag: string = '', start: number = 0, qualifiedTag?: string): void => {
     ++styleRevision;
     if (stack.length > InlineSubtitleLimits.maximumMarkupDepth) { throw new Error('subtitle_failed'); }
     const style = new SubtitleRun('', stack[stack.length - 1].style);
@@ -269,16 +283,17 @@ export function inlineSubtitle(value: string): SubtitleContent {
       if (value === 'start' || value === 'center' || value === 'end') { alignment = value; }
     }
     if (alignment) { paragraphAlignments.push(new SubtitleParagraphSpan(textUnits, textUnits, alignment)); }
-    stack.push({ tag: name, style: style, metricFamily: metricFamily, paragraphStart: textUnits });
+    const linkStart = name === 'a' && fontAttributes(tag, start).hasHref ? pieces.length : undefined;
+    stack.push({ tag: name, style: style, metricFamily: metricFamily, paragraphStart: textUnits, linkStart: linkStart, qualifiedTag: qualifiedTag });
     style.baselines = scriptBaselines(stack);
   };
   // Restart phrasing styles around blocks; span/font attributes end at that boundary.
   const restartable = ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'];
-  const suspendInline = (): string[] => {
+  const suspendInline = (floor: number = 1): string[] => {
     const restart: string[] = [];
-    while (stack.length > 1 && !isSubtitleBlock(stack[stack.length - 1].tag)) {
+    while (stack.length > floor && !isSubtitleBlock(stack[stack.length - 1].tag)) {
       const name = stack[stack.length - 1].tag;
-      if (restartable.includes(name)) { restart.unshift(name); }
+      if (!stack[stack.length - 1].qualifiedTag && restartable.includes(name)) { restart.unshift(name); }
       closeTo(stack.length - 1);
     }
     return restart;
@@ -286,29 +301,44 @@ export function inlineSubtitle(value: string): SubtitleContent {
   const restartInline = (names: string[]): void => { names.forEach((name: string): void => openFrame(name)); };
   for (let i = 0; i < value.length; i++) {
     const character = value[i];
-    if (tagStart < 0) { if (character === '<') { tagStart = i; } continue; }
+    if (tagStart < 0) { if (character === '<') { tagStart = i; tagHasName = false; } continue; }
     if (quote) { if (character === quote) { quote = ''; } continue; }
     if (character === '"' || character === "'") { quote = character; continue; }
-    if (character === '<') { tagStart = i; continue; }
+    if (character === '<') {
+      // TagSoup consumes '<' inside an already named tag as attribute data.
+      // Cache the prefix decision so a long malformed tag still scans once.
+      if (!tagHasName) { tagHasName = /^<\s*\/?\s*[a-z]/i.test(value.slice(tagStart, i)); }
+      if (!tagHasName) { tagStart = i; }
+      continue;
+    }
     if (character !== '>') { continue; }
     appendText(value.slice(plainStart, tagStart));
-    const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*)\b/i.exec(tag);
-    if (match) {
-      const name = match[2].toLowerCase(); const closing = !!match[1];
-      // The legacy name scanner can stop before '-' or ':'. New headings require a complete name.
+      const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*(?::[a-z][a-z0-9]*)*)\b/i.exec(tag);
+      if (match && !(match[1] && match[2].includes(':'))) {
+        const rawName = match[2].toLowerCase(); const closing = !!match[1];
+        const qualifiedTag = rawName.includes(':') ? rawName : undefined;
+        // TagSoup emits a qualified opening element's local name, but explicit
+        // end tags cannot match that unknown qualified element in its schema.
+        const name = qualifiedTag ? rawName.slice(rawName.lastIndexOf(':') + 1) : rawName;
+        // The legacy scanner can stop before '-'; headings and anchors require a complete name.
       const heading = headingScale(name) > 0 && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
+        const anchor = name === 'a' && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
         contentStarted = true;
       if (name === 'br' && !closing) { append('\n'); }
-      else if (heading || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'ul', 'li', 'blockquote', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
+        else if (heading || anchor || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'ul', 'li', 'blockquote', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
         const block = isSubtitleBlock(name);
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) {
-            if (stack[j].tag === name) {
-              const restart = block ? suspendInline() : [];
+              if (stack[j].tag === name && !stack[j].qualifiedTag) {
+                const restart = block ? suspendInline() : anchor ? suspendInline(j + 1) : [];
               closeTo(j); restartInline(restart); break;
             }
           }
         } else {
+            if (anchor && !qualifiedTag && stack[stack.length - 1].tag === 'a' && !stack[stack.length - 1].qualifiedTag) {
+              // A direct child anchor closes its parent; intervening phrasing elements admit nesting.
+              closeTo(stack.length - 1);
+            }
           const restart = block ? suspendInline() : [];
           if (block) {
             paragraph = true;
@@ -323,7 +353,8 @@ export function inlineSubtitle(value: string): SubtitleContent {
             for (let j = stack.length - 1; j > 0; j--) { if (stack[j].tag === 'p' || headingScale(stack[j].tag) > 0) { closeTo(j); break; } }
             blockBreak();
           }
-          if (!/\/\s*>$/.test(tag)) { openFrame(name, tag, match[0].length); }
+            const selfClosing = anchor ? !!fontAttributes(tag, match[0].length).selfClosing : /\/\s*>$/.test(tag);
+            if (!selfClosing) { openFrame(name, tag, match[0].length, qualifiedTag); }
           restartInline(restart);
         }
       }
@@ -339,6 +370,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
   for (const span of spans) {
     for (let i = span.start; i < span.end; i++) {
       if (span.property === 'color') { pieces[i].color = span.value; }
+        else if (span.property === 'link') { pieces[i].color = span.value; pieces[i].underline = true; }
       else if (span.property === 'background') { pieces[i].background = span.value; }
       else { pieces[i].strike = true; }
     }
