@@ -24,7 +24,7 @@ const read = p => JSON.parse(fs.readFileSync(p)).string;
 const values = () => Object.fromEntries(read('entry/src/main/resources/ru_RU/element/string.json').map(r => [r.name, r.value]));
 const disk = () => JSON.parse(fs.readFileSync(path.join(h.directory, 'ui_language.fixture.json')));
 test('Russian is a canonical unique choice and preserves the existing choice order', () => {
-  assert.deepEqual(Array.from(UI_LANGUAGES), ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU']);
+  assert.deepEqual(Array.from(UI_LANGUAGES), ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU', 'pl-PL']);
   assert.equal(validUiLanguage('ru-RU'), true); assert.equal(uiLanguageCaption('ru-RU', 'System'), 'Русский');
   for (const input of ['ru', 'ru_RU', 'RU-RU', 'ru-Cyrl-RU', 'ru-RU-x-test', ' ru-RU', '../ru-RU']) assert.equal(validUiLanguage(input), false, input);
 });

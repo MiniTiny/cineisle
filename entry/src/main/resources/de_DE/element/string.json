@@ -1978,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Unterstützt vereinfachtes Chinesisch, traditionelles Chinesisch, Englisch, Französisch, Spanisch, Deutsch, Italienisch, europäisches Portugiesisch, brasilianisches Portugiesisch, Koreanisch und Russisch. Andere Systemsprachen verwenden Englisch. Diese appweite Einstellung ändert nur die Oberfläche; Medienmetadaten und Audio-/Untertiteleinstellungen bleiben getrennt."
+      "value": "Unterstützt vereinfachtes Chinesisch, traditionelles Chinesisch, Englisch, Französisch, Spanisch, Deutsch, Italienisch, europäisches Portugiesisch, brasilianisches Portugiesisch, Koreanisch, Russisch und Polnisch. Andere Systemsprachen verwenden Englisch. Diese appweite Einstellung ändert nur die Oberfläche; Medienmetadaten und Audio-/Untertiteleinstellungen bleiben getrennt."
     },
     {
       "name": "ui_language_system",

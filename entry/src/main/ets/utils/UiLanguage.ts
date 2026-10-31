@@ -1,5 +1,5 @@
-export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-PT' | 'pt-BR' | 'ko-KR' | 'ru-RU';
-export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU'];
+export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-PT' | 'pt-BR' | 'ko-KR' | 'ru-RU' | 'pl-PL';
+export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU', 'pl-PL'];
 export function validUiLanguage(value: string): boolean { return UI_LANGUAGES.includes(value as UiLanguage); }
 export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): string {
   if (choice === 'system') { return systemLabel; }
@@ -8,6 +8,7 @@ export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): stri
   if (choice === 'pt-BR') { return 'Português (Brasil)'; }
   if (choice === 'ko-KR') { return '한국어'; }
   if (choice === 'ru-RU') { return 'Русский'; }
+  if (choice === 'pl-PL') { return 'Polski'; }
   if (choice === 'it-IT') { return 'Italiano'; }
   if (choice === 'de-DE') { return 'Deutsch'; }
   if (choice === 'es-ES') { return 'Español'; }
@@ -17,6 +18,18 @@ export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): stri
 export function effectiveUiLanguage(choice: UiLanguage, system: string): string {
   if (choice !== 'system') { return choice; }
   const parts = system.trim().replace(/_/g, '-').toLowerCase().split('-');
+  if (parts[0] === 'pl') {
+    if (parts.some(part => !/^[a-z0-9]{1,8}$/.test(part))) { return 'en-US'; }
+    // One Latin Polish pack serves Polish locales; incompatible scripts keep the fallback.
+    let regionIndex = 1;
+    if (parts[1]?.length === 4) {
+      if (parts[1] !== 'latn') { return 'en-US'; }
+      regionIndex = 2;
+    }
+    const region = parts[regionIndex] ?? '';
+    if (region === '' || /^[a-z]{2}$|^\d{3}$/.test(region) || region.length === 1) { return 'pl-PL'; }
+    return 'en-US';
+  }
   if (parts[0] === 'ru') {
     if (parts.some(part => !/^[a-z0-9]{1,8}$/.test(part))) { return 'en-US'; }
     // One Cyrillic Russian pack serves Russian locales; incompatible scripts keep the fallback.
