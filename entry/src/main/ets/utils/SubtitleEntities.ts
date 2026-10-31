@@ -318,10 +318,12 @@ const LEGACY_C1_CHARACTERS: string = '\u20AC\uFFFD\u201A\u0192\u201E\u2026\u2020
   '\uFFFD\u2018\u2019\u201C\u201D\u2022\u2013\u2014' +
   '\u02DC\u2122\u0161\u203A\u0153\uFFFD\u017E\u0178';
 
-export function subtitleEntities(value: string): string {
+export function subtitleEntities(value: string, decodeReferences: boolean = true): string {
   // One pass: an encoded tag stays visible text and escaped ampersands cannot decode twice.
   const readable = value.replace(/[\u0080-\u009F]/g, (character: string): string =>
     LEGACY_C1_CHARACTERS[character.charCodeAt(0) - LEGACY_C1_FIRST_CODE_UNIT]);
+  // CDATA and script/style text still normalize physical C1 characters, but keep entity spelling.
+  if (!decodeReferences) { return readable; }
   return readable.replace(/&(#(?:[xX][0-9a-fA-F]{1,8}|[0-9]{1,10})|[A-Za-z][A-Za-z0-9]{0,30});/g,
     (reference: string, name: string): string => {
       if (name[0] !== '#') { return namedCharacters.get(name) ?? reference; }

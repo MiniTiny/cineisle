@@ -191,7 +191,8 @@ export function inlineSubtitle(value: string): SubtitleContent {
     if (paragraphs.length >= SubtitleParagraphLimits.maximumSpansPerCue) { throw new Error('subtitle_failed'); }
     paragraphs.push(new SubtitleParagraphSpan(start, textUnits, kind));
   };
-  let plainStart = 0; let tagStart = -1; let tagHasName = false; let quote = ''; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
+  let plainStart = 0; let tagStart = -1; let tagMarkupStart = -1; let quote = ''; let expectValue = false;
+  let rawElement = ''; let rawSelfClosing = false; let rawLess = false; let trailingBreaks = 0; let paragraph = false; let contentStarted = false;
   const append = (raw: string): void => {
     if (!raw) { return; }
     textUnits += raw.length;
@@ -200,14 +201,15 @@ export function inlineSubtitle(value: string): SubtitleContent {
     else { if (pieces.length >= CaptionRenderLimits.maxRunsPerCue) { throw new Error('subtitle_failed'); } pieces.push(new SubtitleRun(raw, style)); appendedRevision = styleRevision; }
     trailingBreaks = raw === '\n' || raw === '\n\n' ? Math.min(2, trailingBreaks + raw.length) : 0;
   };
-  const appendText = (raw: string): void => {
+  const appendText = (raw: string, decodeReferences: boolean = true): void => {
     // Decode before folding, as Html.characters does. Encoded tags remain literal text.
     // The legacy HTML scanner drops nonzero numeric controls, rather than turning them into breaks.
-    const readable = raw.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
+    let readable = raw.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+    if (decodeReferences) { readable = readable.replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
       const code = digits[0].toLowerCase() === 'x' ? Number.parseInt(digits.slice(1), 16) : Number.parseInt(digits, 10);
       return code > 0 && code < 32 ? '' : entity;
-    });
-    let text = subtitleEntities(readable).replace(/[ \n]+/g, ' ');
+    }); }
+    let text = subtitleEntities(readable, decodeReferences).replace(/[ \n]+/g, ' ');
       // Before the first element/text, TagSoup ignores an all-Java-whitespace
       // chunk. Nonbreaking spaces (NBSP/figure/narrow) are not in that set.
       if (!contentStarted && /^[\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]*$/.test(text)) { return; }
@@ -299,21 +301,11 @@ export function inlineSubtitle(value: string): SubtitleContent {
     return restart;
   };
   const restartInline = (names: string[]): void => { names.forEach((name: string): void => openFrame(name)); };
-  for (let i = 0; i < value.length; i++) {
-    const character = value[i];
-    if (tagStart < 0) { if (character === '<') { tagStart = i; tagHasName = false; } continue; }
-    if (quote) { if (character === quote) { quote = ''; } continue; }
-    if (character === '"' || character === "'") { quote = character; continue; }
-    if (character === '<') {
-      // TagSoup consumes '<' inside an already named tag as attribute data.
-      // Cache the prefix decision so a long malformed tag still scans once.
-      if (!tagHasName) { tagHasName = /^<\s*\/?\s*[a-z]/i.test(value.slice(tagStart, i)); }
-      if (!tagHasName) { tagStart = i; }
-      continue;
-    }
-    if (character !== '>') { continue; }
-    appendText(value.slice(plainStart, tagStart));
-      const tag = value.slice(tagStart, i + 1); const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*(?::[a-z][a-z0-9]*)*)\b/i.exec(tag);
+  // Lexical behavior follows Android API34 TagSoup HTMLScanner and independent runtime captures.
+  // Copyright 2002-2008 John Cowan; Apache-2.0, see rawfile/third_party/srt/notice.txt.
+  // States are reimplemented separately from the existing style/paragraph stack; input is consumed once.
+  const consumeTag = (tag: string): void => {
+    const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*(?::[a-z][a-z0-9]*)*)\b/i.exec(tag);
       if (match && !(match[1] && match[2].includes(':'))) {
         const rawName = match[2].toLowerCase(); const closing = !!match[1];
         const qualifiedTag = rawName.includes(':') ? rawName : undefined;
@@ -324,6 +316,21 @@ export function inlineSubtitle(value: string): SubtitleContent {
       const heading = headingScale(name) > 0 && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
         const anchor = name === 'a' && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
         contentStarted = true;
+        if (!closing && !qualifiedTag && (name === 'script' || name === 'style') && /[\t\n />]/.test(tag.charAt(match[0].length))) {
+          if (name === 'style') {
+            // Unlike script, style is outside an anchor's legacy content model.
+            for (let j = stack.length - 1; j > 0; j--) {
+              if (stack[j].tag === 'a' && !stack[j].qualifiedTag) {
+                const restart = suspendInline(j + 1);
+                closeTo(j); restartInline(restart); break;
+              }
+            }
+          }
+          rawElement = name;
+          // Empty raw elements leave the legacy scanner in raw mode until its first end tag.
+          rawSelfClosing = !!fontAttributes(tag, match[0].length).selfClosing && tag.endsWith('/>');
+          rawLess = false;
+        }
       if (name === 'br' && !closing) { append('\n'); }
         else if (heading || anchor || ['b', 'strong', 'i', 'em', 'cite', 'dfn', 'tt', 'u', 'font', 'span', 'p', 'div', 'ul', 'li', 'blockquote', 'big', 'small', 's', 'del', 'strike', 'sup', 'sub'].includes(name)) {
         const block = isSubtitleBlock(name);
@@ -359,9 +366,82 @@ export function inlineSubtitle(value: string): SubtitleContent {
         }
       }
     }
+  };
+  for (let i = 0; i < value.length; i++) {
+    const character = value[i];
+    if (rawElement) {
+      if (rawLess) {
+        rawLess = false;
+        if (character === '/') {
+          appendText(value.slice(plainStart, i - 1), false);
+          let end = value.indexOf('>', i + 1);
+          if (end < 0) { end = value.length; }
+          const name = value.slice(i + 1, end).replace(/[ \t\n]/g, '');
+          if (rawSelfClosing) {
+            rawElement = ''; rawSelfClosing = false;
+            consumeTag('</' + name + '>');
+          } else if (name.toLowerCase() === rawElement) { rawElement = ''; }
+          else { appendText('</' + name + '>', false); }
+          i = end; plainStart = Math.min(end + 1, value.length);
+        }
+      } else if (character === '<') { rawLess = true; }
+      continue;
+    }
+    if (tagStart < 0) {
+      if (character !== '<') { continue; }
+      let next = i + 1;
+      while (value[next] === '<') { next++; }
+      // Whitespace after '<' is visible character data, not the start of an element.
+      if (next === value.length || /[ \t\n]/.test(value[next])) { i = next - 1; continue; }
+      const markup = next - 1;
+      if (value.startsWith('<!-', markup)) {
+        appendText(value.slice(plainStart, i));
+        const end = value.indexOf('-->', markup + 4);
+        i = end < 0 ? value.length : end + 2;
+        plainStart = Math.min(i + 1, value.length); continue;
+      }
+      if (value.startsWith('<![CDATA[', markup)) {
+        appendText(value.slice(plainStart, i));
+        let brackets = 0; let end = -1;
+        for (let j = markup + 9; j < value.length; j++) {
+          if (value[j] === '>' && brackets === 2) { end = j; break; }
+          // A third ']' returns to the content state in the fixed legacy scanner.
+          brackets = value[j] === ']' && brackets < 2 ? brackets + 1 : 0;
+        }
+        if (end >= 0) { appendText(value.slice(markup + 9, end - 2), false); }
+        i = end < 0 ? value.length : end;
+        plainStart = Math.min(i + 1, value.length); continue;
+      }
+      if (value[markup + 1] === '!' || value[markup + 1] === '?') {
+        appendText(value.slice(plainStart, i));
+        const end = value.indexOf('>', markup + 2);
+        i = end < 0 ? value.length : end;
+        plainStart = Math.min(i + 1, value.length); continue;
+      }
+      tagStart = i; tagMarkupStart = markup; quote = ''; expectValue = false;
+      i = next - 1; continue;
+    }
+    if (quote) { if (character === quote) { quote = ''; } continue; }
+    if (expectValue && (character === '\"' || character === "'")) { quote = character; expectValue = false; continue; }
+    if (character === '=') { expectValue = true; }
+    else if (!/[ \t\n]/.test(character)) { expectValue = false; }
+    // A leading '>' is a name character in the scanner's first-name state.
+    if (character !== '>' || i === tagMarkupStart + 1) { continue; }
+    appendText(value.slice(plainStart, tagStart));
+    let tag = value.slice(tagMarkupStart, i + 1);
+    if (tag.startsWith('</')) { tag = '</' + tag.slice(2).replace(/[ \t\n]/g, ''); }
+    consumeTag(tag);
     plainStart = i + 1; tagStart = -1;
   }
-  appendText(value.slice(plainStart));
+  if (tagStart >= 0) {
+    appendText(value.slice(plainStart, tagStart));
+    const tag = value.slice(tagMarkupStart);
+    // EOF closes an already emitted name's attributes, while an unfinished name is discarded.
+    if (/^<[^ \t\n/>]+[ \t\n]/.test(tag)) { consumeTag(tag); }
+  } else {
+    const end = rawElement && rawLess ? value.length - 1 : value.length;
+    appendText(value.slice(plainStart, end), !rawElement);
+  }
   suspendInline(); closeTo(1);
   while (strikeMarks.length) { endMark(strikeMarks); }
   while (backgroundMarks.length) { endMark(backgroundMarks); }

@@ -1,9 +1,11 @@
-CineIsle SRT named character references
+CineIsle SRT character and scanner compatibility references
 
 Adapted entity data from TagSoup HTMLSchema.java.
 Copyright 2002-2008 by John Cowan.
 Licensed under the Apache License, Version 2.0.
-Only entity declarations are adapted; no TagSoup parser is included.
+Lexical behavior is reimplemented against Android API34 TagSoup HTMLScanner
+and independent framework/Media3 runtime captures. Entity declarations are
+adapted; no TagSoup runtime dependency is included.
 
 Source: https://android.googlesource.com/platform/external/tagsoup/
 
