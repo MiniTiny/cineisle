@@ -1,0 +1,2392 @@
+{
+  "string": [
+    {
+      "name": "player_retry",
+      "value": "재생 다시 시도"
+    },
+    {
+      "name": "player_failure_hint",
+      "value": "재생을 계속할 수 없습니다. 이 버전을 다시 시도하거나 재생 옵션에서 다른 버전을 선택하세요."
+    },
+    {
+      "name": "player_skip_intro",
+      "value": "오프닝 건너뛰기"
+    },
+    {
+      "name": "player_intro_skipper",
+      "value": "오프닝 건너뛰기 안내"
+    },
+    {
+      "name": "player_intro_hint",
+      "value": "서버의 Intro Skipper 시간 정보가 필요합니다. 유효한 구간에서 안내가 표시되며, 누르면 건너뜁니다. 캐시된 시간 정보는 오프라인에서도 사용할 수 있습니다."
+    },
+    {
+      "name": "player_intro_save_failed",
+      "value": "오프닝 건너뛰기 설정을 저장하지 못했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "download_legacy_version",
+      "value": "이전 다운로드(버전 정보 없음)"
+    },
+    {
+      "name": "offline_versions",
+      "value": "다운로드한 버전"
+    },
+    {
+      "name": "module_desc",
+      "value": "CineIsle · 나만의 HarmonyOS 미디어 라이브러리"
+    },
+    {
+      "name": "login_intro",
+      "value": "Jellyfin에 연결하고 좋은 이야기를 만나보세요"
+    },
+    {
+      "name": "server_placeholder",
+      "value": "서버 주소, 예: https://media.example.com/jellyfin"
+    },
+    {
+      "name": "username",
+      "value": "사용자 이름"
+    },
+    {
+      "name": "password",
+      "value": "비밀번호"
+    },
+    {
+      "name": "https_hint",
+      "value": "외부 연결에는 HTTPS를 사용하세요. 로그인 정보는 시스템의 보안 저장소에 보관됩니다."
+    },
+    {
+      "name": "connecting",
+      "value": "연결 중…"
+    },
+    {
+      "name": "login",
+      "value": "연결하고 로그인"
+    },
+    {
+      "name": "offline_cache",
+      "value": "마지막으로 동기화한 오프라인 캐시를 표시하고 있습니다"
+    },
+    {
+      "name": "offline_detail_missing",
+      "value": "이 계정에는 이 항목의 오프라인 상세 정보가 없습니다. 연결한 후 라이브러리를 동기화하세요."
+    },
+    {
+      "name": "actors_sync_hint",
+      "value": "라이브러리를 동기화하면 전체 재생 횟수별로 배우를 찾아볼 수 있습니다"
+    },
+    {
+      "name": "sync_library",
+      "value": "라이브러리 동기화"
+    },
+    {
+      "name": "actor_stats",
+      "value": "작품 %d개 · 재생 %d회"
+    },
+    {
+      "name": "download_complete",
+      "value": "다운로드 완료 · 오프라인 사용 가능"
+    },
+    {
+      "name": "download_progress",
+      "value": "다운로드 중 %d%%"
+    },
+    {
+      "name": "download_interrupted",
+      "value": "다운로드가 완료되지 않았습니다. 제거한 후 다시 다운로드하세요."
+    },
+    {
+      "name": "play",
+      "value": "재생"
+    },
+    {
+      "name": "remove_download",
+      "value": "다운로드 제거"
+    },
+    {
+      "name": "remove_download_confirm",
+      "value": "로컬 동영상 파일을 삭제하고 진행 중인 다운로드 작업을 취소할까요?"
+    },
+    {
+      "name": "cancel",
+      "value": "취소"
+    },
+    {
+      "name": "remove",
+      "value": "제거"
+    },
+    {
+      "name": "no_downloads",
+      "value": "아직 다운로드한 항목이 없습니다. 영화나 에피소드의 상세 화면에서 다운로드하세요."
+    },
+    {
+      "name": "favorites",
+      "value": "즐겨찾기"
+    },
+    {
+      "name": "downloads",
+      "value": "다운로드"
+    },
+    {
+      "name": "syncing",
+      "value": "동기화 중…"
+    },
+    {
+      "name": "last_sync",
+      "value": "마지막 동기화: %s"
+    },
+    {
+      "name": "not_synced",
+      "value": "아직 라이브러리를 동기화하지 않았습니다"
+    },
+    {
+      "name": "change_account",
+      "value": "이 계정에서 로그아웃"
+    },
+    {
+      "name": "logout_confirm",
+      "value": "이 계정의 로컬 로그인 정보를 제거할까요? 저장된 다른 계정, 캐시 데이터와 다운로드한 파일은 유지됩니다."
+    },
+    {
+      "name": "logout",
+      "value": "로그아웃"
+    },
+    {
+      "name": "version",
+      "value": "CineIsle · 0.2.0"
+    },
+    {
+      "name": "refresh",
+      "value": "새로고침"
+    },
+    {
+      "name": "search_hint",
+      "value": "영화, 시리즈 또는 에피소드 검색"
+    },
+    {
+      "name": "back",
+      "value": "뒤로"
+    },
+    {
+      "name": "search_results",
+      "value": "검색 결과"
+    },
+    {
+      "name": "continue_watching",
+      "value": "이어서 보기"
+    },
+    {
+      "name": "recommend_hint",
+      "value": "즐겨 보던 작품을 다시 만나보세요"
+    },
+    {
+      "name": "latest",
+      "value": "최근 추가된 항목"
+    },
+    {
+      "name": "no_items",
+      "value": "아직 미디어가 없습니다"
+    },
+    {
+      "name": "load_more",
+      "value": "더 불러오기"
+    },
+    {
+      "name": "tab_recommend",
+      "value": "발견"
+    },
+    {
+      "name": "tab_home",
+      "value": "홈"
+    },
+    {
+      "name": "tab_library",
+      "value": "라이브러리"
+    },
+    {
+      "name": "tab_actors",
+      "value": "배우"
+    },
+    {
+      "name": "tab_more",
+      "value": "더 보기"
+    },
+    {
+      "name": "download_wifi",
+      "value": "Wi-Fi로 다운로드"
+    },
+    {
+      "name": "download_confirm",
+      "value": "원본 동영상을 다운로드할까요? 저장 공간을 많이 사용할 수 있습니다. 데이터 요금이 부과되지 않는 네트워크만 사용합니다."
+    },
+    {
+      "name": "download",
+      "value": "다운로드"
+    },
+    {
+      "name": "unfavorite",
+      "value": "즐겨찾기에서 제거"
+    },
+    {
+      "name": "favorite",
+      "value": "즐겨찾기에 추가"
+    },
+    {
+      "name": "mark_unplayed",
+      "value": "시청하지 않음으로 표시"
+    },
+    {
+      "name": "mark_played",
+      "value": "시청함으로 표시"
+    },
+    {
+      "name": "cast",
+      "value": "배역 및 제작진"
+    },
+    {
+      "name": "progress_not_saved",
+      "value": "재생 위치를 서버에 저장하지 못했습니다. 연결 상태를 확인하세요."
+    },
+    {
+      "name": "play_error",
+      "value": "재생하지 못했습니다. 연결 상태와 기기의 코덱 지원 여부를 확인하세요. 이 버전은 직접 재생만 지원합니다."
+    },
+    {
+      "name": "offline_playback",
+      "value": "로컬 다운로드를 재생하고 있습니다"
+    },
+    {
+      "name": "direct_play_hint",
+      "value": "직접 재생 · 코덱 지원 여부는 기기에 따라 다릅니다"
+    },
+    {
+      "name": "invalid_server",
+      "value": "비밀번호, 쿼리 문자열과 프래그먼트가 없는 완전한 http:// 또는 https:// 서버 주소를 입력하세요"
+    },
+    {
+      "name": "invalid_account",
+      "value": "서버에서 유효하지 않은 계정 ID를 반환했습니다"
+    },
+    {
+      "name": "invalid_item",
+      "value": "유효하지 않은 미디어 ID입니다"
+    },
+    {
+      "name": "session_read_failed",
+      "value": "보안 로그인 정보를 읽지 못했습니다. 기기 잠금을 해제한 후 다시 시도하세요."
+    },
+    {
+      "name": "session_clear_failed",
+      "value": "보안 로그인 정보를 삭제하지 못했습니다"
+    },
+    {
+      "name": "login_expired",
+      "value": "세션이 만료되었거나 사용자 이름 또는 비밀번호가 잘못되었습니다. 다시 로그인하세요."
+    },
+    {
+      "name": "permission_denied",
+      "value": "이 계정에는 이 작업을 수행할 권한이 없습니다"
+    },
+    {
+      "name": "http_failed",
+      "value": "서버 요청에 실패했습니다(HTTP %d)"
+    },
+    {
+      "name": "html_response",
+      "value": "서버 주소에서 웹페이지를 반환했습니다. Jellyfin 주소와 역방향 프록시 경로를 확인하세요."
+    },
+    {
+      "name": "login_response_invalid",
+      "value": "서버에서 불완전한 로그인 응답을 반환했습니다"
+    },
+    {
+      "name": "tasks_active",
+      "value": "동기화나 다운로드가 끝날 때까지 기다리거나 먼저 다운로드를 취소하세요"
+    },
+    {
+      "name": "login_required",
+      "value": "먼저 서버에 로그인하세요"
+    },
+    {
+      "name": "sync_active",
+      "value": "라이브러리 동기화가 이미 진행 중입니다"
+    },
+    {
+      "name": "sync_progress",
+      "value": "%d / %d개 항목 동기화됨"
+    },
+    {
+      "name": "sync_complete",
+      "value": "동기화 완료: 항목 %d개, 배우 %d명"
+    },
+    {
+      "name": "no_media_source",
+      "value": "서버에서 재생 가능한 미디어 소스를 반환하지 않았습니다"
+    },
+    {
+      "name": "download_exists",
+      "value": "다운로드가 이미 있습니다. 기존 기록을 제거한 후 다시 시도하세요."
+    },
+    {
+      "name": "no_download_source",
+      "value": "다운로드할 수 있는 미디어 소스가 없습니다"
+    },
+    {
+      "name": "cancel_download_failed",
+      "value": "다운로드를 취소하지 못했습니다. 나중에 다시 시도하세요."
+    },
+    {
+      "name": "cached_media",
+      "value": "오프라인 미디어(라이브러리 폴더를 복원하려면 다시 동기화하세요)"
+    },
+    {
+      "name": "cache_library_unavailable",
+      "value": "이전 캐시에는 라이브러리 소속 정보가 없습니다. 전체 오프라인 미디어로 돌아간 후 온라인에서 동기화하세요."
+    },
+    {
+      "name": "cache_recovered",
+      "value": "로컬 캐시를 다시 구성했습니다. 손상된 기록과 기존 동영상은 보존했습니다. 라이브러리를 다시 동기화하세요."
+    },
+    {
+      "name": "cache_recovery_failed",
+      "value": "손상된 캐시를 보존하지 못했습니다. 여유 저장 공간과 파일 권한을 확인한 후 다시 시도하세요."
+    },
+    {
+      "name": "sync_incomplete",
+      "value": "동기화 중 라이브러리가 변경되었거나 페이지를 모두 가져오지 못했습니다. 이전 캐시는 유지했습니다. 다시 동기화하세요."
+    },
+    {
+      "name": "sync_library_progress",
+      "value": "%s: %d / %d개 항목 동기화됨"
+    },
+    {
+      "name": "pause",
+      "value": "일시정지"
+    },
+    {
+      "name": "playback_options",
+      "value": "재생 옵션"
+    },
+    {
+      "name": "next_episode",
+      "value": "다음 에피소드"
+    },
+    {
+      "name": "media_source",
+      "value": "미디어 소스"
+    },
+    {
+      "name": "audio_track",
+      "value": "오디오 트랙"
+    },
+    {
+      "name": "subtitle_track",
+      "value": "자막"
+    },
+    {
+      "name": "subtitles_off",
+      "value": "자막 끄기"
+    },
+    {
+      "name": "no_audio_tracks",
+      "value": "기기에서 선택 가능한 오디오 트랙을 찾지 못했습니다"
+    },
+    {
+      "name": "auto_next",
+      "value": "다음 에피소드 자동 재생"
+    },
+    {
+      "name": "playback_loading",
+      "value": "재생 옵션을 불러오는 중…"
+    },
+    {
+      "name": "audio_track_number",
+      "value": "오디오 트랙 %d"
+    },
+    {
+      "name": "subtitle_track_number",
+      "value": "자막 트랙 %d"
+    },
+    {
+      "name": "server_subtitle",
+      "value": "서버 텍스트 자막 · %s"
+    },
+    {
+      "name": "subtitle_format_hint",
+      "value": "ASS/SSA 자막의 스타일과 애니메이션을 유지합니다. SRT는 굵게, 기울임, 밑줄, 취소선, 위 첨자, 아래 첨자, span 스타일의 글자색과 배경색, 글꼴, 상대 크기와 9개 위치 정렬을 지원합니다. 다운로드 시 내장 및 외부 텍스트 트랙을 캐시할 수 있으며, 기존 캐시는 온라인에서 업데이트할 수 있습니다. MPV는 지원되는 내장 이미지 자막과 동영상 첨부 글꼴을 사용할 수 있습니다. 시스템 플레이어는 기기 기능에 따라 다릅니다. 오프라인 재생에서는 캐시된 자막과 기기에서 인식한 트랙을 선택할 수 있습니다. 문단 태그 p/div는 문단 줄바꿈을 유지하며, cite/dfn은 기울임꼴, tt는 고정폭 글꼴로 표시됩니다."
+    },
+    {
+      "name": "track_switch_failed",
+      "value": "오디오 트랙을 전환하지 못했습니다. 기기의 오디오 코덱 지원 여부를 확인하세요."
+    },
+    {
+      "name": "subtitle_failed",
+      "value": "자막을 불러오거나 전환하지 못했습니다. 연결 상태와 형식을 확인한 후 다시 시도하거나 자막을 끄세요."
+    },
+    {
+      "name": "source_switch_failed",
+      "value": "미디어 소스를 전환하지 못했습니다. 연결 상태를 확인한 후 다시 시도하세요."
+    },
+    {
+      "name": "next_episode_failed",
+      "value": "다음 에피소드를 불러오지 못했습니다. 연결 상태나 다운로드를 확인한 후 다음 에피소드를 눌러 다시 시도하세요."
+    },
+    {
+      "name": "queue_finished",
+      "value": "재생 가능한 대기열의 끝에 도달했습니다"
+    },
+    {
+      "name": "episode_order_unknown",
+      "value": "에피소드 순서 정보가 불완전하여 자동 재생을 사용할 수 없습니다."
+    },
+    {
+      "name": "episode_queue_failed",
+      "value": "에피소드 목록이 불완전합니다. 다시 시도하세요."
+    },
+    {
+      "name": "next_not_downloaded",
+      "value": "다음 에피소드를 다운로드하지 않아 오프라인 자동 재생을 중지했습니다."
+    },
+    {
+      "name": "speed_failed",
+      "value": "기기에서 이 재생 속도를 적용하지 못했습니다"
+    },
+    {
+      "name": "player_release_failed",
+      "value": "플레이어 리소스를 해제하지 못했습니다. 플레이어를 나간 후 다시 시도하세요."
+    },
+    {
+      "name": "pip_enter",
+      "value": "화면 속 화면"
+    },
+    {
+      "name": "pip_exit",
+      "value": "화면 속 화면 종료"
+    },
+    {
+      "name": "pip_unavailable",
+      "value": "이 기기는 화면 속 화면을 지원하지 않습니다"
+    },
+    {
+      "name": "pip_failed",
+      "value": "화면 속 화면 작업에 실패했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "background_playback",
+      "value": "백그라운드 재생"
+    },
+    {
+      "name": "background_playback_hint",
+      "value": "백그라운드에서 소리를 듣고 잠금 화면에서 재생을 제어할 수 있습니다. 백그라운드에서 화면 속 화면을 닫거나 플레이어를 나가면 재생이 중지됩니다."
+    },
+    {
+      "name": "background_unavailable",
+      "value": "백그라운드 재생 권한을 사용할 수 없어 포그라운드에서 계속 재생합니다."
+    },
+    {
+      "name": "background_stop_failed",
+      "value": "백그라운드 재생 작업을 종료하지 못했습니다. 앱을 종료한 후 다시 시도하세요."
+    },
+    {
+      "name": "session_unavailable",
+      "value": "시스템 미디어 세션을 사용할 수 없어 잠금 화면, 백그라운드와 화면 속 화면에서 재생을 제어할 수 없습니다."
+    },
+    {
+      "name": "session_update_failed",
+      "value": "시스템 재생 상태를 업데이트하지 못했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "system_playback_cleanup_failed",
+      "value": "시스템 재생 리소스를 해제하지 못했습니다. 앱을 종료한 후 다시 시도하세요."
+    },
+    {
+      "name": "pip_subtitle_failed",
+      "value": "화면 속 화면 자막을 업데이트하지 못했습니다. 화면 속 화면을 종료한 후 다시 시도하세요."
+    },
+    {
+      "name": "playback_language_preferences",
+      "value": "오디오 및 자막 언어"
+    },
+    {
+      "name": "preferred_audio_language",
+      "value": "선호하는 오디오 언어"
+    },
+    {
+      "name": "preferred_subtitle_language",
+      "value": "선호하는 자막 언어"
+    },
+    {
+      "name": "playback_language_placeholder",
+      "value": "비워 두면 기본값을 사용합니다. 예: zh, en, ja, zh-Hant"
+    },
+    {
+      "name": "preferred_subtitles_off",
+      "value": "기본적으로 자막 끄기"
+    },
+    {
+      "name": "save_playback_preferences",
+      "value": "저장하고 적용"
+    },
+    {
+      "name": "reset_playback_preferences",
+      "value": "언어 설정 초기화"
+    },
+    {
+      "name": "playback_preferences_hint",
+      "value": "모든 계정에 적용되며 로그아웃하거나 다시 시작해도 유지됩니다. 두세 글자의 언어 코드에 필요하면 문자나 지역 태그를 붙이세요. 일치하는 트랙이 없으면 기본 트랙을 유지합니다. 수동 선택은 현재 재생에만 적용되며 소스나 에피소드를 바꾸면 설정을 다시 적용합니다. 초기화해도 현재 수동 선택한 트랙은 바뀌지 않습니다."
+    },
+    {
+      "name": "playback_preferences_saved",
+      "value": "언어 설정을 저장했으며 가능한 경우 현재 재생에도 적용했습니다"
+    },
+    {
+      "name": "playback_language_invalid",
+      "value": "zh, eng, zh-Hant와 같은 유효한 언어 코드를 입력하세요. 기본값을 사용하려면 비워 두세요."
+    },
+    {
+      "name": "playback_preferences_invalid",
+      "value": "저장된 언어 설정이 유효하지 않아 기본값을 사용합니다. 설정을 다시 저장하세요."
+    },
+    {
+      "name": "playback_preferences_load_failed",
+      "value": "언어 설정을 읽지 못해 기본값을 사용합니다. 저장할 때 다시 시도합니다."
+    },
+    {
+      "name": "playback_preferences_save_failed",
+      "value": "언어 설정을 저장하지 못했습니다. 이전 설정을 계속 사용합니다. 다시 시도하세요."
+    },
+    {
+      "name": "playback_preferences_restore_failed",
+      "value": "언어 설정을 저장하거나 복원하지 못했습니다. 저장 결과를 확인할 수 없으니 설정을 다시 저장하세요."
+    },
+    {
+      "name": "api_response_invalid",
+      "value": "Jellyfin에서 불완전하거나 유효하지 않은 데이터를 반환했습니다"
+    },
+    {
+      "name": "api_parameter_invalid",
+      "value": "요청 매개변수가 유효하지 않습니다. 다시 시도하세요."
+    },
+    {
+      "name": "api_numeric_range",
+      "value": "미디어 데이터가 이 클라이언트에서 지원하는 정수 범위를 초과합니다"
+    },
+    {
+      "name": "api_session_invalid",
+      "value": "세션이 유효하지 않습니다. 다시 로그인하세요."
+    },
+    {
+      "name": "next_up",
+      "value": "다음에 볼 항목"
+    },
+    {
+      "name": "latest_library",
+      "value": "최근 추가된 항목 · %s"
+    },
+    {
+      "name": "view_all",
+      "value": "모두 보기"
+    },
+    {
+      "name": "media_movie",
+      "value": "영화"
+    },
+    {
+      "name": "media_series",
+      "value": "시리즈"
+    },
+    {
+      "name": "media_episode",
+      "value": "에피소드"
+    },
+    {
+      "name": "media_season",
+      "value": "시즌"
+    },
+    {
+      "name": "media_video",
+      "value": "동영상"
+    },
+    {
+      "name": "episode_label",
+      "value": "시즌 %d · 에피소드 %d · %s"
+    },
+    {
+      "name": "poster_unavailable",
+      "value": "포스터가 없습니다"
+    },
+    {
+      "name": "watched_indicator",
+      "value": "시청함"
+    },
+    {
+      "name": "present_year",
+      "value": "현재"
+    },
+    {
+      "name": "channel_count",
+      "value": "%d채널"
+    },
+    {
+      "name": "subtitle_chip",
+      "value": "CC"
+    },
+    {
+      "name": "detail_size",
+      "value": "파일 크기"
+    },
+    {
+      "name": "detail_video",
+      "value": "동영상"
+    },
+    {
+      "name": "detail_audio",
+      "value": "오디오"
+    },
+    {
+      "name": "detail_subtitles",
+      "value": "자막"
+    },
+    {
+      "name": "detail_genres",
+      "value": "장르"
+    },
+    {
+      "name": "detail_directors",
+      "value": "감독"
+    },
+    {
+      "name": "detail_writers",
+      "value": "작가"
+    },
+    {
+      "name": "bit_depth",
+      "value": "%d비트"
+    },
+    {
+      "name": "runtime_minutes",
+      "value": "%d분"
+    },
+    {
+      "name": "community_score",
+      "value": "평점 %s"
+    },
+    {
+      "name": "play_not_allowed",
+      "value": "이 계정은 이 항목을 재생할 수 없습니다"
+    },
+    {
+      "name": "download_not_allowed",
+      "value": "이 계정은 이 항목을 다운로드할 수 없습니다"
+    },
+    {
+      "name": "delete_not_allowed",
+      "value": "이 계정은 이 항목을 삭제할 수 없습니다"
+    },
+    {
+      "name": "media_deleted_cache_failed",
+      "value": "서버 항목은 삭제되었지만 로컬 캐시를 저장하지 못했습니다. 돌아가서 다시 동기화하세요. 다운로드한 동영상은 유지했습니다."
+    },
+    {
+      "name": "no_playable_episode",
+      "value": "재생 가능한 에피소드가 없습니다"
+    },
+    {
+      "name": "continue_play",
+      "value": "계속 재생"
+    },
+    {
+      "name": "start_over",
+      "value": "처음부터 재생"
+    },
+    {
+      "name": "play_next_episode",
+      "value": "다음 에피소드 재생"
+    },
+    {
+      "name": "media_versions",
+      "value": "재생 및 다운로드 버전"
+    },
+    {
+      "name": "source_number",
+      "value": "버전 %d"
+    },
+    {
+      "name": "server_delete",
+      "value": "서버에서 삭제"
+    },
+    {
+      "name": "server_delete_confirm",
+      "value": "이 영화와 미디어 파일을 Jellyfin에서 영구적으로 삭제할까요? 모든 사용자에게 영향을 줍니다. 로컬에 다운로드한 파일은 유지됩니다."
+    },
+    {
+      "name": "trailer",
+      "value": "예고편"
+    },
+    {
+      "name": "trailer_failed",
+      "value": "예고편을 열지 못했습니다. 링크를 확인하거나 이를 지원하는 앱을 설치하세요."
+    },
+    {
+      "name": "seasons",
+      "value": "시즌"
+    },
+    {
+      "name": "episodes",
+      "value": "에피소드"
+    },
+    {
+      "name": "actor_search",
+      "value": "배우 이름 검색"
+    },
+    {
+      "name": "actor_order_play",
+      "value": "재생 횟수"
+    },
+    {
+      "name": "actor_order_watched",
+      "value": "시청한 작품"
+    },
+    {
+      "name": "actor_order_unplayed",
+      "value": "시청하지 않은 작품"
+    },
+    {
+      "name": "actor_order_works",
+      "value": "작품 수"
+    },
+    {
+      "name": "actor_order_recent",
+      "value": "최근 시청"
+    },
+    {
+      "name": "actor_order_name",
+      "value": "이름"
+    },
+    {
+      "name": "actor_order_recommended",
+      "value": "추천 배우"
+    },
+    {
+      "name": "followed_only",
+      "value": "팔로우한 배우만"
+    },
+    {
+      "name": "show_actor_tags",
+      "value": "스타일 태그 표시"
+    },
+    {
+      "name": "clear_filters",
+      "value": "필터 초기화"
+    },
+    {
+      "name": "actor_counts",
+      "value": "작품 %d개 · 시청함 %d개 · 시청하지 않음 %d개"
+    },
+    {
+      "name": "actor_new_count",
+      "value": "팔로우 중 · 새 작품 %d개"
+    },
+    {
+      "name": "no_filter_matches",
+      "value": "이 필터와 일치하는 배우가 없습니다"
+    },
+    {
+      "name": "home_section_failed",
+      "value": "이 섹션을 불러오지 못했습니다"
+    },
+    {
+      "name": "retry",
+      "value": "다시 시도"
+    },
+    {
+      "name": "settings",
+      "value": "설정"
+    },
+    {
+      "name": "cancel_sync",
+      "value": "동기화 취소"
+    },
+    {
+      "name": "sync_cancelled",
+      "value": "동기화를 취소했습니다. 이전 라이브러리와 다운로드는 유지했습니다."
+    },
+    {
+      "name": "pending_changes",
+      "value": "업로드 대기 중인 변경 사항: %d개"
+    },
+    {
+      "name": "flush_changes",
+      "value": "오프라인 변경 사항 업로드"
+    },
+    {
+      "name": "network_failed",
+      "value": "네트워크에 연결하지 못했습니다. 나중에 다시 시도하세요."
+    },
+    {
+      "name": "discover",
+      "value": "새 작품 발견"
+    },
+    {
+      "name": "rewatch",
+      "value": "다시 볼 만한 작품"
+    },
+    {
+      "name": "discovery_hint",
+      "value": "팔로우한 배우와 선호 장르를 바탕으로 추천합니다. 길게 누르면 추천 이유를 볼 수 있습니다."
+    },
+    {
+      "name": "discovery_reason",
+      "value": "추천 이유"
+    },
+    {
+      "name": "discovery_recent",
+      "value": "최근 추가된 미시청 작품"
+    },
+    {
+      "name": "ok",
+      "value": "확인"
+    },
+    {
+      "name": "all",
+      "value": "전체"
+    },
+    {
+      "name": "all_genres",
+      "value": "모든 장르"
+    },
+    {
+      "name": "favorite_search",
+      "value": "이름, 원제 또는 시리즈 검색"
+    },
+    {
+      "name": "unwatched_only",
+      "value": "시청하지 않은 항목만"
+    },
+    {
+      "name": "name_ascending",
+      "value": "이름 오름차순"
+    },
+    {
+      "name": "name_descending",
+      "value": "이름 내림차순"
+    },
+    {
+      "name": "continue_first",
+      "value": "이어서 볼 항목 우선"
+    },
+    {
+      "name": "favorites_loaded",
+      "value": "불러온 항목: 일치하는 %d / %d개"
+    },
+    {
+      "name": "favorites_count",
+      "value": "일치 %d개 / 전체 %d개"
+    },
+    {
+      "name": "select_items",
+      "value": "항목 선택"
+    },
+    {
+      "name": "select_all",
+      "value": "모두 선택"
+    },
+    {
+      "name": "batch_unfavorite",
+      "value": "선택한 즐겨찾기 제거"
+    },
+    {
+      "name": "batch_unfavorite_confirm",
+      "value": "선택한 %d개 항목을 즐겨찾기에서 제거할까요?"
+    },
+    {
+      "name": "confirm",
+      "value": "확인"
+    },
+    {
+      "name": "batch_result",
+      "value": "로컬에서 처리함: %d개, 실패: %d개"
+    },
+    {
+      "name": "undo",
+      "value": "실행 취소"
+    },
+    {
+      "name": "no_matches",
+      "value": "이 필터와 일치하는 즐겨찾기가 없습니다"
+    },
+    {
+      "name": "no_favorites",
+      "value": "아직 즐겨찾기가 없습니다"
+    },
+    {
+      "name": "download_active",
+      "value": "진행 중"
+    },
+    {
+      "name": "download_completed",
+      "value": "완료됨"
+    },
+    {
+      "name": "download_failed",
+      "value": "확인 필요"
+    },
+    {
+      "name": "stop_download",
+      "value": "다운로드 중지"
+    },
+    {
+      "name": "download_failure_reason",
+      "value": "시스템 다운로드에 실패했습니다(%d). 다시 시도할 수 있습니다."
+    },
+    {
+      "name": "download_preferences",
+      "value": "다운로드 설정"
+    },
+    {
+      "name": "remember_source",
+      "value": "다운로드 버전 설정 기억"
+    },
+    {
+      "name": "source_default",
+      "value": "기본 미디어 버전 다운로드"
+    },
+    {
+      "name": "clear_source_preference",
+      "value": "버전 설정 지우기"
+    },
+    {
+      "name": "download_location_hint",
+      "value": "이 계정의 앱 전용 폴더에 저장됩니다. 앱을 삭제하면 이 파일도 삭제됩니다."
+    },
+    {
+      "name": "follow",
+      "value": "팔로우"
+    },
+    {
+      "name": "unfollow",
+      "value": "팔로우 취소"
+    },
+    {
+      "name": "biography_loading",
+      "value": "약력을 불러오는 중입니다. 작품은 먼저 둘러볼 수 있습니다."
+    },
+    {
+      "name": "all_tags",
+      "value": "모든 스타일"
+    },
+    {
+      "name": "tag_evidence",
+      "value": "이 작품 %d개가 이 태그의 근거입니다"
+    },
+    {
+      "name": "actor_tag_boundary",
+      "value": "태그는 라이브러리에 있는 작품의 장르와 주제를 요약합니다. 배역은 서버 메타데이터를 사용합니다."
+    },
+    {
+      "name": "credit_role",
+      "value": "배역: %s"
+    },
+    {
+      "name": "theme_investigation",
+      "value": "수사"
+    },
+    {
+      "name": "theme_revenge",
+      "value": "복수"
+    },
+    {
+      "name": "theme_time_travel",
+      "value": "시간 여행"
+    },
+    {
+      "name": "theme_growth",
+      "value": "성장"
+    },
+    {
+      "name": "change_queued",
+      "value": "변경 사항을 로컬에 저장했으며 업로드를 기다리고 있습니다. 기본 메뉴에서 직접 업로드하세요."
+    },
+    {
+      "name": "batch_download",
+      "value": "이 시즌 다운로드"
+    },
+    {
+      "name": "batch_download_confirm",
+      "value": "선택한 에피소드 %d개를 Wi-Fi로 다운로드할까요? 기존 작업은 건너뜁니다."
+    },
+    {
+      "name": "app_lock",
+      "value": "앱 잠금"
+    },
+    {
+      "name": "lock_unlock",
+      "value": "CineIsle 잠금 해제"
+    },
+    {
+      "name": "lock_pin",
+      "value": "PIN 입력"
+    },
+    {
+      "name": "lock_pin_wrong",
+      "value": "PIN이 틀렸거나 시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."
+    },
+    {
+      "name": "lock_pin_format",
+      "value": "PIN은 숫자 6~12자리여야 합니다"
+    },
+    {
+      "name": "lock_storage_failed",
+      "value": "보안 저장소를 사용할 수 없어 앱 잠금을 유지합니다. 시스템 보안 저장소를 복구한 후 앱을 다시 시작하세요."
+    },
+    {
+      "name": "lock_pin_mismatch",
+      "value": "PIN이 일치하지 않습니다"
+    },
+    {
+      "name": "lock_policy",
+      "value": "숫자 6~12자리의 PIN을 설정하세요. 앱을 새로 시작하거나 백그라운드에서 15분 넘게 지나면 잠깁니다. 잠기면 재생이 일시정지되고 콘텐츠가 숨겨집니다."
+    },
+    {
+      "name": "lock_current_pin",
+      "value": "현재 PIN"
+    },
+    {
+      "name": "lock_new_pin",
+      "value": "새 PIN(숫자 6~12자리)"
+    },
+    {
+      "name": "lock_confirm_pin",
+      "value": "새 PIN 확인"
+    },
+    {
+      "name": "lock_save",
+      "value": "PIN 저장"
+    },
+    {
+      "name": "lock_now",
+      "value": "지금 잠그기"
+    },
+    {
+      "name": "lock_disable",
+      "value": "앱 잠금 해제"
+    },
+    {
+      "name": "offline_mode",
+      "value": "오프라인 모드(이 계정의 캐시와 다운로드만 사용)"
+    },
+    {
+      "name": "offline_mode_enabled",
+      "value": "동기화하기 전에 오프라인 모드를 끄세요"
+    },
+    {
+      "name": "download_create_failed",
+      "value": "시스템 다운로드 작업을 생성하지 못했습니다. 다시 시도할 수 있습니다."
+    },
+    {
+      "name": "controls_lock",
+      "value": "재생 컨트롤 잠금"
+    },
+    {
+      "name": "controls_unlock",
+      "value": "재생 컨트롤 잠금 해제"
+    },
+    {
+      "name": "download_queued",
+      "value": "다운로드 대기 중(최대 4개 작업 동시 실행)"
+    },
+    {
+      "name": "accounts_servers",
+      "value": "계정 및 서버"
+    },
+    {
+      "name": "saved_accounts",
+      "value": "저장된 계정"
+    },
+    {
+      "name": "saved_servers",
+      "value": "저장된 서버"
+    },
+    {
+      "name": "add_account_server",
+      "value": "계정 또는 서버 추가"
+    },
+    {
+      "name": "no_saved_accounts",
+      "value": "아직 저장된 계정이 없습니다"
+    },
+    {
+      "name": "active_account",
+      "value": "현재 계정"
+    },
+    {
+      "name": "switch_account",
+      "value": "전환"
+    },
+    {
+      "name": "remove_saved_account",
+      "value": "계정 제거"
+    },
+    {
+      "name": "remove_account_confirm",
+      "value": "로컬에 저장된 로그인 정보만 제거할까요? 이 계정의 캐시, 오프라인 변경 사항과 다운로드는 유지됩니다. 서버 콘텐츠는 삭제되지 않습니다."
+    },
+    {
+      "name": "remove_saved_server",
+      "value": "서버 제거"
+    },
+    {
+      "name": "remove_server_confirm",
+      "value": "이 서버와 로컬에 저장된 해당 서버의 모든 로그인 정보를 제거할까요? 캐시 데이터와 다운로드는 유지됩니다. 서버 콘텐츠는 삭제되지 않습니다."
+    },
+    {
+      "name": "save_server_only",
+      "value": "서버만 저장"
+    },
+    {
+      "name": "server_display_name",
+      "value": "서버 표시 이름"
+    },
+    {
+      "name": "server_addresses",
+      "value": "서버 이름 및 주소"
+    },
+    {
+      "name": "manage_addresses",
+      "value": "주소 관리"
+    },
+    {
+      "name": "addresses_hint",
+      "value": "한 줄에 완전한 주소를 하나씩, 최대 8개까지 입력하세요. /jellyfin 같은 경로는 유지하세요. 연결에 실패하면 같은 서버인지 확인한 뒤 주소를 순서대로 전환합니다."
+    },
+    {
+      "name": "quick_connect_login",
+      "value": "Quick Connect로 로그인"
+    },
+    {
+      "name": "quick_connect_instructions",
+      "value": "로그인된 Jellyfin 클라이언트에서 설정 → Quick Connect를 열고 이 코드를 입력하여 승인하세요. 5초마다 확인하며, 5분이 지나면 새 코드를 요청해야 합니다."
+    },
+    {
+      "name": "quick_connect_check",
+      "value": "승인했어요 · 로그인 확인"
+    },
+    {
+      "name": "quick_connect_disabled",
+      "value": "이 서버에서 Quick Connect를 사용하지 않습니다. 사용자 이름과 비밀번호로 로그인하세요."
+    },
+    {
+      "name": "quick_connect_expired",
+      "value": "Quick Connect 코드가 만료되었습니다. 새 코드를 요청하세요."
+    },
+    {
+      "name": "quick_connect_cancelled",
+      "value": "Quick Connect를 취소했습니다"
+    },
+    {
+      "name": "account_switching",
+      "value": "계정을 전환하고 있습니다. 잠시 기다리세요."
+    },
+    {
+      "name": "account_not_found",
+      "value": "이 계정은 제거되었습니다. 다시 로그인하세요."
+    },
+    {
+      "name": "server_identity_mismatch",
+      "value": "이 주소는 다른 서버의 주소입니다. 계정 토큰은 전송하지 않았습니다."
+    },
+    {
+      "name": "server_address_conflict",
+      "value": "이 주소는 이미 저장된 다른 서버에 속해 있습니다"
+    },
+    {
+      "name": "server_unavailable",
+      "value": "저장된 모든 주소에 연결할 수 없습니다. 연결 상태를 확인하거나 서버 주소를 관리하세요."
+    },
+    {
+      "name": "account_store_full",
+      "value": "계정 저장 공간이 가득 찼습니다. 사용하지 않는 계정을 먼저 제거하세요."
+    },
+    {
+      "name": "session_save_failed",
+      "value": "로그인 정보를 저장하지 못했습니다. 이전 계정은 유지했습니다."
+    },
+    {
+      "name": "save",
+      "value": "저장"
+    },
+    {
+      "name": "login_cancelled",
+      "value": "로그인을 취소했습니다. 다시 시도하려면 연결하세요."
+    },
+    {
+      "name": "account_unnamed",
+      "value": "이름 없는 계정"
+    },
+    {
+      "name": "reset_saved_accounts",
+      "value": "계정 저장소 초기화"
+    },
+    {
+      "name": "reset_accounts_confirm",
+      "value": "이 기기에 저장된 모든 서버와 로그인 정보를 제거할까요? 손상된 계정 저장소를 복구할 수 있습니다. 캐시 데이터, 오프라인 변경 사항, 다운로드와 PIN은 유지됩니다. 서버 콘텐츠는 삭제되지 않습니다."
+    },
+    {
+      "name": "menu_collection",
+      "value": "내 라이브러리"
+    },
+    {
+      "name": "menu_preferences",
+      "value": "계정 및 환경설정"
+    },
+    {
+      "name": "menu_data",
+      "value": "데이터 및 동기화"
+    },
+    {
+      "name": "server_address_label",
+      "value": "서버 주소"
+    },
+    {
+      "name": "credentials_group",
+      "value": "로컬 로그인 정보"
+    },
+    {
+      "name": "credentials_hint",
+      "value": "로컬에 저장된 로그인 정보만 관리합니다. 캐시 데이터와 다운로드한 파일은 유지됩니다."
+    },
+    {
+      "name": "offline_group",
+      "value": "탐색 및 오프라인"
+    },
+    {
+      "name": "favorite_filters",
+      "value": "즐겨찾기 필터"
+    },
+    {
+      "name": "download_status",
+      "value": "다운로드 상태"
+    },
+    {
+      "name": "selected_count",
+      "value": "%d개 항목 선택됨"
+    },
+    {
+      "name": "player_seek",
+      "value": "재생 위치"
+    },
+    {
+      "name": "player_locked_hint",
+      "value": "재생 컨트롤이 잠겨 있습니다. 오른쪽 위 버튼을 눌러 잠금을 해제하세요."
+    },
+    {
+      "name": "player_system_group",
+      "value": "시스템 재생"
+    },
+    {
+      "name": "player_media_group",
+      "value": "미디어 및 자막"
+    },
+    {
+      "name": "player_queue_group",
+      "value": "속도 및 대기열"
+    },
+    {
+      "name": "player_no_selection",
+      "value": "선택한 항목 없음"
+    },
+    {
+      "name": "recommend_group",
+      "value": "이야기 발견"
+    },
+    {
+      "name": "actor_filters",
+      "value": "배우 필터"
+    },
+    {
+      "name": "actor_sort",
+      "value": "정렬 기준"
+    },
+    {
+      "name": "actor_profile",
+      "value": "프로필 및 팔로우"
+    },
+    {
+      "name": "actor_credits",
+      "value": "작품 및 태그"
+    },
+    {
+      "name": "actor_tags",
+      "value": "작품 태그"
+    },
+    {
+      "name": "media_detail",
+      "value": "미디어 상세 정보"
+    },
+    {
+      "name": "detail_actions",
+      "value": "재생 및 관리"
+    },
+    {
+      "name": "detail_story",
+      "value": "줄거리 및 정보"
+    },
+    {
+      "name": "detail_technical",
+      "value": "버전 및 사양"
+    },
+    {
+      "name": "login_credentials",
+      "value": "라이브러리 연결"
+    },
+    {
+      "name": "login_connections",
+      "value": "다른 연결 옵션"
+    },
+    {
+      "name": "search_group",
+      "value": "라이브러리 검색"
+    },
+    {
+      "name": "search_action",
+      "value": "검색"
+    },
+    {
+      "name": "close_search",
+      "value": "검색 닫기"
+    },
+    {
+      "name": "search_history",
+      "value": "최근 검색"
+    },
+    {
+      "name": "quick_connect_start_hint",
+      "value": "서버 주소를 입력하여 페어링 코드를 요청한 뒤 로그인된 Jellyfin 클라이언트에서 승인하세요."
+    },
+    {
+      "name": "quick_connect_title",
+      "value": "페어링 로그인"
+    },
+    {
+      "name": "loading",
+      "value": "불러오는 중…"
+    },
+    {
+      "name": "favorite_type",
+      "value": "미디어 유형"
+    },
+    {
+      "name": "favorite_genre",
+      "value": "장르"
+    },
+    {
+      "name": "favorite_order",
+      "value": "정렬"
+    },
+    {
+      "name": "no_saved_servers",
+      "value": "아직 저장된 서버가 없습니다"
+    },
+    {
+      "name": "no_seasons",
+      "value": "아직 시즌이 없습니다"
+    },
+    {
+      "name": "no_episodes",
+      "value": "아직 에피소드가 없습니다"
+    },
+    {
+      "name": "library_sort",
+      "value": "정렬 기준"
+    },
+    {
+      "name": "library_order",
+      "value": "정렬 방향"
+    },
+    {
+      "name": "sort_name",
+      "value": "이름"
+    },
+    {
+      "name": "sort_rating",
+      "value": "커뮤니티 평점"
+    },
+    {
+      "name": "sort_critic",
+      "value": "평론가 평점"
+    },
+    {
+      "name": "sort_added",
+      "value": "추가된 날짜"
+    },
+    {
+      "name": "sort_played",
+      "value": "재생한 날짜"
+    },
+    {
+      "name": "sort_premiere",
+      "value": "공개일"
+    },
+    {
+      "name": "sort_ascending",
+      "value": "오름차순"
+    },
+    {
+      "name": "sort_descending",
+      "value": "내림차순"
+    },
+    {
+      "name": "offline_subtitle",
+      "value": "오프라인 자막 · %s"
+    },
+    {
+      "name": "offline_subtitle_failed",
+      "value": "텍스트 자막을 캐시하지 못했습니다. 연결한 후 다시 시도하세요."
+    },
+    {
+      "name": "offline_subtitles_pending",
+      "value": "동영상 다운로드는 완료되었으며 텍스트 자막을 캐시하고 있습니다"
+    },
+    {
+      "name": "offline_subtitles_incomplete",
+      "value": "텍스트 자막이 없거나 일부를 가져오지 못했습니다. 동영상은 계속 재생할 수 있습니다."
+    },
+    {
+      "name": "retry_subtitles",
+      "value": "텍스트 자막 캐시 또는 다시 시도"
+    },
+    {
+      "name": "auto_next_server",
+      "value": "자동 재생은 서버 계정 설정을 따릅니다"
+    },
+    {
+      "name": "auto_next_local",
+      "value": "이 계정의 자동 재생 설정이 로컬에 저장되어 있습니다"
+    },
+    {
+      "name": "auto_next_follow",
+      "value": "서버 설정 다시 따르기"
+    },
+    {
+      "name": "auto_next_load_failed",
+      "value": "자동 재생 설정을 읽지 못했습니다. 현재 자동 재생은 꺼져 있습니다. 서버 설정 따르기를 다시 시도하세요."
+    },
+    {
+      "name": "auto_next_save_failed",
+      "value": "자동 재생 설정을 저장하지 못했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "media_collection",
+      "value": "컬렉션"
+    },
+    {
+      "name": "collection_empty",
+      "value": "이 컬렉션에는 아직 작품이 없습니다"
+    },
+    {
+      "name": "collection_online_required",
+      "value": "컬렉션 항목은 오프라인 캐시에 없습니다. 연결한 후 둘러보세요."
+    },
+    {
+      "name": "collection_cancelled",
+      "value": "컬렉션 불러오기를 취소했습니다"
+    },
+    {
+      "name": "download_mobile",
+      "value": "모바일 데이터 및 종량제 네트워크 다운로드 허용"
+    },
+    {
+      "name": "download_roaming",
+      "value": "로밍 중 다운로드 허용"
+    },
+    {
+      "name": "download_network_hint",
+      "value": "기본적으로 Wi-Fi만 사용하며, 데이터 요금이 부과되는 네트워크와 로밍에서는 다운로드하지 않습니다. 새 동영상, 일괄 대기열과 자막 캐시에 적용됩니다. 변경해도 기존 작업은 영향을 받지 않습니다."
+    },
+    {
+      "name": "download_network_restricted",
+      "value": "현재 네트워크가 다운로드 설정 조건을 충족하지 않습니다. Wi-Fi에 연결하거나 설정을 변경하세요."
+    },
+    {
+      "name": "download_space_check_failed",
+      "value": "다운로드 폴더의 여유 공간을 확인하지 못했습니다. 나중에 다시 시도하세요."
+    },
+    {
+      "name": "download_space_insufficient",
+      "value": "다운로드와 진행 중인 작업에 약 %d MB가 필요하지만, %d MB만 사용할 수 있습니다. 먼저 공간을 확보하세요."
+    },
+    {
+      "name": "download_size_unknown",
+      "value": "미디어 크기를 알 수 없습니다. 여유 공간을 확인하더라도 다운로드를 끝낼 공간이 충분하다고 보장할 수 없습니다."
+    },
+    {
+      "name": "gesture_seek_preview",
+      "value": "놓으면 %s 위치로 이동합니다"
+    },
+    {
+      "name": "gesture_speed_hold",
+      "value": "일시적으로 2배속 · 놓으면 복원"
+    },
+    {
+      "name": "gesture_hint",
+      "value": "두 번 눌러 뒤로 또는 앞으로 이동하고, 가로로 밀어 재생 위치를 바꾸고, 길게 눌러 일시적으로 속도를 높이거나 두 손가락으로 확대할 수 있습니다. 왼쪽을 세로로 밀면 밝기, 오른쪽을 밀면 플레이어 음량이 바뀝니다."
+    },
+    {
+      "name": "public_users_load",
+      "value": "공개 서버 사용자 선택"
+    },
+    {
+      "name": "public_users_empty",
+      "value": "이 서버에는 공개 사용자가 없습니다. 사용자 이름을 직접 입력할 수 있습니다."
+    },
+    {
+      "name": "public_users_invalid",
+      "value": "공개 사용자 데이터가 유효하지 않습니다. 다시 시도하거나 사용자 이름을 직접 입력하세요."
+    },
+    {
+      "name": "player_gesture_preferences",
+      "value": "재생 제스처 및 화면 속 화면"
+    },
+    {
+      "name": "player_gestures_enabled",
+      "value": "재생 제스처 사용"
+    },
+    {
+      "name": "player_seek_gesture",
+      "value": "가로로 밀어 재생 위치 이동"
+    },
+    {
+      "name": "player_zoom_gesture",
+      "value": "두 손가락으로 확대 및 축소"
+    },
+    {
+      "name": "player_start_maximized",
+      "value": "기본적으로 화면을 채우도록 자르기"
+    },
+    {
+      "name": "player_back_seconds",
+      "value": "두 번 눌러 뒤로 이동: 초(1~300)"
+    },
+    {
+      "name": "player_forward_seconds",
+      "value": "두 번 눌러 앞으로 이동: 초(1~300)"
+    },
+    {
+      "name": "player_save_steps",
+      "value": "탐색 시간 간격 저장"
+    },
+    {
+      "name": "player_steps_invalid",
+      "value": "1~300 사이의 정수 초를 입력하세요."
+    },
+    {
+      "name": "player_auto_pip",
+      "value": "백그라운드에서 자동으로 화면 속 화면 전환"
+    },
+    {
+      "name": "player_ui_preferences_hint",
+      "value": "현재 계정에 저장되며 다음에 플레이어를 열 때 적용됩니다. 자동 화면 속 화면은 기본적으로 꺼져 있으며 시스템 지원, 재생 상태와 잠금 상태에 따라 사용할 수 있습니다. PiP와 잠금 화면 버튼은 각각의 탐색 시간 간격을 유지합니다."
+    },
+    {
+      "name": "auto_pip_failed",
+      "value": "현재 자동 화면 속 화면을 사용할 수 없습니다. 직접 전환을 시도할 수 있습니다."
+    },
+    {
+      "name": "sync_schedule_unavailable",
+      "value": "백그라운드 예약 작업을 사용할 수 없습니다. 변경 사항은 보존했으니 더 보기에서 직접 업로드하세요."
+    },
+    {
+      "name": "sync_retry_waiting",
+      "value": "업로드하지 못했습니다. 변경 사항은 보존했으며 자동으로 다시 시도합니다."
+    },
+    {
+      "name": "sync_retry_exhausted",
+      "value": "자동 업로드 재시도를 일시 중지했습니다. 연결 상태를 확인한 후 직접 업로드하세요."
+    },
+    {
+      "name": "sync_auth_required",
+      "value": "자동 업로드를 일시 중지했습니다. 계정 권한을 확인하거나 다시 로그인한 후 직접 업로드하세요."
+    },
+    {
+      "name": "player_fullscreen",
+      "value": "몰입형 전체 화면으로 전환"
+    },
+    {
+      "name": "player_exit_fullscreen",
+      "value": "전체 화면 종료"
+    },
+    {
+      "name": "previous_episode",
+      "value": "이전 에피소드"
+    },
+    {
+      "name": "queue_first_episode",
+      "value": "첫 번째 에피소드입니다."
+    },
+    {
+      "name": "previous_episode_failed",
+      "value": "이전 에피소드를 재생하지 못했습니다. 연결 상태나 다운로드를 확인하세요."
+    },
+    {
+      "name": "window_unavailable",
+      "value": "플레이어 창을 조절하지 못했습니다. 전체 화면을 종료한 후 다시 시도하세요."
+    },
+    {
+      "name": "screen_on_failed",
+      "value": "화면을 켜진 상태로 유지하지 못했습니다. 시스템 설정을 확인하세요."
+    },
+    {
+      "name": "brightness_failed",
+      "value": "창 밝기를 조절하지 못했습니다."
+    },
+    {
+      "name": "volume_failed",
+      "value": "플레이어 음량을 조절하지 못했습니다."
+    },
+    {
+      "name": "player_display_save_failed",
+      "value": "화면 설정을 저장하지 못했습니다. 조절한 값은 현재 재생에는 계속 적용됩니다."
+    },
+    {
+      "name": "player_display_group",
+      "value": "밝기 및 야간 모드"
+    },
+    {
+      "name": "player_window_brightness",
+      "value": "창 밝기"
+    },
+    {
+      "name": "player_brightness_value",
+      "value": "창 밝기: %d%"
+    },
+    {
+      "name": "player_relative_volume",
+      "value": "플레이어 상대 음량"
+    },
+    {
+      "name": "player_volume_value",
+      "value": "플레이어 음량: %d%"
+    },
+    {
+      "name": "player_relative_volume_hint",
+      "value": "이 플레이어의 상대 음량만 변경합니다. 시스템이 음소거 상태이거나 미디어 음량이 작으면 기기의 음량 버튼을 사용하세요."
+    },
+    {
+      "name": "player_night_mode",
+      "value": "야간 화면 필터"
+    },
+    {
+      "name": "player_dim_opacity",
+      "value": "야간 화면 필터 어둡기"
+    },
+    {
+      "name": "player_dim_value",
+      "value": "화면 필터 어둡기: %d%"
+    },
+    {
+      "name": "player_vertical_gesture",
+      "value": "세로로 밀어 밝기 및 플레이어 음량 조절"
+    },
+    {
+      "name": "player_remember_brightness",
+      "value": "이 계정의 창 밝기 기억"
+    },
+    {
+      "name": "search_type",
+      "value": "검색 유형"
+    },
+    {
+      "name": "search_type_all",
+      "value": "모든 유형"
+    },
+    {
+      "name": "search_results_for",
+      "value": "검색: %s"
+    },
+    {
+      "name": "search_loaded_count",
+      "value": "%d / %d개 항목 불러옴"
+    },
+    {
+      "name": "search_cached_count",
+      "value": "이 계정의 캐시에서 %d개 항목을 찾았습니다"
+    },
+    {
+      "name": "search_group_partial",
+      "value": "그룹에는 불러온 결과만 포함됩니다. 더 불러오거나 유형을 선택하면 해당 유형의 전체 결과를 검색할 수 있습니다."
+    },
+    {
+      "name": "search_group_count",
+      "value": "%s · %d개 항목 불러옴"
+    },
+    {
+      "name": "device_name_group",
+      "value": "서버의 기기 이름"
+    },
+    {
+      "name": "device_name_hint",
+      "value": "현재 서버에 표시되는 이 기기의 이름을 최대 64자까지 변경할 수 있습니다. 비워 두면 기본 이름으로 복원됩니다. 서버 권한이 필요합니다."
+    },
+    {
+      "name": "device_name_current",
+      "value": "마지막으로 확인한 이름: %s"
+    },
+    {
+      "name": "device_name_unknown",
+      "value": "서버의 이름을 아직 읽지 않았거나 확인이 필요합니다."
+    },
+    {
+      "name": "device_name_label",
+      "value": "사용자 지정 기기 이름"
+    },
+    {
+      "name": "device_name_default",
+      "value": "기본 기기 이름"
+    },
+    {
+      "name": "device_name_refresh",
+      "value": "서버에서 이름 읽기"
+    },
+    {
+      "name": "device_name_save",
+      "value": "기기 이름 저장"
+    },
+    {
+      "name": "device_name_online_required",
+      "value": "오프라인 모드에서는 서버의 기기 이름을 읽거나 변경할 수 없습니다."
+    },
+    {
+      "name": "device_name_invalid",
+      "value": "줄바꿈이나 제어 문자 없이 최대 64자까지 입력하세요."
+    },
+    {
+      "name": "device_name_cancelled",
+      "value": "작업을 취소했습니다. 기기 이름을 다시 읽으세요."
+    },
+    {
+      "name": "device_name_not_confirmed",
+      "value": "서버에서 반환한 이름이 변경한 이름과 다릅니다."
+    },
+    {
+      "name": "device_name_saved",
+      "value": "서버의 기기 이름이 저장된 것을 확인했습니다."
+    },
+    {
+      "name": "device_name_save_failed",
+      "value": "저장에 실패했거나 결과를 확인할 수 없습니다. 수정하기 전에 서버의 이름을 다시 읽으세요."
+    },
+    {
+      "name": "server_discovery_hint",
+      "value": "약 8초 동안 로컬 네트워크를 검색합니다. 서버를 선택하면 익명으로 확인한 후 주소를 입력해 줍니다. 로그인은 별도로 해야 합니다."
+    },
+    {
+      "name": "discovery_scanning",
+      "value": "로컬 서버 검색 중…"
+    },
+    {
+      "name": "discovery_verifying",
+      "value": "서버 식별 정보 확인 중…"
+    },
+    {
+      "name": "discovery_start",
+      "value": "로컬 네트워크 다시 검색"
+    },
+    {
+      "name": "discovery_stop",
+      "value": "검색 또는 확인 중지"
+    },
+    {
+      "name": "discovery_empty",
+      "value": "서버를 찾지 못했습니다. 같은 네트워크에 연결되어 있는지 확인하거나 주소를 직접 입력하세요."
+    },
+    {
+      "name": "discovery_stopped",
+      "value": "중지했습니다. 주소를 직접 입력하거나 다시 검색하세요."
+    },
+    {
+      "name": "discovery_limit_reached",
+      "value": "검색 한도에 도달했습니다. 서버를 선택하거나 다시 검색하세요."
+    },
+    {
+      "name": "discovery_failed",
+      "value": "로컬 검색에 실패했습니다. 네트워크를 확인한 후 다시 시도하거나 주소를 직접 입력하세요."
+    },
+    {
+      "name": "discovery_cancelled",
+      "value": "검색 또는 확인을 취소했습니다."
+    },
+    {
+      "name": "discovery_verify_timeout",
+      "value": "확인 시간이 초과되었습니다. 서버에 연결할 수 있는지 확인한 후 다시 시도하세요."
+    },
+    {
+      "name": "discovery_verify_failed",
+      "value": "서버를 확인하지 못했습니다. 다시 시도하거나 주소를 직접 입력하세요."
+    },
+    {
+      "name": "api_network_group",
+      "value": "API 연결 및 캐시"
+    },
+    {
+      "name": "api_network_hint",
+      "value": "모든 계정에 적용되는 앱 설정입니다. 각 항목에 1~120초를 입력하세요. 저장한 값은 새로운 API 요청에 적용됩니다. HTTP 전체 제한 시간에는 연결과 읽기가 포함되며, 읽기 제한 시간은 HarmonyOS 방식으로 처리됩니다. 동영상, 이미지, 시스템 다운로드와 로컬 검색은 별도의 전송 정책을 사용합니다."
+    },
+    {
+      "name": "network_request_seconds",
+      "value": "HTTP 전체 제한 시간(초)"
+    },
+    {
+      "name": "network_connect_seconds",
+      "value": "연결 제한 시간(초)"
+    },
+    {
+      "name": "network_read_seconds",
+      "value": "읽기 제한 시간(초)"
+    },
+    {
+      "name": "network_auto_cache",
+      "value": "연결 실패 시 계정 캐시 자동 사용"
+    },
+    {
+      "name": "network_cache_hint",
+      "value": "끄면 연결에 실패해도 자동으로 캐시를 사용하지 않습니다. 수동 오프라인 모드, 다운로드와 대기 중인 변경 사항은 계속 사용할 수 있습니다. 적용하려면 저장하세요."
+    },
+    {
+      "name": "network_options_save",
+      "value": "네트워크 설정 저장"
+    },
+    {
+      "name": "network_options_reset",
+      "value": "네트워크 기본값 복원"
+    },
+    {
+      "name": "network_options_invalid",
+      "value": "네트워크 설정이 유효하지 않습니다. 1~120초 사이의 정수 제한 시간을 입력하세요."
+    },
+    {
+      "name": "network_options_load_failed",
+      "value": "네트워크 설정을 읽지 못했습니다. 기본값이나 마지막으로 저장한 값을 사용합니다."
+    },
+    {
+      "name": "network_options_save_failed",
+      "value": "네트워크 설정을 저장하지 못했습니다. 이전 설정과 현재 입력한 값은 유지했습니다."
+    },
+    {
+      "name": "network_options_restore_failed",
+      "value": "네트워크 설정을 복원하지 못했습니다. 이 화면을 다시 열어 값을 확인하세요."
+    },
+    {
+      "name": "network_options_cancelled",
+      "value": "네트워크 설정 작업을 취소했습니다."
+    },
+    {
+      "name": "network_options_saved",
+      "value": "네트워크 설정을 저장했습니다. 새로운 요청부터 적용됩니다."
+    },
+    {
+      "name": "poster_cache_group",
+      "value": "포스터 및 프로필 이미지 캐시"
+    },
+    {
+      "name": "poster_cache_hint",
+      "value": "기본 용량은 20 MB이며 모든 계정이 공유합니다. 계정별로 구분된 이미지 파일을 총 512개까지 보관합니다. 본 이미지만 캐시하며, 캐시되지 않은 이미지는 오프라인에서 자리 표시자로 표시합니다. 끄면 디스크 읽기와 쓰기가 중지되지만 온라인 이미지는 계속 사용할 수 있고, 기존 파일은 별도로 지울 수 있습니다. 시스템에서 캐시 파일을 정리할 수 있습니다."
+    },
+    {
+      "name": "poster_cache_enabled",
+      "value": "디스크 이미지 캐시 사용"
+    },
+    {
+      "name": "poster_cache_capacity",
+      "value": "용량 한도(1~200 MB)"
+    },
+    {
+      "name": "poster_cache_usage",
+      "value": "이미지 파일: %s MB · %d개"
+    },
+    {
+      "name": "poster_cache_unknown",
+      "value": "이미지 캐시 사용량을 확인할 수 없습니다"
+    },
+    {
+      "name": "poster_options_save",
+      "value": "이미지 캐시 설정 저장"
+    },
+    {
+      "name": "poster_cache_clear",
+      "value": "디스크 이미지 캐시 지우기"
+    },
+    {
+      "name": "poster_cache_clear_confirm",
+      "value": "로컬에 있는 모든 계정의 포스터와 프로필 이미지 캐시를 지울까요? 동영상, 메타데이터 캐시와 대기 중인 변경 사항에는 영향을 주지 않습니다. 현재 이미지는 메모리에 남아 있을 수 있으며, 오프라인에서는 다시 다운로드할 수 없습니다."
+    },
+    {
+      "name": "poster_options_invalid",
+      "value": "1~200 MB 사이의 정수 용량을 입력하세요."
+    },
+    {
+      "name": "poster_options_saved",
+      "value": "이미지 캐시 설정을 저장했습니다."
+    },
+    {
+      "name": "poster_options_load_failed",
+      "value": "이미지 캐시 설정을 읽지 못해 기본값을 사용합니다."
+    },
+    {
+      "name": "poster_options_save_failed",
+      "value": "이미지 캐시 설정이 저장되었는지 확인할 수 없습니다. 입력한 값을 유지하고 다시 시도하세요."
+    },
+    {
+      "name": "poster_options_restore_failed",
+      "value": "이미지 캐시 설정을 복원하지 못했습니다. 앱을 다시 시작하여 확인하세요."
+    },
+    {
+      "name": "poster_cache_unavailable",
+      "value": "이미지 캐시에 접근하거나 사용량을 측정하지 못했습니다. 온라인 이미지 불러오기는 계속 시도할 수 있습니다."
+    },
+    {
+      "name": "poster_cache_trim_failed",
+      "value": "설정은 저장했지만 캐시 용량 정리를 완료하지 못했습니다. 캐시 지우기를 다시 시도하세요."
+    },
+    {
+      "name": "poster_cache_cleared",
+      "value": "디스크 이미지 캐시를 지웠습니다."
+    },
+    {
+      "name": "poster_cache_clear_failed",
+      "value": "이미지 캐시 지우기를 완료하지 못했습니다. 남은 사용량을 확인한 후 다시 시도하세요."
+    },
+    {
+      "name": "player_trickplay",
+      "value": "탐색 미리보기 이미지"
+    },
+    {
+      "name": "player_trickplay_hint",
+      "value": "서버의 Jellyscrub BIF 미리보기가 필요합니다. 캐시된 미리보기는 오프라인에서도 사용할 수 있습니다. 32 MiB / 파일 16개 한도에 따라 오래된 미리보기가 삭제될 수 있습니다."
+    },
+    {
+      "name": "player_trickplay_frame",
+      "value": "이동할 위치 미리보기"
+    },
+    {
+      "name": "player_trickplay_save_failed",
+      "value": "탐색 미리보기 이미지 설정을 저장하지 못했습니다"
+    },
+    {
+      "name": "ui_language_group",
+      "value": "앱 언어"
+    },
+    {
+      "name": "ui_language_hint",
+      "value": "중국어 간체·번체, 영어, 프랑스어, 스페인어, 독일어, 이탈리아어, 포르투갈어(포르투갈·브라질), 한국어를 지원합니다. 그 외 시스템 언어는 영어로 표시됩니다. 모든 계정에 적용되는 설정이며 인터페이스만 바꿉니다. 미디어 메타데이터와 오디오·자막 언어 설정은 별도로 유지됩니다."
+    },
+    {
+      "name": "ui_language_system",
+      "value": "시스템 설정 따르기"
+    },
+    {
+      "name": "ui_language_save",
+      "value": "앱 언어 저장 및 적용"
+    },
+    {
+      "name": "ui_language_saved",
+      "value": "앱 언어를 저장하고 적용했습니다"
+    },
+    {
+      "name": "ui_language_invalid",
+      "value": "앱 언어 설정이 유효하지 않습니다. 언어를 선택한 후 다시 저장하세요."
+    },
+    {
+      "name": "ui_language_load_failed",
+      "value": "앱 언어 설정을 읽지 못했습니다. 설정 화면을 다시 열어 재시도하세요."
+    },
+    {
+      "name": "ui_language_save_failed",
+      "value": "앱 언어를 저장하지 못해 이전 설정으로 복원했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "ui_language_restore_failed",
+      "value": "앱 언어를 복원하지 못했습니다. 현재 설정을 확인할 수 없으니 앱을 다시 시작하고 저장하세요."
+    },
+    {
+      "name": "ui_language_cancelled",
+      "value": "앱 언어 변경을 취소했습니다"
+    },
+    {
+      "name": "ui_language_apply_failed",
+      "value": "앱 언어를 업데이트하지 못했습니다. 설정 화면을 다시 열어 재시도하세요."
+    },
+    {
+      "name": "appearance_group",
+      "value": "디자인 및 상세 정보"
+    },
+    {
+      "name": "appearance_amoled",
+      "value": "AMOLED 검은색 배경"
+    },
+    {
+      "name": "appearance_amoled_hint",
+      "value": "화면, 카드, 입력란과 시스템 바의 배경을 검은색으로 표시합니다. 끄면 CineIsle의 기본 어두운 팔레트로 복원됩니다. 모든 계정에 즉시 적용되며 다시 시작해도 유지됩니다."
+    },
+    {
+      "name": "appearance_extra_info",
+      "value": "추가 미디어 정보 표시"
+    },
+    {
+      "name": "appearance_extra_hint",
+      "value": "영화와 에피소드의 상세 화면에 파일 크기와 동영상, 오디오, 자막의 전체 사양을 표시합니다. 꺼도 줄거리, 기본 태그와 배역 정보는 유지됩니다."
+    },
+    {
+      "name": "appearance_saved",
+      "value": "디자인 설정을 저장하고 적용했습니다"
+    },
+    {
+      "name": "appearance_invalid",
+      "value": "저장된 디자인 설정이 유효하지 않습니다. 다시 선택하세요."
+    },
+    {
+      "name": "appearance_load_failed",
+      "value": "디자인 설정을 읽지 못했습니다. 설정 화면을 다시 열어 재시도하세요."
+    },
+    {
+      "name": "appearance_unavailable",
+      "value": "창 디자인을 사용할 수 없습니다. 설정 화면을 다시 열어 재시도하세요."
+    },
+    {
+      "name": "appearance_cancelled",
+      "value": "디자인 변경을 취소했습니다"
+    },
+    {
+      "name": "appearance_save_failed",
+      "value": "디자인을 저장하지 못해 복원을 시도했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "appearance_restore_failed",
+      "value": "디자인 복원 결과를 확인할 수 없습니다. 설정 화면을 다시 열어 확인한 후 재시도하세요."
+    },
+    {
+      "name": "dynamic_colors",
+      "value": "배경화면 색상"
+    },
+    {
+      "name": "dynamic_colors_hint",
+      "value": "시스템 배경화면 색상을 바탕으로 CineIsle의 어두운 팔레트를 만듭니다. 기본적으로 켜져 있습니다. 색상을 읽지 못하면 기본 팔레트를 사용하고 포그라운드로 돌아올 때 다시 시도합니다. AMOLED 영역은 검은색을 유지합니다."
+    },
+    {
+      "name": "dynamic_colors_loading",
+      "value": "배경화면 색상 확인 중…"
+    },
+    {
+      "name": "dynamic_colors_active",
+      "value": "현재 배경화면 색상을 적용했습니다"
+    },
+    {
+      "name": "dynamic_colors_off",
+      "value": "CineIsle 기본 팔레트를 사용하고 있습니다"
+    },
+    {
+      "name": "dynamic_colors_fallback",
+      "value": "배경화면 색상을 사용할 수 없어 CineIsle 기본 팔레트를 사용합니다. 포그라운드로 돌아오면 다시 시도합니다."
+    },
+    {
+      "name": "dynamic_colors_update_failed",
+      "value": "창 색상을 업데이트하지 못해 이전 팔레트로 복원을 시도했습니다. 설정 화면을 다시 열어 확인하세요."
+    },
+    {
+      "name": "sync_cache_write_failed",
+      "value": "로컬 캐시를 저장하지 못했습니다. 변경 사항은 보존했으니 저장 공간을 확보한 후 다시 시도하세요."
+    },
+    {
+      "name": "caption_settings_title",
+      "value": "시스템 자막 스타일"
+    },
+    {
+      "name": "caption_scope",
+      "value": "시스템 자막 설정을 변경하며 이를 지원하는 다른 앱에도 영향을 줍니다. 뒤로 가면 초안을 버립니다."
+    },
+    {
+      "name": "caption_unavailable",
+      "value": "이 기기에서는 시스템 자막 스타일을 사용할 수 없어 기본 자막 스타일로 재생합니다."
+    },
+    {
+      "name": "caption_invalid",
+      "value": "자막 설정이 유효하지 않습니다. 글꼴 배율과 색상 형식을 확인하세요."
+    },
+    {
+      "name": "caption_changed",
+      "value": "시스템 자막 설정이 변경되었습니다. 변경 사항을 적용하기 전에 다시 불러오세요."
+    },
+    {
+      "name": "caption_save_failed",
+      "value": "시스템 자막 스타일을 저장하지 못했습니다. 이전 설정은 유지하거나 복원했습니다."
+    },
+    {
+      "name": "caption_save_unconfirmed",
+      "value": "저장 또는 복원 결과를 확인할 수 없습니다. 시스템 설정을 다시 불러오세요."
+    },
+    {
+      "name": "caption_saved",
+      "value": "시스템 자막 스타일을 적용했습니다."
+    },
+    {
+      "name": "caption_active",
+      "value": "시스템 자막 스타일을 사용하고 있습니다"
+    },
+    {
+      "name": "caption_default",
+      "value": "시스템 자막 스타일이 꺼져 있어 기본 자막 스타일로 재생합니다."
+    },
+    {
+      "name": "caption_enabled",
+      "value": "시스템 자막 스타일 사용"
+    },
+    {
+      "name": "caption_scale",
+      "value": "글꼴 배율(1~200%)"
+    },
+    {
+      "name": "caption_family",
+      "value": "글꼴 모음"
+    },
+    {
+      "name": "caption_edge",
+      "value": "글자 테두리"
+    },
+    {
+      "name": "caption_foreground",
+      "value": "글자색"
+    },
+    {
+      "name": "caption_background",
+      "value": "글자 배경색"
+    },
+    {
+      "name": "caption_window",
+      "value": "자막 창 색상"
+    },
+    {
+      "name": "caption_color_hint",
+      "value": "#RRGGBB 또는 #AARRGGBB를 사용하세요. AA는 불투명도이며, 00은 투명, FF는 불투명입니다."
+    },
+    {
+      "name": "caption_preview",
+      "value": "자막 스타일 미리보기"
+    },
+    {
+      "name": "caption_preview_text",
+      "value": "CineIsle 자막 미리보기\n두 번째 자막 줄"
+    },
+    {
+      "name": "caption_apply",
+      "value": "시스템 자막에 적용"
+    },
+    {
+      "name": "caption_reload",
+      "value": "시스템 스타일 다시 불러오기"
+    },
+    {
+      "name": "caption_preset_light",
+      "value": "어두운 배경에 흰색"
+    },
+    {
+      "name": "caption_preset_yellow",
+      "value": "어두운 배경에 노란색"
+    },
+    {
+      "name": "caption_unsaved",
+      "value": "저장하지 않은 미리보기입니다. 이 스타일을 사용하려면 적용하세요."
+    },
+    {
+      "name": "caption_family_default",
+      "value": "시스템 기본값"
+    },
+    {
+      "name": "caption_family_mono_serif",
+      "value": "고정폭 세리프"
+    },
+    {
+      "name": "caption_family_serif",
+      "value": "세리프"
+    },
+    {
+      "name": "caption_family_mono_sans",
+      "value": "고정폭 산세리프"
+    },
+    {
+      "name": "caption_family_sans",
+      "value": "산세리프"
+    },
+    {
+      "name": "caption_family_casual",
+      "value": "캐주얼"
+    },
+    {
+      "name": "caption_family_cursive",
+      "value": "필기체"
+    },
+    {
+      "name": "caption_family_small_caps",
+      "value": "작은 대문자"
+    },
+    {
+      "name": "caption_edge_none",
+      "value": "없음"
+    },
+    {
+      "name": "caption_edge_raised",
+      "value": "양각"
+    },
+    {
+      "name": "caption_edge_depressed",
+      "value": "음각"
+    },
+    {
+      "name": "caption_edge_uniform",
+      "value": "외곽선"
+    },
+    {
+      "name": "caption_edge_shadow",
+      "value": "그림자"
+    },
+    {
+      "name": "change_queued_blocked",
+      "value": "변경 사항은 로컬에 저장했지만 서버에서 확인하지 못했습니다. 자동 업로드는 일시 중지되었습니다. 서버나 계정을 확인한 후 직접 다시 시도하세요."
+    },
+    {
+      "name": "batch_queued",
+      "value": "%d개 업로드 대기 중"
+    },
+    {
+      "name": "engine_title",
+      "value": "재생 엔진"
+    },
+    {
+      "name": "engine_current",
+      "value": "현재 엔진: %s"
+    },
+    {
+      "name": "engine_unknown",
+      "value": "저장된 엔진을 아직 확인하지 못했습니다"
+    },
+    {
+      "name": "engine_hint",
+      "value": "새로 여는 동영상에 적용됩니다. 변경해도 현재 동영상에는 영향을 주지 않습니다."
+    },
+    {
+      "name": "engine_native",
+      "value": "시스템 플레이어"
+    },
+    {
+      "name": "engine_mpv",
+      "value": "MPV 플레이어"
+    },
+    {
+      "name": "engine_mpv_requires_api",
+      "value": "MPV는 HarmonyOS API15 이상이 필요합니다."
+    },
+    {
+      "name": "engine_mpv_unavailable",
+      "value": "MPV를 사용할 수 없습니다. 기기 지원 여부를 확인하거나 설정에서 시스템 플레이어를 직접 선택하세요."
+    },
+    {
+      "name": "engine_load_failed",
+      "value": "재생 엔진 설정을 읽을 수 없습니다. 다시 시도하거나 설정에서 엔진을 선택하세요."
+    },
+    {
+      "name": "engine_invalid",
+      "value": "재생 엔진 설정이 유효하지 않습니다. 엔진을 다시 선택하세요."
+    },
+    {
+      "name": "engine_save_failed",
+      "value": "엔진을 저장하지 못했습니다. 이전 선택은 유지했습니다."
+    },
+    {
+      "name": "engine_restore_failed",
+      "value": "엔진 설정을 복원하지 못했습니다. 재생하기 전에 다시 선택하여 저장하세요."
+    },
+    {
+      "name": "engine_cancelled",
+      "value": "엔진 설정을 취소했습니다"
+    },
+    {
+      "name": "engine_saved",
+      "value": "저장했습니다. 새로 여는 동영상부터 이 엔진을 사용합니다."
+    },
+    {
+      "name": "mpv_options_title",
+      "value": "MPV 재생 옵션"
+    },
+    {
+      "name": "mpv_hardware_label",
+      "value": "디코딩 모드"
+    },
+    {
+      "name": "mpv_video_label",
+      "value": "동영상 출력"
+    },
+    {
+      "name": "mpv_hardware_software",
+      "value": "소프트웨어 디코딩"
+    },
+    {
+      "name": "mpv_hardware_ohcodec",
+      "value": "OpenHarmony 하드웨어 디코딩"
+    },
+    {
+      "name": "mpv_hardware_copy",
+      "value": "OpenHarmony 하드웨어 디코딩(카피백)"
+    },
+    {
+      "name": "mpv_options_hint",
+      "value": "앱 전체에 저장되며 다음 동영상부터 적용됩니다. 하드웨어 디코딩을 사용할 수 없으면 소프트웨어로 전환될 수 있으며, 플레이어에서 실제 사용 중인 백엔드를 표시합니다."
+    },
+    {
+      "name": "mpv_audio_fixed",
+      "value": "오디오 출력은 OpenHarmony 시스템 오디오를 사용합니다."
+    },
+    {
+      "name": "mpv_options_current",
+      "value": "저장됨: 디코딩 %s · 동영상 %s"
+    },
+    {
+      "name": "mpv_options_unknown",
+      "value": "MPV 옵션을 확인하지 못했습니다. 유효하지 않은 설정을 복구하려면 옵션을 선택하고 저장하세요."
+    },
+    {
+      "name": "mpv_options_save",
+      "value": "MPV 옵션 저장"
+    },
+    {
+      "name": "mpv_options_saved",
+      "value": "다음 동영상에 사용할 MPV 옵션을 저장했습니다"
+    },
+    {
+      "name": "mpv_options_invalid",
+      "value": "MPV 옵션이 유효하지 않거나 지원되지 않습니다. 다시 선택하고 저장하세요."
+    },
+    {
+      "name": "mpv_options_load_failed",
+      "value": "MPV 옵션을 읽을 수 없습니다"
+    },
+    {
+      "name": "mpv_options_save_failed",
+      "value": "MPV 옵션을 저장하지 못했습니다. 다시 시도하세요."
+    },
+    {
+      "name": "mpv_options_restore_failed",
+      "value": "MPV 옵션을 복원하지 못했습니다. 재생하기 전에 다시 선택하고 저장하세요."
+    },
+    {
+      "name": "mpv_options_cancelled",
+      "value": "MPV 옵션 저장을 취소했습니다"
+    },
+    {
+      "name": "mpv_backend_actual",
+      "value": "실제 디코딩: %s · 동영상: %s · 오디오: %s"
+    },
+    {
+      "name": "mpv_backend_unknown",
+      "value": "아직 정보가 없습니다"
+    }
+  ]
+}

@@ -1978,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Compatível com chinês simplificado, chinês tradicional, inglês, francês, espanhol, alemão, italiano, português de Portugal e português do Brasil. Outros idiomas do sistema usam inglês. Esta definição aplica-se a toda a aplicação e altera apenas a interface; os metadados multimédia e as preferências de áudio e legendas são independentes."
+      "value": "Compatível com chinês simplificado, chinês tradicional, inglês, francês, espanhol, alemão, italiano, português de Portugal, português do Brasil e coreano. Outros idiomas do sistema usam inglês. Esta definição aplica-se a toda a aplicação e altera apenas a interface; os metadados multimédia e as preferências de áudio e legendas são independentes."
     },
     {
       "name": "ui_language_system",

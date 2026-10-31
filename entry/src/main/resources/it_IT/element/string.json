@@ -1978,7 +1978,7 @@
     },
     {
       "name": "ui_language_hint",
-      "value": "Supporta cinese semplificato, cinese tradizionale, inglese, francese, spagnolo, tedesco, italiano, portoghese del Portogallo e portoghese brasiliano. Per le altre lingue di sistema si usa l'inglese. Questa impostazione condivisa cambia solo l'interfaccia; i metadati multimediali e le preferenze di audio e sottotitoli restano separati."
+      "value": "Supporta cinese semplificato, cinese tradizionale, inglese, francese, spagnolo, tedesco, italiano, portoghese del Portogallo, portoghese brasiliano e coreano. Per le altre lingue di sistema si usa l'inglese. Questa impostazione condivisa cambia solo l'interfaccia; i metadati multimediali e le preferenze di audio e sottotitoli restano separati."
     },
     {
       "name": "ui_language_system",
