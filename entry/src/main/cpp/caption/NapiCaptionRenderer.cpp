@@ -69,12 +69,36 @@ uint32_t Integer(napi_env env, napi_value value, uint32_t minimum, uint32_t maxi
 }
 bool Boolean(napi_env env, napi_value value) { bool result; Check(napi_get_value_bool(env, value, &result)); return result; }
 std::string String(napi_env env, napi_value value, size_t maximum, size_t *units = nullptr) {
-    size_t length; Check(napi_get_value_string_utf8(env, value, nullptr, 0, &length));
+    // Read bounded UTF-16 instead of accepting platform-specific UTF-8 for lone
+    // surrogates (some Ark runtimes return CESU-8, which Drawing cannot shape).
+    size_t length; Check(napi_get_value_string_utf16(env, value, nullptr, 0, &length));
     if (length > maximum) { throw std::invalid_argument("caption_text_too_large"); }
-    std::vector<char> buffer(length + 1); Check(napi_get_value_string_utf8(env, value, buffer.data(), buffer.size(), &length));
-    std::string result(buffer.data(), length);
-    if (result.find('\0') != std::string::npos) { throw std::invalid_argument("caption_text_invalid"); }
-    if (units) { Check(napi_get_value_string_utf16(env, value, nullptr, 0, units)); }
+    std::vector<char16_t> buffer(length + 1);
+    Check(napi_get_value_string_utf16(env, value, buffer.data(), buffer.size(), &length));
+    if (units) { *units = length; }
+    std::string result;
+    constexpr uint32_t kHighFirst = 0xD800, kHighLast = 0xDBFF;
+    constexpr uint32_t kLowFirst = 0xDC00, kLowLast = 0xDFFF, kReplacement = 0xFFFD;
+    for (size_t i = 0; i < length; ++i) {
+        uint32_t code = buffer[i];
+        if (!code) { throw std::invalid_argument("caption_text_invalid"); }
+        if (code >= kHighFirst && code <= kHighLast) {
+            if (i + 1 < length && buffer[i + 1] >= kLowFirst && buffer[i + 1] <= kLowLast) {
+                code = 0x10000 + ((code - kHighFirst) << 10) + (buffer[++i] - kLowFirst);
+            } else { code = kReplacement; }
+        } else if (code >= kLowFirst && code <= kLowLast) { code = kReplacement; }
+        // Canonical UTF-8. Replacement preserves the original UTF-16 unit count
+        // and paragraph offsets; valid supplementary pairs keep both units.
+        const size_t bytes = code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
+        if (result.size() + bytes > maximum) { throw std::invalid_argument("caption_text_too_large"); }
+        if (bytes == 1) { result.push_back(char(code)); }
+        else {
+            if (bytes == 4) { result.push_back(char(0xF0 | (code >> 18))); }
+            if (bytes >= 3) { result.push_back(char((bytes == 3 ? 0xE0 : 0x80) | ((code >> 12) & (bytes == 3 ? 0x0F : 0x3F)))); }
+            result.push_back(char((bytes == 2 ? 0xC0 : 0x80) | ((code >> 6) & (bytes == 2 ? 0x1F : 0x3F))));
+            result.push_back(char(0x80 | (code & 0x3F)));
+        }
+    }
     return result;
 }
 Request Read(napi_env env, napi_value value) {

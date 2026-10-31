@@ -4,8 +4,9 @@ Adapted entity data from TagSoup HTMLSchema.java.
 Copyright 2002-2008 by John Cowan.
 Licensed under the Apache License, Version 2.0.
 Lexical behavior is reimplemented against Android API34 TagSoup HTMLScanner
-and independent framework/Media3 runtime captures. Entity declarations are
-adapted; no TagSoup runtime dependency is included.
+and Parser entity/name handling, with independent framework/Media3 runtime
+captures. Entity declarations and semantics are adapted; no TagSoup runtime
+dependency is included.
 
 Source: https://android.googlesource.com/platform/external/tagsoup/
 
