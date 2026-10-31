@@ -1,11 +1,12 @@
-export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-PT' | 'pt-BR';
-export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR'];
+export type UiLanguage = 'system' | 'zh-CN' | 'zh-TW' | 'en-US' | 'fr-FR' | 'es-ES' | 'de-DE' | 'it-IT' | 'pt-PT' | 'pt-BR' | 'ko-KR';
+export const UI_LANGUAGES: UiLanguage[] = ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR'];
 export function validUiLanguage(value: string): boolean { return UI_LANGUAGES.includes(value as UiLanguage); }
 export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): string {
   if (choice === 'system') { return systemLabel; }
   if (choice === 'zh-CN') { return '简体中文'; }
   if (choice === 'pt-PT') { return 'Português (Portugal)'; }
   if (choice === 'pt-BR') { return 'Português (Brasil)'; }
+  if (choice === 'ko-KR') { return '한국어'; }
   if (choice === 'it-IT') { return 'Italiano'; }
   if (choice === 'de-DE') { return 'Deutsch'; }
   if (choice === 'es-ES') { return 'Español'; }
@@ -15,6 +16,18 @@ export function uiLanguageCaption(choice: UiLanguage, systemLabel: string): stri
 export function effectiveUiLanguage(choice: UiLanguage, system: string): string {
   if (choice !== 'system') { return choice; }
   const parts = system.trim().replace(/_/g, '-').toLowerCase().split('-');
+  if (parts[0] === 'ko') {
+    if (parts.some(part => !/^[a-z0-9]{1,8}$/.test(part))) { return 'en-US'; }
+    // The Korean pack serves Korean regions; incompatible explicit scripts keep the fallback.
+    let regionIndex = 1;
+    if (parts[1]?.length === 4) {
+      if (parts[1] !== 'kore' && parts[1] !== 'hang') { return 'en-US'; }
+      regionIndex = 2;
+    }
+    const region = parts[regionIndex] ?? '';
+    if (region === '' || /^[a-z]{2}$|^\d{3}$/.test(region) || region.length === 1) { return 'ko-KR'; }
+    return 'en-US';
+  }
   if (parts[0] === 'pt') {
     if (parts.some(part => !/^[a-z0-9]{1,8}$/.test(part))) { return 'en-US'; }
     // Only the region subtag selects Brazil; extension/private-use BR is not a region.
