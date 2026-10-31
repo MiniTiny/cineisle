@@ -24,7 +24,7 @@ const read = p => JSON.parse(fs.readFileSync(p)).string;
 const values = () => Object.fromEntries(read('entry/src/main/resources/ko_KR/element/string.json').map(r => [r.name, r.value]));
 const disk = () => JSON.parse(fs.readFileSync(path.join(h.directory, 'ui_language.fixture.json')));
 test('Korean is a canonical unique choice and preserves the existing choice order', () => {
-  assert.deepEqual(Array.from(UI_LANGUAGES), ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU']);
+  assert.deepEqual(Array.from(UI_LANGUAGES), ['system', 'zh-CN', 'zh-TW', 'en-US', 'fr-FR', 'es-ES', 'de-DE', 'it-IT', 'pt-PT', 'pt-BR', 'ko-KR', 'ru-RU', 'pl-PL']);
   assert.equal(validUiLanguage('ko-KR'), true); assert.equal(uiLanguageCaption('ko-KR', 'System'), '한국어');
   for (const input of ['ko', 'ko_KR', 'KO-KR', 'ko-Kore-KR', 'ko-KR-x-test', ' ko-KR', '../ko-KR']) assert.equal(validUiLanguage(input), false, input);
 });
