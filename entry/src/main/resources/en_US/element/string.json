@@ -1,13 +1,7 @@
 {
   "string": [
-    {
-      "name": "player_retry",
-      "value": "Retry playback"
-    },
-    {
-      "name": "player_failure_hint",
-      "value": "Playback could not continue. Retry this version or choose another version in playback options."
-    },
+    {"name": "player_retry", "value": "Retry playback"},
+    {"name": "player_failure_hint", "value": "Playback could not continue. Retry this version or choose another version in playback options."},
     {
       "name": "player_skip_intro",
       "value": "Skip intro"
@@ -2016,377 +2010,101 @@
       "name": "ui_language_apply_failed",
       "value": "Could not update the app language. Reopen Settings and retry."
     },
-    {
-      "name": "appearance_group",
-      "value": "Appearance and details"
-    },
-    {
-      "name": "appearance_amoled",
-      "value": "AMOLED black backgrounds"
-    },
-    {
-      "name": "appearance_amoled_hint",
-      "value": "Use black page, card, input and system bar backgrounds. Turn off to restore the CineIsle dark palette. Shared app-wide, applied immediately and kept after restart."
-    },
-    {
-      "name": "appearance_extra_info",
-      "value": "Show extra media information"
-    },
-    {
-      "name": "appearance_extra_hint",
-      "value": "Show file size and full video, audio and subtitle specifications in movie and episode details. When off, the story, basic tags and cast remain visible."
-    },
-    {
-      "name": "appearance_saved",
-      "value": "Appearance settings saved and applied"
-    },
-    {
-      "name": "appearance_invalid",
-      "value": "Saved appearance settings are invalid. Choose your settings again."
-    },
-    {
-      "name": "appearance_load_failed",
-      "value": "Could not read appearance settings. Reopen Settings and retry."
-    },
-    {
-      "name": "appearance_unavailable",
-      "value": "Window appearance is unavailable. Reopen Settings and retry."
-    },
-    {
-      "name": "appearance_cancelled",
-      "value": "Appearance change cancelled"
-    },
-    {
-      "name": "appearance_save_failed",
-      "value": "Could not save appearance settings. Restoration was attempted. Please retry."
-    },
-    {
-      "name": "appearance_restore_failed",
-      "value": "Appearance restoration is unconfirmed. Reopen Settings to verify and retry."
-    },
-    {
-      "name": "dynamic_colors",
-      "value": "Wallpaper colors"
-    },
-    {
-      "name": "dynamic_colors_hint",
-      "value": "Generate a CineIsle dark palette from system wallpaper colors; enabled by default. If colors cannot be read, use the original palette and retry on returning to the foreground. AMOLED containers stay black."
-    },
-    {
-      "name": "dynamic_colors_loading",
-      "value": "Checking wallpaper colors…"
-    },
-    {
-      "name": "dynamic_colors_active",
-      "value": "Current wallpaper colors applied"
-    },
-    {
-      "name": "dynamic_colors_off",
-      "value": "Using the original CineIsle palette"
-    },
-    {
-      "name": "dynamic_colors_fallback",
-      "value": "Wallpaper colors are unavailable. Using the original CineIsle palette; returning to the foreground will retry."
-    },
-    {
-      "name": "dynamic_colors_update_failed",
-      "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."
-    },
+    {"name": "appearance_group", "value": "Appearance and details"},
+    {"name": "appearance_amoled", "value": "AMOLED black backgrounds"},
+    {"name": "appearance_amoled_hint", "value": "Use black page, card, input and system bar backgrounds. Turn off to restore the CineIsle dark palette. Shared app-wide, applied immediately and kept after restart."},
+    {"name": "appearance_extra_info", "value": "Show extra media information"},
+    {"name": "appearance_extra_hint", "value": "Show file size and full video, audio and subtitle specifications in movie and episode details. When off, the story, basic tags and cast remain visible."},
+    {"name": "appearance_saved", "value": "Appearance settings saved and applied"},
+    {"name": "appearance_invalid", "value": "Saved appearance settings are invalid. Choose your settings again."},
+    {"name": "appearance_load_failed", "value": "Could not read appearance settings. Reopen Settings and retry."},
+    {"name": "appearance_unavailable", "value": "Window appearance is unavailable. Reopen Settings and retry."},
+    {"name": "appearance_cancelled", "value": "Appearance change cancelled"},
+    {"name": "appearance_save_failed", "value": "Could not save appearance settings. Restoration was attempted. Please retry."},
+    {"name": "appearance_restore_failed", "value": "Appearance restoration is unconfirmed. Reopen Settings to verify and retry."},
+    {"name": "dynamic_colors", "value": "Wallpaper colors"},
+    {"name": "dynamic_colors_hint", "value": "Generate a CineIsle dark palette from system wallpaper colors; enabled by default. If colors cannot be read, use the original palette and retry on returning to the foreground. AMOLED containers stay black."},
+    {"name": "dynamic_colors_loading", "value": "Checking wallpaper colors…"},
+    {"name": "dynamic_colors_active", "value": "Current wallpaper colors applied"},
+    {"name": "dynamic_colors_off", "value": "Using the original CineIsle palette"},
+    {"name": "dynamic_colors_fallback", "value": "Wallpaper colors are unavailable. Using the original CineIsle palette; returning to the foreground will retry."},
+    {"name": "dynamic_colors_update_failed", "value": "Could not update window colors. Restoration of the previous palette was attempted; reopen Settings to verify."},
     {
       "name": "sync_cache_write_failed",
       "value": "The local cache could not be saved. Changes are retained; free storage space and retry."
     },
-    {
-      "name": "caption_settings_title",
-      "value": "System caption style"
-    },
-    {
-      "name": "caption_scope",
-      "value": "These settings change the system caption configuration and affect other apps that support it. Going back discards the draft."
-    },
-    {
-      "name": "caption_unavailable",
-      "value": "System caption styles are unavailable on this device. Playback uses the default subtitle style."
-    },
-    {
-      "name": "caption_invalid",
-      "value": "Invalid caption configuration. Check the font scale and color format."
-    },
-    {
-      "name": "caption_changed",
-      "value": "The system caption configuration changed. Reload it before applying your changes."
-    },
-    {
-      "name": "caption_save_failed",
-      "value": "Could not save the system caption style. The previous configuration was retained or restored."
-    },
-    {
-      "name": "caption_save_unconfirmed",
-      "value": "Could not confirm the save or restoration result. Reload the system configuration."
-    },
-    {
-      "name": "caption_saved",
-      "value": "System caption style applied."
-    },
-    {
-      "name": "caption_active",
-      "value": "Using the system caption style"
-    },
-    {
-      "name": "caption_default",
-      "value": "System caption styling is off. Playback uses the default subtitle style."
-    },
-    {
-      "name": "caption_enabled",
-      "value": "Use system caption style"
-    },
-    {
-      "name": "caption_scale",
-      "value": "Font scale (1–200%)"
-    },
-    {
-      "name": "caption_family",
-      "value": "Font family"
-    },
-    {
-      "name": "caption_edge",
-      "value": "Text edge"
-    },
-    {
-      "name": "caption_foreground",
-      "value": "Text color"
-    },
-    {
-      "name": "caption_background",
-      "value": "Text background color"
-    },
-    {
-      "name": "caption_window",
-      "value": "Caption window color"
-    },
-    {
-      "name": "caption_color_hint",
-      "value": "Use #RRGGBB or #AARRGGBB. AA is opacity: 00 is transparent and FF is opaque."
-    },
-    {
-      "name": "caption_preview",
-      "value": "Caption style preview"
-    },
-    {
-      "name": "caption_preview_text",
-      "value": "CineIsle caption preview\nSecond caption line"
-    },
-    {
-      "name": "caption_apply",
-      "value": "Apply to system captions"
-    },
-    {
-      "name": "caption_reload",
-      "value": "Reload system style"
-    },
-    {
-      "name": "caption_preset_light",
-      "value": "White on dark"
-    },
-    {
-      "name": "caption_preset_yellow",
-      "value": "Yellow on dark"
-    },
-    {
-      "name": "caption_unsaved",
-      "value": "This is an unsaved preview. Apply it to use the style."
-    },
-    {
-      "name": "caption_family_default",
-      "value": "System default"
-    },
-    {
-      "name": "caption_family_mono_serif",
-      "value": "Monospaced serif"
-    },
-    {
-      "name": "caption_family_serif",
-      "value": "Serif"
-    },
-    {
-      "name": "caption_family_mono_sans",
-      "value": "Monospaced sans serif"
-    },
-    {
-      "name": "caption_family_sans",
-      "value": "Sans serif"
-    },
-    {
-      "name": "caption_family_casual",
-      "value": "Casual"
-    },
-    {
-      "name": "caption_family_cursive",
-      "value": "Cursive"
-    },
-    {
-      "name": "caption_family_small_caps",
-      "value": "Small capitals"
-    },
-    {
-      "name": "caption_edge_none",
-      "value": "None"
-    },
-    {
-      "name": "caption_edge_raised",
-      "value": "Raised"
-    },
-    {
-      "name": "caption_edge_depressed",
-      "value": "Depressed"
-    },
-    {
-      "name": "caption_edge_uniform",
-      "value": "Outline"
-    },
-    {
-      "name": "caption_edge_shadow",
-      "value": "Drop shadow"
-    },
-    {
-      "name": "change_queued_blocked",
-      "value": "Changes are saved locally but not confirmed by the server. Automatic uploads are paused. Check the server or account, then retry manually."
-    },
-    {
-      "name": "batch_queued",
-      "value": "%d waiting to upload"
-    },
-    {
-      "name": "engine_title",
-      "value": "Playback engine"
-    },
-    {
-      "name": "engine_current",
-      "value": "Current engine: %s"
-    },
-    {
-      "name": "engine_unknown",
-      "value": "Saved engine has not been confirmed"
-    },
-    {
-      "name": "engine_hint",
-      "value": "Newly opened videos use this engine. Changing it does not affect the current video."
-    },
-    {
-      "name": "engine_native",
-      "value": "System player"
-    },
-    {
-      "name": "engine_mpv",
-      "value": "MPV player"
-    },
-    {
-      "name": "engine_mpv_requires_api",
-      "value": "MPV requires HarmonyOS API15 or later."
-    },
-    {
-      "name": "engine_mpv_unavailable",
-      "value": "MPV is unavailable. Check device support or explicitly choose the system player in Settings."
-    },
-    {
-      "name": "engine_load_failed",
-      "value": "Cannot read the playback engine setting. Retry or choose an engine in Settings."
-    },
-    {
-      "name": "engine_invalid",
-      "value": "The playback engine setting is invalid. Choose an engine again."
-    },
-    {
-      "name": "engine_save_failed",
-      "value": "Could not save the engine. The previous choice was kept."
-    },
-    {
-      "name": "engine_restore_failed",
-      "value": "Could not restore the engine setting. Save a choice again before playing."
-    },
-    {
-      "name": "engine_cancelled",
-      "value": "Engine setting cancelled"
-    },
-    {
-      "name": "engine_saved",
-      "value": "Saved. Newly opened videos will use this engine."
-    },
-    {
-      "name": "mpv_options_title",
-      "value": "MPV playback options"
-    },
-    {
-      "name": "mpv_hardware_label",
-      "value": "Decoding mode"
-    },
-    {
-      "name": "mpv_video_label",
-      "value": "Video output"
-    },
-    {
-      "name": "mpv_hardware_software",
-      "value": "Software decoding"
-    },
-    {
-      "name": "mpv_hardware_ohcodec",
-      "value": "OpenHarmony hardware decoding"
-    },
-    {
-      "name": "mpv_hardware_copy",
-      "value": "OpenHarmony hardware decoding with copy-back"
-    },
-    {
-      "name": "mpv_options_hint",
-      "value": "Saved for the app and applied to the next video. Unavailable hardware decoding may fall back to software; the player shows the actual backends."
-    },
-    {
-      "name": "mpv_audio_fixed",
-      "value": "Audio output uses OpenHarmony system audio."
-    },
-    {
-      "name": "mpv_options_current",
-      "value": "Saved: decoding %s · video %s"
-    },
-    {
-      "name": "mpv_options_unknown",
-      "value": "MPV options are unconfirmed. Select and save options to repair an invalid configuration."
-    },
-    {
-      "name": "mpv_options_save",
-      "value": "Save MPV options"
-    },
-    {
-      "name": "mpv_options_saved",
-      "value": "MPV options saved for the next video"
-    },
-    {
-      "name": "mpv_options_invalid",
-      "value": "MPV options are invalid or unsupported; select and save them again"
-    },
-    {
-      "name": "mpv_options_load_failed",
-      "value": "Unable to read MPV options"
-    },
-    {
-      "name": "mpv_options_save_failed",
-      "value": "MPV options were not saved; try again"
-    },
-    {
-      "name": "mpv_options_restore_failed",
-      "value": "MPV options could not be restored; select and save them again before playback"
-    },
-    {
-      "name": "mpv_options_cancelled",
-      "value": "Saving MPV options was cancelled"
-    },
-    {
-      "name": "mpv_backend_actual",
-      "value": "Actual decoding: %s · video: %s · audio: %s"
-    },
-    {
-      "name": "mpv_backend_unknown",
-      "value": "Not reported yet"
-    }
+    {"name": "caption_settings_title", "value": "System caption style"},
+    {"name": "caption_scope", "value": "These settings change the system caption configuration and affect other apps that support it. Going back discards the draft."},
+    {"name": "caption_unavailable", "value": "System caption styles are unavailable on this device. Playback uses the default subtitle style."},
+    {"name": "caption_invalid", "value": "Invalid caption configuration. Check the font scale and color format."},
+    {"name": "caption_changed", "value": "The system caption configuration changed. Reload it before applying your changes."},
+    {"name": "caption_save_failed", "value": "Could not save the system caption style. The previous configuration was retained or restored."},
+    {"name": "caption_save_unconfirmed", "value": "Could not confirm the save or restoration result. Reload the system configuration."},
+    {"name": "caption_saved", "value": "System caption style applied."},
+    {"name": "caption_active", "value": "Using the system caption style"},
+    {"name": "caption_default", "value": "System caption styling is off. Playback uses the default subtitle style."},
+    {"name": "caption_enabled", "value": "Use system caption style"},
+    {"name": "caption_scale", "value": "Font scale (1–200%)"},
+    {"name": "caption_family", "value": "Font family"},
+    {"name": "caption_edge", "value": "Text edge"},
+    {"name": "caption_foreground", "value": "Text color"},
+    {"name": "caption_background", "value": "Text background color"},
+    {"name": "caption_window", "value": "Caption window color"},
+    {"name": "caption_color_hint", "value": "Use #RRGGBB or #AARRGGBB. AA is opacity: 00 is transparent and FF is opaque."},
+    {"name": "caption_preview", "value": "Caption style preview"},
+    {"name": "caption_preview_text", "value": "CineIsle caption preview\nSecond caption line"},
+    {"name": "caption_apply", "value": "Apply to system captions"},
+    {"name": "caption_reload", "value": "Reload system style"},
+    {"name": "caption_preset_light", "value": "White on dark"},
+    {"name": "caption_preset_yellow", "value": "Yellow on dark"},
+    {"name": "caption_unsaved", "value": "This is an unsaved preview. Apply it to use the style."},
+    {"name": "caption_family_default", "value": "System default"},
+    {"name": "caption_family_mono_serif", "value": "Monospaced serif"},
+    {"name": "caption_family_serif", "value": "Serif"},
+    {"name": "caption_family_mono_sans", "value": "Monospaced sans serif"},
+    {"name": "caption_family_sans", "value": "Sans serif"},
+    {"name": "caption_family_casual", "value": "Casual"},
+    {"name": "caption_family_cursive", "value": "Cursive"},
+    {"name": "caption_family_small_caps", "value": "Small capitals"},
+    {"name": "caption_edge_none", "value": "None"},
+    {"name": "caption_edge_raised", "value": "Raised"},
+    {"name": "caption_edge_depressed", "value": "Depressed"},
+    {"name": "caption_edge_uniform", "value": "Outline"},
+    {"name": "caption_edge_shadow", "value": "Drop shadow"},
+    {"name": "change_queued_blocked", "value": "Changes are saved locally but not confirmed by the server. Automatic uploads are paused. Check the server or account, then retry manually."},
+    {"name": "batch_queued", "value": "%d waiting to upload"},
+    {"name": "engine_title", "value": "Playback engine"},
+    {"name": "engine_current", "value": "Current engine: %s"},
+    {"name": "engine_unknown", "value": "Saved engine has not been confirmed"},
+    {"name": "engine_hint", "value": "Newly opened videos use this engine. Changing it does not affect the current video."},
+    {"name": "engine_native", "value": "System player"},
+    {"name": "engine_mpv", "value": "MPV player"},
+    {"name": "engine_mpv_requires_api", "value": "MPV requires HarmonyOS API15 or later."},
+    {"name": "engine_mpv_unavailable", "value": "MPV is unavailable. Check device support or explicitly choose the system player in Settings."},
+    {"name": "engine_load_failed", "value": "Cannot read the playback engine setting. Retry or choose an engine in Settings."},
+    {"name": "engine_invalid", "value": "The playback engine setting is invalid. Choose an engine again."},
+    {"name": "engine_save_failed", "value": "Could not save the engine. The previous choice was kept."},
+    {"name": "engine_restore_failed", "value": "Could not restore the engine setting. Save a choice again before playing."},
+    {"name": "engine_cancelled", "value": "Engine setting cancelled"},
+    {"name": "engine_saved", "value": "Saved. Newly opened videos will use this engine."},
+    {"name": "mpv_options_title", "value": "MPV playback options"},
+    {"name": "mpv_hardware_label", "value": "Decoding mode"},
+    {"name": "mpv_video_label", "value": "Video output"},
+    {"name": "mpv_hardware_software", "value": "Software decoding"},
+    {"name": "mpv_hardware_ohcodec", "value": "OpenHarmony hardware decoding"},
+    {"name": "mpv_hardware_copy", "value": "OpenHarmony hardware decoding with copy-back"},
+    {"name": "mpv_options_hint", "value": "Saved for the app and applied to the next video. Unavailable hardware decoding may fall back to software; the player shows the actual backends."},
+    {"name": "mpv_audio_fixed", "value": "Audio output uses OpenHarmony system audio."},
+    {"name": "mpv_options_current", "value": "Saved: decoding %s · video %s"},
+    {"name": "mpv_options_unknown", "value": "MPV options are unconfirmed. Select and save options to repair an invalid configuration."},
+    {"name": "mpv_options_save", "value": "Save MPV options"},
+    {"name": "mpv_options_saved", "value": "MPV options saved for the next video"},
+    {"name": "mpv_options_invalid", "value": "MPV options are invalid or unsupported; select and save them again"},
+    {"name": "mpv_options_load_failed", "value": "Unable to read MPV options"},
+    {"name": "mpv_options_save_failed", "value": "MPV options were not saved; try again"},
+    {"name": "mpv_options_restore_failed", "value": "MPV options could not be restored; select and save them again before playback"},
+    {"name": "mpv_options_cancelled", "value": "Saving MPV options was cancelled"},
+    {"name": "mpv_backend_actual", "value": "Actual decoding: %s · video: %s · audio: %s"},
+    {"name": "mpv_backend_unknown", "value": "Not reported yet"}
   ]
 }

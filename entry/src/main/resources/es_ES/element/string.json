@@ -2256,137 +2256,38 @@
       "name": "batch_queued",
       "value": "%d pendientes de envío"
     },
-    {
-      "name": "engine_title",
-      "value": "Motor de reproducción"
-    },
-    {
-      "name": "engine_current",
-      "value": "Motor actual: %s"
-    },
-    {
-      "name": "engine_unknown",
-      "value": "No se ha confirmado el motor guardado"
-    },
-    {
-      "name": "engine_hint",
-      "value": "Los vídeos que abras usarán este motor. El cambio no afecta al vídeo en reproducción."
-    },
-    {
-      "name": "engine_native",
-      "value": "Reproductor del sistema"
-    },
-    {
-      "name": "engine_mpv",
-      "value": "Reproductor MPV"
-    },
-    {
-      "name": "engine_mpv_requires_api",
-      "value": "MPV requiere HarmonyOS API15 o posterior."
-    },
-    {
-      "name": "engine_mpv_unavailable",
-      "value": "MPV no está disponible. Comprueba la compatibilidad o elige el reproductor del sistema en Ajustes."
-    },
-    {
-      "name": "engine_load_failed",
-      "value": "No se puede leer el motor guardado. Reintenta o elige un motor en Ajustes."
-    },
-    {
-      "name": "engine_invalid",
-      "value": "El ajuste del motor no es válido. Elige un motor de nuevo."
-    },
-    {
-      "name": "engine_save_failed",
-      "value": "No se pudo guardar el motor. Se conserva la elección anterior."
-    },
-    {
-      "name": "engine_restore_failed",
-      "value": "No se pudo restaurar el motor. Guarda una elección antes de reproducir."
-    },
-    {
-      "name": "engine_cancelled",
-      "value": "Ajuste del motor cancelado"
-    },
-    {
-      "name": "engine_saved",
-      "value": "Guardado. Los vídeos que abras usarán este motor."
-    },
-    {
-      "name": "mpv_options_title",
-      "value": "Opciones de reproducción MPV"
-    },
-    {
-      "name": "mpv_hardware_label",
-      "value": "Modo de decodificación"
-    },
-    {
-      "name": "mpv_video_label",
-      "value": "Salida de vídeo"
-    },
-    {
-      "name": "mpv_hardware_software",
-      "value": "Decodificación por software"
-    },
-    {
-      "name": "mpv_hardware_ohcodec",
-      "value": "Decodificación por hardware OpenHarmony"
-    },
-    {
-      "name": "mpv_hardware_copy",
-      "value": "Decodificación por hardware OpenHarmony con copia"
-    },
-    {
-      "name": "mpv_options_hint",
-      "value": "Se guardan para la aplicación y se aplican al siguiente vídeo. Si el hardware no está disponible, se puede usar software; el reproductor muestra los sistemas utilizados realmente."
-    },
-    {
-      "name": "mpv_audio_fixed",
-      "value": "La salida de audio utiliza el sistema de audio OpenHarmony."
-    },
-    {
-      "name": "mpv_options_current",
-      "value": "Guardado: decodificación %s · vídeo %s"
-    },
-    {
-      "name": "mpv_options_unknown",
-      "value": "Las opciones MPV no están confirmadas. Selecciónalas y guárdalas para reparar una configuración no válida."
-    },
-    {
-      "name": "mpv_options_save",
-      "value": "Guardar opciones MPV"
-    },
-    {
-      "name": "mpv_options_saved",
-      "value": "Opciones MPV guardadas para el siguiente vídeo"
-    },
-    {
-      "name": "mpv_options_invalid",
-      "value": "Las opciones MPV no son válidas o compatibles; vuelve a seleccionarlas y guardarlas"
-    },
-    {
-      "name": "mpv_options_load_failed",
-      "value": "No se pueden leer las opciones MPV"
-    },
-    {
-      "name": "mpv_options_save_failed",
-      "value": "No se han guardado las opciones MPV; inténtalo de nuevo"
-    },
-    {
-      "name": "mpv_options_restore_failed",
-      "value": "No se han podido restaurar las opciones MPV; vuelve a seleccionarlas y guardarlas antes de reproducir"
-    },
-    {
-      "name": "mpv_options_cancelled",
-      "value": "Se ha cancelado el guardado de las opciones MPV"
-    },
-    {
-      "name": "mpv_backend_actual",
-      "value": "Decodificación real: %s · vídeo: %s · audio: %s"
-    },
-    {
-      "name": "mpv_backend_unknown",
-      "value": "Todavía no se ha indicado"
-    }
+    {"name": "engine_title", "value": "Motor de reproducción"},
+    {"name": "engine_current", "value": "Motor actual: %s"},
+    {"name": "engine_unknown", "value": "No se ha confirmado el motor guardado"},
+    {"name": "engine_hint", "value": "Los vídeos que abras usarán este motor. El cambio no afecta al vídeo en reproducción."},
+    {"name": "engine_native", "value": "Reproductor del sistema"},
+    {"name": "engine_mpv", "value": "Reproductor MPV"},
+    {"name": "engine_mpv_requires_api", "value": "MPV requiere HarmonyOS API15 o posterior."},
+    {"name": "engine_mpv_unavailable", "value": "MPV no está disponible. Comprueba la compatibilidad o elige el reproductor del sistema en Ajustes."},
+    {"name": "engine_load_failed", "value": "No se puede leer el motor guardado. Reintenta o elige un motor en Ajustes."},
+    {"name": "engine_invalid", "value": "El ajuste del motor no es válido. Elige un motor de nuevo."},
+    {"name": "engine_save_failed", "value": "No se pudo guardar el motor. Se conserva la elección anterior."},
+    {"name": "engine_restore_failed", "value": "No se pudo restaurar el motor. Guarda una elección antes de reproducir."},
+    {"name": "engine_cancelled", "value": "Ajuste del motor cancelado"},
+    {"name": "engine_saved", "value": "Guardado. Los vídeos que abras usarán este motor."},
+    {"name": "mpv_options_title", "value": "Opciones de reproducción MPV"},
+    {"name": "mpv_hardware_label", "value": "Modo de decodificación"},
+    {"name": "mpv_video_label", "value": "Salida de vídeo"},
+    {"name": "mpv_hardware_software", "value": "Decodificación por software"},
+    {"name": "mpv_hardware_ohcodec", "value": "Decodificación por hardware OpenHarmony"},
+    {"name": "mpv_hardware_copy", "value": "Decodificación por hardware OpenHarmony con copia"},
+    {"name": "mpv_options_hint", "value": "Se guardan para la aplicación y se aplican al siguiente vídeo. Si el hardware no está disponible, se puede usar software; el reproductor muestra los sistemas utilizados realmente."},
+    {"name": "mpv_audio_fixed", "value": "La salida de audio utiliza el sistema de audio OpenHarmony."},
+    {"name": "mpv_options_current", "value": "Guardado: decodificación %s · vídeo %s"},
+    {"name": "mpv_options_unknown", "value": "Las opciones MPV no están confirmadas. Selecciónalas y guárdalas para reparar una configuración no válida."},
+    {"name": "mpv_options_save", "value": "Guardar opciones MPV"},
+    {"name": "mpv_options_saved", "value": "Opciones MPV guardadas para el siguiente vídeo"},
+    {"name": "mpv_options_invalid", "value": "Las opciones MPV no son válidas o compatibles; vuelve a seleccionarlas y guardarlas"},
+    {"name": "mpv_options_load_failed", "value": "No se pueden leer las opciones MPV"},
+    {"name": "mpv_options_save_failed", "value": "No se han guardado las opciones MPV; inténtalo de nuevo"},
+    {"name": "mpv_options_restore_failed", "value": "No se han podido restaurar las opciones MPV; vuelve a seleccionarlas y guardarlas antes de reproducir"},
+    {"name": "mpv_options_cancelled", "value": "Se ha cancelado el guardado de las opciones MPV"},
+    {"name": "mpv_backend_actual", "value": "Decodificación real: %s · vídeo: %s · audio: %s"},
+    {"name": "mpv_backend_unknown", "value": "Todavía no se ha indicado"}
   ]
 }

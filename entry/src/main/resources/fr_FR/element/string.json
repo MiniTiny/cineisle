@@ -2256,137 +2256,38 @@
       "name": "batch_queued",
       "value": "%d en attente d’envoi"
     },
-    {
-      "name": "engine_title",
-      "value": "Moteur de lecture"
-    },
-    {
-      "name": "engine_current",
-      "value": "Moteur actuel : %s"
-    },
-    {
-      "name": "engine_unknown",
-      "value": "Le moteur enregistré n’a pas été confirmé"
-    },
-    {
-      "name": "engine_hint",
-      "value": "Les nouvelles vidéos utilisent ce moteur. Ce choix ne modifie pas la vidéo en cours."
-    },
-    {
-      "name": "engine_native",
-      "value": "Lecteur système"
-    },
-    {
-      "name": "engine_mpv",
-      "value": "Lecteur MPV"
-    },
-    {
-      "name": "engine_mpv_requires_api",
-      "value": "MPV nécessite HarmonyOS API15 ou une version ultérieure."
-    },
-    {
-      "name": "engine_mpv_unavailable",
-      "value": "MPV est indisponible. Vérifiez la compatibilité ou choisissez le lecteur système dans les paramètres."
-    },
-    {
-      "name": "engine_load_failed",
-      "value": "Impossible de lire le réglage du moteur. Réessayez ou choisissez un moteur dans les paramètres."
-    },
-    {
-      "name": "engine_invalid",
-      "value": "Le réglage du moteur est invalide. Choisissez de nouveau un moteur."
-    },
-    {
-      "name": "engine_save_failed",
-      "value": "Impossible d’enregistrer le moteur. Le choix précédent est conservé."
-    },
-    {
-      "name": "engine_restore_failed",
-      "value": "Impossible de restaurer le réglage du moteur. Enregistrez un choix avant de lire une vidéo."
-    },
-    {
-      "name": "engine_cancelled",
-      "value": "Réglage du moteur annulé"
-    },
-    {
-      "name": "engine_saved",
-      "value": "Enregistré. Les nouvelles vidéos utiliseront ce moteur."
-    },
-    {
-      "name": "mpv_options_title",
-      "value": "Options de lecture MPV"
-    },
-    {
-      "name": "mpv_hardware_label",
-      "value": "Mode de décodage"
-    },
-    {
-      "name": "mpv_video_label",
-      "value": "Sortie vidéo"
-    },
-    {
-      "name": "mpv_hardware_software",
-      "value": "Décodage logiciel"
-    },
-    {
-      "name": "mpv_hardware_ohcodec",
-      "value": "Décodage matériel OpenHarmony"
-    },
-    {
-      "name": "mpv_hardware_copy",
-      "value": "Décodage matériel OpenHarmony avec copie"
-    },
-    {
-      "name": "mpv_options_hint",
-      "value": "Ces options sont enregistrées pour l’application et appliquées à la prochaine vidéo. Le décodage logiciel peut prendre le relais si le matériel est indisponible ; le lecteur affiche les sorties réellement utilisées."
-    },
-    {
-      "name": "mpv_audio_fixed",
-      "value": "La sortie audio utilise le système audio OpenHarmony."
-    },
-    {
-      "name": "mpv_options_current",
-      "value": "Enregistré : décodage %s · vidéo %s"
-    },
-    {
-      "name": "mpv_options_unknown",
-      "value": "Les options MPV ne sont pas confirmées. Sélectionnez-les et enregistrez-les pour réparer une configuration invalide."
-    },
-    {
-      "name": "mpv_options_save",
-      "value": "Enregistrer les options MPV"
-    },
-    {
-      "name": "mpv_options_saved",
-      "value": "Options MPV enregistrées pour la prochaine vidéo"
-    },
-    {
-      "name": "mpv_options_invalid",
-      "value": "Options MPV invalides ou non prises en charge ; sélectionnez-les et enregistrez-les à nouveau"
-    },
-    {
-      "name": "mpv_options_load_failed",
-      "value": "Impossible de lire les options MPV"
-    },
-    {
-      "name": "mpv_options_save_failed",
-      "value": "Options MPV non enregistrées ; réessayez"
-    },
-    {
-      "name": "mpv_options_restore_failed",
-      "value": "Impossible de restaurer les options MPV ; sélectionnez-les et enregistrez-les avant la lecture"
-    },
-    {
-      "name": "mpv_options_cancelled",
-      "value": "Enregistrement des options MPV annulé"
-    },
-    {
-      "name": "mpv_backend_actual",
-      "value": "Décodage réel : %s · vidéo : %s · audio : %s"
-    },
-    {
-      "name": "mpv_backend_unknown",
-      "value": "Pas encore indiqué"
-    }
+    {"name": "engine_title", "value": "Moteur de lecture"},
+    {"name": "engine_current", "value": "Moteur actuel : %s"},
+    {"name": "engine_unknown", "value": "Le moteur enregistré n’a pas été confirmé"},
+    {"name": "engine_hint", "value": "Les nouvelles vidéos utilisent ce moteur. Ce choix ne modifie pas la vidéo en cours."},
+    {"name": "engine_native", "value": "Lecteur système"},
+    {"name": "engine_mpv", "value": "Lecteur MPV"},
+    {"name": "engine_mpv_requires_api", "value": "MPV nécessite HarmonyOS API15 ou une version ultérieure."},
+    {"name": "engine_mpv_unavailable", "value": "MPV est indisponible. Vérifiez la compatibilité ou choisissez le lecteur système dans les paramètres."},
+    {"name": "engine_load_failed", "value": "Impossible de lire le réglage du moteur. Réessayez ou choisissez un moteur dans les paramètres."},
+    {"name": "engine_invalid", "value": "Le réglage du moteur est invalide. Choisissez de nouveau un moteur."},
+    {"name": "engine_save_failed", "value": "Impossible d’enregistrer le moteur. Le choix précédent est conservé."},
+    {"name": "engine_restore_failed", "value": "Impossible de restaurer le réglage du moteur. Enregistrez un choix avant de lire une vidéo."},
+    {"name": "engine_cancelled", "value": "Réglage du moteur annulé"},
+    {"name": "engine_saved", "value": "Enregistré. Les nouvelles vidéos utiliseront ce moteur."},
+    {"name": "mpv_options_title", "value": "Options de lecture MPV"},
+    {"name": "mpv_hardware_label", "value": "Mode de décodage"},
+    {"name": "mpv_video_label", "value": "Sortie vidéo"},
+    {"name": "mpv_hardware_software", "value": "Décodage logiciel"},
+    {"name": "mpv_hardware_ohcodec", "value": "Décodage matériel OpenHarmony"},
+    {"name": "mpv_hardware_copy", "value": "Décodage matériel OpenHarmony avec copie"},
+    {"name": "mpv_options_hint", "value": "Ces options sont enregistrées pour l’application et appliquées à la prochaine vidéo. Le décodage logiciel peut prendre le relais si le matériel est indisponible ; le lecteur affiche les sorties réellement utilisées."},
+    {"name": "mpv_audio_fixed", "value": "La sortie audio utilise le système audio OpenHarmony."},
+    {"name": "mpv_options_current", "value": "Enregistré : décodage %s · vidéo %s"},
+    {"name": "mpv_options_unknown", "value": "Les options MPV ne sont pas confirmées. Sélectionnez-les et enregistrez-les pour réparer une configuration invalide."},
+    {"name": "mpv_options_save", "value": "Enregistrer les options MPV"},
+    {"name": "mpv_options_saved", "value": "Options MPV enregistrées pour la prochaine vidéo"},
+    {"name": "mpv_options_invalid", "value": "Options MPV invalides ou non prises en charge ; sélectionnez-les et enregistrez-les à nouveau"},
+    {"name": "mpv_options_load_failed", "value": "Impossible de lire les options MPV"},
+    {"name": "mpv_options_save_failed", "value": "Options MPV non enregistrées ; réessayez"},
+    {"name": "mpv_options_restore_failed", "value": "Impossible de restaurer les options MPV ; sélectionnez-les et enregistrez-les avant la lecture"},
+    {"name": "mpv_options_cancelled", "value": "Enregistrement des options MPV annulé"},
+    {"name": "mpv_backend_actual", "value": "Décodage réel : %s · vidéo : %s · audio : %s"},
+    {"name": "mpv_backend_unknown", "value": "Pas encore indiqué"}
   ]
 }
