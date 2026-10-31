@@ -8,6 +8,7 @@ import fs from '@ohos.file.fs';
 import { PlaybackRoute } from '../model/Models';
 import { parseSubtitles, subtitleContentAt, SubtitleCue, subtitleFormat, textSubtitle, TrackChoice, validAssDocument } from '../utils/Playback';
 import { SubtitleContent, PositionedSubtitle } from '../utils/InlineSubtitle';
+import { displaySubtitleContent } from '../utils/SubtitlePresentation';
 import { StyledSubtitleFrame, StyledSubtitleSession } from '../utils/StyledSubtitle';
 import { text } from '../utils/Strings';
 import { JellyfinClient } from './JellyfinClient';
@@ -316,6 +317,7 @@ export class PlaybackController {
   }
   private emitTracks(): void { this.view.tracks(this.audio.slice(), this.subtitles.slice(), this.audioKey, this.subtitleKey); }
   private publishCaption(value: SubtitleContent): void {
+    value = displaySubtitleContent(value);
     value.revision = `${this.generation}:${this.selection}`;
     value.positioned.forEach((cue: PositionedSubtitle) => { cue.revision = value.revision; });
     if (this.view.caption) { this.view.caption(value); } else { this.view.subtitle(value.text); }

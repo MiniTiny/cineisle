@@ -1,5 +1,5 @@
 import { CaptionRenderLimits } from './SubtitleLimits';
-import { subtitleEntities } from './SubtitleEntities';
+import { subtitleEntities, subtitlePhysicalText, subtitleTextEntities } from './SubtitleEntities';
 import { EMPTY_SUBTITLE_PARAGRAPHS, SubtitleParagraphKind, SubtitleParagraphLimits, SubtitleParagraphSpan } from './SubtitleParagraph';
 
 // Both plain-track converters produce the same relative size in SubtitleRun.
@@ -82,7 +82,7 @@ export class SubtitleContent {
     this.paragraphs = paragraphs; this.flowParagraphs = paragraphs;
   }
 }
-interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string; paragraphStart?: number; linkStart?: number; qualifiedTag?: string }
+interface FormatFrame { tag: string; style: SubtitleRun; metricFamily?: string; paragraphStart?: number; linkStart?: number; qualifiedTag?: string; qualifiedRoot?: boolean }
 interface FontAttributes { color?: string; face?: string; style?: string; hasHref?: boolean; selfClosing?: boolean }
 interface StyleMark { start: number; property: string; value: string }
 interface StyleSpan extends StyleMark { end: number }
@@ -166,9 +166,26 @@ function scriptBaselines(stack: FormatFrame[]): SubtitleBaseline[] {
 }
 
 // Keep the existing plain-text result while retaining common SubRip emphasis/font spans.
+// Parser.makeName ignores punctuation but preserves Java BMP letters/digits,
+// hyphens, dots and the first colon. Raw end-tag comparison happens before it.
+function subtitleMarkupName(value: string): string {
+  const parts: string[] = []; let start = true; let colon = false;
+  for (let i = 0; i < value.length; i++) {
+    const character = value[i];
+    if (/[\p{L}_]/u.test(character)) { parts.push(character); start = false; }
+    else if (/[\p{Nd}.\-]/u.test(character)) {
+      if (start) { parts.push('_'); } parts.push(character); start = false;
+    } else if (character === ':' && !colon) {
+      if (start) { parts.push('_'); } parts.push(':'); start = true; colon = true;
+    }
+  }
+  if (start) { parts.push('_'); }
+  return parts.join('');
+}
+
 export function inlineSubtitle(value: string): SubtitleContent {
   // The HTML scanner consumes one document-leading BOM and normalizes line ends.
-  value = value.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+  value = subtitlePhysicalText(value.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n'));
   const pieces: SubtitleRun[] = []; const root = new SubtitleRun();
   const stack: FormatFrame[] = [{ tag: '', style: root }];
   const colorMarks: StyleMark[] = []; const backgroundMarks: StyleMark[] = []; const strikeMarks: StyleMark[] = [];
@@ -202,14 +219,9 @@ export function inlineSubtitle(value: string): SubtitleContent {
     trailingBreaks = raw === '\n' || raw === '\n\n' ? Math.min(2, trailingBreaks + raw.length) : 0;
   };
   const appendText = (raw: string, decodeReferences: boolean = true): void => {
-    // Decode before folding, as Html.characters does. Encoded tags remain literal text.
-    // The legacy HTML scanner drops nonzero numeric controls, rather than turning them into breaks.
-    let readable = raw.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
-    if (decodeReferences) { readable = readable.replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity: string, digits: string): string => {
-      const code = digits[0].toLowerCase() === 'x' ? Number.parseInt(digits.slice(1), 16) : Number.parseInt(digits, 10);
-      return code > 0 && code < 32 ? '' : entity;
-    }); }
-    let text = subtitleEntities(readable, decodeReferences).replace(/[ \n]+/g, ' ');
+    // Physical scanner normalization precedes markup. Only PCDATA decodes
+    // optional references; CDATA/script/style keep their spelling.
+    let text = (decodeReferences ? subtitleTextEntities(raw) : raw).replace(/[ \n]+/g, ' ');
       // Before the first element/text, TagSoup ignores an all-Java-whitespace
       // chunk. Nonbreaking spaces (NBSP/figure/narrow) are not in that set.
       if (!contentStarted && /^[\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]*$/.test(text)) { return; }
@@ -242,7 +254,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
       }
     }
   };
-  const openFrame = (name: string, tag: string = '', start: number = 0, qualifiedTag?: string): void => {
+  const openFrame = (name: string, tag: string = '', start: number = 0, qualifiedTag?: string, qualifiedRoot: boolean = false): void => {
     ++styleRevision;
     if (stack.length > InlineSubtitleLimits.maximumMarkupDepth) { throw new Error('subtitle_failed'); }
     const style = new SubtitleRun('', stack[stack.length - 1].style);
@@ -286,7 +298,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
     }
     if (alignment) { paragraphAlignments.push(new SubtitleParagraphSpan(textUnits, textUnits, alignment)); }
     const linkStart = name === 'a' && fontAttributes(tag, start).hasHref ? pieces.length : undefined;
-    stack.push({ tag: name, style: style, metricFamily: metricFamily, paragraphStart: textUnits, linkStart: linkStart, qualifiedTag: qualifiedTag });
+    stack.push({ tag: name, style: style, metricFamily: metricFamily, paragraphStart: textUnits, linkStart: linkStart, qualifiedTag: qualifiedTag, qualifiedRoot: qualifiedRoot });
     style.baselines = scriptBaselines(stack);
   };
   // Restart phrasing styles around blocks; span/font attributes end at that boundary.
@@ -305,18 +317,19 @@ export function inlineSubtitle(value: string): SubtitleContent {
   // Copyright 2002-2008 John Cowan; Apache-2.0, see rawfile/third_party/srt/notice.txt.
   // States are reimplemented separately from the existing style/paragraph stack; input is consumed once.
   const consumeTag = (tag: string): void => {
-    const match = /^<\s*(\/?)\s*([a-z][a-z0-9]*(?::[a-z][a-z0-9]*)*)\b/i.exec(tag);
-      if (match && !(match[1] && match[2].includes(':'))) {
+    const match = /^<(\/?)([^ \t\n/>]+)/.exec(tag);
+      if (match) { match[2] = subtitleMarkupName(match[2]); }
+      if (match) {
         const rawName = match[2].toLowerCase(); const closing = !!match[1];
         const qualifiedTag = rawName.includes(':') ? rawName : undefined;
-        // TagSoup emits a qualified opening element's local name, but explicit
-        // end tags cannot match that unknown qualified element in its schema.
         const name = qualifiedTag ? rawName.slice(rawName.lastIndexOf(':') + 1) : rawName;
-        // The legacy scanner can stop before '-'; headings and anchors require a complete name.
-      const heading = headingScale(name) > 0 && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
-        const anchor = name === 'a' && /[\t\n\f\r />]/.test(tag.charAt(match[0].length));
+      const heading = headingScale(name) > 0;
+        const anchor = name === 'a';
+        // A first unknown qualified element can itself occupy the body/root
+        // position. Parser.etag_basic cannot pop that root; a child can close.
+        const qualifiedRoot = !!qualifiedTag && !contentStarted;
         contentStarted = true;
-        if (!closing && !qualifiedTag && (name === 'script' || name === 'style') && /[\t\n />]/.test(tag.charAt(match[0].length))) {
+        if (!closing && !qualifiedTag && (name === 'script' || name === 'style')) {
           if (name === 'style') {
             // Unlike script, style is outside an anchor's legacy content model.
             for (let j = stack.length - 1; j > 0; j--) {
@@ -336,7 +349,8 @@ export function inlineSubtitle(value: string): SubtitleContent {
         const block = isSubtitleBlock(name);
         if (closing) {
           for (let j = stack.length - 1; j > 0; j--) {
-              if (stack[j].tag === name && !stack[j].qualifiedTag) {
+              if (stack[j].tag === name && (qualifiedTag ?
+                stack[j].qualifiedTag === qualifiedTag && !stack[j].qualifiedRoot : !stack[j].qualifiedTag)) {
                 const restart = block ? suspendInline() : anchor ? suspendInline(j + 1) : [];
               closeTo(j); restartInline(restart); break;
             }
@@ -361,7 +375,7 @@ export function inlineSubtitle(value: string): SubtitleContent {
             blockBreak();
           }
             const selfClosing = anchor ? !!fontAttributes(tag, match[0].length).selfClosing : /\/\s*>$/.test(tag);
-            if (!selfClosing) { openFrame(name, tag, match[0].length, qualifiedTag); }
+            if (!selfClosing) { openFrame(name, tag, match[0].length, qualifiedTag, qualifiedRoot); }
           restartInline(restart);
         }
       }

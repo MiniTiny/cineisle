@@ -1,6 +1,6 @@
 // Named character references from TagSoup HTMLSchema (Android API34 source).
 // Copyright 2002-2008 John Cowan. Apache-2.0; see rawfile/third_party/srt/notice.txt.
-// Only the entity table is adapted; no Android parser or runtime dependency is used.
+// Entity table and scanner/attribute semantics adapted without an Android runtime dependency.
 // Case-sensitive names; unknown/malformed references remain literal plain text.
 const CHARACTER_REFERENCES: string = `AElig=198 Aacgr=902 Aacute=193 Abreve=258 Acirc=194 Acy=1040 Afr=120068
 Agr=913 Agrave=192 Alpha=913 Amacr=256 And=10835 Aogon=260 Aopf=120120
@@ -318,20 +318,107 @@ const LEGACY_C1_CHARACTERS: string = '\u20AC\uFFFD\u201A\u0192\u201E\u2026\u2020
   '\uFFFD\u2018\u2019\u201C\u201D\u2022\u2013\u2014' +
   '\u02DC\u2122\u0161\u203A\u0153\uFFFD\u017E\u0178';
 
+// Android API34 Character.isDigit(char) decimal zeroes, captured independently
+// for every BMP code unit. Java's entity parser accepts these digits in both bases.
+const BMP_DECIMAL_ZEROES: number[] = [48, 1632, 1776, 1984, 2406, 2534, 2662, 2790,
+  2918, 3046, 3174, 3302, 3430, 3558, 3664, 3792, 3872, 4160, 4240, 6112, 6160,
+  6470, 6608, 6784, 6800, 6992, 7088, 7232, 7248, 42528, 43216, 43264, 43472,
+  43504, 43600, 44016, 65296];
+const LEGACY_ENTITY_MAXIMUM: number = 0x7FFFFFFF; // Integer.parseInt, not a Unicode scalar bound.
+const SURROGATE_FIRST: number = 0xD800;
+const SURROGATE_LAST: number = 0xDFFF;
+const ASTRAL_OFFSET: number = 0x10000;
+
+function decimalDigit(character: string): number {
+  const code = character.charCodeAt(0);
+  for (const zero of BMP_DECIMAL_ZEROES) { if (code >= zero && code <= zero + 9) { return code - zero; } }
+  return -1;
+}
+function entityDigit(character: string, hex: boolean): number {
+  const digit = decimalDigit(character);
+  if (digit >= 0 || !hex) { return digit; }
+  // Integer.parseInt also accepts fullwidth A-F in attributes. The PCDATA
+  // scanner only collects ASCII hex letters, before it calls the same lookup.
+  const code = character.charCodeAt(0);
+  for (const first of [0x41, 0x61, 0xFF21, 0xFF41]) {
+    if (code >= first && code < first + 6) { return code - first + 10; }
+  }
+  return -1;
+}
+function entityCode(name: string): number {
+  if (name[0] !== '#') {
+    const value = namedCharacters.get(name); return value ? value.codePointAt(0)! : 0;
+  }
+  const hex = name[1] === 'x' || name[1] === 'X'; const start = hex ? 2 : 1;
+  if (start >= name.length) { return 0; }
+  const base = hex ? 16 : 10; let value = 0;
+  for (let i = start; i < name.length; i++) {
+    const digit = entityDigit(name[i], hex);
+    if (digit < 0 || value > Math.floor((LEGACY_ENTITY_MAXIMUM - digit) / base)) { return 0; }
+    value = value * base + digit;
+  }
+  return value;
+}
+function legacyEntityText(code: number): string {
+  if (code < ASTRAL_OFFSET) { return String.fromCharCode(code); }
+  const value = code - ASTRAL_OFFSET;
+  // TagSoup saves Java char values, including signed-int overflow results
+  // outside Unicode. Preserve those code units in the parsed model; the
+  // presentation/native boundary replaces isolated surrogates for drawing.
+  return String.fromCharCode((value >> 10) + SURROGATE_FIRST, (value & 0x3FF) + 0xDC00);
+}
+export function subtitlePhysicalText(value: string): string {
+  return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/[\u0080-\u009F]/g, (character: string): string =>
+      LEGACY_C1_CHARACTERS[character.charCodeAt(0) - LEGACY_C1_FIRST_CODE_UNIT]);
+}
+
+// Attributes use Parser.expandEntities: semicolon required, controls/C1 and
+// surrogate code units preserved. An invalid '&' ends a reference without
+// starting another one at that same position. Never recursively decode output.
 export function subtitleEntities(value: string, decodeReferences: boolean = true): string {
-  // One pass: an encoded tag stays visible text and escaped ampersands cannot decode twice.
-  const readable = value.replace(/[\u0080-\u009F]/g, (character: string): string =>
-    LEGACY_C1_CHARACTERS[character.charCodeAt(0) - LEGACY_C1_FIRST_CODE_UNIT]);
-  // CDATA and script/style text still normalize physical C1 characters, but keep entity spelling.
+  const readable = subtitlePhysicalText(value);
   if (!decodeReferences) { return readable; }
-  return readable.replace(/&(#(?:[xX][0-9a-fA-F]{1,8}|[0-9]{1,10})|[A-Za-z][A-Za-z0-9]{0,30});/g,
-    (reference: string, name: string): string => {
-      if (name[0] !== '#') { return namedCharacters.get(name) ?? reference; }
-      const hex = name[1] === 'x' || name[1] === 'X';
-      const code = parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10);
-      if (code >= LEGACY_C1_FIRST_CODE_UNIT && code < LEGACY_C1_FIRST_CODE_UNIT + LEGACY_C1_CHARACTERS.length) {
-        return LEGACY_C1_CHARACTERS[code - LEGACY_C1_FIRST_CODE_UNIT];
+  const parts: string[] = []; let start = -1; let plain = 0;
+  for (let i = 0; i < readable.length; i++) {
+    const character = readable[i];
+    if (character === '&' && start < 0) { start = i; }
+    else if (start < 0 || /[\p{L}\p{Nd}#]/u.test(character)) { continue; }
+    else {
+      if (character === ';') {
+        const code = entityCode(readable.slice(start + 1, i));
+        if (code) { parts.push(readable.slice(plain, start), legacyEntityText(code)); plain = i + 1; }
       }
-      return code > 0 && code <= 0x10FFFF && !(code >= 0xD800 && code <= 0xDFFF) ? String.fromCodePoint(code) : reference;
-    });
+      start = -1;
+    }
+  }
+  parts.push(readable.slice(plain)); return parts.join('');
+}
+
+// PCDATA uses HTMLScanner entity states: the complete token is looked up at
+// ';', EOF or its first non-token character. There is no HTML5 prefix fallback.
+export function subtitleTextEntities(value: string): string {
+  const parts: string[] = []; let plain = 0;
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] !== '&') { continue; }
+    const start = i; let end = i + 1; let state = 0; // name, decimal, hexadecimal
+    for (; end < value.length; end++) {
+      const character = value[end];
+      if (state === 0 && character === '#') { state = 1; }
+      else if (state === 1 && (character === 'x' || character === 'X')) { state = 2; }
+      else if (state === 0 ? /[\p{L}\p{Nd}]/u.test(character) :
+        decimalDigit(character) >= 0 || (state === 2 && /[a-fA-F]/.test(character))) { continue; }
+      else { break; }
+    }
+    const code = entityCode(value.slice(start + 1, end));
+    if (code) {
+      let decoded = '';
+      if (code >= LEGACY_C1_FIRST_CODE_UNIT && code < LEGACY_C1_FIRST_CODE_UNIT + LEGACY_C1_CHARACTERS.length) {
+        decoded = LEGACY_C1_CHARACTERS[code - LEGACY_C1_FIRST_CODE_UNIT];
+      } else if (code >= 0x20 && !(code >= SURROGATE_FIRST && code <= SURROGATE_LAST)) { decoded = legacyEntityText(code); }
+      const next = end + (value[end] === ';' ? 1 : 0);
+      parts.push(value.slice(plain, start), decoded); plain = next; i = next - 1;
+    } else { i = end - 1; }
+  }
+  parts.push(value.slice(plain)); return parts.join('');
 }
